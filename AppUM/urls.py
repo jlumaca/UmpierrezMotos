@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
-from Inicio import views
+from AppUM import views
 
 urlpatterns = [
-    path('',views.loginTemplate,name="Login")
+     path('', views.login,name="Inicio"),
 ]

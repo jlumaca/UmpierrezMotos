@@ -1,11 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7ca4d; /* Amarillo suave */
+        }
+        .login-container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        .btn-login {
+            background-color: #e3342f; /* Rojo */
+            color: #fff;
+        }
+        .btn-login:hover {
+            background-color: #c71c1a; /* Rojo oscuro */
+        }
+        .form-label {
+            color: #e3342f; /* Rojo */
+        }
+        .form-control {
+            border-color: #f7ca4d; /* Amarillo */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 5px #f7ca4d;
+            border-color: #f7ca4d; /* Amarillo */
+        }
+    </style>
 </head>
 <body>
-    <h1>PRUEBAaaaaa</h1>
+    <div class="login-container">
+        <h2 class="text-center" style="color: #e3342f;">Iniciar Sesión</h2>
+        <form action="{% url 'LoginValidacion' %}" method="get">{% csrf_token %}
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="username" name="usuario_login" placeholder="Ingrese su usuario" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="pass_login" placeholder="Ingrese su contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-login w-100">Iniciar Sesión</button>
+            <h1>{{resultado}}</h1>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

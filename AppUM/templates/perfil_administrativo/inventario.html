@@ -1,0 +1,114 @@
+{% extends "padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios" style="display: none;">
+    <h3>Motos</h3>
+    <button class="btn btn-primary mb-3" onclick="toggleMotoForm()">Alta de moto</button>
+    <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Buscar por Marca, Modelo, Año, Kilómetros">
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Motor (cc)</th>
+                <th>Año</th>
+                <th>Estado</th>
+                <th>Kilómetros</th>
+                <th>Color</th>
+                <th>Precio (USD)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Filas de ejemplo de motos -->
+            <tr>
+                <td>Honda</td>
+                <td>CBR500R</td>
+                <td>500</td>
+                <td>2023</td>
+                <td>Nueva</td>
+                <td>0</td>
+                <td>Rojo</td>
+                <td>7000</td>
+                <td>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="form-container" id="motoForm" style="display: none;">
+        <h4>Alta de Moto</h4>
+        <form>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="marca" placeholder="Ingrese la marca">
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modelo" placeholder="Ingrese el modelo">
+            </div>
+            <div class="mb-3">
+                <label for="motor" class="form-label">Motor (cc)</label>
+                <input type="number" class="form-control" id="motor" placeholder="Ingrese la cilindrada">
+            </div>
+            <div class="mb-3">
+                <label for="anio" class="form-label">Año</label>
+                <input type="number" class="form-control" id="anio" placeholder="Ingrese el año">
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-control" id="estado">
+                    <option value="nueva">Nueva</option>
+                    <option value="usada">Usada</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="kilometros" class="form-label">Kilómetros</label>
+                <input type="number" class="form-control" id="kilometros" placeholder="Ingrese los kilómetros">
+            </div>
+            <div class="mb-3">
+                <label for="color" class="form-label">Color</label>
+                <input type="text" class="form-control" id="color" placeholder="Ingrese el color">
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio (USD)</label>
+                <input type="number" class="form-control" id="precio" placeholder="Ingrese el precio">
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleMotoForm()">Cancelar</button>
+        </form>
+    </div>
+
+    <h3>Accesorios</h3>
+    <button class="btn btn-primary mb-3">Alta de accesorio</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Precio (USD)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>Casco</td>
+                <td>Shark</td>
+                <td>150</td>
+                <td>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

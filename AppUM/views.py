@@ -29,6 +29,7 @@ def validacion_login(req):
                 else:
                     existe_mecanico = 0
             else:
+                mecanico_jefe = 0
                 existe_mecanico = 0
                 
             administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
@@ -47,8 +48,8 @@ def validacion_login(req):
                 renderizar_en = "login/login.html"
                 contexto = "Administrativo y Mecanico Empleado"
             elif existe_administrativo == 1 and existe_mecanico == 0:
-                renderizar_en = "login/login.html"
-                contexto = "Solo Administrativo"
+                renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+                contexto = {"existe_mecanico":0,"mecanico_jefe":0,"existe_administrativo":1}
             elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 1:
                 renderizar_en = "login/login.html"
                 contexto = "Solo Mecanico Jefe"
@@ -61,9 +62,10 @@ def validacion_login(req):
            
         else:
             renderizar_en = "login/login.html"
-            contexto = "Error de usuario y/o contraseña"
+            contexto = {"resultado":"Error de usuario y/o contraseña"}
 
     except:
         renderizar_en = "login/login.html"
         contexto = "Algo salió mal"
-    return render(req,renderizar_en,{"resultado":contexto})
+    #print(existe_mecanico)
+    return render(req,renderizar_en,contexto)

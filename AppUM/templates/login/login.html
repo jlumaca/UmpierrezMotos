@@ -50,7 +50,13 @@
                 <input type="password" class="form-control" id="password" name="pass_login" placeholder="Ingrese su contraseña" required>
             </div>
             <button type="submit" class="btn btn-login w-100">Iniciar Sesión</button>
-            <h1>{{resultado}}</h1>
+
+            <!-- Mostrar el mensaje de error aquí, si existe -->
+            {% if resultado %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    {{ resultado }}
+                </div>
+            {% endif %}
         </form>
     </div>
 

@@ -1,0 +1,34 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<div class="table-container" id="inventarios">
+    <h3>Accesorios</h3>
+    <button class="btn btn-primary mb-3">Alta de accesorio</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Precio (USD)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>Casco</td>
+                <td>Shark</td>
+                <td>150</td>
+                <td>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

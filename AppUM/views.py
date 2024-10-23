@@ -69,3 +69,17 @@ def validacion_login(req):
         contexto = "Algo salió mal"
     #print(existe_mecanico)
     return render(req,renderizar_en,contexto)
+
+
+def vista_inventario_motos(req):
+    return render(req,"perfil_administrativo/motos/motos.html",{})
+
+
+def vista_inventario_accesorios(req):
+    return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
+
+def form_alta_moto(req):
+    if req.POST:
+        pass
+    else:
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{})

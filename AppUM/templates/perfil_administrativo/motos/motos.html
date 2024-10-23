@@ -1,0 +1,47 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<title>Motos</title>
+<div class="table-container" id="inventarios">
+    <h3>Motos</h3>
+    <a href="{% url 'MotoAlta' %}" class="btn btn-primary mb-3">Alta de moto</a>
+    <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Buscar por Marca, Modelo, Año, Kilómetros">
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Motor (cc)</th>
+                <th>Año</th>
+                <th>Estado</th>
+                <th>Kilómetros</th>
+                <th>Color</th>
+                <th>Precio (USD)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Filas de ejemplo de motos -->
+            <tr>
+                <td>Honda</td>
+                <td>CBR500R</td>
+                <td>500</td>
+                <td>2023</td>
+                <td>Nueva</td>
+                <td>0</td>
+                <td>Rojo</td>
+                <td>7000</td>
+                <td>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -2,8 +2,18 @@
 {% load static %}
 
 {% block contenidoQueCambia %}
+
+
+
 <title>Motos</title>
 <div class="table-container" id="inventarios">
+    {% if messages %}
+    <div class="alert-container">
+        <div class="alert alert-success">
+            <p>{{ messages }}</p>
+        </div>
+    </div>
+{% endif %}
     <h3>Motos</h3>
     <a href="{% url 'MotoAlta' %}" class="btn btn-primary mb-3">Alta de moto</a>
     <div class="mb-3">
@@ -25,21 +35,24 @@
         </thead>
         <tbody>
             <!-- Filas de ejemplo de motos -->
+            {% for moto in motos %}
             <tr>
-                <td>Honda</td>
-                <td>CBR500R</td>
-                <td>500</td>
-                <td>2023</td>
-                <td>Nueva</td>
-                <td>0</td>
-                <td>Rojo</td>
-                <td>7000</td>
+                <td>{{ moto.marca }}</td>
+                <td>{{ moto.modelo }}</td>
+                <td>{{ moto.motor }}</td>
+                <td>{{ moto.anio }}</td>
+                <td>{{ moto.estado }}</td>
+                <td>{{ moto.kilometros }}</td>
+                <td>{{ moto.color }}</td>
+                <td>{{ moto.precio }}</td>
                 <td>
                     <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
                     <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
                 </td>
+
             </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

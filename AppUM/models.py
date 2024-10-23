@@ -26,13 +26,18 @@ class Moto(models.Model):
     estado = models.CharField(max_length=10)
     kilometros = models.IntegerField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    color = models.CharField(max_length=20)
-    matricula = models.CharField(max_length=20, unique=True)
+    color = models.CharField(max_length=20)   
     num_motor = models.CharField(max_length=20, unique=True)
     num_chasis = models.CharField(max_length=20, unique=True)
     foto = models.ImageField(null=True, blank=True, upload_to="motos/")
     pertenece_tienda = models.BooleanField()
     pertenece_taller = models.BooleanField()
+
+class Matriculas(models.Model):
+    moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)
+    matricula = models.CharField(max_length=20, unique=True)
+    activo = models.BooleanField()
+
 
 class accesorio(models.Model):
     tipo = models.CharField(max_length=20)

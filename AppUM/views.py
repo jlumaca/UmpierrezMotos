@@ -72,14 +72,107 @@ def validacion_login(req):
 
 
 def vista_inventario_motos(req):
-    return render(req,"perfil_administrativo/motos/motos.html",{})
+    motos = Moto.objects.filter(pertenece_tienda=1)
+    return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos})
 
 
 def vista_inventario_accesorios(req):
     return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
 
-def form_alta_moto(req):
-    if req.POST:
-        pass
+# def existe_matricula_moto_tienda(matr):
+#     existe_moto = Moto.objects.filter(matricula = matr).first()
+
+#     if existe_moto.pertenece_tienda == 0:
+#         return "update"
+#     else:
+#         return "existe_matr"
+
+# def existe_num_motor_moto_tienda(num_motor):
+#     existe_moto = Moto.objects.filter(num_motor = num_motor).first()
+    
+#     if existe_moto.pertenece_tienda == 0:
+#         return "update_pert_tienda"
+#     else:
+#         return "existe_num_motor"
+
+# def existe_num_chasis_moto_tienda(num_motor):
+#     existe_moto = Moto.objects.filter(num_motor = num_motor).first()
+    
+#     if existe_moto.pertenece_tienda == 0:
+#         return "update_pert_tienda"
+#     else:
+#         return "existe_num_motor"
+
+def datos_moto(num_motor, num_chasis):
+    existe_num_motor = Moto.objects.filter(num_motor = num_motor).first()
+    existe_num_chasis = Moto.objects.filter(num_chasis = num_chasis).first() 
+    existen_ambos = Moto.objects.filter(num_motor = num_motor, num_chasis = num_chasis).first() 
+
+    if existe_num_motor:
+        if existe_num_motor.pertenece_tienda == 1:
+            return "existe_num_motor"
+    
+    if existe_num_chasis:
+        if existe_num_chasis.pertenece_tienda == 1:
+            return "existe_num_chasis"
+    
+    if existen_ambos:
+        if existen_ambos.pertenece_tienda == 0:
+            return "update_pert_tienda_a_1"
+
+def matricula(matricula,num_motor,num_chasis):
+    moto = Moto.objects.filter(num_motor = num_motor, num_chasis = num_chasis).first()
+    existe_matricula = Matriculas.objects.filter(matricula = matricula).first()
+    if existe_matricula:
+        if existe_matricula.activo == 1:
+            return "matricula_existe"
+        else:
+            return "update_activo"
     else:
-        return render(req,"perfil_administrativo/motos/alta_moto.html",{})
+        return "ingresar_matr"
+
+      
+
+
+def form_alta_moto(req):
+    try:
+        if req.method == "POST":
+            matricula = req.POST['matricula_letras'] + str(req.POST['matricula_numeros'])
+
+            valid_moto = datos_moto(req.POST['num_motor_moto'],req.POST['num_chasis_moto'])
+            # print(req.POST['estado_moto'])
+            estado_moto = req.POST['estado_moto']
+            
+            if valid_moto == "existe_num_motor":
+                print("YA EXISTE UNA MOTO CON ESE NUMERO DE MOTOR")
+            elif valid_moto == "existe_num_chasis":
+                print("YA EXISTE UNA MOTO CON ESE NUMERO DE CHASIS")
+            else:
+                if estado_moto == "nueva":
+                    nueva_moto = Moto(marca = req.POST['marca_moto'],
+                            modelo = req.POST['modelo_moto'],
+                            anio = req.POST['anio_moto'],
+                            estado = "Nueva",
+                            motor = req.POST['motor_moto'],
+			                kilometros = 0,
+                            precio = req.POST['precio_moto'],
+                            color = req.POST['color_moto'],
+                            num_motor = req.POST['num_motor_moto'],
+                            num_chasis = req.POST['num_chasis_moto'],
+                            pertenece_tienda = 1,
+                            pertenece_taller = 0
+                            )
+                    nueva_moto.save()
+                    motos = Moto.objects.filter(pertenece_tienda=1)
+                    return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+                else:
+                    pass
+
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{})
+        else:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{})
+    
+    except:
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{"mensaje":"Algo salió mal"})
+
+    

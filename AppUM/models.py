@@ -32,6 +32,7 @@ class Moto(models.Model):
     foto = models.ImageField(null=True, blank=True, upload_to="motos/")
     pertenece_tienda = models.BooleanField()
     pertenece_taller = models.BooleanField()
+    identificacion_pdf = models.FileField(upload_to='motos/pdfs/', null=True, blank=True)
 
 class Matriculas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)

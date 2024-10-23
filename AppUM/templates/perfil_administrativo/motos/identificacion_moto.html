@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identificación de Moto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #e3342f; /* Color rojo similar */
+            padding: 10px;
+            border-radius: 8px;
+        }
+        header h1 {
+            color: #ffffff;
+            margin: 0;
+        }
+        header img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e3342f;
+            color: #ffffff;
+        }
+        td {
+            background-color: #ffffe0;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="D:\Escritorio\civic1.jpg" alt="Logo de la tienda"> <!-- Ruta al logo -->
+            <h1>Identificación de la Moto</h1>
+        </header>
+
+        <table>
+            <tr>
+                <th>Código</th>
+                <td>{{ moto.id }}</td>
+            </tr>
+            <tr>
+                <th>Marca</th>
+                <td>{{ moto.marca }}</td>
+            </tr>
+            <tr>
+                <th>Modelo</th>
+                <td>{{ moto.modelo }}</td>
+            </tr>
+            <tr>
+                <th>Motor (cc)</th>
+                <td>{{ moto.motor }}</td>
+            </tr>
+            <tr>
+                <th>Año</th>
+                <td>{{ moto.anio }}</td>
+            </tr>
+            <tr>
+                <th>Kilómetros</th>
+                <td>{{ moto.kilometros }}</td>
+            </tr>
+            <tr>
+                <th>Precio (USD)</th>
+                <td>{{ moto.precio }}</td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            &copy; {{ current_year }} Umpierrez Motos. Todos los derechos reservados.
+        </div>
+    </div>
+</body>
+</html>

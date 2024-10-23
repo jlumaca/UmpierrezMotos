@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from .models import *
-
+from .utils import crear_pdf
+from django.http import HttpResponse
+from django.core.files.base import ContentFile
+from datetime import datetime
 # Create your views here.
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##
@@ -163,9 +166,31 @@ def form_alta_moto(req):
                             pertenece_taller = 0
                             )
                     nueva_moto.save()
+                    #pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {"mensaje":"mensaje de prueba",})
+                    pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
+    "moto": {
+        "id":nueva_moto.id,
+        "marca": nueva_moto.marca,
+        "modelo": nueva_moto.modelo,
+        "motor": nueva_moto.motor,
+        "anio": nueva_moto.anio,
+        "kilometros": nueva_moto.kilometros,
+        "precio": nueva_moto.precio
+    },
+    "current_year": datetime.now().year  # Asegúrate de importar datetime
+})
+                    if pdf:
+                        pdf_file = ContentFile(pdf.content)
+                        file_name = f"identificacion_{nueva_moto.id}.pdf"
+                # Asignar el archivo al campo identificacion_pdf de la moto
+                        nueva_moto.identificacion_pdf.save(file_name, pdf_file)
+                        nueva_moto.save()
                     motos = Moto.objects.filter(pertenece_tienda=1)
-                    return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+                    #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+                    return render(req,"perfil_administrativo/motos/contenido_pdf.html",{"messages":"Moto ingresada con éxito. A continuación se visualiza el pdf generado para identificar fisicamente la misma.",'pdf_url': nueva_moto.identificacion_pdf.url})
+                    #return HttpResponse(pdf, content_type='application/pdf')
                 else:
+                    #INGRESAR MOTOS USADAS
                     pass
 
             return render(req,"perfil_administrativo/motos/alta_moto.html",{})

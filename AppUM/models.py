@@ -47,3 +47,7 @@ class accesorio(models.Model):
     foto = models.ImageField(null=True, blank=True, upload_to="accesorios/")
     activo = models.BooleanField()
 
+class Logos(models.Model):
+    logo_UM = models.ImageField(null=True, blank=True, upload_to="logos/")
+    logo_DM = models.ImageField(null=True, blank=True, upload_to="logos/")
+

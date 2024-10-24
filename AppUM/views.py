@@ -4,6 +4,8 @@ from .utils import crear_pdf
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
 from datetime import datetime
+from django.core.paginator import Paginator
+from django.shortcuts import render
 # Create your views here.
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##
@@ -76,7 +78,15 @@ def validacion_login(req):
 
 def vista_inventario_motos(req):
     motos = Moto.objects.filter(pertenece_tienda=1)
-    return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos})
+
+    logo_um = Logos.objects.get(id=1)
+
+    paginator = Paginator(motos, 5)  # 10 motos por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
 
 
 def vista_inventario_accesorios(req):
@@ -167,6 +177,8 @@ def form_alta_moto(req):
                             )
                     nueva_moto.save()
                     #pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {"mensaje":"mensaje de prueba",})
+                    logo_um = Logos.objects.get(id=1)
+                    logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
                     pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
     "moto": {
         "id":nueva_moto.id,
@@ -177,17 +189,25 @@ def form_alta_moto(req):
         "kilometros": nueva_moto.kilometros,
         "precio": nueva_moto.precio
     },
-    "current_year": datetime.now().year  # Asegúrate de importar datetime
-})
+    "current_year": datetime.now().year,
+      "logo_um": logo_um_url  # Asegúrate de importar datetime
+})              
                     if pdf:
                         pdf_file = ContentFile(pdf.content)
                         file_name = f"identificacion_{nueva_moto.id}.pdf"
                 # Asignar el archivo al campo identificacion_pdf de la moto
                         nueva_moto.identificacion_pdf.save(file_name, pdf_file)
                         nueva_moto.save()
-                    motos = Moto.objects.filter(pertenece_tienda=1)
+                    
                     #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
-                    return render(req,"perfil_administrativo/motos/contenido_pdf.html",{"messages":"Moto ingresada con éxito. A continuación se visualiza el pdf generado para identificar fisicamente la misma.",'pdf_url': nueva_moto.identificacion_pdf.url})
+
+                    contexto = {
+                        "messages":"Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma.",
+                        'pdf_url': nueva_moto.identificacion_pdf.url,
+                        "logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None
+                        
+                    }
+                    return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
                     #return HttpResponse(pdf, content_type='application/pdf')
                 else:
                     #INGRESAR MOTOS USADAS

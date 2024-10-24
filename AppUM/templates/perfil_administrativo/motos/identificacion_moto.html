@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+    <head>
+        {% load static %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Identificación de Moto</title>
@@ -18,21 +20,24 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
         header {
-            text-align: center;
-            margin-bottom: 20px;
-            background-color: #f7ca4d; /* Color rojo similar */
-            padding: 10px;
-            border-radius: 8px;
-        }
-        header h1 {
-            color: #e3342f;
-            margin: 0;
-        }
-        header img {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 10px;
-        }
+        display: flex;
+        align-items: center;
+        background-color: #f7ca4d; /* Color similar */
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    header img {
+        max-width: 150px;
+        height: auto;
+        margin-right: 20px;
+    }
+    header h1 {
+        color: #e3342f;
+        margin: 0;
+        flex-grow: 1; /* Esto hace que el título ocupe el espacio restante */
+        text-align: center; /* Centra el título dentro del espacio disponible */
+    }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -58,12 +63,26 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
-            <img src="D:\Escritorio\civic1.jpg" alt="Logo de la tienda"> <!-- Ruta al logo -->
-            <h1>Identificación de la Moto</h1>
+            <table style="width: 100%; border: none; border-collapse: collapse;">
+                <tr>
+                    <td style="background-color: #f7ca4d; width: 150px; vertical-align: middle; border: none;">
+                        {% if logo_um %}
+                            <img src="{{ logo_um }}" alt="Logo de la tienda" style="width: 100%; max-width: 150px; height: auto;">
+                        {% else %}
+                            <p>No se encontró el logo.</p>
+                        {% endif %}
+                    </td>
+                    <td style="background-color: #f7ca4d; text-align: left; vertical-align: middle; padding-left: 20px; border: none;">
+                        <h1 style="color: #e3342f; margin: 0;">Características</h1>
+                    </td>
+                </tr>
+            </table>
         </header>
+        
 
         <table>
             <tr>

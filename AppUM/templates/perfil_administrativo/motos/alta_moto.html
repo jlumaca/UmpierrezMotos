@@ -9,11 +9,11 @@
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
-                <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca">
+                <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20">
             </div>
             <div class="mb-3">
                 <label for="modelo" class="form-label">Modelo</label>
-                <input type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo">
+                <input type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
             </div>
             <div class="mb-3">
                 <label for="motor" class="form-label">Motor(cc)</label>
@@ -37,17 +37,17 @@
 
             <div class="mb-3">
                 <label for="num_motor" class="form-label">Número de motor</label>
-                <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor">
+                <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40">
             </div>
 
             <div class="mb-3">
                 <label for="num_chasis" class="form-label">Número de chasis</label>
-                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis">
+                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
             </div>
             <div class="mb-3" id="matr">
                 <label for="matricula" class="form-label">Matricula</label>
                 <div class="d-flex">
-                    <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos">
+                    <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3">
                     <span class="mx-1">-</span>
                     <input type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos">
                 </div>
@@ -56,7 +56,7 @@
 
             <div class="mb-3">
                 <label for="color" class="form-label">Color</label>
-                <input type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color">
+                <input type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20">
             </div>
             <div class="mb-3">
                 <label for="precio" class="form-label">Precio (USD)</label>

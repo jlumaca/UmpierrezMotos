@@ -150,9 +150,16 @@ def matricula(matricula,num_motor,num_chasis):
 def form_alta_moto(req):
     try:
         if req.method == "POST":
-            matricula = req.POST['matricula_letras'] + str(req.POST['matricula_numeros'])
-
-            valid_moto = datos_moto(req.POST['num_motor_moto'],req.POST['num_chasis_moto'])
+            marca = req.POST['marca_moto'].upper()
+            modelo = req.POST['modelo_moto'].upper()
+            color = req.POST['color_moto'].upper()
+            matricula_mayus = req.POST['matricula_letras'].upper()
+            matricula = matricula_mayus + str(req.POST['matricula_numeros'])
+            num_motor = req.POST['num_motor_moto'].upper()
+            num_chasis = req.POST['num_chasis_moto'].upper()
+            
+            
+            valid_moto = datos_moto(num_motor,num_chasis)
             # print(req.POST['estado_moto'])
             estado_moto = req.POST['estado_moto']
             
@@ -162,16 +169,16 @@ def form_alta_moto(req):
                 print("YA EXISTE UNA MOTO CON ESE NUMERO DE CHASIS")
             else:
                 if estado_moto == "nueva":
-                    nueva_moto = Moto(marca = req.POST['marca_moto'],
-                            modelo = req.POST['modelo_moto'],
+                    nueva_moto = Moto(marca = marca,
+                            modelo = modelo,
                             anio = req.POST['anio_moto'],
                             estado = "Nueva",
                             motor = req.POST['motor_moto'],
 			                kilometros = 0,
                             precio = req.POST['precio_moto'],
-                            color = req.POST['color_moto'],
-                            num_motor = req.POST['num_motor_moto'],
-                            num_chasis = req.POST['num_chasis_moto'],
+                            color = color,
+                            num_motor = num_motor,
+                            num_chasis = num_chasis,
                             pertenece_tienda = 1,
                             pertenece_taller = 0
                             )

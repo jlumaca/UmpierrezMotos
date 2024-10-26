@@ -2,10 +2,16 @@
 {% load static %}
 
 {% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
 <title>Motos</title>
 <div class="table-container" id="inventarios">
     <h3>Motos</h3>
-    <a href="{% url 'MotoAlta' %}" class="btn btn-primary mb-3">Alta de moto</a>
+    <a href="{% url 'MotoAlta' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-motorcycle"></i> Alta de moto
+    </a>
+
     <div class="mb-3">
         <label for="estado" class="form-label">Buscar por:</label>
         <select class="form-control" name="estado_moto" id="tipo_busqueda" onchange="tipo_busqueda()">
@@ -13,42 +19,99 @@
             <option value="modelo">Modelo</option>
             <option value="marca_modelo">Marca y modelo</option>
             <option value="anio">Año</option>
-            <option value="kms">Kilometros</option>
+            <option value="kms">Kilómetros</option>
+            <option value="precio">Precio</option>
         </select>
     </div>
-    <form action="" enctype="multipart/form-data" method="POST" id="busqueda_marca">{% csrf_token %}
-        <div class="mb-3">
-            <input type="text" name="marca" class="form-control" placeholder="Buscar por Marca">
+
+    <!-- Formulario de búsqueda por marca -->
+    <form action="{% url 'BusquedaMarca' %}" enctype="multipart/form-data" method="get" id="busqueda_marca">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="marca" class="form-control" placeholder="Buscar por marca">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
         </div>
     </form>
 
-    <form action="" enctype="multipart/form-data" method="POST" id="busqueda_modelo" style="display: none;">{% csrf_token %}
-        <div class="mb-3">
+    <!-- Formulario de búsqueda por modelo -->
+    <form action="{% url 'BusquedaModelo' %}" enctype="multipart/form-data" method="get" id="busqueda_modelo" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
             <input type="text" name="modelo" class="form-control" placeholder="Buscar por modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
         </div>
     </form>
 
-    <form action="" enctype="multipart/form-data" method="POST" id="busqueda_marca_modelo" style="display: none;">{% csrf_token %}
-        <div class="d-flex">
-            <input type="text" class="form-control me-1" name="marca_modelo" id="marca_modelo" placeholder="Marca">
-            <span class="mx-1">-</span>
-            <input type="number" class="form-control ms-1" name="modelo_marca" id="modelo_marca" placeholder="Modelo">
+    <!-- Formulario de búsqueda por marca y modelo -->
+    <form action="{% url 'BusquedaMarcaModelo' %}" enctype="multipart/form-data" method="get" id="busqueda_marca_modelo" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="marca_modelo" placeholder="Marca">
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="modelo_marca" placeholder="Modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
         </div>
     </form>
 
-    <form action="" enctype="multipart/form-data" method="POST" id="busqueda_anio" style="display: none;">{% csrf_token %}
-        <div class="mb-3">
+    <!-- Formulario de búsqueda por año -->
+    <form action="{% url 'BusquedaAnio' %}" enctype="multipart/form-data" method="get" id="busqueda_anio" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
             <input type="text" class="form-control" name="anio" placeholder="Buscar por año">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
         </div>
     </form>
-    <form action="" enctype="multipart/form-data" method="POST" id="busqueda_kms" style="display: none;">{% csrf_token %}
-        <div class="d-flex">
-            <input type="number" class="form-control me-1" name="km_minimo" id="km_minimo" placeholder="Kilometraje minimo" >
-            <span class="mx-1">-</span>
-            <input type="number" class="form-control ms-1" name="km_maximo" id="km_maximo" placeholder="Kilometraje máximo">
+
+    <!-- Formulario de búsqueda por kilómetros -->
+    <form action="{% url 'BusquedaKms' %}" enctype="multipart/form-data" method="get" id="busqueda_kms" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="number" class="form-control" name="km_minimo" placeholder="Kilometraje mínimo">
+            <span class="input-group-text">-</span>
+            <input type="number" class="form-control" name="km_maximo" placeholder="Kilometraje máximo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
         </div>
     </form>
-    
+    <form action="{% url 'BusquedaPrecio' %}" enctype="multipart/form-data" method="get" id="busqueda_precio" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="number" class="form-control" name="precio_minimo" placeholder="Precio mínimo">
+            <span class="input-group-text">-</span>
+            <input type="number" class="form-control" name="precio_maximo" placeholder="Precio máximo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </form>
+
     <table class="table">
         <thead>
             <tr>
@@ -127,6 +190,7 @@
         </ul>
     </nav>
 </div>
+
 <script>
     function tipo_busqueda() {
         var busqueda_tipo = document.getElementById("tipo_busqueda").value;
@@ -135,20 +199,14 @@
         var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
         var busqueda_anio = document.getElementById("busqueda_anio");
         var busqueda_kms = document.getElementById("busqueda_kms");
-   
-       
+        var busqueda_precio = document.getElementById("busqueda_precio");
 
-        if (busqueda_tipo === "marca") {
-            busqueda_marca.style.display = "block";
-            busqueda_modelo.style.display = "none";
-            busqueda_marca_modelo.style.display = "none";
-            busqueda_anio.style.display = "none";
-            busqueda_kms.style.display = "none";
-        }else{
-            kms.style.display = "block";
-           matr.style.display = "block";
-        }
+        busqueda_marca.style.display = busqueda_tipo === "marca" ? "block" : "none";
+        busqueda_modelo.style.display = busqueda_tipo === "modelo" ? "block" : "none";
+        busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+        busqueda_anio.style.display = busqueda_tipo === "anio" ? "block" : "none";
+        busqueda_kms.style.display = busqueda_tipo === "kms" ? "block" : "none";
+        busqueda_precio.style.display = busqueda_tipo === "precio" ? "block" : "none";
     }
 </script>
 {% endblock %}
-

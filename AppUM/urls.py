@@ -11,6 +11,12 @@ urlpatterns = [
      path('moto_alta', views.form_alta_moto,name="MotoAlta"),
      path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),
+     path('busqueda_marca', views.busqueda_marca,name="BusquedaMarca"),
+     path('busqueda_modelo', views.busqueda_modelo,name="BusquedaModelo"),
+     path('busqueda_marca_modelo', views.busqueda_marca_modelo,name="BusquedaMarcaModelo"),
+     path('busqueda_anio', views.busqueda_anio,name="BusquedaAnio"),
+     path('busqueda_kms', views.busqueda_kms,name="BusquedaKms"),
+     path('busqueda_precio', views.busqueda_precio,name="BusquedaPrecio"),
 
 
      

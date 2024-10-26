@@ -240,3 +240,67 @@ def baja_moto(req,id_moto):
        #print(f"Id auto es: {id_auto}")
        return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto})
        #return HttpResponse(f"<p>{id_auto}</p>")
+
+def busqueda_marca(req):
+    marca = req.GET.get('marca')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
+def busqueda_modelo(req):
+    modelo = req.GET.get('modelo')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(modelo__icontains=modelo,pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
+def busqueda_marca_modelo(req):
+    marca = req.GET.get('marca_modelo')
+    modelo = req.GET.get('modelo_marca')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(marca__icontains=marca,modelo__icontains=modelo,pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
+def busqueda_anio(req):
+    anio = req.GET.get('anio')
+    
+    #if req.method == 'get':
+    motos = Moto.objects.filter(anio=anio,pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
+def busqueda_kms(req):
+    km_minimo = req.GET.get('km_minimo')
+    km_maximo = req.GET.get('km_maximo')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(kilometros__range=(km_minimo, km_maximo),pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
+def busqueda_precio(req):
+    precio_minimo = req.GET.get('precio_minimo')
+    precio_maximo = req.GET.get('precio_maximo')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})

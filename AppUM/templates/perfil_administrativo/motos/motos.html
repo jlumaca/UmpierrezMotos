@@ -122,6 +122,7 @@
                 <th>Estado</th>
                 <th>Kilómetros</th>
                 <th>Color</th>
+                <th>Fecha de ingreso</th>
                 <th>Precio (USD)</th>
                 <th>Acciones</th>
             </tr>
@@ -137,6 +138,7 @@
                     <td>{{ moto.estado }}</td>
                     <td>{{ moto.kilometros }}</td>
                     <td>{{ moto.color }}</td>
+                    <td>{{ moto.fecha_ingreso|date:"d/m/Y" }}</td>
                     <td>{{ moto.precio }}</td>
                     <td>
                         <a href="{% url 'MotoBaja' moto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>

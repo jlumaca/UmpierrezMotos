@@ -77,7 +77,7 @@ def validacion_login(req):
 
 
 def vista_inventario_motos(req):
-    motos = Moto.objects.filter(pertenece_tienda=1)
+    motos = Moto.objects.filter(pertenece_tienda=1).order_by('-fecha_ingreso')
 
     logo_um = Logos.objects.get(id=1)
 

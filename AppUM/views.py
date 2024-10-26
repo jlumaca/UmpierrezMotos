@@ -227,4 +227,16 @@ def form_alta_moto(req):
     except:
         return render(req,"perfil_administrativo/motos/alta_moto.html",{"mensaje":"Algo salió mal"})
 
-    
+
+def baja_moto(req,id_moto):
+    if req.method == 'POST':
+
+      motoDel = Moto.objects.get(id=id_moto)
+      motoDel.pertenece_tienda = 0
+      motoDel.save()
+      return render(req, "perfil_administrativo/motos/baja_moto.html", {"message":"Moto borrada con éxito","id_moto":0})
+      #return HttpResponse(f"<p>{id_auto}</p>")
+    else:
+       #print(f"Id auto es: {id_auto}")
+       return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto})
+       #return HttpResponse(f"<p>{id_auto}</p>")

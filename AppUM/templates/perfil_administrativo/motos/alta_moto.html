@@ -5,7 +5,11 @@
 <div class="table-container" id="inventarios">
     <div class="form-container" id="motoForm">
         <h4>Alta de Moto</h4>
-        <h1>{{ mensaje }}</h1>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>

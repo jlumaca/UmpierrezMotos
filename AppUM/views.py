@@ -129,19 +129,45 @@ def datos_moto(num_motor, num_chasis):
         if existe_num_chasis.pertenece_tienda == 1:
             return "existe_num_chasis"
     
+    if existe_num_motor and existe_num_chasis:
+        if existe_num_motor.id != existe_num_chasis.id: #PENSADO EN CASO DE QUE SI UNA MOTO VUELVE A LA TIENDA COINCIDAN EL NUM DE CHASIS Y NUM DE MOTOR
+            return "num_motor_chasis_error"             #EVITAR QUE SE INGRESE NUM DE CHASIS DE MOTO X CON NUM DE MOTOR DE MOTO Y
+    
     if existen_ambos:
         if existen_ambos.pertenece_tienda == 0:
             return "update_pert_tienda_a_1"
+        
+def datos_moto_pert_tienda(num_motor, num_chasis):
+    existe_num_motor = Moto.objects.filter(num_motor = num_motor).first()
+    existe_num_chasis = Moto.objects.filter(num_chasis = num_chasis).first() 
+    #existen_ambos = Moto.objects.filter(num_motor = num_motor, num_chasis = num_chasis).first() 
 
-def matricula(matricula,num_motor,num_chasis):
-    moto = Moto.objects.filter(num_motor = num_motor, num_chasis = num_chasis).first()
-    existe_matricula = Matriculas.objects.filter(matricula = matricula).first()
-    if existe_matricula:
-        if existe_matricula.activo == 1:
-            return "matricula_existe"
-        else:
-            return "update_activo"
+    if existe_num_motor and existe_num_chasis:
+        
+        if existe_num_motor.pertenece_tienda == 0 and existe_num_chasis.pertenece_tienda == 0: #LA MOTO INGRESA NUEVAMENTE A LA TIENDA TIEMPO DESPUES DE SER VENDIDA
+            return "update_pert_tienda"
     else:
+        return None
+    
+    # if existe_num_chasis:
+    #     if existe_num_chasis.pertenece_tienda == 0:
+    #         return "update_pert_tienda"
+
+def matricula_valid(matricula,num_motor,num_chasis):
+    existe_matricula = Matriculas.objects.filter(matricula = matricula).first()
+    moto = Moto.objects.filter(num_motor = num_motor,num_chasis = num_chasis).first()
+    if existe_matricula:
+        if moto:
+            if existe_matricula.moto_id != moto.id: #SI LA MOTO EXISTE Y LA MATRICULA PERTENECE A OTRA MOTO DA ERROR
+                return "matricula_existe"
+        elif not moto: #LA MOTO NO EXISTE, POR LO TANTO LA MATRICULA INGRESADA PERTENECE A OTRA MOTO DEL SISTEMA
+            return "matricula_existe"
+        # elif existe_matricula.activo == 1: #SI LA MATRICULA EXISTE, ESTA ACTIVA Y PERTENECE A LA MISMA MOTO, NO SE MODIFICA NINGUN DATO
+            # return "no_hacer_nada"
+        # else:
+        #     return "update_activo"
+
+    else: #AL NO EXISTIR LA MATRICULA SE INGRESA DE 0
         return "ingresar_matr"
 
       
@@ -158,15 +184,20 @@ def form_alta_moto(req):
             num_motor = req.POST['num_motor_moto'].upper()
             num_chasis = req.POST['num_chasis_moto'].upper()
             
-            
+            valid_matricula = matricula_valid(matricula,num_motor,num_chasis)
             valid_moto = datos_moto(num_motor,num_chasis)
+            #valid_matricula = matricula(matricula_mayus)
             # print(req.POST['estado_moto'])
             estado_moto = req.POST['estado_moto']
             
             if valid_moto == "existe_num_motor":
-                print("YA EXISTE UNA MOTO CON ESE NUMERO DE MOTOR")
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de motor"})
             elif valid_moto == "existe_num_chasis":
-                print("YA EXISTE UNA MOTO CON ESE NUMERO DE CHASIS")
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de chasis"})
+            elif valid_moto == "num_motor_chasis_error":
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"El número de chasis y/o motor pertenecen a otra moto ingresada en el sistema"})
+            elif valid_matricula == "matricula_existe":
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe la matricula"})
             else:
                 if estado_moto == "nueva":
                     nueva_moto = Moto(marca = marca,
@@ -180,9 +211,13 @@ def form_alta_moto(req):
                             num_motor = num_motor,
                             num_chasis = num_chasis,
                             pertenece_tienda = 1,
-                            pertenece_taller = 0
+                            pertenece_taller = 0,
+                            fecha_ingreso = datetime.now()
                             )
                     nueva_moto.save()
+                    #id_moto = nueva_moto.id
+                    #matricula_insert = Matriculas(matricula = matricula_mayus,activo = 1, moto_id = id_moto)
+                    #matricula_insert.save()
                     #pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {"mensaje":"mensaje de prueba",})
                     logo_um = Logos.objects.get(id=1)
                     logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
@@ -218,14 +253,131 @@ def form_alta_moto(req):
                     #return HttpResponse(pdf, content_type='application/pdf')
                 else:
                     #INGRESAR MOTOS USADAS
-                    pass
+                    valid_pert_tienda = datos_moto_pert_tienda(num_motor, num_chasis)
+                    if valid_pert_tienda == "update_pert_tienda": #SI LA MOTO FUE VENDIDA ANTERIORMENTE DE LA TIENDA Y VUELVE A LA MISMA, SE ACTUALIZA PERT_TIENDA = 1
+                        # print("ENTRA IF")
+                        regresa_moto = Moto.objects.get(num_chasis=num_chasis,num_motor=num_motor)
+                        regresa_moto.pertenece_tienda = 1
+                        regresa_moto.fecha_ingreso = datetime.now()
+                        regresa_moto.kilometros = req.POST['km_moto']
+                        regresa_moto.precio = req.POST['precio_moto']
+                        regresa_moto.estado = "Usada"
+                        regresa_moto.save()
+                        nueva_matricula = matricula_valid(matricula,num_motor,num_chasis)
 
-            return render(req,"perfil_administrativo/motos/alta_moto.html",{})
+                        if nueva_matricula == "ingresar_matr":
+                            new_matricula = Matriculas(
+                                matricula = matricula,
+                                activo = 1,
+                                moto_id = regresa_moto.id
+                            )
+                            new_matricula.save()
+                    
+    
+
+                        logo_um = Logos.objects.get(id=1)
+                        logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+
+                        pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
+                            "moto": {
+                                "id":regresa_moto.id,
+                                "marca": regresa_moto.marca,
+                                "modelo": regresa_moto.modelo,
+                                "motor": regresa_moto.motor,
+                                "anio": regresa_moto.anio,
+                                "kilometros": regresa_moto.kilometros,
+                                "precio": regresa_moto.precio
+                            },
+                            "current_year": datetime.now().year,
+                            "logo_um": logo_um_url  # Asegúrate de importar datetime
+                        })              
+                        if pdf:
+                            pdf_file = ContentFile(pdf.content)
+                            file_name = f"identificacion_{regresa_moto.id}.pdf"
+                # Asignar el archivo al campo identificacion_pdf de la moto
+                            regresa_moto.identificacion_pdf.save(file_name, pdf_file)
+                            regresa_moto.save()
+
+                        contexto = {
+                        "pdf_url": regresa_moto.identificacion_pdf.url,
+                        "logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,
+                        "messages" : f"Los datos ingresados corresponden a la moto {regresa_moto.marca} {regresa_moto.modelo}, que anteriormente fue vendida."
+                        }
+                        return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
+                    else: #SI LA MOTO NUNCA ESTUVO EN LA TIENDA, SE INGRESA DE 0
+                        moto_taller = Moto.objects.filter(num_chasis=num_chasis,num_motor=num_motor).first()
+                        if moto_taller: #LA MOTO PUEDE QUE EXISTA EN EL TALLER
+                                pert_taller = moto_taller.pertenece_taller
+                        else:
+                            pert_taller = 0
+                        
+                        nueva_moto = Moto(marca = marca,
+                            modelo = modelo,
+                            anio = req.POST['anio_moto'],
+                            estado = "Usada",
+                            motor = req.POST['motor_moto'],
+			                kilometros = req.POST['km_moto'],
+                            precio = req.POST['precio_moto'],
+                            color = color,
+                            num_motor = num_motor,
+                            num_chasis = num_chasis,
+                            pertenece_tienda = 1,
+                            pertenece_taller = pert_taller,
+                            fecha_ingreso = datetime.now()
+                            )
+                        nueva_moto.save()
+                        
+                        nueva_matricula = matricula_valid(matricula,nueva_moto.num_motor,nueva_moto.num_chasis)
+
+                        if nueva_matricula == "ingresar_matr":
+                            new_matricula = Matriculas(
+                                matricula = matricula,
+                                activo = 1,
+                                moto_id = nueva_moto.id
+                            )
+                            new_matricula.save()
+                    #id_moto = nueva_moto.id
+                    #matricula_insert = Matriculas(matricula = matricula_mayus,activo = 1, moto_id = id_moto)
+                    #matricula_insert.save()
+                    #pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {"mensaje":"mensaje de prueba",})
+                        logo_um = Logos.objects.get(id=1)
+                        logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                        pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
+                        "moto": {
+                        "id":nueva_moto.id,
+                        "marca": nueva_moto.marca,
+                        "modelo": nueva_moto.modelo,
+                        "motor": nueva_moto.motor,
+                        "anio": nueva_moto.anio,
+                        "kilometros": nueva_moto.kilometros,
+                        "precio": nueva_moto.precio
+                        },
+                        "current_year": datetime.now().year,
+                        "logo_um": logo_um_url  # Asegúrate de importar datetime
+                    })              
+                        if pdf:
+                            pdf_file = ContentFile(pdf.content)
+                            file_name = f"identificacion_{nueva_moto.id}.pdf"
+                # Asignar el archivo al campo identificacion_pdf de la moto
+                            nueva_moto.identificacion_pdf.save(file_name, pdf_file)
+                            nueva_moto.save()
+                    
+                    #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+
+                        contexto = {
+                        "messages":"Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma.",
+                        'pdf_url': nueva_moto.identificacion_pdf.url,
+                        "logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None
+                        
+                        }
+                        return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
+
+            # return render(req,"perfil_administrativo/motos/alta_moto.html",{})
         else:
             return render(req,"perfil_administrativo/motos/alta_moto.html",{})
     
-    except:
-        return render(req,"perfil_administrativo/motos/alta_moto.html",{"mensaje":"Algo salió mal"})
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__})
 
 
 def baja_moto(req,id_moto):

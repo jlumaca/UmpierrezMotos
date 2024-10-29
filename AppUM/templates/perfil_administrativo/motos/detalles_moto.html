@@ -1,0 +1,97 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px; /* Ajusta el ancho máximo según necesites */
+        white-space: normal; /* Permite que el texto se envuelva */
+        word-wrap: break-word; /* Corta palabras largas si es necesario */
+        overflow-y: auto; /* Añade una barra de desplazamiento si el texto es demasiado largo */
+        max-height: 150px; /* Altura máxima antes de que aparezca el scroll */
+    }
+</style>
+
+<div class="table-container" id="motoDetails">
+    <h4>Detalles de la Moto</h4>
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Marca</th>
+                <td>{{ moto.marca }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Modelo</th>
+                <td>{{ moto.modelo }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Motor (cc)</th>
+                <td>{{ moto.motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Año</th>
+                <td>{{ moto.anio }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Estado</th>
+                <td>{{ moto.estado }}</td>
+            </tr>
+
+            <tr>
+                <th scope="row">Kilómetros</th>
+                <td>{{ moto.kilometros }}</td>
+            </tr>
+       
+            <tr>
+                <th scope="row">Número de Motor</th>
+                <td>{{ moto.num_motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Chasis</th>
+                <td>{{ moto.num_chasis }}</td>
+            </tr>
+            {% if matr_actual %}
+            <tr>
+                <th scope="row">Matrícula</th>
+                <td>
+                    <span style="color: green; font-weight: bold;">Actual: {{ matr_actual }}</span>
+                    <br>
+                    {% if matr_anterior %}
+                        <span style="color: red;">Anterior: {{ matr_anterior }}</span><br>
+                    {% endif %}
+                </td>
+            </tr>
+            
+            {% endif %}
+            <tr>
+                <th scope="row">Color</th>
+                <td>{{ moto.color }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Precio (USD)</th>
+                <td>{{ moto.precio }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Descripción</th>
+                <td class="descripcion-celda">{{ descripcion }}</td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <a href="{% url 'Motos' %}" class="btn btn-secondary">Volver</a>
+</div>
+<style>
+    .matricula-actual {
+        color: green;
+        font-weight: bold;
+    }
+    .matricula-anterior {
+        color: red;
+    }
+</style>
+
+
+
+{% endblock %}

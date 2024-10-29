@@ -145,7 +145,7 @@
                     <td>
                         <a href="{% url 'MotoBaja' moto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         <a href="{% url 'DatosMotoModificacion' moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                        <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                        <a href="{% url 'MotoDetalles' moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

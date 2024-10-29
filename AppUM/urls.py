@@ -12,6 +12,9 @@ urlpatterns = [
      path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),
      path('datos_moto_modificacion/<int:id_moto>', views.datos_a_modificacion_moto,name="DatosMotoModificacion"),
      path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),
+
+     path('moto_detalles/<int:id_moto>', views.detalles_moto,name="MotoDetalles"),
+     
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),
      path('busqueda_marca', views.busqueda_marca,name="BusquedaMarca"),
      path('busqueda_modelo', views.busqueda_modelo,name="BusquedaModelo"),

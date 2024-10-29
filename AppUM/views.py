@@ -587,3 +587,44 @@ def modificacion_moto(req,id_moto):
         #return render(req,"perfil_administrativo/motos/motos.html",{})
     except:
         pass
+
+def detalles_moto(req,id_moto):
+    moto = Moto.objects.get(id=id_moto)
+    
+    matriculas_moto = Matriculas.objects.filter(moto_id=id_moto)
+
+    if not moto.observaciones:
+        descripcion = "Sin descripción"
+    else:
+        descripcion = moto.observaciones
+
+    # print("Matr actual: "+str(matricula_actual.matricula))
+    # print("Matr anterior: "+str(matricula_anterior.matricula))
+
+    if matriculas_moto.exists():
+    # Obtiene la matrícula actual, o None si no existe
+        matricula_actual = Matriculas.objects.filter(moto_id=moto.id, activo=1).first()
+    # Obtiene las matrículas anteriores, o un queryset vacío si no existen
+        matricula_anterior = Matriculas.objects.filter(moto_id=moto.id, activo=0).first()
+        if not matricula_anterior:
+            matr_ant = None
+        else:
+            matr_ant = matricula_anterior.matricula
+        
+        if not matricula_actual: 
+            matr_act = None
+        else:
+            matr_act = matricula_actual.matricula
+        
+        contexto = {"moto":moto,
+                    "descripcion":descripcion,
+                    "matr_anterior": matr_ant,
+                    "matr_actual":matr_act}
+    else:
+        contexto = {"moto":moto,"descripcion":descripcion}
+      
+    
+    # if not matricula_anterior:
+    #     matricula_anterior.matricula = None
+
+    return render(req,"perfil_administrativo/motos/detalles_moto.html",contexto)

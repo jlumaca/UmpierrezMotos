@@ -115,6 +115,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>Código</th>
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Motor (cc)</th>
@@ -131,6 +132,7 @@
             {% if page_obj %}
                 {% for moto in page_obj %}
                 <tr>
+                    <td>{{ moto.id }}</td>
                     <td>{{ moto.marca }}</td>
                     <td>{{ moto.modelo }}</td>
                     <td>{{ moto.motor }}</td>
@@ -142,7 +144,7 @@
                     <td>{{ moto.precio }}</td>
                     <td>
                         <a href="{% url 'MotoBaja' moto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
-                        <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                        <a href="{% url 'DatosMotoModificacion' moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                         <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
                     </td>
                 </tr>

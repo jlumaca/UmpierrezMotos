@@ -1,0 +1,127 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Modificacion de moto</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="{% url 'MotoModificacion' datos_moto.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input value="{{ datos_moto.marca }}" type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20">
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input value="{{ datos_moto.modelo }}" type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
+            </div>
+            <div class="mb-3">
+                <label for="motor" class="form-label">Motor(cc)</label>
+                <input value="{{ datos_moto.motor }}" type="number" class="form-control" name="motor_moto" id="motor" placeholder="Ingrese la cilindrada">
+            </div>
+            <div class="mb-3">
+                <label for="anio" class="form-label">Año</label>
+                <input value="{{ datos_moto.anio }}" type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año">
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select value="{{ datos_moto.estado }}" class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
+                    <option value="usada">Usada</option>
+                    <option value="nueva">Nueva</option>
+                </select>
+            </div>
+            <div class="mb-3" id="kms">
+                <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
+                <input value="{{ datos_moto.kilometros }}" type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
+            </div>
+
+            <div class="mb-3">
+                <label for="num_motor" class="form-label">Número de motor</label>
+                <input value="{{ datos_moto.num_motor }}" type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40">
+            </div>
+
+            <div class="mb-3">
+                <label for="num_chasis" class="form-label">Número de chasis</label>
+                <input value="{{ datos_moto.num_chasis }}" type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
+            </div>
+            {% if letras_matricula and num_matricula %}
+            <div class="mb-3" id="matr">
+                <label for="matricula" class="form-label">Matricula</label>
+                <div class="d-flex">
+                    <input value="{{ letras_matricula }}" type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3">
+                    <span class="mx-1">-</span>
+                    <input value="{{ num_matricula }}" type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos">
+                </div>
+            </div>
+            {% else %}
+            <div class="mb-3">
+                <input type="checkbox" id="toggleMatr" class="form-check-input">
+                <label for="toggleMatr" class="form-check-label">Ingresar matricula</label>
+            </div>
+            
+            <div class="mb-3" id="matr" style="display: none;">
+                <label for="matricula" class="form-label">Matrícula</label>
+                <div class="d-flex">
+                    <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabéticos" maxlength="3">
+                    <span class="mx-1">-</span>
+                    <input type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos">
+                </div>
+            </div>
+            {% endif %}
+            
+
+            <div class="mb-3">
+                <label for="color" class="form-label">Color</label>
+                <input value="{{ datos_moto.color }}" type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20">
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio (USD)</label>
+                <input value="{{ datos_moto.precio }}" type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio">
+            </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3">{{ datos_moto.observaciones }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
+                <label for="toggleMatr" class="form-check-label">Generar PDF</label>
+            </div>
+            
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+
+<script>
+    function toggleFields() {
+        var estado = document.getElementById("estado").value;
+        var kms = document.getElementById("kms");
+        var matr = document.getElementById("matr");
+   
+       
+
+        if (estado === "nueva") {
+            kms.style.display = "none";
+            matr.style.display = "none";
+        }else{
+            kms.style.display = "block";
+           matr.style.display = "block";
+        }
+    }
+
+    document.getElementById("toggleMatr").addEventListener("change", function() {
+        const matrDiv = document.getElementById("matr");
+        matrDiv.style.display = this.checked ? "block" : "none";
+    });
+</script>
+
+{% endblock %}

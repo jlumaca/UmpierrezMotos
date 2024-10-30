@@ -170,7 +170,41 @@ def matricula_valid(matricula,num_motor,num_chasis):
     else: #AL NO EXISTIR LA MATRICULA SE INGRESA DE 0
         return "ingresar_matr"
 
-      
+def pdf_crear(req,ruta_pdf,renderizar_en,model_insert,datos_a_pdf,nombre_archivo,mensaje,negocio):
+    if negocio == "UM":
+        logo = Logos.objects.get(id=1)
+        logo_um_url = req.build_absolute_uri(logo.logo_UM.url) if logo.logo_UM else None
+
+        logo_contexto = logo.logo_UM.url if logo.logo_UM else None
+    else:
+        logo = Logos.objects.get(id=2)
+        logo_dm_url = req.build_absolute_uri(logo.logo_DM.url) if logo.logo_DM else None
+        logo_contexto = logo.logo_DM.url if logo.logo_DM else None
+        
+    pdf = crear_pdf(ruta_pdf, datos_a_pdf)             
+    if pdf:
+         pdf_file = ContentFile(pdf.content)
+         file_name = nombre_archivo
+ # Asignar el archivo al campo identificacion_pdf de la moto
+         model_insert.identificacion_pdf.save(file_name, pdf_file)
+         model_insert.save()
+
+    contexto = {
+                "messages":mensaje,
+                'pdf_url': model_insert.identificacion_pdf.url,
+                "logo_um": logo_contexto
+
+                }
+    return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
+
+ #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+
+    
+#     return render(req,renderizar_en,contexto_rend_pdf)
+    if model_insert:
+        print("LLEGA NUEVA MOTO")
+    else:
+        print("NO LLEGA NUEVA MOTO")
 
 
 def form_alta_moto(req):
@@ -200,6 +234,7 @@ def form_alta_moto(req):
                 return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe la matricula"})
             else:
                 if estado_moto == "nueva":
+                    foto = req.FILES.get('foto_moto')
                     nueva_moto = Moto(marca = marca,
                             modelo = modelo,
                             anio = req.POST['anio_moto'],
@@ -213,50 +248,81 @@ def form_alta_moto(req):
                             pertenece_tienda = 1,
                             pertenece_taller = 0,
                             fecha_ingreso = datetime.now(),
-                            observaciones = req.POST['descripcion_moto']
+                            observaciones = req.POST['descripcion_moto'],
+                            foto = foto
                             )
                     nueva_moto.save()
                     #id_moto = nueva_moto.id
                     #matricula_insert = Matriculas(matricula = matricula_mayus,activo = 1, moto_id = id_moto)
                     #matricula_insert.save()
                     #pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {"mensaje":"mensaje de prueba",})
-                    logo_um = Logos.objects.get(id=1)
-                    logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-                    pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
-    "moto": {
-        "id":nueva_moto.id,
-        "marca": nueva_moto.marca,
-        "modelo": nueva_moto.modelo,
-        "motor": nueva_moto.motor,
-        "anio": nueva_moto.anio,
-        "kilometros": nueva_moto.kilometros,
-        "precio": nueva_moto.precio
-    },
-    "current_year": datetime.now().year,
-      "logo_um": logo_um_url  # Asegúrate de importar datetime
-})              
-                    if pdf:
-                        pdf_file = ContentFile(pdf.content)
-                        file_name = f"identificacion_{nueva_moto.id}.pdf"
-                # Asignar el archivo al campo identificacion_pdf de la moto
-                        nueva_moto.identificacion_pdf.save(file_name, pdf_file)
-                        nueva_moto.save()
                     
-                    #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
+                    checkbox = 'crear_pdf' in req.POST
+                    if checkbox:
+                        ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                        logo_um = Logos.objects.get(id=1)
+                        logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                        datos_a_pdf = {
+                                            "moto": {
+                                                "id":nueva_moto.id,
+                                                "marca": nueva_moto.marca,
+                                                "modelo": nueva_moto.modelo,
+                                                "motor": nueva_moto.motor,
+                                                "anio": nueva_moto.anio,
+                                                "kilometros": nueva_moto.kilometros,
+                                                "precio": nueva_moto.precio
+                                            },
+                                            "current_year": datetime.now().year,
+                                                "logo_um": logo_um_url  # Asegúrate de importar datetime
+                                            }
+                        renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                        nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
+                        mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                        pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                        return pdf_ret
+                    #     logo_um = Logos.objects.get(id=1)
+                    #     logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                    #     pdf = crear_pdf('perfil_administrativo/motos/identificacion_moto.html', {
+                    #                                             "moto": {
+                    #                                                 "id":nueva_moto.id,
+                    #                                                 "marca": nueva_moto.marca,
+                    #                                                 "modelo": nueva_moto.modelo,
+                    #                                                 "motor": nueva_moto.motor,
+                    #                                                 "anio": nueva_moto.anio,
+                    #                                                 "kilometros": nueva_moto.kilometros,
+                    #                                                 "precio": nueva_moto.precio
+                    #                                             },
+                    #                                             "current_year": datetime.now().year,
+                    #                                                 "logo_um": logo_um_url  # Asegúrate de importar datetime
+                    #                                             })              
+                    #     if pdf:
+                    #         pdf_file = ContentFile(pdf.content)
+                    #         file_name = f"identificacion_{nueva_moto.id}.pdf"
+                    # # Asignar el archivo al campo identificacion_pdf de la moto
+                    #         nueva_moto.identificacion_pdf.save(file_name, pdf_file)
+                    #         nueva_moto.save()
+                    
+                    # #return render(req,"perfil_administrativo/motos/motos.html",{"motos":motos,"messages":"Moto ingresada con éxito"})
 
-                    contexto = {
-                        "messages":"Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma.",
-                        'pdf_url': nueva_moto.identificacion_pdf.url,
-                        "logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None
-                        
-                    }
-                    return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
+                    #     contexto = {
+                    #         "messages":"Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma.",
+                    #         'pdf_url': nueva_moto.identificacion_pdf.url,
+                    #         "logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None
+                            
+                    #     }
+                    #     return render(req,"perfil_administrativo/motos/contenido_pdf.html",contexto)
+                    else:
+                        contexto = {
+                            "messages":"Moto ingresada con éxito.",
+                        }
+                        return render(req,"perfil_administrativo/motos/motos.html",contexto)
                     #return HttpResponse(pdf, content_type='application/pdf')
                 else:
                     #INGRESAR MOTOS USADAS
                     valid_pert_tienda = datos_moto_pert_tienda(num_motor, num_chasis)
                     if valid_pert_tienda == "update_pert_tienda": #SI LA MOTO FUE VENDIDA ANTERIORMENTE DE LA TIENDA Y VUELVE A LA MISMA, SE ACTUALIZA PERT_TIENDA = 1
                         # print("ENTRA IF")
+                        foto = req.FILES.get('foto_moto')
                         regresa_moto = Moto.objects.get(num_chasis=num_chasis,num_motor=num_motor)
                         regresa_moto.pertenece_tienda = 1
                         regresa_moto.fecha_ingreso = datetime.now()
@@ -264,6 +330,7 @@ def form_alta_moto(req):
                         regresa_moto.precio = req.POST['precio_moto']
                         regresa_moto.estado = "Usada"
                         regresa_moto.observaciones = req.POST['descripcion_moto']
+                        regresa_moto.foto = foto
                         regresa_moto.save()
 
                         if req.POST['matricula_letras'] and req.POST['matricula_numeros']: #SI LOS CAMPOS DE TEXTO DE LA MATRICULA NO ESTAN VACIOS
@@ -322,7 +389,7 @@ def form_alta_moto(req):
                                 pert_taller = moto_taller.pertenece_taller
                         else:
                             pert_taller = 0
-                        
+                        foto = req.FILES.get('foto_moto')
                         nueva_moto = Moto(marca = marca,
                             modelo = modelo,
                             anio = req.POST['anio_moto'],
@@ -336,7 +403,8 @@ def form_alta_moto(req):
                             pertenece_tienda = 1,
                             pertenece_taller = pert_taller,
                             fecha_ingreso = datetime.now(),
-                            observaciones = req.POST['descripcion_moto']
+                            observaciones = req.POST['descripcion_moto'],
+                            foto = foto
                             )
                         nueva_moto.save()
                         
@@ -507,6 +575,8 @@ def modificacion_moto(req,id_moto):
         color = req.POST['color_moto'].upper()
         num_motor = req.POST['num_motor_moto'].upper()
         num_chasis = req.POST['num_chasis_moto'].upper()
+
+        foto = req.FILES.get('foto_moto')
         
         moto_upd = Moto.objects.get(id=id_moto)
         moto_upd.marca = marca
@@ -526,6 +596,7 @@ def modificacion_moto(req,id_moto):
         moto_upd.color = color
         moto_upd.precio = req.POST['precio_moto']
         moto_upd.observaciones = req.POST['descripcion_moto']
+        moto_upd.foto = foto
         moto_upd.save()
 
 
@@ -629,7 +700,8 @@ def detalles_moto(req,id_moto):
         contexto = {"moto":moto,
                     "descripcion":descripcion,
                     "matr_anterior": matr_ant,
-                    "matr_actual":matr_act}
+                    "matr_actual":matr_act,
+                    "foto_moto":moto.foto.url if moto.foto else None}
     else:
         contexto = {"moto":moto,"descripcion":descripcion}
       

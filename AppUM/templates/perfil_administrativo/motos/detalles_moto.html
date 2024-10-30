@@ -4,16 +4,36 @@
 {% block contenidoQueCambia %}
 <style>
     .descripcion-celda {
-        max-width: 300px; /* Ajusta el ancho máximo según necesites */
-        white-space: normal; /* Permite que el texto se envuelva */
-        word-wrap: break-word; /* Corta palabras largas si es necesario */
-        overflow-y: auto; /* Añade una barra de desplazamiento si el texto es demasiado largo */
-        max-height: 150px; /* Altura máxima antes de que aparezca el scroll */
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-moto {
+        display: block;
+        max-width: 300px; /* Ajusta el ancho máximo */
+        max-height: 200px; /* Ajusta la altura máxima */
+        margin-bottom: 20px; /* Espacio debajo de la imagen */
+        border-radius: 8px; /* Esquinas redondeadas */
+        object-fit: cover; /* Asegura que la imagen se recorte sin deformarse */
     }
 </style>
 
 <div class="table-container" id="motoDetails">
     <h4>Detalles de la Moto</h4>
+
+    {% if moto.foto %}
+        <div class="text-center">
+            <img src="{{ moto.foto.url }}" alt="Foto de la moto" class="imagen-moto">
+        </div>
+    {% else %}
+        <div class="text-center mt-3">
+            <div class="alert alert-warning" role="alert">
+                Esta moto no tiene una foto disponible.
+            </div>
+        </div>
+    {% endif %}
 
     <table class="table table-bordered">
         <tbody>
@@ -72,26 +92,15 @@
                 <th scope="row">Precio (USD)</th>
                 <td>{{ moto.precio }}</td>
             </tr>
+
             <tr>
                 <th scope="row">Descripción</th>
                 <td class="descripcion-celda">{{ descripcion }}</td>
             </tr>
-            
         </tbody>
     </table>
 
     <a href="{% url 'Motos' %}" class="btn btn-secondary">Volver</a>
 </div>
-<style>
-    .matricula-actual {
-        color: green;
-        font-weight: bold;
-    }
-    .matricula-anterior {
-        color: red;
-    }
-</style>
-
-
 
 {% endblock %}

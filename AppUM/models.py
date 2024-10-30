@@ -29,7 +29,7 @@ class Moto(models.Model):
     color = models.CharField(max_length=20)   
     num_motor = models.CharField(max_length=40, unique=True)
     num_chasis = models.CharField(max_length=40, unique=True)
-    foto = models.ImageField(null=True, blank=True, upload_to="motos/")
+    foto = models.ImageField(null=True, blank=True, upload_to="motos/fotos/")
     pertenece_tienda = models.BooleanField()
     pertenece_taller = models.BooleanField()
     identificacion_pdf = models.FileField(upload_to='motos/pdfs/', null=True, blank=True)

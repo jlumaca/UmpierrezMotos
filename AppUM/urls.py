@@ -16,6 +16,7 @@ urlpatterns = [
      path('moto_detalles/<int:id_moto>', views.detalles_moto,name="MotoDetalles"),
      
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),
+     path('busqueda_codigo', views.busqueda_codigo,name="BusquedaCodigo"),
      path('busqueda_marca', views.busqueda_marca,name="BusquedaMarca"),
      path('busqueda_modelo', views.busqueda_modelo,name="BusquedaModelo"),
      path('busqueda_marca_modelo', views.busqueda_marca_modelo,name="BusquedaMarcaModelo"),

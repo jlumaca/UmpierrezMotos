@@ -15,6 +15,7 @@
     <div class="mb-3">
         <label for="estado" class="form-label">Buscar por:</label>
         <select class="form-control" name="estado_moto" id="tipo_busqueda" onchange="tipo_busqueda()">
+            <option value="codigo">Código</option>
             <option value="marca">Marca</option>
             <option value="modelo">Modelo</option>
             <option value="marca_modelo">Marca y modelo</option>
@@ -25,7 +26,21 @@
     </div>
 
     <!-- Formulario de búsqueda por marca -->
-    <form action="{% url 'BusquedaMarca' %}" enctype="multipart/form-data" method="get" id="busqueda_marca">{% csrf_token %}
+    <form action="{% url 'BusquedaCodigo' %}" enctype="multipart/form-data" method="get" id="busqueda_codigo">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="number" name="codigo" class="form-control" placeholder="Buscar por código">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+
+    <form action="{% url 'BusquedaMarca' %}" enctype="multipart/form-data" method="get" id="busqueda_marca" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="marca" class="form-control" placeholder="Buscar por marca">
             <button class="btn btn-outline-primary" type="submit">
@@ -198,6 +213,7 @@
 <script>
     function tipo_busqueda() {
         var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+        var busqueda_codigo = document.getElementById("busqueda_codigo");
         var busqueda_marca = document.getElementById("busqueda_marca");
         var busqueda_modelo = document.getElementById("busqueda_modelo");
         var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
@@ -205,6 +221,7 @@
         var busqueda_kms = document.getElementById("busqueda_kms");
         var busqueda_precio = document.getElementById("busqueda_precio");
 
+        busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
         busqueda_marca.style.display = busqueda_tipo === "marca" ? "block" : "none";
         busqueda_modelo.style.display = busqueda_tipo === "modelo" ? "block" : "none";
         busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";

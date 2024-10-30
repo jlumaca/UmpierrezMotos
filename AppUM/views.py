@@ -406,6 +406,16 @@ def baja_moto(req,id_moto):
        return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto})
        #return HttpResponse(f"<p>{id_auto}</p>")
 
+def busqueda_codigo(req):
+    codigo = req.GET.get('codigo')
+    #if req.method == 'get':
+    motos = Moto.objects.filter(id=codigo,pertenece_tienda=1)
+    paginator = Paginator(motos, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+
 def busqueda_marca(req):
     marca = req.GET.get('marca')
     #if req.method == 'get':

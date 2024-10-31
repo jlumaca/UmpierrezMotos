@@ -796,6 +796,11 @@ def detalles_moto(req,id_moto):
         descripcion = "Sin descripción"
     else:
         descripcion = moto.observaciones
+    
+    if moto.identificacion_pdf:
+        pdf = moto.identificacion_pdf.url
+    else:
+        pdf = None
 
     # print("Matr actual: "+str(matricula_actual.matricula))
     # print("Matr anterior: "+str(matricula_anterior.matricula))
@@ -819,9 +824,10 @@ def detalles_moto(req,id_moto):
                     "descripcion":descripcion,
                     "matr_anterior": matr_ant,
                     "matr_actual":matr_act,
-                    "foto_moto":moto.foto.url if moto.foto else None}
+                    "foto_moto":moto.foto.url if moto.foto else None,
+                    "pdf":pdf}
     else:
-        contexto = {"moto":moto,"descripcion":descripcion}
+        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf}
       
     
     # if not matricula_anterior:

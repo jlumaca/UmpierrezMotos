@@ -12,11 +12,11 @@
     }
     .imagen-moto {
         display: block;
-        max-width: 300px; /* Ajusta el ancho máximo */
-        max-height: 200px; /* Ajusta la altura máxima */
-        margin-bottom: 20px; /* Espacio debajo de la imagen */
-        border-radius: 8px; /* Esquinas redondeadas */
-        object-fit: cover; /* Asegura que la imagen se recorte sin deformarse */
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
     }
 </style>
 
@@ -57,12 +57,10 @@
                 <th scope="row">Estado</th>
                 <td>{{ moto.estado }}</td>
             </tr>
-
             <tr>
                 <th scope="row">Kilómetros</th>
                 <td>{{ moto.kilometros }}</td>
             </tr>
-       
             <tr>
                 <th scope="row">Número de Motor</th>
                 <td>{{ moto.num_motor }}</td>
@@ -82,7 +80,6 @@
                     {% endif %}
                 </td>
             </tr>
-            
             {% endif %}
             <tr>
                 <th scope="row">Color</th>
@@ -92,13 +89,20 @@
                 <th scope="row">Precio (USD)</th>
                 <td>{{ moto.precio }}</td>
             </tr>
-
             <tr>
                 <th scope="row">Descripción</th>
                 <td class="descripcion-celda">{{ descripcion }}</td>
             </tr>
         </tbody>
     </table>
+
+    {% if pdf %}
+        <a href="{{ pdf }}" class="btn btn-primary" target="_blank">Ver PDF</a>
+    {% else %}
+        <div class="alert alert-info mt-3" role="alert">
+            No hay un PDF disponible para esta moto.
+        </div>
+    {% endif %}
 
     <a href="{% url 'Motos' %}" class="btn btn-secondary">Volver</a>
 </div>

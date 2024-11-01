@@ -13,15 +13,10 @@
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="estado" class="form-label">Tipo</label>
-                <select class="form-control" name="tipo_accesorio" id="tipo" onchange="toggleFields()">
+                <select class="form-control" name="tipo_accesorio" id="tipo">
                     <option value="Casco">Casco</option>
-                    <option value="Prueba">Prueba</option>
                     <option value="Otro">Otro</option>
                 </select>
-            </div>
-            <div class="mb-3" style="display: none;" id="div_tipo_otro">
-                <label for="marca" class="form-label">Tipo de accesorio</label>
-                <input type="text" class="form-control" name="tipo_accesorio_text" id="marca" placeholder="Especifique el tipo de accesorio" maxlength="20">
             </div>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
@@ -49,22 +44,4 @@
        
     </div>
 </div>
-
-<script>
-    function toggleFields() {
-        var tipo = document.getElementById("tipo").value;
-        var tipo_otro = document.getElementById("div_tipo_otro");
-        
-   
-       
-
-        if (tipo === "Otro") {
-            tipo_otro.style.display = "block";
-            
-        }else{
-            tipo_otro.style.display = "none";
-        }
-    }
-</script>
-
 {% endblock %}

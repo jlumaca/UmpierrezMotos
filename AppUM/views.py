@@ -839,12 +839,7 @@ def vista_inventario_accesorios(req):
 def alta_accesorio(req):
     try:
         if req.method == "POST":
-            tipo = req.POST['tipo_accesorio'].upper()
-
-            if tipo == "OTRO":
-                tipo = req.POST['tipo_accesorio_text'].upper()
-
-            
+            tipo = req.POST['tipo_accesorio'].upper()     
             marca = req.POST['marca_accesorio'].upper()
             modelo = req.POST['modelo_accesorio'].upper()
             precio = req.POST['precio_accesorio']
@@ -862,9 +857,14 @@ def alta_accesorio(req):
             )
 
             nuevo_accesorio.save()
+
+            if req.POST['tipo_accesorio'] == "Otro":
+                tipo = "Accesorio"
+            else:
+                tipo = req.POST['tipo_accesorio']
             # return render(req,"perfil_administrativo/accesorios/accesorios.html",{"message":"Accesorio ingresado con éxito"})
-            retornar_accesorios = vista_inventario_accesorios(req)
-            return retornar_accesorios
+            messages.success(req, f"{tipo} ingresado con éxito.")
+            return redirect('Accesorios')
         else:
             return render(req,"perfil_administrativo/accesorios/alta_accesorio.html",{})
     except Exception as e:
@@ -915,5 +915,32 @@ def detalles_accesorio(req,id_accesorio):
     try:
         accesorio_detalle = Accesorio.objects.get(id=id_accesorio)
         return render(req, "perfil_administrativo/accesorios/detalles_accesorio.html", {"accesorio":accesorio_detalle})
+    except Exception as e:
+        pass
+
+def busqueda_tipo_accesorio(req):
+    try:
+        tipo = req.GET.get('tipo_accesorio')
+        accesorio = Accesorio.objects.filter(tipo__icontains=tipo,activo=1)
+        paginator = Paginator(accesorio, 5)  # 10 accesorios por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+        return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorio})
+    except Exception as e:
+        pass
+
+
+def busqueda_marca_modelo_accesorio(req):
+    try:
+        marca = req.GET.get('marca_modelo')
+        modelo = req.GET.get('modelo_marca')
+        #if req.method == 'get':
+        accesorio = Accesorio.objects.filter(marca__icontains=marca,modelo__icontains=modelo,activo=1)
+        paginator = Paginator(accesorio, 5)  # 10 accesorios por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+        return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorio})
     except Exception as e:
         pass

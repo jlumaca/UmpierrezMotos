@@ -55,3 +55,26 @@ class Logos(models.Model):
     logo_UM = models.ImageField(null=True, blank=True, upload_to="logos/")
     logo_DM = models.ImageField(null=True, blank=True, upload_to="logos/")
 
+class Cliente(models.Model):
+    documento = models.CharField(max_length=20, unique=True)
+    nombre = models.CharField(max_length=20)
+    apellido  = models.CharField(max_length=20)
+    fecha_nacimiento = models.DateField()
+    ciudad = models.CharField(max_length=40)
+    calle = models.CharField(max_length=40)
+    numero = models.IntegerField()
+    num_apartamento = models.IntegerField()
+
+
+class ClienteCorreo(models.Model):
+    cliente = models.ForeignKey(Cliente, related_name='cliente', on_delete=models.CASCADE, null=True)
+    correo = models.CharField(max_length=100, unique=True)
+    principal = models.BooleanField(default=True)
+    activo = models.BooleanField(default=True)
+
+
+class ClienteTelefono(models.Model):
+    cliente = models.ForeignKey(Cliente, related_name='cliente_telefono', on_delete=models.CASCADE, null=True)
+    telefono = models.IntegerField(unique=True)
+    principal = models.BooleanField(default=True)
+    activo = models.BooleanField(default=True)

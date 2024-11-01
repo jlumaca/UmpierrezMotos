@@ -42,12 +42,14 @@ class Matriculas(models.Model):
     activo = models.BooleanField()
 
 
-class accesorio(models.Model):
+class Accesorio(models.Model):
     tipo = models.CharField(max_length=20)
     marca = models.CharField(max_length=20)
     modelo = models.CharField(max_length=20)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
     foto = models.ImageField(null=True, blank=True, upload_to="accesorios/")
     activo = models.BooleanField()
+    fecha_ingreso = models.DateTimeField(auto_now_add=True)
 
 class Logos(models.Model):
     logo_UM = models.ImageField(null=True, blank=True, upload_to="logos/")

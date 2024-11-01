@@ -5,28 +5,47 @@
 
 <div class="table-container" id="inventarios">
     <h3>Accesorios</h3>
-    <button class="btn btn-primary mb-3">Alta de accesorio</button>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <a href="{% url 'AccesorioAlta' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-helmet-safety"></i> Alta de accesorio
+    </a>
     <table class="table">
         <thead>
             <tr>
                 <th>Tipo</th>
                 <th>Marca</th>
+                <th>Modelo</th>
                 <th>Precio (USD)</th>
+                <th>Fecha de ingreso</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
+            {% if page_obj %}
+                {% for accesorios in page_obj %}
             <!-- Filas de ejemplo de accesorios -->
             <tr>
-                <td>Casco</td>
-                <td>Shark</td>
-                <td>150</td>
+                <td>{{ accesorios.tipo }}</td>
+                <td>{{ accesorios.marca }}</td>
+                <td>{{ accesorios.modelo}}</td>
+                <td>{{ accesorios.precio}}</td>
+                <td>{{ accesorios.fecha_ingreso|date:"d/m/Y"}}</td>
                 <td>
-                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                    <a href="{% url 'AccesorioBaja' accesorios.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                    <a href="{% url 'DatosAccesorioModificacion' accesorios.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                    <a href="{% url 'AccesorioDetalle' accesorios.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                 </td>
             </tr>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de accesorios disponibles.
+                    </td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
 </div>

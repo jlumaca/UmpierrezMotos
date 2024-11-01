@@ -834,3 +834,94 @@ def detalles_moto(req,id_moto):
     #     matricula_anterior.matricula = None
 
     return render(req,"perfil_administrativo/motos/detalles_moto.html",contexto)
+
+
+def vista_inventario_accesorios(req):
+    accesorios = Accesorio.objects.filter(activo=1).order_by('-fecha_ingreso')
+
+    logo_um = Logos.objects.get(id=1)
+
+    paginator = Paginator(accesorios, 5)  # 5 accesorios por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+
+def alta_accesorio(req):
+    try:
+        if req.method == "POST":
+            tipo = req.POST['tipo_accesorio'].upper()
+
+            if tipo == "OTRO":
+                tipo = req.POST['tipo_accesorio_text'].upper()
+
+            
+            marca = req.POST['marca_accesorio'].upper()
+            modelo = req.POST['modelo_accesorio'].upper()
+            precio = req.POST['precio_accesorio']
+
+            foto = req.FILES.get('foto_accesorio')
+
+            nuevo_accesorio = Accesorio(
+                tipo = tipo,
+                marca = marca,
+                modelo = modelo,
+                activo = 1,
+                foto = foto,
+                precio = precio,
+                fecha_ingreso = datetime.now()
+            )
+
+            nuevo_accesorio.save()
+            # return render(req,"perfil_administrativo/accesorios/accesorios.html",{"message":"Accesorio ingresado con éxito"})
+            retornar_accesorios = vista_inventario_accesorios(req)
+            return retornar_accesorios
+        else:
+            return render(req,"perfil_administrativo/accesorios/alta_accesorio.html",{})
+    except Exception as e:
+        pass
+
+def datos_a_modificacion_accesorio(req,id_accesorio):
+    try:
+        accesorio = Accesorio.objects.get(id=id_accesorio)
+        return render(req,"perfil_administrativo/accesorios/modificacion_accesorio.html",{"datos_accesorio":accesorio})
+    except Exception as e:
+        pass
+
+def modificacion_accesorio(req,id_accesorio):
+    try:
+        accesorio_upd = Accesorio.objects.get(id=id_accesorio)
+        accesorio_upd.tipo = req.POST['tipo_accesorio']
+        accesorio_upd.marca = req.POST['marca_accesorio']
+        accesorio_upd.modelo = req.POST['modelo_accesorio']
+        accesorio_upd.precio = req.POST['precio_accesorio']
+        accesorio_upd.foto = req.FILES.get('foto_accesorio')
+        accesorio_upd.save()
+        retornar_accesorios = vista_inventario_accesorios(req)
+        return retornar_accesorios
+    except Exception as e:
+        pass
+
+def baja_accesorio(req,id_accesorio):
+    try:
+        
+        if req.method == 'POST':
+            accesorio_baja = Accesorio.objects.get(id=id_accesorio)
+            accesorio_baja.activo = 0
+            accesorio_baja.save()
+            return render(req, "perfil_administrativo/accesorios/baja_accesorio.html", {"message":"Accesorio borrado con éxito","id_accesorio":0})
+      #return HttpResponse(f"<p>{id_auto}</p>")
+        else:
+       #print(f"Id auto es: {id_auto}")
+            return render(req, "perfil_administrativo/accesorios/baja_accesorio.html", {"id_accesorio":id_accesorio})
+       #return HttpResponse(f"<p>{id_auto}</p>")
+    except Exception as e:
+        pass
+
+def detalles_accesorio(req,id_accesorio):
+    try:
+        accesorio_detalle = Accesorio.objects.get(id=id_accesorio)
+        return render(req, "perfil_administrativo/accesorios/detalles_accesorio.html", {"accesorio":accesorio_detalle})
+    except Exception as e:
+        pass

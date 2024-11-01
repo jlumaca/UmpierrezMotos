@@ -870,24 +870,28 @@ def alta_accesorio(req):
     except Exception as e:
         pass
 
-def datos_a_modificacion_accesorio(req,id_accesorio):
-    try:
-        accesorio = Accesorio.objects.get(id=id_accesorio)
-        return render(req,"perfil_administrativo/accesorios/modificacion_accesorio.html",{"datos_accesorio":accesorio})
-    except Exception as e:
-        pass
+# def datos_a_modificacion_accesorio(req,id_accesorio):
+#     try:
+        
+#     except Exception as e:
+#         pass
 
 def modificacion_accesorio(req,id_accesorio):
     try:
-        accesorio_upd = Accesorio.objects.get(id=id_accesorio)
-        accesorio_upd.tipo = req.POST['tipo_accesorio']
-        accesorio_upd.marca = req.POST['marca_accesorio']
-        accesorio_upd.modelo = req.POST['modelo_accesorio']
-        accesorio_upd.precio = req.POST['precio_accesorio']
-        accesorio_upd.foto = req.FILES.get('foto_accesorio')
-        accesorio_upd.save()
-        retornar_accesorios = vista_inventario_accesorios(req)
-        return retornar_accesorios
+        
+        if req.method == "POST": 
+            accesorio_upd = Accesorio.objects.get(id=id_accesorio)
+            accesorio_upd.tipo = req.POST['tipo_accesorio']
+            accesorio_upd.marca = req.POST['marca_accesorio']
+            accesorio_upd.modelo = req.POST['modelo_accesorio']
+            accesorio_upd.precio = req.POST['precio_accesorio']
+            accesorio_upd.foto = req.FILES.get('foto_accesorio')
+            accesorio_upd.save()
+            messages.success(req, "El accesorio ha sido modificado con éxito.")
+            return redirect('Accesorios')
+        else:
+            accesorio = Accesorio.objects.get(id=id_accesorio)
+            return render(req,"perfil_administrativo/accesorios/modificacion_accesorio.html",{"datos_accesorio":accesorio})
     except Exception as e:
         pass
 

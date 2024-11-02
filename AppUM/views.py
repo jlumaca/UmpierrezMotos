@@ -944,3 +944,20 @@ def busqueda_marca_modelo_accesorio(req):
         return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorio})
     except Exception as e:
         pass
+
+def vista_clientes(req):
+    clientes = Cliente.objects.filter(
+        cliente_correo__activo=True,
+        cliente_correo__principal=True,
+        cliente_telefono__activo=True,
+        cliente_telefono__principal=True
+    ).values('nombre', 'apellido', 'cliente_telefono__telefono', 'cliente_correo__correo').order_by('nombre')
+
+    logo_um = Logos.objects.get(id=1)
+
+    paginator = Paginator(clientes, 5)  # 5 clientes por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":clientes})

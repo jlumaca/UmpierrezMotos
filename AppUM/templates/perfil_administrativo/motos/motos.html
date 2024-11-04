@@ -29,6 +29,7 @@
             <option value="anio">Año</option>
             <option value="kms">Kilómetros</option>
             <option value="precio">Precio</option>
+            <option value="matricula">Matricula</option>
         </select>
     </div>
 
@@ -134,6 +135,21 @@
         </div>
     </form>
 
+    <form action="" enctype="multipart/form-data" method="get" id="busqueda_matricula" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input maxlength="3" type="text" class="form-control" name="letras_matricula" placeholder="Caracteres alfabeticos">
+            <span class="input-group-text">-</span>
+            <input type="number" class="form-control" name="numeros_matricula" placeholder="Caracteres numéricos">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </form>
+
     <table class="table">
         <thead>
             <tr>
@@ -227,6 +243,7 @@
         var busqueda_anio = document.getElementById("busqueda_anio");
         var busqueda_kms = document.getElementById("busqueda_kms");
         var busqueda_precio = document.getElementById("busqueda_precio");
+        var busqueda_matricula = document.getElementById("busqueda_matricula");
 
         busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
         busqueda_marca.style.display = busqueda_tipo === "marca" ? "block" : "none";
@@ -235,6 +252,8 @@
         busqueda_anio.style.display = busqueda_tipo === "anio" ? "block" : "none";
         busqueda_kms.style.display = busqueda_tipo === "kms" ? "block" : "none";
         busqueda_precio.style.display = busqueda_tipo === "precio" ? "block" : "none";
+        busqueda_matricula.style.display = busqueda_tipo === "matricula" ? "block" : "none";
+    
     }
 </script>
 {% endblock %}

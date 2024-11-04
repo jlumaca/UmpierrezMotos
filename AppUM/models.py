@@ -91,8 +91,7 @@ class ComprasVentas(models.Model):
     tipo = models.CharField(max_length=20)
 
     class Meta:
-        # Define moto y cliente como clave primaria compuesta
-        unique_together = (('moto', 'cliente'),)
+        pass
 
 #tipo = V --->>> PARA CUANDO UN CLIENTE COMPRA UNA MOTO
 #tipo = CV --->>> PARA CUANDO UN CLIENTE VENDE UNA MOTO USADA

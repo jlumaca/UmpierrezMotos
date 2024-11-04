@@ -7,9 +7,9 @@
 
 <title>Motos</title>
 {% if messages %}
-    <div class="messages">
-            <div class="alert alert alert-success">{{ messages }}</div>
-    </div>
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
 {% endif %}
 <div class="table-container" id="inventarios">
     <h3>Motos</h3>

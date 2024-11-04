@@ -172,6 +172,14 @@ def matricula_valid(matricula,num_motor,num_chasis):
     else: #AL NO EXISTIR LA MATRICULA SE INGRESA DE 0
         return "ingresar_matr"
 
+def num_padron(num_padron):
+    existe_num_padron = ComprasVentas.objects.filter(padron = num_padron).first()
+
+    if existe_num_padron:
+        return existe_num_padron.id
+    else:
+        return "insert_num_padron"
+
 def pdf_crear(req,ruta_pdf,renderizar_en,model_insert,datos_a_pdf,nombre_archivo,mensaje,negocio):
     if negocio == "UM":
         logo = Logos.objects.get(id=1)
@@ -306,10 +314,8 @@ def form_alta_moto(req):
                         pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
                         return pdf_ret
                     else:
-                        contexto = {
-                            "messages":"Moto ingresada con éxito.",
-                        }
-                        return render(req,"perfil_administrativo/motos/motos.html",contexto)
+                        messages.success(req, "Moto ingresada con éxito.")
+                        return redirect('Motos')
                     #return HttpResponse(pdf, content_type='application/pdf')
                 else:
                     #INGRESAR MOTOS USADAS
@@ -323,12 +329,13 @@ def form_alta_moto(req):
                         documento = "DNI" + str(documento_num)
                     
                     cliente = Cliente.objects.filter(documento=documento).first()
-
+                    valid_compra_venta = num_padron(req.POST['num_padron'])
+                    
                     if cliente:
                         valid_pert_tienda = datos_moto_pert_tienda(num_motor, num_chasis)
                         if valid_pert_tienda == "update_pert_tienda": #SI LA MOTO FUE VENDIDA ANTERIORMENTE DE LA TIENDA Y VUELVE A LA MISMA, SE ACTUALIZA PERT_TIENDA = 1
                             # print("ENTRA IF")
-                            print("ID DEL CLIENTE --->>> " + str(req.POST['cliente_id']))
+                           
                             foto = req.FILES.get('foto_moto')
                             regresa_moto = Moto.objects.get(num_chasis=num_chasis,num_motor=num_motor)
                             regresa_moto.pertenece_tienda = 1
@@ -339,6 +346,23 @@ def form_alta_moto(req):
                             regresa_moto.observaciones = req.POST['descripcion_moto']
                             regresa_moto.foto = foto
                             regresa_moto.save()
+
+                            libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
+                            if valid_compra_venta == "insert_num_padron":
+                                cliente_moto = ComprasVentas(
+                                    fecha_compra = datetime.now(),
+                                    padron = req.POST['num_padron'],
+                                    tipo = "CV",
+                                    fotocopia_libreta = libreta_propiedad,
+                                    cliente_id = cliente.id,
+                                    moto_id = regresa_moto.id
+                                )
+
+                                cliente_moto.save()
+                            else:
+                                upd_compra_venta = ComprasVentas.objects.get(padron=req.POST['num_padron'])
+                                upd_compra_venta.tipo = "CV"
+                                upd_compra_venta.save()
 
                             if req.POST['matricula_letras'] and req.POST['matricula_numeros']: #SI LOS CAMPOS DE TEXTO DE LA MATRICULA NO ESTAN VACIOS
                                 nueva_matricula = matricula_valid(matricula,num_motor,num_chasis)
@@ -368,17 +392,26 @@ def form_alta_moto(req):
                                                 )
                                             new_matricula.save()
                             
-
-                            logo_um = Logos.objects.get(id=1)
-                            logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-                            ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                            checkbox = 'crear_pdf' in req.POST
+                            if checkbox:
+                                logo_um = Logos.objects.get(id=1)
+                                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                                
+                                datos_a_pdf = contexto_para_pdf_moto(regresa_moto,logo_um_url)
+                                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                                nombre_archivo = f"identificacion_{regresa_moto.id}.pdf"
+                                mensaje = f"Los datos ingresados corresponden a la moto {regresa_moto.marca} {regresa_moto.modelo}, que anteriormente fue vendida."
+                                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,regresa_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                                return pdf_ret
+                            else:
+                                # contexto = {
+                                # "messages":"Moto ingresada con éxito.",
+                                # }
+                                # return render(req,"perfil_administrativo/motos/motos.html",contexto)
                             
-                            datos_a_pdf = contexto_para_pdf_moto(regresa_moto,logo_um_url)
-                            renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-                            nombre_archivo = f"identificacion_{regresa_moto.id}.pdf"
-                            mensaje = f"Los datos ingresados corresponden a la moto {regresa_moto.marca} {regresa_moto.modelo}, que anteriormente fue vendida."
-                            pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,regresa_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-                            return pdf_ret
+                                messages.success(req, "Moto ingresada con éxito.")
+                                return redirect('Motos')
                         else: #SI LA MOTO NUNCA ESTUVO EN LA TIENDA, SE INGRESA DE 0
                             moto_taller = Moto.objects.filter(num_chasis=num_chasis,num_motor=num_motor).first()
                             if moto_taller: #LA MOTO PUEDE QUE EXISTA EN EL TALLER
@@ -403,11 +436,12 @@ def form_alta_moto(req):
                                 foto = foto
                                 )
                             nueva_moto.save()
-
+                            libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
                             cliente_moto = ComprasVentas(
                                 fecha_compra = datetime.now(),
                                 padron = req.POST['num_padron'],
                                 tipo = "CV",
+                                fotocopia_libreta = libreta_propiedad,
                                 cliente_id = cliente.id,
                                 moto_id = nueva_moto.id
                             )
@@ -429,6 +463,7 @@ def form_alta_moto(req):
 
                                 logo_um = Logos.objects.get(id=1)
                                 logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
                                 datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
                                 renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
                                 nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
@@ -436,10 +471,8 @@ def form_alta_moto(req):
                                 pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
                                 return pdf_ret
                             else:
-                                contexto = {
-                            "messages":"Moto ingresada con éxito.",
-                                }
-                                return render(req,"perfil_administrativo/motos/motos.html",contexto)
+                                messages.success(req, "Moto ingresada con éxito.")
+                                return redirect('Motos')
                     else:
                         contexto = {
                             "error_message_cliente":"El cliente no existe, debe ingresar los datos del mismo haciendo clic "

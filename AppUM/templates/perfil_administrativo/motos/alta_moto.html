@@ -55,6 +55,13 @@
 
         
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
+                    <option value="usada">Usada</option>
+                    <option value="nueva">Nueva</option>
+                </select>
+            </div>
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
@@ -85,13 +92,7 @@
                 <label for="anio" class="form-label">Año</label>
                 <input type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año" required>
             </div>
-            <div class="mb-3">
-                <label for="estado" class="form-label">Estado</label>
-                <select class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
-                    <option value="usada">Usada</option>
-                    <option value="nueva">Nueva</option>
-                </select>
-            </div>
+            
             <div class="mb-3" id="kms">
                 <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
                 <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros" required>
@@ -134,21 +135,20 @@
                 <label for="descripcion" class="form-label">Descripción</label>
                 <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
             </div>
-            <div class="mb-3">
+            <div class="mb-3" id="foto_prueba">
                 <label for="foto" class="form-label">Foto</label>
                 <input type="file" class="form-control" name="foto_moto" id="foto">
             </div>
-
+            <div class="mb-3" id="libreta_propiedad_div">
+                <label for="libreta_propiedad" class="form-label">Libreta de propiedad</label>
+                <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+            </div>
+            
             <div class="mb-3">
                 <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
                 <label for="toggleMatr" class="form-check-label">Generar PDF</label>
             </div>
-
-            
-            
-            
-
-            
+   
             <button type="submit" class="btn btn-success">Guardar</button>
             
             <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
@@ -167,7 +167,7 @@
         var cliente = document.getElementById("documento_cliente");
         var datos_cliente = document.getElementById("datos_cliente");
         var num_padron = document.getElementById("num_padron");
-   
+        var libreta_propiedad = document.getElementById("libreta_propiedad_div");
        
 
         if (estado === "nueva") {
@@ -176,11 +176,13 @@
             cliente.style.display = "none";
             datos_cliente.style.display = "none";
             num_padron.style.display = "none";
+            libreta_propiedad.style.display = "none";
         }else{
             kms.style.display = "block";
-           matr.style.display = "block";
-           cliente.style.display = "block";
-           num_padron.style.display = "block";
+            matr.style.display = "block";
+            cliente.style.display = "block";
+            num_padron.style.display = "block";
+            libreta_propiedad.style.display = "block";
         }
     }
 </script>

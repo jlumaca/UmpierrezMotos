@@ -5,12 +5,70 @@
 <div class="table-container" id="inventarios">
     <div class="form-container" id="motoForm">
         <h4>Alta de Moto</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+    
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }}<a href="">aquí</a>
+            </div>
+        {% endif %}
         {% if error_message %}
             <div class="alert alert-danger" role="alert">
             {{ error_message }}
             </div>
         {% endif %}
+        <!-- <form action="{% url 'DatosClienteMoto' %}" enctype="multipart/form-data" method="POST">  {% csrf_token %} -->
+            <!-- <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="cedula">Cédula</option>
+                        <option value="pasaporte">Pasaporte</option>
+                        <option value="dni">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento"> -->
+                    <!-- Cambiar el botón a tipo submit -->
+                    <!-- <button type="submit" class="btn btn-info text-white">
+                        <i class="fas fa-search"></i> Buscar Cliente
+                    </button>
+                </div>
+            </div>
+        </form> -->
+
+        <!-- {% if datos_cliente %} -->
+        <!-- <div class="card mb-3" id="datos_cliente">
+            <div class="card-header">
+                <h5>Datos del Cliente</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Nombre:</strong> {{ datos_cliente.nombre }}</p>
+                <p><strong>Teléfono:</strong> {{ datos_cliente.apellido }}</p> -->
+                <!-- <p><strong>Email:</strong> {{ cliente.email }}</p> -->
+            <!-- </div>
+        </div> -->
+        <!-- {% endif %} -->
+
+        
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="cedula">Cédula</option>
+                        <option value="pasaporte">Pasaporte</option>
+                        <option value="dni">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
                 <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
@@ -48,6 +106,12 @@
                 <label for="num_chasis" class="form-label">Número de chasis</label>
                 <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40" required>
             </div>
+
+            <div class="mb-3" id="num_padron">
+                <label for="num_chasis" class="form-label">Número de padrón</label>
+                <input type="text" class="form-control" name="num_padron" id="num_padron" placeholder="Ingrese el número de padron" maxlength="40" required>
+            </div>
+
             <div class="mb-3" id="matr">
                 <label for="matricula" class="form-label">Matricula</label>
                 <div class="d-flex">
@@ -80,24 +144,7 @@
                 <label for="toggleMatr" class="form-check-label">Generar PDF</label>
             </div>
 
-            <form action="" enctype="multipart/form-data" method="get">
-                {% csrf_token %}
-                <div class="mb-3" id="documento_cliente">
-                    <label for="documento" class="form-label">Documento del cliente</label>
-                    <div class="input-group">
-                        <select class="form-control" name="estado_moto" id="tipo_documento">
-                            <option value="cedula">Cédula</option>
-                            <option value="pasaporte">Pasaporte</option>
-                            <option value="dni">DNI</option>
-                        </select>
-                        <span class="input-group-text">-</span>
-                        <input type="number" class="form-control" name="documento" placeholder="Documento">
-                        <button type="button" class="btn btn-info text-white">
-                            <i class="fas fa-search"></i> Buscar Cliente
-                        </button>
-                    </div>
-                </div>
-            </form>
+            
             
             
 
@@ -118,6 +165,8 @@
         var kms = document.getElementById("kms");
         var matr = document.getElementById("matr");
         var cliente = document.getElementById("documento_cliente");
+        var datos_cliente = document.getElementById("datos_cliente");
+        var num_padron = document.getElementById("num_padron");
    
        
 
@@ -125,10 +174,13 @@
             kms.style.display = "none";
             matr.style.display = "none";
             cliente.style.display = "none";
+            datos_cliente.style.display = "none";
+            num_padron.style.display = "none";
         }else{
             kms.style.display = "block";
            matr.style.display = "block";
            cliente.style.display = "block";
+           num_padron.style.display = "block";
         }
     }
 </script>

@@ -78,3 +78,21 @@ class ClienteTelefono(models.Model):
     telefono = models.IntegerField(unique=True)
     principal = models.BooleanField(default=True)
     activo = models.BooleanField(default=True)
+
+
+class ComprasVentas(models.Model):
+    moto = models.ForeignKey(Moto, related_name='moto_cliente', on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, related_name='cliente_moto', on_delete=models.CASCADE)
+    fecha_compra = models.DateField()
+    padron = models.IntegerField(unique=True)
+    fotocopia_libreta = models.ImageField(null=True, blank=True, upload_to="documentacion/libretas/")
+    compra_venta = models.FileField(null=True, blank=True, upload_to="documentacion/compra_venta/")
+    certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")
+    tipo = models.CharField(max_length=20)
+
+    class Meta:
+        # Define moto y cliente como clave primaria compuesta
+        unique_together = (('moto', 'cliente'),)
+
+#tipo = V --->>> PARA CUANDO UN CLIENTE COMPRA UNA MOTO
+#tipo = CV --->>> PARA CUANDO UN CLIENTE VENDE UNA MOTO USADA

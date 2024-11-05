@@ -21,7 +21,7 @@
 </style>
 
 <div class="table-container" id="motoDetails">
-    <h4>Detalles de la Moto</h4>
+    <h4>Detalles de la moto</h4>
 
     {% if moto.foto %}
         <div class="text-center">
@@ -95,7 +95,41 @@
             </tr>
         </tbody>
     </table>
+    {% if cliente %}
+    <h4>Datos del propietario</h4>
 
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Nombre</th>
+                <td>{{ cliente.nombre }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Apellido</th>
+                <td>{{ cliente.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Dirección</th>
+                <td>{{ cliente.calle }} {{ cliente.numero }} {% if cliente.num_apartamento %} Apartamento {{ cliente.num_apartamento }} {% endif %}, {{ cliente.ciudad }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Telefono/Celular</th>
+                <td>telefono</td>
+            </tr>
+            <tr>
+                <th scope="row">Correo</th>
+                <td>correo</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
+    {% if libreta %}
+            <a href="{{ libreta }}" class="btn btn-info" target="_blank">Ver libreta</a>
+        {% else %}
+            <div class="alert alert-warning mb-0" role="alert">
+                No existe libreta de propiedad.
+            </div>
+        {% endif %}
     {% if pdf %}
         <a href="{{ pdf }}" class="btn btn-primary" target="_blank">Ver PDF</a>
     {% else %}

@@ -754,6 +754,17 @@ def detalles_moto(req,id_moto):
         pdf = moto.identificacion_pdf.url
     else:
         pdf = None
+    
+    compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,tipo="CV").first()
+
+    if compra_venta:
+        cliente_id = compra_venta.cliente_id
+        libreta = req.build_absolute_uri(compra_venta.fotocopia_libreta.url) if compra_venta.fotocopia_libreta else None
+        # print("ID CLIENTE --->>>" + str(cliente_id))
+        cliente = Cliente.objects.get(id=cliente_id)
+    else:
+        cliente = None
+        libreta = None
 
     # print("Matr actual: "+str(matricula_actual.matricula))
     # print("Matr anterior: "+str(matricula_anterior.matricula))
@@ -778,9 +789,11 @@ def detalles_moto(req,id_moto):
                     "matr_anterior": matr_ant,
                     "matr_actual":matr_act,
                     "foto_moto":moto.foto.url if moto.foto else None,
-                    "pdf":pdf}
+                    "pdf":pdf,
+                    "cliente":cliente,
+                    "libreta":libreta}
     else:
-        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf}
+        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta}
       
     
     # if not matricula_anterior:

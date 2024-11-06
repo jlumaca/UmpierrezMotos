@@ -777,12 +777,23 @@ def detalles_moto(req,id_moto):
 
     if compra_venta:
         cliente_id = compra_venta.cliente_id
+        telefono_principal_cliente = ClienteTelefono.objects.filter(cliente_id=cliente_id,principal=1).first()
+        correo_cliente = ClienteCorreo.objects.filter(cliente_id=cliente_id,principal=1).first()
+
+        if correo_cliente:
+            correo = correo_cliente.correo
+        else:
+            correo = None
+
+        telefono_principal = telefono_principal_cliente.telefono
         libreta = req.build_absolute_uri(compra_venta.fotocopia_libreta.url) if compra_venta.fotocopia_libreta else None
         # print("ID CLIENTE --->>>" + str(cliente_id))
         cliente = Cliente.objects.get(id=cliente_id)
     else:
         cliente = None
         libreta = None
+        telefono_principal = None
+        correo = None
 
     # print("Matr actual: "+str(matricula_actual.matricula))
     # print("Matr anterior: "+str(matricula_anterior.matricula))
@@ -809,9 +820,12 @@ def detalles_moto(req,id_moto):
                     "foto_moto":moto.foto.url if moto.foto else None,
                     "pdf":pdf,
                     "cliente":cliente,
-                    "libreta":libreta}
+                    "libreta":libreta,
+                    "telefono_principal":telefono_principal,
+                    "correo":correo
+                    }
     else:
-        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta}
+        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta,"telefono_principal":telefono_principal,"correo":correo}
       
     
     # if not matricula_anterior:

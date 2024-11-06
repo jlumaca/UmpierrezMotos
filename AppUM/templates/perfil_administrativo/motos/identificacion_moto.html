@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        {% load static %}
+<head>
+    {% load static %}
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,32 +12,43 @@
             background-color: #f9f9f9;
             margin: 0;
             padding: 20px;
+            display: flex; 
+            justify-content: center;
         }
         .container {
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 700px;
         }
         header {
-        display: flex;
-        align-items: center;
-        background-color: #f7ca4d; /* Color similar */
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    header img {
-        max-width: 150px;
-        height: auto;
-        margin-right: 20px;
-    }
-    header h1 {
-        color: #e3342f;
-        margin: 0;
-        flex-grow: 1; /* Esto hace que el título ocupe el espacio restante */
-        text-align: center; /* Centra el título dentro del espacio disponible */
-    }
+            display: flex;
+            align-items: center;
+            background-color: #f7ca4d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        header img {
+            max-width: 150px;
+            height: auto;
+            margin-right: 20px;
+        }
+        header h1 {
+            color: #e3342f;
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+            font-size: 24px;
+        }
+        .code-large {
+            font-size: 100px;
+            color: #e3342f;
+            font-weight: bold;
+            text-align: right;
+            margin-left: auto;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -76,19 +87,15 @@
                             <p>No se encontró el logo.</p>
                         {% endif %}
                     </td>
-                    <td style="background-color: #f7ca4d; text-align: left; vertical-align: middle; padding-left: 20px; border: none;">
-                        <h1 style="color: #e3342f; margin: 0;">Características</h1>
+                    
+                    <td style="background-color: #f7ca4d; text-align: right; vertical-align: middle;  border: none;">
+                        <span class="code-large" style="width: 100%; max-width: 150px;">{{ moto.id }}</span>
                     </td>
                 </tr>
             </table>
         </header>
         
-
         <table>
-            <tr>
-                <th>Código</th>
-                <td>{{ moto.id }}</td>
-            </tr>
             <tr>
                 <th>Marca</th>
                 <td>{{ moto.marca }}</td>
@@ -104,14 +111,6 @@
             <tr>
                 <th>Año</th>
                 <td>{{ moto.anio }}</td>
-            </tr>
-            <tr>
-                <th>Kilómetros</th>
-                <td>{{ moto.kilometros }}</td>
-            </tr>
-            <tr>
-                <th>Precio (USD)</th>
-                <td>{{ moto.precio }}</td>
             </tr>
         </table>
 

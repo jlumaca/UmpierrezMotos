@@ -60,6 +60,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>Código</th>
                 <th>Tipo</th>
                 <th>Marca</th>
                 <th>Modelo</th>
@@ -73,6 +74,7 @@
                 {% for accesorios in page_obj %}
             <!-- Filas de ejemplo de accesorios -->
             <tr>
+                <td>{{ accesorios.id }}</td>
                 <td>{{ accesorios.tipo }}</td>
                 <td>{{ accesorios.marca }}</td>
                 <td>{{ accesorios.modelo}}</td>

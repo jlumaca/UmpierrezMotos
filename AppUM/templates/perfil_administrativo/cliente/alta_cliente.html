@@ -1,0 +1,146 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de cliente</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            
+            <!-- <div class="mb-3">
+                <label for="estado" class="form-label">Tipo de documento</label>
+                <select class="form-control" name="tipo_documento" id="tipo">
+                    <option value="CI">Cédula</option>
+                    <option value="PAS">Pasaporte</option>
+                    <option value="DNI">DNI</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Documento</label>
+                <input type="text" class="form-control" name="documento" id="marca" placeholder="Ingrese el documento" maxlength="20">
+            </div> -->
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Nombre</label>
+                <input type="text" class="form-control" name="nombre" id="modelo" placeholder="Ingrese el nombre" maxlength="20">
+            </div>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Apellido</label>
+                <input type="text" class="form-control" name="apellido" placeholder="Ingrese el apellido">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Fecha de nacimiento</label>
+                <input type="date" class="form-control" name="f_nac" placeholder="Ingrese la fecha de nacimiento">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Telefono 1</label>
+                <input type="number" class="form-control" name="telefono_principal" placeholder="Ingrese el telefono principal">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Telefono 2</label>
+                <input type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el telefono secundario">
+            </div>
+
+            <div class="mb-3">
+                <label for="documento" class="form-label">Correo electrónico</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="correo" placeholder="Correo">
+                    <span class="input-group-text">-</span>
+                    <select class="form-control" placeholder="Dominio del correo" id="dominio_principal" name="dominio_correo" onchange="correos()">
+                        <option value="@gmail.com">@gmail.com</option>
+                        <option value="@hotmail.com">@hotmail.com</option>
+                        <option value="@outlook.com">@outlook.com</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <input type="text" class="form-control" id="id_otro_correo" name="otro_correo" placeholder="Dominio del correo" style="display: none;">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+
+
+            <label for="estado" class="form-label">Localidad</label>
+            <select class="form-control" name="localidad" id="id_localidad" onchange="toggleFields()">
+                <option value="Libertad">Libertad</option>
+                <option value="Kiyú">Kiyú</option>
+                <option value="Puntas de Valdez">Puntas de Valdez</option>
+                <option value="Playa Pascual">Playa Pascual</option>
+                <option value="Ciudad del Plata">Ciudad del Plata</option>
+                <option value="San José de Mayo">San José de Mayo</option>
+                <option value="Otro">Otro</option>
+            </select>
+            <div class="mb-3" style="display: none;" id="id_localidad_otro">
+                <label for="precio" class="form-label">Localidad</label>
+                <input type="text" class="form-control" name="localidad_otro" placeholder="Ingrese la localidad">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Calle</label>
+                <input type="text" class="form-control" name="calle" placeholder="Ingrese la calle">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Número</label>
+                <input type="number" class="form-control" name="numero" placeholder="Ingrese el numero">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Número de apartamento</label>
+                <input type="number" class="form-control" name="num_apto" placeholder="Ingrese el numero de apartamento">
+            </div>
+            
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+<script>
+    function toggleFields() {
+        var loc = document.getElementById("id_localidad").value;
+        var otro = document.getElementById("id_localidad_otro");
+        if (loc === "Otro") {
+            otro.style.display = "block";
+        }else{
+            otro.style.display = "none";
+        }
+    }
+
+    function correos(){
+        var dominio_correo = document.getElementById("dominio_principal").value;
+        var dom_correo = document.getElementById("dominio_principal")
+        var otro_correo = document.getElementById("id_otro_correo");
+        if (dom_correo  === "Otro") {
+            otro_correo.style.display = "block";
+            dom_correo.style.display = "none";
+        }else{
+            otro_correo.style.display = "none";
+            dom_correo.style.display = "block";
+        }
+    }
+</script>
+{% endblock %}

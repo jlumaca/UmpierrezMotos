@@ -971,3 +971,12 @@ def vista_clientes(req):
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":clientes})
+
+def alta_cliente(req):
+    try:
+        if req.method == "POST":
+            pass
+        else:
+            return render(req,"perfil_administrativo/cliente/alta_cliente.html",{})
+    except Exception as e:
+        pass

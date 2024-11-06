@@ -26,7 +26,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<title>Motos</title>
+<title>Clientes</title>
 {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -39,7 +39,7 @@
     <!-- <a href="" class="btn btn-primary mb-3 registrar-cliente">
         <i class="fas fa-user-plus"></i> Alta de Cliente
     </a> -->
-    <a href="" class="btn btn-primary mb-3">
+    <a href="{% url 'ClienteAlta' %}" class="btn btn-primary mb-3">
         <i class="fas fa-user-plus"></i> Alta de cliente
     </a>
     

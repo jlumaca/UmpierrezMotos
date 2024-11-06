@@ -22,6 +22,7 @@ urlpatterns = [
      path('busqueda_anio', views.busqueda_anio,name="BusquedaAnio"),
      path('busqueda_kms', views.busqueda_kms,name="BusquedaKms"),
      path('busqueda_precio', views.busqueda_precio,name="BusquedaPrecio"),
+     path('busqueda_matricula', views.busqueda_matricula,name="BusquedaMatricula"),
 
      
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),

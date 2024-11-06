@@ -34,7 +34,7 @@
     <!-- Formulario de búsqueda por marca -->
     <form action="{% url 'BusquedaCodigo' %}" enctype="multipart/form-data" method="get" id="busqueda_codigo">{% csrf_token %}
         <div class="input-group mb-3">
-            <input type="number" name="codigo" class="form-control" placeholder="Buscar por código">
+            <input type="number" name="codigo" class="form-control" placeholder="Buscar por código" required>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
@@ -93,7 +93,7 @@
     <form action="{% url 'BusquedaAnio' %}" enctype="multipart/form-data" method="get" id="busqueda_anio" style="display: none;">
         {% csrf_token %}
         <div class="input-group mb-3">
-            <input type="text" class="form-control" name="anio" placeholder="Buscar por año">
+            <input type="text" class="form-control" name="anio" placeholder="Buscar por año" required>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
@@ -107,9 +107,9 @@
     <form action="{% url 'BusquedaKms' %}" enctype="multipart/form-data" method="get" id="busqueda_kms" style="display: none;">
         {% csrf_token %}
         <div class="input-group mb-3">
-            <input type="number" class="form-control" name="km_minimo" placeholder="Kilometraje mínimo">
+            <input type="number" class="form-control" name="km_minimo" placeholder="Kilometraje mínimo" required>
             <span class="input-group-text">-</span>
-            <input type="number" class="form-control" name="km_maximo" placeholder="Kilometraje máximo">
+            <input type="number" class="form-control" name="km_maximo" placeholder="Kilometraje máximo" required>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
@@ -121,9 +121,9 @@
     <form action="{% url 'BusquedaPrecio' %}" enctype="multipart/form-data" method="get" id="busqueda_precio" style="display: none;">
         {% csrf_token %}
         <div class="input-group mb-3">
-            <input type="number" class="form-control" name="precio_minimo" placeholder="Precio mínimo">
+            <input type="number" class="form-control" name="precio_minimo" placeholder="Precio mínimo" required>
             <span class="input-group-text">-</span>
-            <input type="number" class="form-control" name="precio_maximo" placeholder="Precio máximo">
+            <input type="number" class="form-control" name="precio_maximo" placeholder="Precio máximo" required>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
@@ -132,8 +132,8 @@
             </a>
         </div>
     </form>
-
-    <form action="" enctype="multipart/form-data" method="get" id="busqueda_matricula" style="display: none;">
+    
+    <form action="{% url 'BusquedaMatricula' %}" enctype="multipart/form-data" method="get" id="busqueda_matricula" style="display: none;">
         {% csrf_token %}
         <div class="input-group mb-3">
             <input maxlength="3" type="text" class="form-control" name="letras_matricula" placeholder="Caracteres alfabeticos">

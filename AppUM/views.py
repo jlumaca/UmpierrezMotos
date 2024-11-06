@@ -574,6 +574,24 @@ def busqueda_precio(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
 
+def busqueda_matricula(req):
+    matricula_letras = req.GET.get('letras_matricula').upper()
+    matricula_numeros = str(req.GET.get('numeros_matricula'))
+    matricula = matricula_letras + matricula_numeros
+
+    busq_matricula = Matriculas.objects.filter(matricula = matricula).first()
+    if busq_matricula:
+        moto = Moto.objects.filter(id=busq_matricula.moto_id,pertenece_tienda=1)
+        paginator = Paginator(moto, 5)  # 10 motos por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+        contexto = {'page_obj': page_obj,"motos":moto}
+    else:
+        contexto = {'page_obj': None,"motos":None}
+
+    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+
+
 def datos_a_modificacion_moto(req,id_moto):
     try:
         moto_upd = Moto.objects.get(id=id_moto)

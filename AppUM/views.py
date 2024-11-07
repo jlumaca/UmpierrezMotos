@@ -957,11 +957,9 @@ def busqueda_marca_modelo_accesorio(req):
 
 def vista_clientes(req):
     clientes = Cliente.objects.filter(
-        cliente_correo__activo=True,
-        cliente_correo__principal=True,
         cliente_telefono__activo=True,
         cliente_telefono__principal=True
-    ).values('nombre', 'apellido', 'cliente_telefono__telefono', 'cliente_correo__correo').order_by('nombre')
+    ).values('nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
 
     logo_um = Logos.objects.get(id=1)
 
@@ -972,10 +970,144 @@ def vista_clientes(req):
 
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":clientes})
 
+def valid_cliente(documento,tel1,tel2,correo1,correo2):
+    existe_cliente = Cliente.objects.filter(documento=documento).first()
+    if existe_cliente:
+        return "existe_cliente"
+    
+    existe_tel_1 = ClienteTelefono.objects.filter(telefono=tel1).first()
+
+    if existe_tel_1:
+        return "existe_telefono_1"
+    
+    if tel2:
+        existe_tel_2 = ClienteTelefono.objects.filter(telefono=tel2).first()
+        if existe_tel_2:
+            return "existe_telefono_2"
+    
+
+    if correo1:
+        existe_correo_1 = ClienteCorreo.objects.filter(correo=correo1).first()
+        if existe_correo_1:
+            return "existe_correo_1"
+        
+    if correo2:
+        existe_correo_2 = ClienteCorreo.objects.filter(correo=correo2).first()
+        if existe_correo_2:
+            return "existe_correo_2"
+
 def alta_cliente(req):
     try:
         if req.method == "POST":
-            pass
+            tipo_doc = req.POST['tipo_doc']
+            doc = req.POST['doc']
+            nombre = req.POST['nombre']
+            apellido = req.POST['apellido']
+            f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+            f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+            telefono_principal = req.POST['telefono_principal']
+            telefono_secundario = req.POST['telefono_secundario']
+            correo = req.POST['correo_1']
+            dominio_correo = req.POST['dominio_correo']
+            otro_correo = req.POST['otro_correo']
+            correo_2 = req.POST['correo_2']
+            dominio_correo_2 = req.POST['dominio_correo_2']
+            otro_correo_2 = req.POST['otro_correo_2']
+            localidad = req.POST['localidad']
+            localidad_otro = req.POST['localidad_otro']
+            calle = req.POST['calle']
+            numero = req.POST['numero']
+            num_apto = req.POST['num_apto']
+            
+            if correo:
+                correo_principal = correo + dominio_correo
+            else:
+                correo_principal = None
+            
+            if correo_2:
+                correo_secundario = correo_2 + dominio_correo_2
+            else:
+                correo_secundario = None
+            
+            doc_compuesto = tipo_doc + str(doc)
+            existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
+            if existe_cliente == "existe_cliente":
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El cliente ya existe"})
+            elif existe_cliente == "existe_telefono_1":
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
+            elif existe_cliente == "existe_telefono_2":
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
+            elif existe_cliente == "existe_correo_1":
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
+            elif existe_cliente == "existe_correo_2":
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
+            elif telefono_principal == telefono_secundario:
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los numeros de teléfono no pueden ser iguales"})
+            elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
+                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los correos no pueden ser iguales"})
+            else:
+                if localidad == "Otro":
+                    ciudad = localidad_otro
+                else:
+                    ciudad = localidad
+
+                if num_apto:
+                    n_a = num_apto
+                else:
+                    n_a = 0
+
+                nuevo_cliente = Cliente(
+                    documento = doc_compuesto,
+                    nombre = nombre,
+                    apellido = apellido,
+                    fecha_nacimiento = f_nac,
+                    ciudad = ciudad,
+                    calle = calle,
+                    numero = numero,
+                    num_apartamento = n_a
+                )
+
+                nuevo_cliente.save()
+                
+                telefono_cliente = ClienteTelefono(
+                    telefono = telefono_principal,
+                    principal = 1,
+                    activo = 1,
+                    cliente_id = nuevo_cliente.id
+                )
+                telefono_cliente.save()
+
+                if telefono_secundario:
+                    telefono_sec_cliente = ClienteTelefono(
+                    telefono = telefono_secundario,
+                    principal = 0,
+                    activo = 1,
+                    cliente_id = nuevo_cliente.id
+                )
+                    telefono_sec_cliente.save()
+
+                if correo_principal:
+                    correo_cliente = ClienteCorreo(
+                        correo = correo_principal,
+                        principal = 1,
+                        activo = 1,
+                        cliente_id = nuevo_cliente.id
+                    )
+                    correo_cliente.save()
+                
+                if correo_secundario:
+                    correo_sec_cliente = ClienteCorreo(
+                        correo = correo_secundario,
+                        principal = 0,
+                        activo = 1,
+                        cliente_id = nuevo_cliente.id
+                    )
+                    correo_sec_cliente.save()
+
+
+
+                messages.success(req, "El cliente fue ingresado con éxito.")
+                return redirect('Clientes')
         else:
             return render(req,"perfil_administrativo/cliente/alta_cliente.html",{})
     except Exception as e:

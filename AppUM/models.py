@@ -75,7 +75,7 @@ class ClienteCorreo(models.Model):
 
 class ClienteTelefono(models.Model):
     cliente = models.ForeignKey(Cliente, related_name='cliente_telefono', on_delete=models.CASCADE, null=True)
-    telefono = models.IntegerField(unique=True)
+    telefono = models.CharField(max_length=10,unique=True)
     principal = models.BooleanField(default=True)
     activo = models.BooleanField(default=True)
 

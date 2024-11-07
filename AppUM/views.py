@@ -959,7 +959,7 @@ def vista_clientes(req):
     clientes = Cliente.objects.filter(
         cliente_telefono__activo=True,
         cliente_telefono__principal=True
-    ).values('nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
+    ).values('id','nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
 
     logo_um = Logos.objects.get(id=1)
 
@@ -1112,3 +1112,35 @@ def alta_cliente(req):
             return render(req,"perfil_administrativo/cliente/alta_cliente.html",{})
     except Exception as e:
         pass
+
+
+def modificacion_cliente(req,id_cliente):
+    try:
+        if req.method == "POST":
+            pass
+        else:
+            cliente = Cliente.objects.get(id=id_cliente)
+            tel_princ = ClienteTelefono.objects.get(principal=1,cliente_id=id_cliente)
+            tel_sec = ClienteTelefono.objects.filter(principal=0,cliente_id=id_cliente).first()
+
+            correo_princ = ClienteCorreo.objects.filter(principal=1,cliente_id=id_cliente).first()
+            correo_sec = ClienteCorreo.objects.filter(principal=0,cliente_id=id_cliente).first()
+
+            if tel_sec:
+                t_s = tel_sec.telefono
+            else:
+                t_s = None
+
+            if correo_princ:
+                c_p = correo_princ.correo
+            else:
+                c_p = None
+            
+            if correo_sec:
+                c_s = correo_sec.correo
+            else:
+                c_s = None
+            f_nac_formateada = cliente.fecha_nacimiento.strftime('%Y-%m-%d')
+            return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"datos_cliente":cliente,"tel_princ":tel_princ,"fecha_nac":f_nac_formateada,"tel_sec":t_s,"correo_princ":c_p,"correo_sec":c_s})
+    except Exception as e:
+        return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})

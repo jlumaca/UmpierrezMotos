@@ -36,7 +36,8 @@ urlpatterns = [
      path('busqueda_tipo_accesorio', views.busqueda_tipo_accesorio,name="BusquedaTipoAccesorio"),
 
      path('clientes', views.vista_clientes,name="Clientes"),
-     path('cliente_alta', views.alta_cliente,name="ClienteAlta")
+     path('cliente_alta', views.alta_cliente,name="ClienteAlta"),
+     path('cliente_modificacion/<int:id_cliente>', views.modificacion_cliente,name="ClienteModificacion")
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1384,3 +1384,14 @@ def buscar_nom_ape(req):
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
+
+def ficha_cliente(req,id_cliente):
+    cliente = Cliente.objects.get(id=id_cliente)
+    tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+    tel_1 = tel1.telefono
+    tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+    if tel2:
+        tel_2 = tel2.telefono
+    else:
+        tel_2 = None
+    return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,"tel1":tel_1,"tel2":tel_2})

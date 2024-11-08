@@ -1,0 +1,122 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-accesorio {
+        display: block;
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="table-container" id="clienteDetails">
+    <h1>Ficha del cliente</h1>
+    <h4>Datos personales</h4>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Cliente</th>
+                <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Documento</th>
+                <td>{{ cliente.documento }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Contacto</th>
+                <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th scope="row">Correo</th>
+                <td></td>
+            </tr>
+          
+            <tr>
+                <th scope="row">Dirección</th>
+                <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }} </td>
+            </tr>
+        </tbody>
+    </table>
+    <h4>Motos</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="row">Detalles</th>
+                <th scope="row">Fecha</th>
+                <th scope="row">Forma de pago</th>
+                <th scope="row">Cuotas</th>
+                <th scope="row">Monto</th>
+                <th scope="row">Documentacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for cliente in page_obj %}
+                <tr>
+                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    <td>{{ cliente.cliente_telefono__telefono }}</td>
+                   
+                    <td>
+                        <a href="{% url 'ClienteModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de compras de motos.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <h4>Accesorios</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="row">Detalles</th>
+                <th scope="row">Fecha</th>
+                <th scope="row">Forma de pago</th>
+                <th scope="row">Cuotas</th>
+                <th scope="row">Monto</th>
+                <th scope="row">Documentacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for cliente in page_obj %}
+                <tr>
+                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    <td>{{ cliente.cliente_telefono__telefono }}</td>
+                   
+                    <td>
+                        <a href="{% url 'ClienteModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de compras de accesorios.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <a href="{% url 'Clientes' %}" class="btn btn-secondary">Volver</a>
+</div>
+
+{% endblock %}

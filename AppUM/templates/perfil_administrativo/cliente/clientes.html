@@ -108,7 +108,7 @@
                    
                     <td>
                         <a href="{% url 'ClienteModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

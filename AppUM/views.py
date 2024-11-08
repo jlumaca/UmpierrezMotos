@@ -1072,7 +1072,7 @@ def alta_cliente(req):
                 telefono_cliente = ClienteTelefono(
                     telefono = telefono_principal,
                     principal = 1,
-                    activo = 1,
+                    
                     cliente_id = nuevo_cliente.id
                 )
                 telefono_cliente.save()
@@ -1081,7 +1081,7 @@ def alta_cliente(req):
                     telefono_sec_cliente = ClienteTelefono(
                     telefono = telefono_secundario,
                     principal = 0,
-                    activo = 1,
+                   
                     cliente_id = nuevo_cliente.id
                 )
                     telefono_sec_cliente.save()
@@ -1090,7 +1090,7 @@ def alta_cliente(req):
                     correo_cliente = ClienteCorreo(
                         correo = correo_principal,
                         principal = 1,
-                        activo = 1,
+                        
                         cliente_id = nuevo_cliente.id
                     )
                     correo_cliente.save()
@@ -1099,7 +1099,7 @@ def alta_cliente(req):
                     correo_sec_cliente = ClienteCorreo(
                         correo = correo_secundario,
                         principal = 0,
-                        activo = 1,
+                        
                         cliente_id = nuevo_cliente.id
                     )
                     correo_sec_cliente.save()

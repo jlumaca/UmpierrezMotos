@@ -37,7 +37,9 @@ urlpatterns = [
 
      path('clientes', views.vista_clientes,name="Clientes"),
      path('cliente_alta', views.alta_cliente,name="ClienteAlta"),
-     path('cliente_modificacion/<int:id_cliente>', views.modificacion_cliente,name="ClienteModificacion")
+     path('cliente_modificacion/<int:id_cliente>', views.modificacion_cliente,name="ClienteModificacion"),
+     path('busqueda_documento', views.buscar_por_doc,name="BusquedaDocumento"),
+     path('busqueda_nombre_apellido', views.buscar_nom_ape,name="BusquedaNombreApellido"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -54,26 +54,26 @@
     </div>
 
     <!-- Formulario de búsqueda por marca -->
-    <form action="" enctype="multipart/form-data" method="get" id="busqueda_documento">{% csrf_token %}
+    <form action="{% url 'BusquedaDocumento' %}" enctype="multipart/form-data" method="get" id="busqueda_documento">{% csrf_token %}
         <div class="input-group mb-3">
-            <select class="form-control" name="tipo_documento" id="tipo_documento">
-                <option value="ci">Cédula</option>
-                <option value="pasaporte">Pasaporte</option>
-                <option value="dni">DNI</option>
+            <select class="form-control" name="tipo_doc_busq" id="tipo_doc">
+                <option value="CI">Cédula</option>
+                <option value="PAS">Pasaporte</option>
+                <option value="DNI">DNI</option>
             </select>
             <input type="number" name="documento" class="form-control" placeholder="Buscar por documento">
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
             
-            <a href="" class="btn btn-secondary">
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">
                 <i class="fas fa-sync-alt"></i>
             </a>
             
         </div>
     </form>
 
-    <form action="" enctype="multipart/form-data" method="get" id="busqueda_nombre_apellido" style="display: none;">{% csrf_token %}
+    <form action="{% url 'BusquedaNombreApellido' %}" enctype="multipart/form-data" method="get" id="busqueda_nombre_apellido" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre">
             <span class="input-group-text">-</span>
@@ -82,7 +82,7 @@
                 <i class="fas fa-search"></i>
             </button>
             
-            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">
                 <i class="fas fa-sync-alt"></i>
             </a>
             

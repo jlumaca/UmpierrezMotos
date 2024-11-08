@@ -1351,3 +1351,36 @@ def modificacion_cliente(req,id_cliente):
             return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
     except Exception as e:
         return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})
+
+def buscar_por_doc(req):
+    tipo_doc = req.GET.get('tipo_doc_busq')
+    doc_num = req.GET.get('documento')
+    documento = tipo_doc + str(doc_num)
+
+    cliente = Cliente.objects.filter(
+         documento = documento,
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    paginator = Paginator(cliente, 5)  # 5 clientes por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
+
+def buscar_nom_ape(req):
+    nombre = req.GET.get('nombre').capitalize()
+    apellido = req.GET.get('apellido').capitalize()
+    cliente = Cliente.objects.filter(
+         nombre = nombre,
+         apellido = apellido,
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    paginator = Paginator(cliente, 5)  # 5 clientes por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})

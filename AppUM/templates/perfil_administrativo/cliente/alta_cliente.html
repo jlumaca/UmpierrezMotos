@@ -100,7 +100,7 @@
 
 
             <label for="estado" class="form-label">Localidad</label>
-            <select class="form-control" name="localidad" id="id_localidad" onchange="toggleFields()">
+            <select class="form-control" name="localidad" id="id_localidad">
                 <option value="Libertad">Libertad</option>
                 <option value="Kiyú">Kiyú</option>
                 <option value="Puntas de Valdez">Puntas de Valdez</option>
@@ -109,10 +109,7 @@
                 <option value="San José de Mayo">San José de Mayo</option>
                 <option value="Otro">Otro</option>
             </select>
-            <div class="mb-3" style="display: none;" id="id_localidad_otro">
-                <label for="precio" class="form-label">Localidad</label>
-                <input type="text" class="form-control" name="localidad_otro" placeholder="Ingrese la localidad">
-            </div>
+
 
             <div class="mb-3">
                 <label for="precio" class="form-label">Calle</label>
@@ -138,18 +135,6 @@
     </div>
 </div>
 <script>
-    function toggleFields() {
-        var loc = document.getElementById("id_localidad").value;
-        var otro = document.getElementById("id_localidad_otro");
-        if (loc === "Otro") {
-            otro.style.display = "block";
-        }else{
-            otro.style.display = "none";
-        }
-
-
-    }
-
     function correos(){
         var dominio_correo = document.getElementById("dominio_principal").value;
         var dom_correo = document.getElementById("dominio_principal")

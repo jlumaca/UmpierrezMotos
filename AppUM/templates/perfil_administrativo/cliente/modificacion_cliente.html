@@ -10,7 +10,7 @@
             {{ error_message }}
             </div>
         {% endif %}
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'ClienteModificacion' datos_cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
@@ -58,13 +58,19 @@
             </div>
 
             <div class="mb-3">
-                <label for="precio" class="form-label">Telefono 2</label>
+                <label for="precio" class="form-label">Teléfono 2</label>
                 {% if tel_sec %}
-                <input value="{{ tel_sec }}" type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el telefono secundario">
+                    <input value="{{ tel_sec }}" type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el teléfono secundario">
                 {% else %}
-                <input type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el telefono secundario">
+                    <input type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el teléfono secundario">
                 {% endif %}
+            
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="convertToTel1" name="convert_to_tel1">
+                    <label class="form-check-label" for="convertToTel1">Convertir en teléfono 1</label>
+                </div>
             </div>
+            
 
 
             <div class="mb-3">
@@ -97,14 +103,19 @@
                     </select>
                     <span class="input-group-text">-</span>
                     <input type="text" class="form-control" id="id_otro_correo_2" name="otro_correo_2" placeholder="Dominio del correo" style="display: none;">
+                    
                     <!-- Cambiar el botón a tipo submit -->
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="convertToCorreo1" name="convert_to_correo1">
+                    <label class="form-check-label" for="convertToCorreo1">Convertir en correo 1</label>
                 </div>
             </div>
 
 
 
             <label for="estado" class="form-label">Localidad</label>
-            <select class="form-control" name="localidad" id="id_localidad" onchange="toggleFields()">
+            <select class="form-control" name="localidad" id="id_localidad">
                 <option value="Libertad">Libertad</option>
                 <option value="Kiyú">Kiyú</option>
                 <option value="Puntas de Valdez">Puntas de Valdez</option>
@@ -113,10 +124,7 @@
                 <option value="San José de Mayo">San José de Mayo</option>
                 <option value="Otro">Otro</option>
             </select>
-            <div class="mb-3" style="display: none;" id="id_localidad_otro">
-                <label for="precio" class="form-label">Localidad</label>
-                <input type="text" class="form-control" name="localidad_otro" placeholder="Ingrese la localidad">
-            </div>
+
 
             <div class="mb-3">
                 <label for="precio" class="form-label">Calle</label>
@@ -142,17 +150,7 @@
     </div>
 </div>
 <script>
-    function toggleFields() {
-        var loc = document.getElementById("id_localidad").value;
-        var otro = document.getElementById("id_localidad_otro");
-        if (loc === "Otro") {
-            otro.style.display = "block";
-        }else{
-            otro.style.display = "none";
-        }
 
-
-    }
 
     function correos(){
         var dominio_correo = document.getElementById("dominio_principal").value;

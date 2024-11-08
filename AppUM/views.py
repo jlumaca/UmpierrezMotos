@@ -957,7 +957,6 @@ def busqueda_marca_modelo_accesorio(req):
 
 def vista_clientes(req):
     clientes = Cliente.objects.filter(
-        cliente_telefono__activo=True,
         cliente_telefono__principal=True
     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
 
@@ -1234,7 +1233,7 @@ def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
         
 
 def modificacion_cliente(req,id_cliente):
-    #try:
+    try:
         if req.method == "POST":
             tipo_doc = req.POST['tipo_doc']
             doc = req.POST['doc']
@@ -1261,12 +1260,94 @@ def modificacion_cliente(req,id_cliente):
             elif valid_cliente == "existe_correo_secundario":
                 contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
                 return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif tel1 == tel2:
+                contexto = contexto_para_cliente(id_cliente,"Los telefonos no pueden ser iguales")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif correo1 == correo2:
+                contexto = contexto_para_cliente(id_cliente,"Los correos no pueden ser iguales")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
             else:
-                print("INGRESAR")
-        
-        
+            
+                tel1_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
+                if tel1_actual.telefono != tel1:
+                    #SI EL TEL1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL1
+                    tel1_actual.delete()
+                    nuevo_tel1 = ClienteTelefono(
+                        telefono = tel1,
+                        principal = 1,
+                        cliente_id = id_cliente
+                    )
+                    nuevo_tel1.save()
+
+                if tel2:
+                    tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    checkbox = 'convert_to_tel1' in req.POST    
+                    if tel2_actual.telefono != tel2:
+                        #SI EL TEL2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL2
+                        tel2_actual.delete()
+                        nuevo_tel2 = ClienteTelefono(
+                            telefono = tel2,
+                            principal = 0,
+                            cliente_id = id_cliente
+                        )
+                        nuevo_tel2.save()
+                    if checkbox:
+                        tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        tel2_actual.principal = 1
+                        tel1_actual.principal = 0
+                        tel2_actual.save()
+                        tel1_actual.save()
+
+                if req.POST['correo_1']:
+                    correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
+                    if correo1_actual.correo != correo1:
+                        #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
+                        correo1_actual.delete()
+                        nuevo_correo1 = ClienteCorreo(
+                            correo = correo1,
+                            principal = 1,
+                            cliente_id = id_cliente
+                        )
+                        nuevo_correo1.save()
+                
+                if req.POST['correo_2']:
+                    correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    checkbox_correo = 'convert_to_correo1' in req.POST
+                    if correo2_actual.correo != correo2:
+                        #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
+                        correo2_actual.delete()
+                        nuevo_correo2 = ClienteCorreo(
+                            correo = correo2,
+                            principal = 0,
+                            cliente_id = id_cliente
+                        )
+                        nuevo_correo2.save()
+                    
+                    if checkbox_correo:
+                        correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        correo2_actual.principal = 1
+                        correo1_actual.principal = 0 
+                        correo1_actual.save()
+                        correo2_actual.save()
+                
+                f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+
+                mod_cliente = Cliente.objects.get(id=id_cliente)
+                mod_cliente.documento = documento
+                mod_cliente.nombre = req.POST['nombre'].capitalize()
+                mod_cliente.apellido = req.POST['apellido'].capitalize()
+                mod_cliente.fecha_nacimiento = f_nac
+                mod_cliente.ciudad = req.POST['localidad'].capitalize()
+                mod_cliente.calle = req.POST['calle'].capitalize()
+                mod_cliente.numero = req.POST['numero']
+                mod_cliente.num_apartamento = req.POST['num_apto']
+                
+                mod_cliente.save()
+                messages.success(req, "Cliente modificado con éxito")
+                return redirect('Clientes')
         else:
             contexto = contexto_para_cliente(id_cliente,None)
             return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})
+    except Exception as e:
+        return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})

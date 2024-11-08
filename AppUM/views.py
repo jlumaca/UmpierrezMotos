@@ -1114,15 +1114,32 @@ def alta_cliente(req):
         pass
 
 
-def modificacion_cliente(req,id_cliente):
-    try:
-        if req.method == "POST":
-            pass
-        else:
+
+
+def contexto_para_cliente(id_cliente,mensaje_error):
             cliente = Cliente.objects.get(id=id_cliente)
             tel_princ = ClienteTelefono.objects.get(principal=1,cliente_id=id_cliente)
             tel_sec = ClienteTelefono.objects.filter(principal=0,cliente_id=id_cliente).first()
 
+            tipo_documento_ci = cliente.documento[0:2:1]
+            tipo_documento_pas_dni = cliente.documento[0:3:1]
+
+            longitud_doc = len(cliente.documento)
+            doc_num = ""
+            
+            if tipo_documento_ci == "CI":
+                tipo_doc = "CI"
+                for i in range(2,longitud_doc):
+                    doc_num = doc_num + cliente.documento[i]
+            elif tipo_documento_pas_dni == "DNI":
+                tipo_doc = "DNI"
+                for i in range(3,longitud_doc):
+                    doc_num = doc_num + cliente.documento[i]
+            else:
+                tipo_doc = "PAS"
+                for i in range(3,longitud_doc):
+                    doc_num = doc_num + cliente.documento[i]
+            
             correo_princ = ClienteCorreo.objects.filter(principal=1,cliente_id=id_cliente).first()
             correo_sec = ClienteCorreo.objects.filter(principal=0,cliente_id=id_cliente).first()
 
@@ -1132,15 +1149,124 @@ def modificacion_cliente(req,id_cliente):
                 t_s = None
 
             if correo_princ:
-                c_p = correo_princ.correo
+                longitud_correo_princ = len(correo_princ.correo)
+                c_p = "" 
+                lon = 0
+                for i in range(0,longitud_correo_princ):
+                    if correo_princ.correo[i] == "@":
+                        j = i
+                        break
+                    else:
+                        lon += 1
+                        c_p = c_p + correo_princ.correo[i]
+                
+                longitud_dominio = longitud_correo_princ - lon
+                dom_princ = ""
+                pos = j
+                for j in range(pos,longitud_correo_princ):
+                    dom_princ = dom_princ + correo_princ.correo[j]
             else:
-                c_p = None
+                c_p = ""
+                dom_princ = None
             
             if correo_sec:
-                c_s = correo_sec.correo
+                
+                longitud_correo_sec = len(correo_sec.correo)
+                c_s = "" 
+                lon = 0
+                for i in range(0,longitud_correo_sec):
+                    if correo_sec.correo[i] == "@":
+                        j = i
+                        break
+                    else:
+                        lon += 1
+                        c_s = c_s + correo_sec.correo[i]
+                
+            
+                dom_sec = ""
+                pos = j
+                for j in range(pos,longitud_correo_sec):
+                    dom_sec = dom_sec + correo_sec.correo[j]
             else:
-                c_s = None
+                c_s = ""
+                dom_sec = None
             f_nac_formateada = cliente.fecha_nacimiento.strftime('%Y-%m-%d')
-            return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"datos_cliente":cliente,"tel_princ":tel_princ,"fecha_nac":f_nac_formateada,"tel_sec":t_s,"correo_princ":c_p,"correo_sec":c_s})
-    except Exception as e:
-        return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})
+            contexto = {"datos_cliente":cliente,
+                        "tipo_doc":tipo_doc,
+                        "doc_num":doc_num,
+                        "tel_princ":tel_princ,
+                        "fecha_nac":f_nac_formateada,
+                        "tel_sec":t_s,
+                        "correo_princ":c_p,
+                        "dom_princ":dom_princ,
+                        "dom_sec":dom_sec,
+                        "correo_sec":c_s,
+                        "error_message":mensaje_error}
+            return contexto
+
+def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
+    cliente_id = Cliente.objects.get(id=id_cliente)
+    cliente_doc = Cliente.objects.filter(documento=documento).first()
+
+    if cliente_doc:
+        if id_cliente != cliente_doc.id:
+            return "existe_cliente"
+    
+    tel_principal = ClienteTelefono.objects.filter(telefono=tel1).first()
+    if tel_principal:
+        if tel_principal.cliente_id != id_cliente:
+            return "existe_tel_principal"
+    
+    tel_secundario = ClienteTelefono.objects.filter(telefono=tel2).first()
+    if tel_secundario:
+        if tel_secundario.cliente_id != id_cliente:
+            return "existe_tel_secundario"
+        
+    correo_princ = ClienteCorreo.objects.filter(correo=correo1).first()
+    if correo_princ:
+        if correo_princ.cliente_id != id_cliente:
+            return "existe_correo_principal"
+
+    correo_sec = ClienteCorreo.objects.filter(correo=correo2).first()
+    if correo_sec:
+        if correo_sec.cliente_id != id_cliente:
+            return "existe_correo_secundario"
+        
+
+def modificacion_cliente(req,id_cliente):
+    #try:
+        if req.method == "POST":
+            tipo_doc = req.POST['tipo_doc']
+            doc = req.POST['doc']
+            documento = tipo_doc + str(doc)
+            tel1 = req.POST['telefono_principal']
+            tel2 = req.POST['telefono_secundario']
+            correo1 = req.POST['correo_1'] + req.POST['dominio_correo']
+            correo2 = req.POST['correo_2'] + req.POST['dominio_correo_2']
+    
+            valid_cliente = valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2)
+            if valid_cliente == "existe_cliente":
+                contexto = contexto_para_cliente(id_cliente,"El documento ingresado ya existe")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            
+            elif valid_cliente == "existe_tel_principal":
+                contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif valid_cliente == "existe_tel_secundario":
+                contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif valid_cliente == "existe_correo_principal":
+                contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif valid_cliente == "existe_correo_secundario":
+                contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
+                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            else:
+                print("INGRESAR")
+        
+        
+        else:
+            contexto = contexto_para_cliente(id_cliente,None)
+            return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})

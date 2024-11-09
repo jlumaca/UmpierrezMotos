@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.conf import settings
 # Create your views here.
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##
@@ -355,7 +356,9 @@ def form_alta_moto(req):
                                     tipo = "CV",
                                     fotocopia_libreta = libreta_propiedad,
                                     cliente_id = cliente.id,
-                                    moto_id = regresa_moto.id
+                                    moto_id = regresa_moto.id,
+                                    cantidad_cuotas = 0,
+                                    cuotas_pagas = 0
                                 )
 
                                 cliente_moto.save()
@@ -443,7 +446,9 @@ def form_alta_moto(req):
                                 tipo = "CV",
                                 fotocopia_libreta = libreta_propiedad,
                                 cliente_id = cliente.id,
-                                moto_id = nueva_moto.id
+                                moto_id = nueva_moto.id,
+                                cantidad_cuotas = 0,
+                                cuotas_pagas = 0
                             )
 
                             cliente_moto.save()
@@ -1390,8 +1395,59 @@ def ficha_cliente(req,id_cliente):
     tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
     tel_1 = tel1.telefono
     tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+    correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+    correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
     if tel2:
         tel_2 = tel2.telefono
     else:
         tel_2 = None
-    return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,"tel1":tel_1,"tel2":tel_2})
+
+    if correo1:
+        c_1 = correo1.correo
+    else:
+        c_1 = None
+    
+    if correo2:
+        c_2 = correo1.correo
+    else:
+        c_2 = None
+    
+    resultados = (
+        ComprasVentas.objects
+        .filter(cliente__id=id_cliente, tipo='V')
+        .select_related('moto', 'cliente')
+        .values(
+            'moto__marca', 
+            'moto__modelo', 
+            'fecha_compra', 
+            'cantidad_cuotas', 
+            'cuotas_pagas', 
+            'moto__precio', 
+            'fotocopia_libreta', 
+            'compra_venta', 
+            'certificado_venta',
+            'valor_cuota'
+        )
+    )
+    #pdf = moto.identificacion_pdf.url
+    paginator = Paginator(resultados, 5)  # 5 clientes por página
+
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)
+    for resultado in resultados:
+        if resultado['fotocopia_libreta']:
+            resultado['fotocopia_libreta_url'] = settings.MEDIA_URL + resultado['fotocopia_libreta']
+        if resultado['compra_venta']:
+            resultado['compra_venta_url'] = resultado['compra_venta']
+        if resultado['certificado_venta']:
+            resultado['certificado_venta_url'] = resultado['certificado_venta']
+    
+    return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,
+                                                                             "tel1":tel_1,
+                                                                             "tel2":tel_2,
+                                                                             "correo1":c_1,
+                                                                             "correo2":c_2,
+                                                                             "page_obj":page_obj,
+                                                                             
+                                                                             "res_motos":resultados})

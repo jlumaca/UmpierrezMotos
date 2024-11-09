@@ -88,6 +88,9 @@ class ComprasVentas(models.Model):
     compra_venta = models.FileField(null=True, blank=True, upload_to="documentacion/compra_venta/")
     certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")
     tipo = models.CharField(max_length=20)
+    cantidad_cuotas = models.IntegerField()
+    cuotas_pagas = models.IntegerField()
+    valor_cuota = models.IntegerField()
 
     class Meta:
         pass

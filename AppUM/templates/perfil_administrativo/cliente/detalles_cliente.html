@@ -39,11 +39,11 @@
             </tr>
             <tr>
                 <th scope="row">Correo</th>
-                <td></td>
+                <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
             </tr>
           
             <tr>
-                <th scope="row">Dirección</th>
+                <th scope="row">Domicilio</th>
                 <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }} </td>
             </tr>
         </tbody>
@@ -62,15 +62,44 @@
         </thead>
         <tbody>
             {% if page_obj %}
-                {% for cliente in page_obj %}
+                {% for moto in page_obj %}
                 <tr>
-                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
-                    <td>{{ cliente.cliente_telefono__telefono }}</td>
-                   
+                    <td>{{ moto.moto__marca }} {{ moto.moto__modelo }}</td>
+                    <td>{{ moto.fecha_compra }}</td>
+                    <td>{% if moto.cantidad_cuotas == 1 %} CONTADO {% else %} {{ moto.cantidad_cuotas }} CUOTAS {% endif %}</td>
+                    <td>{% if moto.cantidad_cuotas == 1 %} -------  {% else %} {{ moto.cuotas_pagas }} DE {{ moto.cantidad_cuotas }} {% endif %}</td>
+                    <td>{{ moto.valor_cuota }}</td>
                     <td>
-                        <a href="{% url 'ClienteModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        {% if moto.fotocopia_libreta or moto.compra_venta or moto.certificado_venta %}
+                        <!-- Botón para ver la fotocopia de la libreta de propiedad -->
+                        {% if moto.fotocopia_libreta_url %}
+                        <a href="{{ moto.fotocopia_libreta_url }}" target="_blank">
+                            <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
+                                <i class="fas fa-file-alt"></i> Libreta
+                            </button>
+                        </a>
+                        {% endif %}
+                        {% if moto.compra_venta %}
+                        <!-- Botón para ver el documento de compra-venta -->
+                        <a href="" target="_blank">
+                            <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
+                                <i class="fas fa-file-contract"></i> Compra-Venta
+                            </button>
+                        </a>
+                        {% endif %}
+                        {% if moto.certificado_venta %}
+                        <!-- Botón para ver el certificado de venta -->
+                        <a href="" target="_blank">
+                            <button class="btn btn-sm btn-secondary" title="Ver Certificado de Venta">
+                                <i class="fas fa-certificate"></i> Certificado
+                            </button>
+                        </a>
+                        {% endif %}
+                        {% else %}
+                        <p>SIN DOCUMENTACION</p>
+                        {% endif %}
                     </td>
+                    
                 </tr>
                 {% endfor %}
             {% else %}
@@ -102,8 +131,11 @@
                     <td>{{ cliente.cliente_telefono__telefono }}</td>
                    
                     <td>
-                        <a href="{% url 'ClienteModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="" target="_blank">
+                            <button class="btn btn-sm btn-secondary" title="Ver Factura">
+                                <i class="fas fa-certificate"></i> Factura
+                            </button>
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}

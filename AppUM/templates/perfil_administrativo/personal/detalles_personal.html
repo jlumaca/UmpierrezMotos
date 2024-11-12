@@ -1,0 +1,67 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-accesorio {
+        display: block;
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="table-container" id="motoDetails">
+    <h4>Detalles</h4>
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Personal</th>
+                <td>{{ personal.nombre }} {{ personal.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Cumpleaños</th>
+                <td>{{ personal.fecha_nacimiento }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Telefono</th>
+                <td>{{ personal.telefono }}</td>
+            </tr>
+            {% if personal.correo %}
+            <tr>
+                <th scope="row">Correo electrónico</th>
+                <td>{{ personal.correo }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th scope="row">Funciones</th>
+                <td>
+                {% if admin %}
+                Administrativo de tienda <br>
+                {% endif %}
+                {% if mec %}
+                {% if jefe %}
+                Mecánico jefe
+                {% else %}
+                Mecánico
+                {% endif %}
+                {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{% url 'Personal' %}" class="btn btn-secondary">Volver</a>
+</div>
+
+{% endblock %}

@@ -44,6 +44,8 @@ urlpatterns = [
 
 
      path('personal', views.vista_personal,name="Personal"),
+     path('personal_alta', views.alta_personal,name="PersonalAlta"),
+     path('personal_detalle/<int:id_personal>', views.detalles_personal,name="PersonalDetalle"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

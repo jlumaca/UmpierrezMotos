@@ -1489,3 +1489,74 @@ def vista_personal(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)
     return render(req,"perfil_administrativo/personal/personal.html",{"page_obj":page_obj})
+
+def validar_personal(documento,telefono,correo):
+    personal = Personal.objects.filter(documento=documento).first()
+    if personal:
+        #VERIFICAR SI EXISTE EN ADMINISTRATIVO
+        administrativo = Administrativo.objects.filter(personal_ptr_id = personal.id).first()
+        if administrativo:
+            if administrativo.activo == 1:
+                return "existe_admin"
+            else:
+                return "update_activo"
+        else:
+            return "ingresar_en_administrativo"
+    
+    # telefono_pers = Personal.objects.filter(telefono = telefono).first()
+
+    # if telefono_pers:
+    #     return "existe_telefono"
+    
+    # correo_pers = Personal.objects.filter(correo = correo).first()
+    # if correo_pers:
+    #     return "existe_telefono"
+
+def alta_personal(req):
+    try:
+        if req.method == "POST":
+            documento = req.POST['tipo_doc'] + str(req.POST['doc'])
+            valid_personal = validar_personal(documento)
+            if valid_personal == "existe_admin":
+                return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Existe administrativo"})
+            else:
+                if valid_personal == "update_activo":
+                    pass
+                elif valid_personal == "ingresar_en_administrativo":
+                    pass
+                else:
+                    pass
+                
+        else:
+            return render(req,"perfil_administrativo/personal/alta_personal.html",{})
+    except Exception as e:
+        pass
+
+def detalles_personal(req,id_personal):
+    # try:
+        personal = Personal.objects.get(id=id_personal)
+        administrativo = Administrativo.objects.filter(personal_ptr_id = id_personal,activo = 1).first()
+        if administrativo:
+            admin = True
+        else:
+            admin = False
+        
+        mecanico = Mecanico.objects.filter(personal_ptr_id = id_personal,activo = 1).first()
+        if mecanico:
+            mec = True
+            if mecanico.jefe == 1:
+                jefe = True
+            else:
+                jefe = False
+        else:
+            mec = False
+            jefe = False
+        contexto = {
+            "personal":personal,
+            "admin":admin,
+            "mec":mec,
+            "jefe":jefe
+        }
+        return render(req,"perfil_administrativo/personal/detalles_personal.html",contexto)
+    # except Exception as e:
+    #     pass

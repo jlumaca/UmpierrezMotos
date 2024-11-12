@@ -39,7 +39,7 @@
     <!-- <a href="" class="btn btn-primary mb-3 registrar-cliente">
         <i class="fas fa-user-plus"></i> Alta de Cliente
     </a> -->
-    <a href="{% url 'ClienteAlta' %}" class="btn btn-primary mb-3">
+    <a href="{% url 'PersonalAlta' %}" class="btn btn-primary mb-3">
         <i class="fas fa-user-plus"></i> Alta de personal
     </a>
     
@@ -106,7 +106,7 @@
                     <td>{{ personal.telefono }}</td>
                    
                     <td>
-                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="{% url 'PersonalDetalle' personal.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

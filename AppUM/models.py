@@ -94,6 +94,14 @@ class ComprasVentas(models.Model):
 
     class Meta:
         pass
-
 #tipo = V --->>> PARA CUANDO UN CLIENTE COMPRA UNA MOTO
 #tipo = CV --->>> PARA CUANDO UN CLIENTE VENDE UNA MOTO USADA
+
+class ClienteAccesorio(models.Model):
+    accesorio = models.ForeignKey(Accesorio, related_name='accesorio_cliente', on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, related_name='cliente_cliente', on_delete=models.CASCADE)
+    fecha_compra = models.DateField()
+    factura = models.IntegerField(null=True)
+    factura_rut = models.IntegerField(null=True)
+    factura_documento = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_accesorios/")
+

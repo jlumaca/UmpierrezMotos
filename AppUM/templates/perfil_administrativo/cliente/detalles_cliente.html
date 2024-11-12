@@ -62,45 +62,41 @@
         </thead>
         <tbody>
             {% if page_obj %}
-                {% for moto in page_obj %}
-                <tr>
-                    <td>{{ moto.moto__marca }} {{ moto.moto__modelo }}</td>
-                    <td>{{ moto.fecha_compra }}</td>
-                    <td>{% if moto.cantidad_cuotas == 1 %} CONTADO {% else %} {{ moto.cantidad_cuotas }} CUOTAS {% endif %}</td>
-                    <td>{% if moto.cantidad_cuotas == 1 %} -------  {% else %} {{ moto.cuotas_pagas }} DE {{ moto.cantidad_cuotas }} {% endif %}</td>
-                    <td>{{ moto.valor_cuota }}</td>
-                    <td>
-                        {% if moto.fotocopia_libreta or moto.compra_venta or moto.certificado_venta %}
-                        <!-- Botón para ver la fotocopia de la libreta de propiedad -->
-                        {% if moto.fotocopia_libreta_url %}
-                        <a href="{{ moto.fotocopia_libreta_url }}" target="_blank">
-                            <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
-                                <i class="fas fa-file-alt"></i> Libreta
-                            </button>
-                        </a>
-                        {% endif %}
-                        {% if moto.compra_venta %}
-                        <!-- Botón para ver el documento de compra-venta -->
-                        <a href="" target="_blank">
-                            <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
-                                <i class="fas fa-file-contract"></i> Compra-Venta
-                            </button>
-                        </a>
-                        {% endif %}
-                        {% if moto.certificado_venta %}
-                        <!-- Botón para ver el certificado de venta -->
-                        <a href="" target="_blank">
-                            <button class="btn btn-sm btn-secondary" title="Ver Certificado de Venta">
-                                <i class="fas fa-certificate"></i> Certificado
-                            </button>
-                        </a>
-                        {% endif %}
-                        {% else %}
-                        <p>SIN DOCUMENTACION</p>
-                        {% endif %}
-                    </td>
-                    
-                </tr>
+                {% for item in page_obj %}
+                    <tr>
+                        <td>{{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}</td>
+                        <td>{{ item.moto.fecha_compra }}</td>
+                        <td>{% if item.moto.cantidad_cuotas == 1 %} CONTADO {% else %} {{ item.moto.cantidad_cuotas }} CUOTAS {% endif %}</td>
+                        <td>{% if item.moto.cantidad_cuotas == 1 %} -------  {% else %} {{ item.moto.cuotas_pagas }} DE {{ item.moto.cantidad_cuotas }} {% endif %}</td>
+                        <td>{{ item.moto.valor_cuota }}</td>
+                        <td>
+                            {% if item.libreta or item.compra_venta or item.certificado_venta %}
+                                {% if item.libreta %}
+                                    <a href="{{ item.libreta }}" target="_blank">
+                                        <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
+                                            <i class="fas fa-file-alt"></i> Libreta
+                                        </button>
+                                    </a>
+                                {% endif %}
+                                {% if item.compra_venta %}
+                                    <a href="{{ item.compra_venta }}" target="_blank">
+                                        <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
+                                            <i class="fas fa-file-contract"></i> Compra-Venta
+                                        </button>
+                                    </a>
+                                {% endif %}
+                                {% if item.certificado_venta %}
+                                    <a href="{{ item.certificado_venta }}" target="_blank">
+                                        <button class="btn btn-sm btn-secondary" title="Ver Certificado de Venta">
+                                            <i class="fas fa-certificate"></i> Certificado
+                                        </button>
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <p>SIN DOCUMENTACION</p>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
             {% else %}
                 <tr>
@@ -117,25 +113,29 @@
             <tr>
                 <th scope="row">Detalles</th>
                 <th scope="row">Fecha</th>
-                <th scope="row">Forma de pago</th>
+                <!-- <th scope="row">Forma de pago</th>
                 <th scope="row">Cuotas</th>
-                <th scope="row">Monto</th>
-                <th scope="row">Documentacion</th>
+                <th scope="row">Monto</th> -->
+                <th scope="row">Factura</th>
             </tr>
         </thead>
         <tbody>
-            {% if page_obj %}
-                {% for cliente in page_obj %}
+            {% if page_obj_accesorio %}
+                {% for item in page_obj_accesorio %}
                 <tr>
-                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
-                    <td>{{ cliente.cliente_telefono__telefono }}</td>
+                    <td>{{ item.accesorio.accesorio__tipo }} {{ item.accesorio.accesorio__marca }} {{ item.accesorio.accesorio__modelo }}</td>
+                    <td>{{ item.accesorio.fecha_compra }}</td>
                    
                     <td>
-                        <a href="" target="_blank">
+                        {% if item.factura_documento %}
+                        <a href="{{ item.factura_documento }}" target="_blank">
                             <button class="btn btn-sm btn-secondary" title="Ver Factura">
                                 <i class="fas fa-certificate"></i> Factura
                             </button>
                         </a>
+                        {% else %}
+                        <p>SIN DOCUMENTACION</p>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

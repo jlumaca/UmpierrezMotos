@@ -832,7 +832,7 @@ def detalles_moto(req,id_moto):
     else:
         contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta,"telefono_principal":telefono_principal,"correo":correo}
       
-    
+    print(pdf)
     # if not matricula_anterior:
     #     matricula_anterior.matricula = None
 
@@ -1413,11 +1413,12 @@ def ficha_cliente(req,id_cliente):
     else:
         c_2 = None
     
-    resultados = (
+    resultados_motos = (
         ComprasVentas.objects
         .filter(cliente__id=id_cliente, tipo='V')
         .select_related('moto', 'cliente')
         .values(
+            'id',
             'moto__marca', 
             'moto__modelo', 
             'fecha_compra', 
@@ -1430,24 +1431,49 @@ def ficha_cliente(req,id_cliente):
             'valor_cuota'
         )
     )
-    #pdf = moto.identificacion_pdf.url
-    paginator = Paginator(resultados, 5)  # 5 clientes por página
+    res_documentacion = []
+    for resultado in resultados_motos:
+            cv = ComprasVentas.objects.get(id=resultado['id'])
+            res_documentacion.append({
+            'moto': resultado,
+            'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
+            'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
+            'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
+        })
 
+
+    paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)
-    for resultado in resultados:
-        if resultado['fotocopia_libreta']:
-            resultado['fotocopia_libreta_url'] = settings.MEDIA_URL + resultado['fotocopia_libreta']
-        if resultado['compra_venta']:
-            resultado['compra_venta_url'] = resultado['compra_venta']
-        if resultado['certificado_venta']:
-            resultado['certificado_venta_url'] = resultado['certificado_venta']
-    
+
+    resultados_accesorios = (
+        ClienteAccesorio.objects
+        .filter(cliente__id=id_cliente)
+        .select_related('accesorio', 'cliente')
+        .values(
+            'id',
+            'accesorio__tipo',
+            'accesorio__marca',
+            'accesorio__modelo',
+            'fecha_compra',
+            'factura_documento'
+        )
+    )
+    res_facturas = []
+    for resultado_accesorio in resultados_accesorios:
+            ca = ClienteAccesorio.objects.get(id=resultado_accesorio['id'])
+            res_facturas.append({
+            'accesorio': resultado_accesorio,
+            'factura_documento': ca.factura_documento.url if ca.factura_documento else None
+        })
+    paginator_accesorio = Paginator(res_facturas, 5)  # 5 clientes por página
+    page_number_accesorio = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj_accesorio = paginator_accesorio.get_page(page_number_accesorio)
     return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,
                                                                              "tel1":tel_1,
                                                                              "tel2":tel_2,
                                                                              "correo1":c_1,
                                                                              "correo2":c_2,
                                                                              "page_obj":page_obj,
-                                                                             
-                                                                             "res_motos":resultados})
+                                                                             "page_obj_accesorio":page_obj_accesorio
+                                                                             })

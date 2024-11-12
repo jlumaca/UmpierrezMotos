@@ -1477,3 +1477,15 @@ def ficha_cliente(req,id_cliente):
                                                                              "page_obj":page_obj,
                                                                              "page_obj_accesorio":page_obj_accesorio
                                                                              })
+
+
+
+def vista_personal(req):
+    administrativos = (Administrativo.objects
+                       .filter(activo=True)
+                       .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo')
+                       .order_by('nombre'))
+    paginator = Paginator(administrativos, 5)  # 5 clientes por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)
+    return render(req,"perfil_administrativo/personal/personal.html",{"page_obj":page_obj})

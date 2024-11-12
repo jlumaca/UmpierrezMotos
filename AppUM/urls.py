@@ -41,6 +41,9 @@ urlpatterns = [
      path('busqueda_documento', views.buscar_por_doc,name="BusquedaDocumento"),
      path('busqueda_nombre_apellido', views.buscar_nom_ape,name="BusquedaNombreApellido"),
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
+
+
+     path('personal', views.vista_personal,name="Personal"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -51,22 +51,22 @@ def validacion_login(req):
         
             if existe_mecanico == 1 and mecanico_jefe == 1 and existe_administrativo == 1:
                 renderizar_en = "login/login.html"
-                contexto = "Administrativo y Mecanico Jefe"
+                contexto = {"resultado":"Administrativo y Mecanico Jefe"}
             elif existe_mecanico == 1 and mecanico_jefe == 0 and existe_administrativo == 1:
                 renderizar_en = "login/login.html"
-                contexto = "Administrativo y Mecanico Empleado"
+                contexto = {"resultado":"Administrativo y Mecanico Empleado"}
             elif existe_administrativo == 1 and existe_mecanico == 0:
                 renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
                 contexto = {"existe_mecanico":0,"mecanico_jefe":0,"existe_administrativo":1}
             elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 1:
                 renderizar_en = "login/login.html"
-                contexto = "Solo Mecanico Jefe"
+                contexto ={"resultado":"Solo Mecanico Jefe"}
             elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 0:
                 renderizar_en = "login/login.html"
-                contexto = "Solo Mecanico Empleado" 
+                contexto = {"resultado":"Solo Mecanico Empleado" }
             else:
                 renderizar_en = "login/login.html"
-                contexto = "Este usuario fue dado de baja, contactese con el administrador del sistema."
+                contexto = {"resultado":"Este usuario fue dado de baja, contactese con el administrador del sistema."}
            
         else:
             renderizar_en = "login/login.html"
@@ -74,7 +74,7 @@ def validacion_login(req):
 
     except:
         renderizar_en = "login/login.html"
-        contexto = "Algo salió mal"
+        contexto = {"resultado":"Algo salió mal"}
     #print(existe_mecanico)
     return render(req,renderizar_en,contexto)
 
@@ -1496,41 +1496,90 @@ def validar_personal(documento,telefono,correo):
         #VERIFICAR SI EXISTE EN ADMINISTRATIVO
         administrativo = Administrativo.objects.filter(personal_ptr_id = personal.id).first()
         if administrativo:
-            if administrativo.activo == 1:
+            if administrativo.activo == 1: #SI EXISTIERA DEVUELVE ERROR 
                 return "existe_admin"
-            else:
+            else: #SI EXISTIERA Y FUE DADO DE BAJA COMO ADMINISTRATIVO (EJ. FUE ADMIN, PASO A SER MECANICO Y VUELVE A SER ADMIN), SIMPLEMENTE SE MODIFICA EL CAMPO ACTIVO = 1
                 return "update_activo"
         else:
-            return "ingresar_en_administrativo"
+            return "ingresar_en_administrativo" #SI LA PERSONA EXISTE PERO NUNCA FUE ADMINISTRATIVA, SE INGRESA COMO NUEVA ADMINISTRATIVA (EJ. MECANICO QUE EMPEZARA CON TAREAS DE ADMINISTRATIVO)
     
-    # telefono_pers = Personal.objects.filter(telefono = telefono).first()
+    telefono_pers = Personal.objects.filter(telefono = telefono).first()
 
-    # if telefono_pers:
-    #     return "existe_telefono"
+    if telefono_pers: #SI EL TELEFONO DEL PERSONAL A INGRESAR EXISTIERA (PUEDE QUE SEA UN MECANICO QUE SE LE ASIGNARA TAREAS DE ADMINISTRATIVO), EL ADMINISTRATIVO LOGEADO EN EL SISTEMA DEBERA OTORGARLE PERMISOS DE ADMINISTRATIVO
+        return "existe_telefono" 
     
-    # correo_pers = Personal.objects.filter(correo = correo).first()
-    # if correo_pers:
-    #     return "existe_telefono"
+    correo_pers = Personal.objects.filter(correo = correo).first()
+    if correo_pers: #SI EL CORREO DEL PERSONAL A INGRESAR EXISTIERA (PUEDE QUE SEA UN MECANICO QUE SE LE ASIGNARA TAREAS DE ADMINISTRATIVO), EL ADMINISTRATIVO LOGEADO EN EL SISTEMA DEBERA OTORGARLE PERMISOS DE ADMINISTRATIVO
+        return "existe_correo"
 
 def alta_personal(req):
     try:
         if req.method == "POST":
             documento = req.POST['tipo_doc'] + str(req.POST['doc'])
-            valid_personal = validar_personal(documento)
+            telefono = req.POST['telefono'] 
+            correo_nombre = req.POST['correo'] 
+            correo_dominio = req.POST['dominio_correo'] 
+            correo = correo_nombre + correo_dominio
+            # print(documento)
+            valid_personal = validar_personal(documento,telefono,correo)
+            # print(valid_personal)
             if valid_personal == "existe_admin":
                 return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Existe administrativo"})
+            elif valid_personal == "existe_telefono":
+                return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"El teléfono ingresado ya existe en el sistema, el mismo no debe estar repetido"})
+            elif valid_personal == "existe_correo":
+                return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"El correo ingresado ya existe en el sistema, el mismo no debe estar repetido"})
             else:
                 if valid_personal == "update_activo":
-                    pass
+                    return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Modificar activo = 1"})
                 elif valid_personal == "ingresar_en_administrativo":
-                    pass
+                    return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Ingresar nuevo administrativo"})
                 else:
-                    pass
+                    #return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"ingresar nueva persona"})
+                    nombre_para_usuario = req.POST['nombre']
+                    apellido_para_usuario = req.POST['apellido']
+                    usuario = nombre_para_usuario[0:1:1] + apellido_para_usuario
+                    #print("USUARIO --->>>" + usuario)
+                    f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                    f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+                    # print(f_nac)
+                    # nuevo_admin = Personal(
+                    #     documento = documento,
+                    #     nombre = req.POST['nombre'],
+                    #     apellido = req.POST['correo'],
+                    #     fecha_nacimiento = f_nac,
+                    #     usuario = usuario,
+                    #     contrasena = "Inicio1234",
+                    #     correo = correo,
+                    #     telefono = telefono
+                    # )
+                    # nuevo_admin.save()
+
+                    # id_admin = Personal.objects.filter(documento=documento).first()
+
+                    # administrativo = Administrativo(
+                    #     personal_ptr_id = id_admin.id,
+                    #     activo = 1
+                    # )
+                    # administrativo.save()
+                    administrativo = Administrativo(
+                    documento=documento,
+                    nombre=req.POST['nombre'],
+                    apellido=req.POST['apellido'],  # Cambié 'correo' a 'apellido'
+                    fecha_nacimiento=f_nac,
+                    usuario=usuario,
+                    contrasena="Inicio1234",
+                    correo=correo,
+                    telefono=telefono,
+                    activo=1  # Campo adicional específico de `Administrativo`
+                    )
+                    administrativo.save()
+                    return render(req,"perfil_administrativo/personal/personal.html",{})
                 
         else:
             return render(req,"perfil_administrativo/personal/alta_personal.html",{})
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":e})
 
 def detalles_personal(req,id_personal):
     # try:

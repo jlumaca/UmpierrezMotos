@@ -1506,11 +1506,26 @@ def validar_personal(documento,telefono,correo):
     telefono_pers = Personal.objects.filter(telefono = telefono).first()
 
     if telefono_pers: #SI EL TELEFONO DEL PERSONAL A INGRESAR EXISTIERA (PUEDE QUE SEA UN MECANICO QUE SE LE ASIGNARA TAREAS DE ADMINISTRATIVO), EL ADMINISTRATIVO LOGEADO EN EL SISTEMA DEBERA OTORGARLE PERMISOS DE ADMINISTRATIVO
-        return "existe_telefono" 
+        # tel_admin = Administrativo.objects.filter(ptr_personal_id = telefono_pers.id).first()
+        # if tel_admin:
+        #     if tel_admin.activo == 1: 
+                return "existe_telefono" 
     
     correo_pers = Personal.objects.filter(correo = correo).first()
     if correo_pers: #SI EL CORREO DEL PERSONAL A INGRESAR EXISTIERA (PUEDE QUE SEA UN MECANICO QUE SE LE ASIGNARA TAREAS DE ADMINISTRATIVO), EL ADMINISTRATIVO LOGEADO EN EL SISTEMA DEBERA OTORGARLE PERMISOS DE ADMINISTRATIVO
-        return "existe_correo"
+        # correo_admin = Administrativo.objects.filter(ptr_personal_id = correo_pers.id).first()
+        # if correo_admin:
+        #     if correo_admin.activo == 1:
+                return "existe_correo"
+
+def nombre_usuario(nombre,apellido):
+    #SI EXISTE EL USUARIO, AGREGAR NUMERO AL FINAL (EJ. jperez, jperez1, jperez2)
+    apellido_unido = apellido.replace(' ','')
+    usuario = nombre[0:1:1] + apellido_unido
+    cant_usuario = Personal.objects.filter(usuario__contains=usuario).count()
+    if cant_usuario > 0: #EXISTE MAS DE UN jperez
+        usuario = nombre[0:1:1] + apellido + str(cant_usuario)
+    return usuario
 
 def alta_personal(req):
     try:
@@ -1530,51 +1545,36 @@ def alta_personal(req):
             elif valid_personal == "existe_correo":
                 return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"El correo ingresado ya existe en el sistema, el mismo no debe estar repetido"})
             else:
-                if valid_personal == "update_activo":
-                    return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Modificar activo = 1"})
-                elif valid_personal == "ingresar_en_administrativo":
-                    return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Ingresar nuevo administrativo"})
-                else:
-                    #return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"ingresar nueva persona"})
-                    nombre_para_usuario = req.POST['nombre']
-                    apellido_para_usuario = req.POST['apellido']
-                    usuario = nombre_para_usuario[0:1:1] + apellido_para_usuario
-                    #print("USUARIO --->>>" + usuario)
-                    f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
-                    f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
-                    # print(f_nac)
-                    # nuevo_admin = Personal(
-                    #     documento = documento,
-                    #     nombre = req.POST['nombre'],
-                    #     apellido = req.POST['correo'],
-                    #     fecha_nacimiento = f_nac,
-                    #     usuario = usuario,
-                    #     contrasena = "Inicio1234",
-                    #     correo = correo,
-                    #     telefono = telefono
-                    # )
-                    # nuevo_admin.save()
+                # if valid_personal == "update_activo":
+                #     return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Modificar activo = 1"})
+                # elif valid_personal == "ingresar_en_administrativo":
+                #     # return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Ingresar nuevo administrativo"})
+                #     personal = Personal.objects.filter(documento=documento).first()
+                #     solo_administrativo = Administrativo(
+                #         personal_ptr_id = personal.id,
+                #         activo = 1
+                #     )
+                #     solo_administrativo.id
+                # else:
+                                    
+                f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+                usuario = nombre_usuario(req.POST['nombre'],req.POST['apellido'])
+                
+                administrativo = Administrativo.objects.create(
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono,
+                        activo=True
+                     )
 
-                    # id_admin = Personal.objects.filter(documento=documento).first()
-
-                    # administrativo = Administrativo(
-                    #     personal_ptr_id = id_admin.id,
-                    #     activo = 1
-                    # )
-                    # administrativo.save()
-                    administrativo = Administrativo(
-                    documento=documento,
-                    nombre=req.POST['nombre'],
-                    apellido=req.POST['apellido'],  # Cambié 'correo' a 'apellido'
-                    fecha_nacimiento=f_nac,
-                    usuario=usuario,
-                    contrasena="Inicio1234",
-                    correo=correo,
-                    telefono=telefono,
-                    activo=1  # Campo adicional específico de `Administrativo`
-                    )
-                    administrativo.save()
-                    return render(req,"perfil_administrativo/personal/personal.html",{})
+                messages.success(req, "Personal ingresado con éxito")
+                return redirect('Personal')
                 
         else:
             return render(req,"perfil_administrativo/personal/alta_personal.html",{})

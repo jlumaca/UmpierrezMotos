@@ -6,7 +6,7 @@ class Personal(models.Model):
     nombre = models.CharField(max_length=20)
     apellido  = models.CharField(max_length=20)
     fecha_nacimiento = models.DateField()
-    usuario = models.CharField(max_length=10,unique=True)
+    usuario = models.CharField(max_length=100,unique=True)
     contrasena = models.CharField(max_length=20)
     correo = models.CharField(max_length=40,unique=True)
     telefono = models.CharField(max_length=10,unique=True) 

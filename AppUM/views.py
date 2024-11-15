@@ -1618,3 +1618,61 @@ def detalles_personal(req,id_personal):
         return render(req,"perfil_administrativo/personal/detalles_personal.html",contexto)
     # except Exception as e:
     #     pass
+
+def prueba_compra_venta(req):
+    logo_um = Logos.objects.get(id=1)
+    logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+    ruta_pdf = "perfil_administrativo/motos/compra_venta.html"
+
+    regresa_moto = Moto.objects.get(id=1)
+    
+    datos_a_pdf = contexto_para_pdf_moto(regresa_moto,logo_um_url)
+    renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+    nombre_archivo = "compra_venta_prueba.pdf"
+    mensaje = "PRUEBA DE MOTO MENSAJE"
+    pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,regresa_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+    return pdf_ret
+
+
+def form_venta_moto(req,id_moto):
+    try:
+        if req.method == "POST":
+            tipo_doc = req.POST['tipo_documento']
+            doc = req.POST['documento']
+            documento = tipo_doc + str(doc)
+            cliente = Cliente.objects.filter(documento=documento).first()
+            if cliente:
+                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+                tel_1 = tel1.telefono
+                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+                if tel2:
+                    tel_2 = tel2.telefono
+                else:
+                    tel_2 = None
+
+                if correo1:
+                    c_1 = correo1.correo
+                else:
+                    c_1 = None
+                
+                if correo2:
+                    c_2 = correo1.correo
+                else:
+                    c_2 = None
+                moto = Moto.objects.get(id=id_moto)
+                return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
+                                                                                "cliente":cliente,
+                                                                                "moto":moto,
+                                                                                "tel1":tel_1,
+                                                                                "tel2":tel_2,
+                                                                                "correo1":c_1,
+                                                                                "correo2":c_2,})
+            else:
+                return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+        else:
+            return render(req,"perfil_administrativo/motos/venta_moto.html",{})
+    except Exception as e:
+        pass

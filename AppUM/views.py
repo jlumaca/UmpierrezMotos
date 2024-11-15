@@ -11,6 +11,10 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 # Create your views here.
+from django.contrib.auth.hashers import make_password
+# for usuario in Personal.objects.all():
+#     usuario.contrasena = make_password(usuario.contrasena)
+#     usuario.save()
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##
 
@@ -19,70 +23,66 @@ def vista_login(req):
 
 ##VALIDACION DE USUARIO Y CONTRASEÑA##
 def validacion_login(req):
-    try:
-        usuario = req.GET['usuario_login']
-        passw = req.GET['pass_login']
+    if req.method == "POST":
+        usuario = req.POST.get('usuario_login')
+        passw = req.POST.get('pass_login')
 
-        usuario_consulta = Personal.objects.filter(usuario=usuario,contrasena=passw).first()
-    
+        try:
+            # Buscar usuario
+            usuario_consulta = Personal.objects.filter(usuario=usuario).first()
 
-        if usuario_consulta:
-            nombre_apellido = usuario_consulta.nombre + " " + usuario_consulta.apellido
-            mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
-            if mecanico:
-                if mecanico.activo == 1:
-                    existe_mecanico = 1
-                    if mecanico.jefe == 1:
-                        mecanico_jefe = 1
-                    else:
-                        mecanico_jefe = 0
-                else:
-                    existe_mecanico = 0
-            else:
-                mecanico_jefe = 0
-                existe_mecanico = 0
+            if usuario_consulta and check_password(passw, usuario_consulta.contrasena):
+                # Concatenar nombre completo
+                nombre_apellido = f"{usuario_consulta.nombre} {usuario_consulta.apellido}"
                 
-            administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
-            if administrativo:
-                if administrativo.activo == 1:
-                    existe_administrativo = 1
+                # Verificar roles
+                mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+                administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+
+                existe_mecanico = mecanico and mecanico.activo
+                mecanico_jefe = mecanico and mecanico.jefe
+                existe_administrativo = administrativo and administrativo.activo
+
+                # Decidir redirección y contexto
+                if existe_administrativo and mecanico_jefe:
+                    contexto = {"resultado": "Administrativo y Mecánico Jefe"}
+                    renderizar_en = "login/login.html"
+                elif existe_administrativo and existe_mecanico:
+                    contexto = {"resultado": "Administrativo y Mecánico Empleado"}
+                    renderizar_en = "login/login.html"
+                elif existe_administrativo:
+                    contexto = {
+                        "usuario": nombre_apellido,
+                        "existe_mecanico": 0,
+                        "mecanico_jefe": 0,
+                        "existe_administrativo": 1
+                    }
+                    renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+                elif mecanico_jefe:
+                    contexto = {"resultado": "Solo Mecánico Jefe"}
+                    renderizar_en = "login/login.html"
+                elif existe_mecanico:
+                    contexto = {"resultado": "Solo Mecánico Empleado"}
+                    renderizar_en = "login/login.html"
                 else:
-                    existe_administrativo = 0
+                    contexto = {"resultado": "Este usuario fue dado de baja, contacte al administrador del sistema."}
+                    renderizar_en = "login/login.html"
             else:
-                existe_administrativo = 0
-        
-            if existe_mecanico == 1 and mecanico_jefe == 1 and existe_administrativo == 1:
+                # Usuario o contraseña incorrectos
+                contexto = {"resultado": "Error de usuario y/o contraseña"}
                 renderizar_en = "login/login.html"
-                contexto = {"resultado":"Administrativo y Mecanico Jefe"}
-            elif existe_mecanico == 1 and mecanico_jefe == 0 and existe_administrativo == 1:
-                renderizar_en = "login/login.html"
-                contexto = {"resultado":"Administrativo y Mecanico Empleado"}
-            elif existe_administrativo == 1 and existe_mecanico == 0:
-                renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
 
-
-                
-                contexto = {"existe_mecanico":0,"mecanico_jefe":0,"existe_administrativo":1,"usuario":nombre_apellido}
-            elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 1:
-                renderizar_en = "login/login.html"
-                contexto ={"resultado":"Solo Mecanico Jefe"}
-            elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 0:
-                renderizar_en = "login/login.html"
-                contexto = {"resultado":"Solo Mecanico Empleado" }
-            else:
-                renderizar_en = "login/login.html"
-                contexto = {"resultado":"Este usuario fue dado de baja, contactese con el administrador del sistema."}
-           
-        else:
+        except Exception as e:
+            # Manejar errores específicos o generales
+            contexto = {"resultado": f"Algo salió mal: {str(e)}"}
             renderizar_en = "login/login.html"
-            contexto = {"resultado":"Error de usuario y/o contraseña"}
 
-    except:
+    else:
+        # Redirigir si el método no es POST
+        contexto = {"resultado": "Método de solicitud no válido"}
         renderizar_en = "login/login.html"
-        contexto = {"resultado":"Algo salió mal"}
-    #print(existe_mecanico)
-    return render(req,renderizar_en,contexto)
 
+    return render(req, renderizar_en, contexto)
 
 def vista_inventario_motos(req):
     motos = Moto.objects.filter(pertenece_tienda=1).order_by('-fecha_ingreso')

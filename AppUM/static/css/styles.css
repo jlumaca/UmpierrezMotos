@@ -100,3 +100,9 @@ body {
     color: #004085;
     border: 1px solid #b8daff;
 }
+
+.nav-item.active .nav-link {
+    color: #007bff !important;    /* Color del texto */
+    border-bottom: 3px solid #007bff; /* Línea inferior */
+    font-weight: bold;        /* Bordes redondeados */
+}

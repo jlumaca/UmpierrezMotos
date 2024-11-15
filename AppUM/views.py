@@ -94,7 +94,7 @@ def vista_inventario_motos(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 
 def vista_inventario_accesorios(req):
@@ -250,13 +250,15 @@ def datos_cliente_venta(req):
 
         if cliente:
             contexto = {
-                "datos_cliente":cliente
+                "datos_cliente":cliente,
+                "active_page": 'Motos'
             }
             return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
         else:
             contexto = {
                 "error_message_cliente":"El cliente no existe, debe ingresar los datos del mismo haciendo clic ",
-                "form_cliente":True
+                "form_cliente":True,
+                "active_page": 'Motos'
             }
             return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
 
@@ -279,13 +281,13 @@ def form_alta_moto(req):
             estado_moto = req.POST['estado_moto']
             
             if valid_moto == "existe_num_motor":
-                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de motor"})
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de motor","active_page": 'Motos'})
             elif valid_moto == "existe_num_chasis":
-                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de chasis"})
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe una moto con ese numero de chasis","active_page": 'Motos'})
             elif valid_moto == "num_motor_chasis_error":
-                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"El número de chasis y/o motor pertenecen a otra moto ingresada en el sistema"})
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"El número de chasis y/o motor pertenecen a otra moto ingresada en el sistema","active_page": 'Motos'})
             elif valid_matricula == "matricula_existe":
-                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe la matricula"})
+                return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Ya existe la matricula","active_page": 'Motos'})
             else:
                 if estado_moto == "nueva":
                     foto = req.FILES.get('foto_moto')
@@ -485,16 +487,17 @@ def form_alta_moto(req):
                                 return redirect('Motos')
                     else:
                         contexto = {
-                            "error_message_cliente":"El cliente no existe, debe ingresar los datos del mismo haciendo clic "
+                            "error_message_cliente":"El cliente no existe, debe ingresar los datos del mismo haciendo clic ",
+                            "active_page": 'Motos'
                         }
                         return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
 
             # return render(req,"perfil_administrativo/motos/alta_moto.html",{})
         else:
-            return render(req,"perfil_administrativo/motos/alta_moto.html",{})
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos'})
     
     except Exception as e:
-        return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__})
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__,"active_page": 'Motos'})
 
 
 def baja_moto(req,id_moto):
@@ -503,11 +506,11 @@ def baja_moto(req,id_moto):
       motoDel = Moto.objects.get(id=id_moto)
       motoDel.pertenece_tienda = 0
       motoDel.save()
-      return render(req, "perfil_administrativo/motos/baja_moto.html", {"message":"Moto borrada con éxito","id_moto":0})
+      return render(req, "perfil_administrativo/motos/baja_moto.html", {"message":"Moto borrada con éxito","id_moto":0,"active_page": 'Motos'})
       #return HttpResponse(f"<p>{id_auto}</p>")
     else:
        #print(f"Id auto es: {id_auto}")
-       return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto})
+       return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto,"active_page": 'Motos'})
        #return HttpResponse(f"<p>{id_auto}</p>")
 
 def busqueda_codigo(req):
@@ -518,7 +521,7 @@ def busqueda_codigo(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_marca(req):
     marca = req.GET.get('marca')
@@ -528,7 +531,7 @@ def busqueda_marca(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_modelo(req):
     modelo = req.GET.get('modelo')
@@ -538,7 +541,7 @@ def busqueda_modelo(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_marca_modelo(req):
     marca = req.GET.get('marca_modelo')
@@ -549,7 +552,7 @@ def busqueda_marca_modelo(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_anio(req):
     anio = req.GET.get('anio')
@@ -560,7 +563,7 @@ def busqueda_anio(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_kms(req):
     km_minimo = req.GET.get('km_minimo')
@@ -571,7 +574,7 @@ def busqueda_kms(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_precio(req):
     precio_minimo = req.GET.get('precio_minimo')
@@ -582,7 +585,7 @@ def busqueda_precio(req):
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
 
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos})
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
 def busqueda_matricula(req):
     matricula_letras = req.GET.get('letras_matricula').upper()
@@ -595,9 +598,9 @@ def busqueda_matricula(req):
         paginator = Paginator(moto, 5)  # 10 motos por página
         page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
         page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
-        contexto = {'page_obj': page_obj,"motos":moto}
+        contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}
     else:
-        contexto = {'page_obj': None,"motos":None}
+        contexto = {'page_obj': None,"motos":None,"active_page": 'Motos'}
 
     return render(req,"perfil_administrativo/motos/motos.html",contexto)
 
@@ -618,7 +621,8 @@ def datos_a_modificacion_moto(req,id_moto):
             moto_upd.observaciones = "Sin descripción"
         return render(req,"perfil_administrativo/motos/modificacion_moto.html",{'datos_moto': moto_upd,
         "letras_matricula":letras_matricula,
-        "num_matricula":num_matricula})   
+        "num_matricula":num_matricula,
+        "active_page": 'Motos'})   
     except:
         pass
 
@@ -656,12 +660,14 @@ def modificacion_moto(req,id_moto):
                             return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"Ya existe el numero de motor",
                                                                                                     'datos_moto': moto_upd,
                                                                                                     "letras_matricula":letras_matricula,
-                                                                                                    "num_matricula":num_matricula}) 
+                                                                                                    "num_matricula":num_matricula,
+                                                                                                    "active_page": 'Motos'}) 
                         elif validacion_datos_moto == "existe_num_chasis":
                             return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"Ya existe el numero de chasis",
                                                                                                     'datos_moto': moto_upd,
                                                                                                     "letras_matricula":letras_matricula,
-                                                                                                    "num_matricula":num_matricula}) 
+                                                                                                    "num_matricula":num_matricula,
+                                                                                                    "active_page": 'Motos'}) 
                         else:
                             marca = req.POST['marca_moto'].upper()
                             modelo = req.POST['modelo_moto'].upper()
@@ -703,7 +709,8 @@ def modificacion_moto(req,id_moto):
                                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"Ya existe la matricula",
                                                                                                             'datos_moto': moto_upd,
                                                                                                             "letras_matricula":matr_letras,
-                                                                                                            "num_matricula":matr_num})
+                                                                                                            "num_matricula":matr_num,
+                                                                                                            "active_page": 'Motos'})
                                 else:
                                     if matr_upd: #SI EXISTIERA UNA MATRICULA ASIGNADA A LA MOTO INGRESA, LA MISMA SERA BORRADA DESPUES
                                         
@@ -763,7 +770,7 @@ def modificacion_moto(req,id_moto):
                         moto_upd.observaciones = "Sin descripción"
                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{'datos_moto': moto_upd,
                     "letras_matricula":letras_matricula,
-                    "num_matricula":num_matricula}) 
+                    "num_matricula":num_matricula,"active_page": 'Motos'}) 
     except:
         pass
     
@@ -832,10 +839,11 @@ def detalles_moto(req,id_moto):
                     "cliente":cliente,
                     "libreta":libreta,
                     "telefono_principal":telefono_principal,
-                    "correo":correo
+                    "correo":correo,
+                    "active_page": 'Motos'
                     }
     else:
-        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta,"telefono_principal":telefono_principal,"correo":correo}
+        contexto = {"moto":moto,"descripcion":descripcion,"pdf":pdf,"cliente":cliente,"libreta":libreta,"telefono_principal":telefono_principal,"correo":correo,"active_page": 'Motos'}
       
     print(pdf)
     # if not matricula_anterior:

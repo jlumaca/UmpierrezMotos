@@ -30,6 +30,9 @@
                         <a class="nav-link" href="{% url 'Clientes' %}" onclick="">Clientes</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'Ventas' %}" onclick="">Ventas</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'Personal' %}" onclick="">Personal</a>
                     </li>
                     <!-- Más ítems de la barra -->
@@ -40,7 +43,7 @@
                         <span class="notification-count" id="notificationCount">3</span>
                     </div>
                     <span class="navbar-text ms-3 me-3">
-                        Usuario: nombre_usuario
+                        Usuario: {{ usuario }}
                     </span>
                     <button class="btn btn-logout">Cerrar sesión</button>
                 </div>

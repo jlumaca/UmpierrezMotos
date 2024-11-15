@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
 # Create your views here.
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##
@@ -26,6 +27,7 @@ def validacion_login(req):
     
 
         if usuario_consulta:
+            nombre_apellido = usuario_consulta.nombre + " " + usuario_consulta.apellido
             mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
             if mecanico:
                 if mecanico.activo == 1:
@@ -57,7 +59,10 @@ def validacion_login(req):
                 contexto = {"resultado":"Administrativo y Mecanico Empleado"}
             elif existe_administrativo == 1 and existe_mecanico == 0:
                 renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
-                contexto = {"existe_mecanico":0,"mecanico_jefe":0,"existe_administrativo":1}
+
+
+                
+                contexto = {"existe_mecanico":0,"mecanico_jefe":0,"existe_administrativo":1,"usuario":nombre_apellido}
             elif existe_administrativo == 0 and existe_mecanico == 1 and mecanico_jefe == 1:
                 renderizar_en = "login/login.html"
                 contexto ={"resultado":"Solo Mecanico Jefe"}
@@ -1674,5 +1679,62 @@ def form_venta_moto(req,id_moto):
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:
             return render(req,"perfil_administrativo/motos/venta_moto.html",{})
+    except Exception as e:
+        pass
+
+def vista_ventas(req):
+    try:
+            resultados_motos = (
+                ComprasVentas.objects
+                .filter(tipo='V')
+                .select_related('moto','cliente')
+                .values(
+                    'id',
+                    'moto__marca', 
+                    'moto__modelo', 
+                    'fecha_compra', 
+                    'cliente__nombre',
+                    'cliente__apellido'
+                ).order_by('-fecha_compra')
+            )
+
+            res_documentacion = []
+            for resultado in resultados_motos:
+                cv = ComprasVentas.objects.get(id=resultado['id'])
+                res_documentacion.append({
+                'moto': resultado
+            })
+
+
+            paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
+            page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+            page_obj = paginator.get_page(page_number)
+            
+            resultados_accesorios = (
+                ClienteAccesorio.objects
+                # .filter(cliente__id=1)
+                .select_related('accesorio', 'cliente')
+                .values(
+                    'id',
+                    'accesorio__tipo',
+                    'accesorio__marca',
+                    'accesorio__modelo',
+                    'fecha_compra',
+                    'cliente__nombre',
+                    'cliente__apellido'
+                
+                ).order_by('-fecha_compra')
+            )
+            res_facturas = []
+            for resultado_accesorio in resultados_accesorios:
+                    ca = ClienteAccesorio.objects.get(id=resultado_accesorio['id'])
+                    res_facturas.append({
+                    'accesorio': resultado_accesorio,
+                    'factura_documento': ca.factura_documento.url if ca.factura_documento else None
+                })
+            paginator_accesorio = Paginator(res_facturas, 5)  # 5 clientes por página
+            page_number_accesorio = req.GET.get('page')  # Obtiene el número de página desde la URL
+            page_obj_accesorio = paginator_accesorio.get_page(page_number_accesorio)
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
     except Exception as e:
         pass

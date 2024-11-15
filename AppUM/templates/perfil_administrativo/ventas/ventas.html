@@ -1,0 +1,177 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert alert-success">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Motos</h3>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <div class="mb-3">
+        <label for="estado" class="form-label">Buscar por:</label>
+        <select class="form-control" name="estado_accesorio" id="tipo_busqueda" onchange="tipo_busqueda()">
+            <option value="tipo">Tipo</option>
+            <option value="marca_modelo">Marca y modelo</option>
+
+        </select>
+    </div>
+
+    <form action="{% url 'BusquedaTipoAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_tipo">{% csrf_token %}
+        <div class="input-group mb-3">
+            <select class="form-control" name="tipo_accesorio" id="tipo_accesorio">
+                <option value="casco">Casco</option>
+                <option value="otro">Otro</option>
+            </select>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Accesorios' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+
+    <form action="{% url 'BusquedaMarcaModeloAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_marca_modelo" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="marca_modelo" placeholder="Marca">
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="modelo_marca" placeholder="Modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Accesorios' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Detalles</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for moto in page_obj %}
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>{{ moto.moto.moto__marca }} {{ moto.moto.moto__modelo }}</td>
+                <td>{{ moto.moto.fecha_compra|date:"d/m/Y"}}</td>
+                <td>{{ moto.moto.cliente__nombre }} {{ moto.moto.cliente__apellido }}</td>
+                <td>
+                    <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de accesorios disponibles.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+<br>
+<br>
+    <h3>Accesorios</h3>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <div class="mb-3">
+        <label for="estado" class="form-label">Buscar por:</label>
+        <select class="form-control" name="estado_accesorio" id="tipo_busqueda" onchange="tipo_busqueda()">
+            <option value="tipo">Tipo</option>
+            <option value="marca_modelo">Marca y modelo</option>
+
+        </select>
+    </div>
+
+    <form action="{% url 'BusquedaTipoAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_tipo">{% csrf_token %}
+        <div class="input-group mb-3">
+            <select class="form-control" name="tipo_accesorio" id="tipo_accesorio">
+                <option value="casco">Casco</option>
+                <option value="otro">Otro</option>
+            </select>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Accesorios' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+
+    <form action="{% url 'BusquedaMarcaModeloAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_marca_modelo" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="marca_modelo" placeholder="Marca">
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="modelo_marca" placeholder="Modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Accesorios' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Detalles</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_objAccs %}
+                {% for accesorio in page_objAccs %}
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>{{ accesorio.accesorio.accesorio__tipo }} {{ accesorio.accesorio.accesorio__marca }} {{ accesorio.accesorio.accesorio__modelo }}</td>
+                <td>{{ accesorio.accesorio.fecha_compra|date:"d/m/Y"}}</td>
+                <td>{{ accesorio.accesorio.cliente__nombre }} {{ accesorio.accesorio.cliente__apellido }}</td>
+                <td>
+                    <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de accesorios disponibles.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+<script>
+    function tipo_busqueda() {
+        var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+
+        var busqueda_tipo_inp = document.getElementById("busqueda_tipo");
+        var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
+        
+        busqueda_tipo_inp.style.display = busqueda_tipo === "tipo" ? "block" : "none";
+        busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+    }
+</script>
+{% endblock %}

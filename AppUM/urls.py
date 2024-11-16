@@ -51,6 +51,7 @@ urlpatterns = [
 
 
      path('ventas', views.vista_ventas,name="Ventas"),
+     path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

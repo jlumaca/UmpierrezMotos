@@ -1,0 +1,47 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+            <h5 class="card-title text-success">
+                <i class="fas fa-dollar-sign"></i> Confirmación de alta de cuota paga
+            </h5>
+            <hr>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {% if not message %}
+                    <p class="mb-4">¿Está seguro de que desea registrar el pago de una cuota para este cliente? Esta acción no se puede deshacer.</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-success mx-2">
+                            <i class="fas fa-check-circle"></i> Confirmar
+                        </button>
+                        <a href="" class="btn btn-secondary mx-2">
+                            <i class="fas fa-times-circle"></i> Cancelar
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+
+            {% if message %}
+                <div class="alert alert-success mt-4">
+                    <i class="fas fa-check"></i> 
+                    <p class="mb-2">{{ message }}</p>
+                    <p>Para volver a la ficha del cliente, haz click <a href="{% url 'ClienteFicha' id_cliente %}" class="text-success">aquí</a>.</p>
+                </div>
+            {% else %}
+                {% if error_message %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-circle"></i> 
+                        <p>{{ error_message }}</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

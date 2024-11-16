@@ -58,8 +58,9 @@
                 <th scope="row">Cuotas</th>
                 <th scope="row">Monto</th>
                 <th scope="row">Documentacion</th>
-                
+                <!-- {% if show_acciones %} -->
                 <th scope="row">Acciones</th>
+                <!-- {% endif %} -->
               
             </tr>
         </thead>
@@ -102,8 +103,8 @@
                             
                         </td>
                         <td>
-                        {% if item.moto.cantidad_cuotas > 1 %}
-                        <a href=""><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i> Cuota</button></a>
+                        {% if item.moto.cantidad_cuotas|add:0 > 1 and item.moto.cuotas_pagas|add:0 < item.moto.cantidad_cuotas|add:0 %}
+                        <a href="{% url 'AltaCuota' item.moto.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i> Cuota</button></a>
                         {% else %}
                                 <p>------------</p>
                         {% endif %}

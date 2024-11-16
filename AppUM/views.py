@@ -1462,8 +1462,9 @@ def ficha_cliente(req,id_cliente):
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
+            'cantidad_cuotas':cv.cantidad_cuotas
         })
-
+    show_acciones = any(item['moto']['cantidad_cuotas'] > 1 for item in res_documentacion)
 
     paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
@@ -1498,8 +1499,24 @@ def ficha_cliente(req,id_cliente):
                                                                              "correo1":c_1,
                                                                              "correo2":c_2,
                                                                              "page_obj":page_obj,
-                                                                             "page_obj_accesorio":page_obj_accesorio
+                                                                             "page_obj_accesorio":page_obj_accesorio,
+                                                                             "show_acciones": show_acciones
                                                                              })
+
+def alta_cuota(req,id_cv):
+    try:
+        if req.method == "POST":
+            compra_venta = ComprasVentas.objects.get(id=id_cv)
+            compra_venta.cuotas_pagas = compra_venta.cuotas_pagas + 1
+            id_cliente = compra_venta.cliente_id
+            compra_venta.save()
+
+            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"message":"Cuota dada de alta con éxito","id_cliente":id_cliente})
+        else:
+            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{})
+
+    except Exception as e:
+        pass
 
 
 

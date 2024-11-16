@@ -58,6 +58,9 @@
                 <th scope="row">Cuotas</th>
                 <th scope="row">Monto</th>
                 <th scope="row">Documentacion</th>
+                
+                <th scope="row">Acciones</th>
+              
             </tr>
         </thead>
         <tbody>
@@ -92,9 +95,18 @@
                                         </button>
                                     </a>
                                 {% endif %}
+
                             {% else %}
                                 <p>SIN DOCUMENTACION</p>
                             {% endif %}
+                            
+                        </td>
+                        <td>
+                        {% if item.moto.cantidad_cuotas > 1 %}
+                        <a href=""><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i> Cuota</button></a>
+                        {% else %}
+                                <p>------------</p>
+                        {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

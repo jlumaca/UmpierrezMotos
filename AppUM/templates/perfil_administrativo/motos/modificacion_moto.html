@@ -48,6 +48,15 @@
                 <label for="num_chasis" class="form-label">Número de chasis</label>
                 <input value="{{ datos_moto.num_chasis }}" type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
             </div>
+            <div class="mb-3" id="num_cilindros">
+                <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
+                <input value="{{ datos_moto.num_cilindros }}" type="number" class="form-control" name="num_cilindros" id="num_padron" placeholder="Ingrese la cantidad de cilindros" required>
+            </div>
+
+            <div class="mb-3" id="num_pasajeros">
+                <label for="num_chasis" class="form-label">Cantidad de pasajeros</label>
+                <input value="{{ datos_moto.cantidad_pasajeros }}" type="number" class="form-control" name="num_pasajeros" id="num_padron" placeholder="Ingrese la cantidad de pasajeros" required>
+            </div>
             {% if letras_matricula and num_matricula %}
             <div class="mb-3" id="matr">
                 <label for="matricula" class="form-label">Matricula</label>

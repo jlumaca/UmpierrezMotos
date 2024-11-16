@@ -21,39 +21,7 @@
             {{ error_message }}
             </div>
         {% endif %}
-        <!-- <form action="{% url 'DatosClienteMoto' %}" enctype="multipart/form-data" method="POST">  {% csrf_token %} -->
-            <!-- <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Documento del cliente</label>
-                <div class="input-group">
-                    <select class="form-control" name="tipo_documento" id="tipo_documento">
-                        <option value="cedula">Cédula</option>
-                        <option value="pasaporte">Pasaporte</option>
-                        <option value="dni">DNI</option>
-                    </select>
-                    <span class="input-group-text">-</span>
-                    <input type="number" class="form-control" name="documento" placeholder="Documento"> -->
-                    <!-- Cambiar el botón a tipo submit -->
-                    <!-- <button type="submit" class="btn btn-info text-white">
-                        <i class="fas fa-search"></i> Buscar Cliente
-                    </button>
-                </div>
-            </div>
-        </form> -->
-
-        <!-- {% if datos_cliente %} -->
-        <!-- <div class="card mb-3" id="datos_cliente">
-            <div class="card-header">
-                <h5>Datos del Cliente</h5>
-            </div>
-            <div class="card-body">
-                <p><strong>Nombre:</strong> {{ datos_cliente.nombre }}</p>
-                <p><strong>Teléfono:</strong> {{ datos_cliente.apellido }}</p> -->
-                <!-- <p><strong>Email:</strong> {{ cliente.email }}</p> -->
-            <!-- </div>
-        </div> -->
-        <!-- {% endif %} -->
-
-        
+    
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="estado" class="form-label">Estado</label>
@@ -111,6 +79,16 @@
             <div class="mb-3" id="num_padron">
                 <label for="num_chasis" class="form-label">Número de padrón</label>
                 <input type="text" class="form-control" name="num_padron" id="num_padron" placeholder="Ingrese el número de padron" maxlength="40">
+            </div>
+
+            <div class="mb-3" id="num_cilindros">
+                <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
+                <input type="number" class="form-control" name="num_cilindros" id="num_padron" placeholder="Ingrese la cantidad de cilindros" required>
+            </div>
+
+            <div class="mb-3" id="num_pasajeros">
+                <label for="num_chasis" class="form-label">Cantidad de pasajeros</label>
+                <input type="number" class="form-control" name="num_pasajeros" id="num_padron" placeholder="Ingrese la cantidad de pasajeros" required>
             </div>
 
             <div class="mb-3" id="matr">

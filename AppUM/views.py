@@ -1513,7 +1513,9 @@ def alta_cuota(req,id_cv):
 
             return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"message":"Cuota dada de alta con éxito","id_cliente":id_cliente})
         else:
-            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{})
+            id_c = ComprasVentas.objects.get(id=id_cv)
+            id_cliente = id_c.cliente_id
+            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"id_cliente":id_cliente})
 
     except Exception as e:
         pass

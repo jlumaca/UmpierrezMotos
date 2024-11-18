@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import check_password
 # Create your views here.
 from django.contrib.auth.hashers import make_password
+from decimal import Decimal
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
@@ -776,9 +777,10 @@ def modificacion_moto(req,id_moto):
 
             if moto_upd.observaciones == None:
                 moto_upd.observaciones = "Sin descripción"
+            precio = int(moto_upd.precio) if moto_upd.precio else 0
             return render(req,"perfil_administrativo/motos/modificacion_moto.html",{'datos_moto': moto_upd,
             "letras_matricula":letras_matricula,
-            "num_matricula":num_matricula,"active_page": 'Motos'}) 
+            "num_matricula":num_matricula,"precio":precio,"active_page": 'Motos'}) 
     except Exception as e:
         return render(req,"perfil_administrativo/motos/modificacion_moto.html",{'datos_moto': moto_upd,
             "letras_matricula":letras_matricula,

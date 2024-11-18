@@ -54,9 +54,7 @@
             <tr>
                 <th scope="row">Detalles</th>
                 <th scope="row">Fecha</th>
-                <th scope="row">Forma de pago</th>
-                <th scope="row">Cuotas</th>
-                <th scope="row">Monto</th>
+               
                 <th scope="row">Documentacion</th>
          
                 <th scope="row">Acciones</th>
@@ -70,9 +68,7 @@
                     <tr>
                         <td>{{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}</td>
                         <td>{{ item.moto.fecha_compra }}</td>
-                        <td>{% if item.moto.cantidad_cuotas == 1 %} CONTADO {% else %} {{ item.moto.cantidad_cuotas }} CUOTAS {% endif %}</td>
-                        <td>{% if item.moto.cantidad_cuotas == 1 %} -------  {% else %} {{ item.moto.cuotas_pagas }} DE {{ item.moto.cantidad_cuotas }} {% endif %}</td>
-                        <td>{{ item.moto.valor_cuota }}</td>
+                        
                         <td>
                             {% if item.libreta or item.compra_venta or item.certificado_venta %}
                                 {% if item.libreta %}
@@ -103,10 +99,7 @@
                             
                         </td>
                         <td>
-                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                        {% if item.moto.cantidad_cuotas|add:0 > 1 and item.moto.cuotas_pagas|add:0 < item.moto.cantidad_cuotas|add:0 %}
-                        <a href="{% url 'AltaCuota' item.moto.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i> Cuota</button></a>
-                        {% endif %}
+                        <a href="{% url 'DetallesCuotas' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                         </td>
                     </tr>
                 {% endfor %}

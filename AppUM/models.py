@@ -90,9 +90,6 @@ class ComprasVentas(models.Model):
     compra_venta = models.FileField(null=True, blank=True, upload_to="documentacion/compra_venta/")
     certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")
     tipo = models.CharField(max_length=20)
-    cantidad_cuotas = models.IntegerField()
-    cuotas_pagas = models.IntegerField()
-    valor_cuota = models.IntegerField()
 
     class Meta:
         pass
@@ -106,4 +103,12 @@ class ClienteAccesorio(models.Model):
     factura = models.IntegerField(null=True)
     factura_rut = models.IntegerField(null=True)
     factura_documento = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_accesorios/")
+
+class CuotasMoto(models.Model):
+    fecha_cuota = models.DateField()
+    fecha_prox_cuota = models.DateField()
+    valor_cuota = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad_cuotas = models.IntegerField()
+    cuotas_pagas = models.IntegerField()
+    venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
 

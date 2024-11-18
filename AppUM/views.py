@@ -1445,15 +1445,18 @@ def ficha_cliente(req,id_cliente):
             'moto__marca', 
             'moto__modelo', 
             'fecha_compra', 
-            'cantidad_cuotas', 
-            'cuotas_pagas', 
+            # 'cantidad_cuotas', 
+            # 'cuotas_pagas', 
             'moto__precio', 
             'fotocopia_libreta', 
             'compra_venta', 
             'certificado_venta',
-            'valor_cuota'
+            # 'valor_cuota'
         )
     )
+    #cantidad_cuotas = CuotasMoto.cantidad_cuotas
+    #valor_cuota = cuotasmoto.valor_cuota
+    #cuotas_pagas = obtener el valor de la columna cuotas_pagas del ultimo registro ingresado en model CuotasMoto
     res_documentacion = []
     for resultado in resultados_motos:
             cv = ComprasVentas.objects.get(id=resultado['id'])
@@ -1462,9 +1465,9 @@ def ficha_cliente(req,id_cliente):
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
-            'cantidad_cuotas':cv.cantidad_cuotas
+            # 'cantidad_cuotas':cv.cantidad_cuotas
         })
-    show_acciones = any(item['moto']['cantidad_cuotas'] > 1 for item in res_documentacion)
+    # show_acciones = any(item['moto']['cantidad_cuotas'] > 1 for item in res_documentacion)
 
     paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
@@ -1500,7 +1503,7 @@ def ficha_cliente(req,id_cliente):
                                                                              "correo2":c_2,
                                                                              "page_obj":page_obj,
                                                                              "page_obj_accesorio":page_obj_accesorio,
-                                                                             "show_acciones": show_acciones
+                                                                            #  "show_acciones": show_acciones
                                                                              })
 
 def alta_cuota(req,id_cv):
@@ -1773,5 +1776,15 @@ def vista_ventas(req):
             page_number_accesorio = req.GET.get('page')  # Obtiene el número de página desde la URL
             page_obj_accesorio = paginator_accesorio.get_page(page_number_accesorio)
             return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+    except Exception as e:
+        pass
+
+def detalles_cuotas(req,id_cv):
+    try: 
+        cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
+        paginator = Paginator(cuotas, 5)  # 5 clientes por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj})
     except Exception as e:
         pass

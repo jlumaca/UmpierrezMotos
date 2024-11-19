@@ -13,6 +13,8 @@ from django.contrib.auth.hashers import check_password
 # Create your views here.
 from django.contrib.auth.hashers import make_password
 from decimal import Decimal
+from num2words import num2words
+from datetime import date
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
@@ -21,6 +23,48 @@ from decimal import Decimal
 
 def vista_login(req):
     return render(req,"login/login.html",{})
+
+def departamento_matricula(matricula):
+    primer_letra = matricula[0:1:1]
+    if primer_letra == "A":
+        departamento = "Canelones"
+    elif primer_letra == "B":
+        departamento = "Maldonado"
+    elif primer_letra == "C":
+        departamento = "Rocha"
+    elif primer_letra == "D":
+        departamento = "Treina y Tres"
+    elif primer_letra == "E":
+        departamento = "Cerro Largo"
+    elif primer_letra == "F":
+        departamento = "Rivera"
+    elif primer_letra == "G":
+        departamento = "Artigas"
+    elif primer_letra == "H":
+        departamento = "Salto"
+    elif primer_letra == "I":
+        departamento = "Paysandú"
+    elif primer_letra == "J":
+        departamento = "Río Negro"
+    elif primer_letra == "K":
+        departamento = "Soriano"
+    elif primer_letra == "L":
+        departamento = "Colonia"
+    elif primer_letra == "M":
+        departamento = "San José"
+    elif primer_letra == "N":
+        departamento = "Flores"
+    elif primer_letra == "O":
+        departamento = "Florida"
+    elif primer_letra == "P":
+        departamento = "Lavalleja"
+    elif primer_letra == "Q":
+        departamento = "Durazno"
+    elif primer_letra == "R":
+        departamento = "Tacuarembó"
+    elif primer_letra == "S":
+        departamento = "Montevideo"
+    return departamento
 
 ##VALIDACION DE USUARIO Y CONTRASEÑA##
 def validacion_login(req):
@@ -1710,14 +1754,37 @@ def form_venta_moto(req,id_moto):
                 else:
                     c_2 = None
                 moto = Moto.objects.get(id=id_moto)
+                existe_matricula = Matriculas.objects.filter(moto_id=moto.id,activo=1).first()
+                if existe_matricula:
+                    matricula = existe_matricula.matricula 
+                    departamento = departamento_matricula(matricula)
+                else:
+                    matricula = None
+                    departamento = None
+                existe_padron = ComprasVentas.objects.filter(moto_id=moto.id).first()
+                if existe_padron:
+                    padron = existe_padron.padron
+                else:
+                    padron = None
                 #RENDERIZAR PAPEL COMPRA-VENTA
+                numero_letra = num2words(moto.precio, lang='es').upper()
+                fecha = date.today()
+                logo_cv = Logos.objects.get(id=2)
+                logo_cv_url = req.build_absolute_uri(logo_cv.logo_UM.url) if logo_cv.logo_UM else None
+                # print(numero_letra)
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
                                                                                 "cliente":cliente,
                                                                                 "moto":moto,
                                                                                 "tel1":tel_1,
                                                                                 "tel2":tel_2,
                                                                                 "correo1":c_1,
-                                                                                "correo2":c_2,})
+                                                                                "correo2":c_2,
+                                                                                "num_letra":numero_letra,
+                                                                                "matricula":matricula,
+                                                                                "padron":padron,
+                                                                                "departamento":departamento,
+                                                                                "fecha":fecha,
+                                                                                "logo_cv":logo_cv_url})
             else:
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:
@@ -1783,6 +1850,9 @@ def vista_ventas(req):
             paginator_accesorio = Paginator(res_facturas, 5)  # 5 clientes por página
             page_number_accesorio = req.GET.get('page')  # Obtiene el número de página desde la URL
             page_obj_accesorio = paginator_accesorio.get_page(page_number_accesorio)
+
+            # prueba = num2words(42)
+            
             return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
     except Exception as e:
         pass

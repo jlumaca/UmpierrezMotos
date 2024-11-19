@@ -95,11 +95,16 @@
             </table>
 
             <!-- COMPROMISO COMPRA VENTA -->
-            <h2 class="text-center">COMPROMISO COMPRA VENTA</h2>
+            {% if logo_cv %}
+            <img src="{{ logo_cv }}" alt="Logo de la tienda" style="width: 200%; max-width: 150px; height: auto;">
+            {% else %}
+            <p>No se encontró el logo.</p>
+            {% endif %}
+            <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
             <textarea id="previewText" rows="20" class="form-control">
-                En la ciudad de Libertad, el día FECHA ACTUAL
+                En la ciudad de Libertad, el día {{ fecha }}
                 Por una parte Brisa Morales CI: 13213213645456
-                Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} CI: {{ cliente.documento }} 
+                Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} {{ cliente.documento }} 
                 Con domicilio {{ cliente.calle }} {{ cliente.numero }}, {{ cliente.ciudad }}
                 Celular {{ tel1 }}
                 Han convenido celebrar el siguiente compromiso de compraventa:
@@ -108,13 +113,13 @@
                 compromiso se dará por enterado, acepta y se hará cargo de todo lo notificado de la manera que se haya hecho,
                 tanto verbal como escrita).
                 Quién en tal concepto se obliga a comprar la propiedad y posesión del vehículo tipo MOTO
-                marca {{ moto.marca }} Modelo {{ moto.modelo }} año {{ moto.anio }} matricula MAA123 del
-                departamento de San José padrón 123654 Motor Nº {{ moto.num_motor }},
+                marca {{ moto.marca }} Modelo {{ moto.modelo }} año {{ moto.anio }} matricula {% if matricula %} {{ matricula }} {% else %} _______________ {% endif %}del
+                departamento de{% if departamento %} {{ departamento }} {% else %} _______________ {% endif %} padrón {% if padron %} {{ padron }} {% else %} _______________ {% endif %} Motor Nº {{ moto.num_motor }},
                 chasis Nº {{ moto.num_chasis }}
-                SEGUNDO: el precio de la compraventa se fija em U$s. $ {{ moto.precio }} En letra INPUT
-                Pagaderos de la siguiente forma: OTRO INPUT
+                SEGUNDO: el precio de la compraventa se fija en U$s. $ {{ moto.precio }} En letra {{ num_letra }}
+                Pagaderos de la siguiente forma: FORMA DE PAGO
                 TERCERO: el promitente comprador toma posesión del vehículo referido en la cláusula primera en el
-                día --------------- recibiendo del vendedor las llaves correspondientes. En consecuencia, serán de
+                día _______________ recibiendo del vendedor las llaves correspondientes. En consecuencia, serán de
                 cuenta desde este momento todas las responsabilidades civiles y/o penales que con el mismo se cometan, el
                 vehículo corre de su exclusiva cuenta y riesgo, siendo de su cargo toda responsabilidad por multas, infracciones,
                 accidentes de cualquier naturaleza, deterioros y desperfectos, incluso contra terceros u otros bienes.
@@ -130,16 +135,18 @@
                 SÉPTIMO: El comprador declada haber inspeccionado la motocicleta y aceptando su condición actual.
                 OCTAVO: Como señal de otorgamiento se firma el presente, previa ratificación y lectura, en el lugar y fecha
                 indicados.
-                
-                
-                        _____________________________                   ______________________________
-                        Firma del promitente vendedor                   Firma del promitente comprador
-                        
-                        
-        
-                        CI. 123654                                      CI. {{ cliente.documento }}
-            </textarea>
 
+
+
+                        _____________________________                   ______________________________
+                        Firma del promitente vendedor                           Firma del promitente comprador
+             
+                        CI. 123654                                                          CI. {{ cliente.documento }}
+            </textarea>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Forma de pago</label>
+                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Forma de pago" rows="3"></textarea>
+            </div>
             <div class="button-container">
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
                 <button type="submit" class="btn btn-success">Guardar y Vender</button>
@@ -152,36 +159,73 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
-    function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4"); // Configuración para hoja A4
 
-        const content = document.getElementById("previewText").value;
-        const margin = 10;
-        const pageHeight = doc.internal.pageSize.height;
-        let y = margin;
+    const margin = 10; // Márgenes estándar
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    let y = margin;
 
-        // Agregar título centrado
-        doc.setFont("Arial", "bold");
-        doc.setFontSize(16);
-        doc.text("COMPROMISO COMPRA VENTA", doc.internal.pageSize.width / 2, y, { align: "center" });
-        y += 15; // Espacio después del título
+    // Obtener contenido de los textareas
+    const mainContent = document.getElementById("previewText").value;
+    const formaPago = document.getElementById("descripcion").value;
 
-        // Agregar contenido del textarea línea por línea
-        doc.setFont("Arial", "normal");
-        doc.setFontSize(12);
-        content.split("\n").forEach(line => {
-            if (y + 10 > pageHeight - margin) {
+    // Dividir el texto de forma de pago para ajustarlo al ancho de la página
+    const formaPagoLines = doc.splitTextToSize(formaPago || "____________________________________________________________", pageWidth - 2 * margin);
+    const formaPagoText = formaPagoLines.join("\n");
+
+    // Reemplazar el marcador FORMA DE PAGO con las líneas ajustadas de forma de pago
+    const finalContent = mainContent.replace("FORMA DE PAGO", formaPagoText);
+
+    // Calcular tamaño dinámico del logo
+    const logoWidth = pageWidth / 2; // Tamaño del logo como la mitad del ancho de la página
+    const logoHeight = logoWidth * 0.4; // Proporción ajustada (relación de aspecto 5:2)
+    const xCenter = (pageWidth - logoWidth) / 2; // Centrar horizontalmente
+
+    // Agregar imagen centrada
+    const logo = document.querySelector("img").src; // Asegúrate de que el logo esté cargado
+    if (logo) {
+        doc.addImage(logo, "JPEG", xCenter, y, logoWidth, logoHeight);
+        y += logoHeight + 5; // Espacio después de la imagen
+    }
+
+    // Agregar título centrado
+    doc.setFont("Arial", "bold");
+    doc.setFontSize(14);
+    doc.text("COMPROMISO DE COMPRAVENTA", pageWidth / 2, y, { align: "center" });
+    y += 10;
+
+    // Agregar contenido principal con formato ajustado
+    doc.setFont("Arial", "normal");
+    doc.setFontSize(10); // Tamaño del texto
+    const lineHeight = 5; // Espaciado entre líneas
+
+    // Ajustar el contenido al margen izquierdo
+    finalContent.split("\n").forEach(line => {
+        const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin); // Ajustar texto al ancho de la página
+        splitText.forEach(subLine => {
+            if (y + lineHeight > pageHeight - margin) {
                 doc.addPage();
                 y = margin;
             }
-            doc.text(line, margin, y);
-            y += 7;
+            doc.text(margin, y, subLine); // Asegura que el texto comience desde el margen izquierdo
+            y += lineHeight;
         });
+    });
 
-        // Guardar el PDF
-        doc.save("compromiso_compra_venta.pdf");
-    }
+    // Guardar el PDF
+    doc.save("compromiso_compra_venta.pdf");
+}
+
+
+
+
+
+
+
+
 </script>
 
 {% endblock %}

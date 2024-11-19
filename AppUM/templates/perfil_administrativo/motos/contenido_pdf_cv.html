@@ -1,0 +1,43 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    {% if messages %}
+    <div class="alert-container">
+        <div class="alert alert-success">
+            <p>{{ messages }}</p>
+        </div>
+    </div>
+{% endif %}
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">Compromiso compra venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="redireccionar();"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Muestra el PDF embebido en un iframe -->
+                <iframe id="pdfIframe" src="" width="100%" height="500px"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if pdf_url %}
+<script>
+    // Si hay un pdf_url, abre el modal automáticamente y establece la fuente del iframe al PDF.
+    document.addEventListener('DOMContentLoaded', function () {
+        var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+        var pdfIframe = document.getElementById('pdfIframe');
+        pdfIframe.src = "{{ pdf_url }}";
+        pdfModal.show();
+    });
+
+    function redireccionar() {
+        window.location.href = "{% url 'Motos' %}";
+    }
+</script>
+{% endif %}
+
+{% endblock %}

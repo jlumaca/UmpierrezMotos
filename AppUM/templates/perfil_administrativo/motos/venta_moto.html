@@ -8,21 +8,21 @@
         {% if messages %}
         <div class="messages">
             <div class="alert alert alert-success">{{ message }}</div>
-    
         </div>
         {% endif %}
         {% if error_message_cliente %}
-            <div class="alert alert-danger" role="alert">
-            {{ error_message_cliente }}<a href="{% url 'ClienteAlta' %}">aquí</a>
-            </div>
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
+        </div>
         {% endif %}
         {% if error_message %}
-            <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger" role="alert">
             {{ error_message }}
-            </div>
-        {% endif %}        
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        </div>
+        {% endif %}
 
+        <!-- Formulario de búsqueda de cliente -->
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
@@ -36,101 +36,151 @@
                     <button class="btn btn-outline-primary" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
-                    <!-- Cambiar el botón a tipo submit -->
                 </div>
             </div>
         </form>
 
         {% if datos_moto %}
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
-        <h4>Datos del cliente</h4>
-        <table class="table table-bordered">
-            <tbody>
-                <tr>
-                    <th scope="row">Cliente</th>
-                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Documento</th>
-                    <td>{{ cliente.documento }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Contacto</th>
-                    <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Correo</th>
-                    <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
-                </tr>
-              
-                <tr>
-                    <th scope="row">Domicilio</th>
-                    <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }} </td>
-                </tr>
-            </tbody>
-        </table>
+            <h4>Datos del cliente</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <h4>Datos de la moto</h4>
-        <table class="table table-bordered">
-            <tbody>
-                <tr>
-                    <th scope="row">Código</th>
-                    <td>{{ moto.id }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Marca</th>
-                    <td>{{ moto.marca }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Modelo</th>
-                    <td>{{ moto.modelo }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Motor (cc)</th>
-                    <td>{{ moto.motor }}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Año</th>
-                    <td>{{ moto.anio }}</td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-success">Vender</button>
+            <h4>Datos de la moto</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Código</th>
+                        <td>{{ moto.id }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Marca</th>
+                        <td>{{ moto.marca }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Modelo</th>
+                        <td>{{ moto.modelo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Motor (cc)</th>
+                        <td>{{ moto.motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Año</th>
+                        <td>{{ moto.anio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- COMPROMISO COMPRA VENTA -->
+            <h2 class="text-center">COMPROMISO COMPRA VENTA</h2>
+            <textarea id="previewText" rows="20" class="form-control">
+                En la ciudad de Libertad, el día FECHA ACTUAL
+                Por una parte Brisa Morales CI: 13213213645456
+                Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} CI: {{ cliente.documento }} 
+                Con domicilio {{ cliente.calle }} {{ cliente.numero }}, {{ cliente.ciudad }}
+                Celular {{ tel1 }}
+                Han convenido celebrar el siguiente compromiso de compraventa:
+                PRIMERO: Se obliga a vender libre de multas prendas, embargos y demás gravámenes a {{ cliente.nombre }} {{ cliente.apellido }}
+                (de existir algo de lo anteriormente expresado se notificará al promitente comprador, quien al firmar este
+                compromiso se dará por enterado, acepta y se hará cargo de todo lo notificado de la manera que se haya hecho,
+                tanto verbal como escrita).
+                Quién en tal concepto se obliga a comprar la propiedad y posesión del vehículo tipo MOTO
+                marca {{ moto.marca }} Modelo {{ moto.modelo }} año {{ moto.anio }} matricula MAA123 del
+                departamento de San José padrón 123654 Motor Nº {{ moto.num_motor }},
+                chasis Nº {{ moto.num_chasis }}
+                SEGUNDO: el precio de la compraventa se fija em U$s. $ {{ moto.precio }} En letra INPUT
+                Pagaderos de la siguiente forma: OTRO INPUT
+                TERCERO: el promitente comprador toma posesión del vehículo referido en la cláusula primera en el
+                día --------------- recibiendo del vendedor las llaves correspondientes. En consecuencia, serán de
+                cuenta desde este momento todas las responsabilidades civiles y/o penales que con el mismo se cometan, el
+                vehículo corre de su exclusiva cuenta y riesgo, siendo de su cargo toda responsabilidad por multas, infracciones,
+                accidentes de cualquier naturaleza, deterioros y desperfectos, incluso contra terceros u otros bienes.
+                CUARTO: Se declara que motor instalado en el vehículo referido en el presente contrato y número de chasis
+                coinciden con los que surgen de la documentación referida, además se encuentra en las condiciones constatadas
+                el día de la fecha, sin garantía, que son de total conformidad del promitente comprador.
+                QUINTO: la parte promitente comprador/a se hace cargo de los honorarios, impuestos, deudas de existir y fueron
+                debidamente notificadas y demás gastos originados por la transferencia municipal y título de propiedad de 
+                vehículo.
+                SEXTO: En caso de incumplimiento de pago por parte del comprador, el vendedor se reserva de derecho de retirar
+                y recuperar la motocicleta sin previo aviso, quedando anulada la presente transacción y sin que ello implique la
+                devolución de los pagos parciales realizados hasta la fecha.
+                SÉPTIMO: El comprador declada haber inspeccionado la motocicleta y aceptando su condición actual.
+                OCTAVO: Como señal de otorgamiento se firma el presente, previa ratificación y lectura, en el lugar y fecha
+                indicados.
+                
+                
+                        _____________________________                   ______________________________
+                        Firma del promitente vendedor                   Firma del promitente comprador
+                        
+                        
         
-        <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
-        
-    </form>
-    {% endif %}   
-        
-       
+                        CI. 123654                                      CI. {{ cliente.documento }}
+            </textarea>
+
+            <div class="button-container">
+                <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
+                <button type="submit" class="btn btn-success">Guardar y Vender</button>
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+        {% endif %}
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
-    function toggleFields() {
-        var estado = document.getElementById("estado").value;
-        var kms = document.getElementById("kms");
-        var matr = document.getElementById("matr");
-        var cliente = document.getElementById("documento_cliente");
-        var datos_cliente = document.getElementById("datos_cliente");
-        var num_padron = document.getElementById("num_padron");
-        var libreta_propiedad = document.getElementById("libreta_propiedad_div");
-       
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-        if (estado === "nueva") {
-            kms.style.display = "none";
-            matr.style.display = "none";
-            cliente.style.display = "none";
-            datos_cliente.style.display = "none";
-            num_padron.style.display = "none";
-            libreta_propiedad.style.display = "none";
-        }else{
-            kms.style.display = "block";
-            matr.style.display = "block";
-            cliente.style.display = "block";
-            num_padron.style.display = "block";
-            libreta_propiedad.style.display = "block";
-        }
+        const content = document.getElementById("previewText").value;
+        const margin = 10;
+        const pageHeight = doc.internal.pageSize.height;
+        let y = margin;
+
+        // Agregar título centrado
+        doc.setFont("Arial", "bold");
+        doc.setFontSize(16);
+        doc.text("COMPROMISO COMPRA VENTA", doc.internal.pageSize.width / 2, y, { align: "center" });
+        y += 15; // Espacio después del título
+
+        // Agregar contenido del textarea línea por línea
+        doc.setFont("Arial", "normal");
+        doc.setFontSize(12);
+        content.split("\n").forEach(line => {
+            if (y + 10 > pageHeight - margin) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.text(line, margin, y);
+            y += 7;
+        });
+
+        // Guardar el PDF
+        doc.save("compromiso_compra_venta.pdf");
     }
 </script>
 

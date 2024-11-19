@@ -1710,6 +1710,7 @@ def form_venta_moto(req,id_moto):
                 else:
                     c_2 = None
                 moto = Moto.objects.get(id=id_moto)
+                #RENDERIZAR PAPEL COMPRA-VENTA
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
                                                                                 "cliente":cliente,
                                                                                 "moto":moto,
@@ -1723,6 +1724,11 @@ def form_venta_moto(req,id_moto):
             return render(req,"perfil_administrativo/motos/venta_moto.html",{})
     except Exception as e:
         pass
+
+
+def venta_moto(req):
+    return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message_cliente":"probando clic en aceptar"})
+
 
 def vista_ventas(req):
     try:

@@ -182,7 +182,8 @@
                         <a href="{% url 'MotoBaja' moto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         <a href="{% url 'MotoModificacion' moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                         <a href="{% url 'MotoDetalles' moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                        <a href="{% url 'MotoVentaForm' moto.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i> Vender</button></a>
+                        <a href="{% url 'MotoVentaForm' moto.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        <a href="{% url 'MotoReserva' moto.id %}"><button class="btn btn-sm btn-primary"><i class="fas fa-calendar-check"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -93,12 +93,10 @@
                     </tr>
                 </tbody>
             </table>
-
+            
             <!-- COMPROMISO COMPRA VENTA -->
             {% if logo_cv %}
-            <img src="{{ logo_cv }}" alt="Logo de la tienda" style="width: 200%; max-width: 150px; height: auto;">
-            {% else %}
-            <p>No se encontró el logo.</p>
+            <img src="{{ logo_cv }}" alt="Logo de la tienda" style="display: none; width: 200%; max-width: 150px; height: auto;">
             {% endif %}
             <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
             <textarea id="previewText" rows="20" class="form-control">
@@ -149,9 +147,50 @@
             </div>
             <div class="button-container">
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
-                <button type="submit" class="btn btn-success">Guardar y Vender</button>
-                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
             </div>
+
+            <h4>Forma de pago</h4>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Valor del dólar</label>
+                <label id="precio_moto_label">$43</label>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Moneda</label>
+                <select class="form-control" name="moneda" id="moneda">
+                    <option value="Dolares">Dólares</option>
+                    <option value="Pesos">Pesos</option>
+                </select>
+            </div>  
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio total de la moto</label>
+                <label id="precio_moto_label" value="{{ moto.precio }}">$/U$S {{ moto.precio }}</label>
+            </div>
+            <div class="mb-3">
+                <label for="seña" class="form-label">Seña</label>
+                <input type="number" class="form-control" name="seña" id="seña" placeholder="Ingrese la seña" required>
+            </div>
+            <div class="mb-3">
+                <label for="entrega_inicial" class="form-label">Entrega inicial</label>
+                <input type="number" class="form-control" name="entrega_inicial" id="entrega_inicial" placeholder="Ingrese la entrega inicial" required>
+            </div>
+            <div class="mb-3">
+                <label for="cant_cuotas" class="form-label">Cantidad de cuotas</label>
+                <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" placeholder="Ingrese la cantidad de cuotas" required>
+            </div>
+            <div class="mb-3">
+                <label for="valor_cuota" class="form-label">Valor de cada cuota</label>
+                <label id="valor_cuota">$VALOR</label>
+            </div>
+            <button type="button" class="btn btn-success" onclick="calcularCuotas()">Calcular</button>
+            
+            <h4>Documentación</h4>
+            <div class="mb-3" id="libreta_propiedad_div">
+                <label for="libreta_propiedad" class="form-label">Papel compraventa</label>
+                <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+            </div>
+            
+            <button type="submit" class="btn btn-success">Generar venta</button>
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
         </form>
         {% endif %}
     </div>
@@ -220,6 +259,26 @@ function generatePDF() {
 }
 
 
+function calcularCuotas() {
+    // Obtener los valores de los campos
+    const seña = parseFloat(document.getElementById("seña").value);
+    const entregaInicial = parseFloat(document.getElementById("entrega_inicial").value);
+    const cantidadCuotas = parseInt(document.getElementById("cant_cuotas").value);
+    const precio = document.getElementById("precio_moto_label").innerText
+
+    // Validar que todos los campos contengan valores numéricos y sean mayores que 0
+    if (isNaN(seña) || isNaN(entregaInicial) || isNaN(cantidadCuotas) || cantidadCuotas <= 0) {
+        alert("Por favor, ingrese valores válidos para todos los campos.");
+        return;
+    }
+
+    // Calcular el valor de cada cuota
+    const total = precio - seña - entregaInicial;
+    const valorCuota = total / cantidadCuotas;
+
+    // Mostrar el valor de cada cuota en el label correspondiente
+    document.getElementById("valor_cuota").innerText = `$/U$S${valorCuota.toFixed(2)}`;
+}
 
 
 

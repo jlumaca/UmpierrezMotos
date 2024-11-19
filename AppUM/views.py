@@ -1866,3 +1866,51 @@ def detalles_cuotas(req,id_cv):
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj})
     except Exception as e:
         pass
+
+def reservar_moto(req,id_moto):
+    try:
+        if req.method == "POST":
+            tipo_doc = req.POST['tipo_documento']
+            doc = req.POST['documento']
+            documento = tipo_doc + str(doc)
+            cliente = Cliente.objects.filter(documento=documento).first()
+            if cliente:
+                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+                tel_1 = tel1.telefono
+                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+                if tel2:
+                    tel_2 = tel2.telefono
+                else:
+                    tel_2 = None
+
+                if correo1:
+                    c_1 = correo1.correo
+                else:
+                    c_1 = None
+                
+                if correo2:
+                    c_2 = correo1.correo
+                else:
+                    c_2 = None
+                moto = Moto.objects.get(id=id_moto)
+                
+                #RENDERIZAR PAPEL COMPRA-VENTA
+
+                # print(numero_letra)
+                return render(req,"perfil_administrativo/motos/reservar_moto.html",{"datos_moto":True,
+                                                                                "cliente":cliente,
+                                                                                "moto":moto,
+                                                                                "tel1":tel_1,
+                                                                                "tel2":tel_2,
+                                                                                "correo1":c_1,
+                                                                                "correo2":c_2
+                                                                                })
+            else:
+                return render(req,"perfil_administrativo/motos/reservar_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+        else:
+            return render(req,"perfil_administrativo/motos/reservar_moto.html",{})
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})

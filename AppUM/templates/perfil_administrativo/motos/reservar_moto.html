@@ -1,0 +1,138 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Venta</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
+        </div>
+        {% endif %}
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de búsqueda de cliente -->
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if datos_moto %}
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <h4>Datos del cliente</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Datos de la moto</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Código</th>
+                        <td>{{ moto.id }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Marca</th>
+                        <td>{{ moto.marca }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Modelo</th>
+                        <td>{{ moto.modelo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Motor (cc)</th>
+                        <td>{{ moto.motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Año</th>
+                        <td>{{ moto.anio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <!-- COMPROMISO COMPRA VENTA -->
+            <h4>Forma de pago</h4>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Valor del dólar</label>
+                <label id="precio_moto_label">$43</label>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Moneda</label>
+                <select class="form-control" name="moneda" id="moneda">
+                    <option value="Dolares">Dólares</option>
+                    <option value="Pesos">Pesos</option>
+                </select>
+            </div>  
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio total de la moto</label>
+                <label id="precio_moto_label" value="{{ moto.precio }}">$/U$S {{ moto.precio }}</label>
+            </div>
+            <div class="mb-3">
+                <label for="seña" class="form-label">Seña</label>
+                <input type="number" class="form-control" name="seña" id="seña" placeholder="Ingrese la seña" required>
+            </div>
+            <div class="mb-3">
+                <label for="entrega_inicial" class="form-label">Entrega inicial</label>
+                <input type="number" class="form-control" name="entrega_inicial" id="entrega_inicial" placeholder="Ingrese la entrega inicial" required>
+            </div>
+            <div class="mb-3">
+                <label for="cant_cuotas" class="form-label">Cantidad de cuotas</label>
+                <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" placeholder="Ingrese la cantidad de cuotas" required>
+            </div>
+            <div class="mb-3">
+                <label for="valor_cuota" class="form-label">Valor de cada cuota</label>
+                <label id="valor_cuota">$VALOR</label>
+            </div>
+            <button type="button" class="btn btn-success" onclick="calcularCuotas()">Calcular</button>
+            <button type="submit" class="btn btn-success">Reservar</button>
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

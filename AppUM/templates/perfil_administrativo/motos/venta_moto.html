@@ -41,7 +41,7 @@
         </form>
 
         {% if datos_moto %}
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'MotoVenta' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
@@ -99,7 +99,7 @@
             <img src="{{ logo_cv }}" alt="Logo de la tienda" style="display: none; width: 200%; max-width: 150px; height: auto;">
             {% endif %}
             <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
-            <textarea id="previewText" rows="20" class="form-control">
+            <textarea id="previewText" rows="20" class="form-control" style="width: 62%;">
                 En la ciudad de Libertad, el día {{ fecha }}
                 Por una parte Brisa Morales CI: 13213213645456
                 Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} {{ cliente.documento }} 
@@ -115,7 +115,7 @@
                 departamento de{% if departamento %} {{ departamento }} {% else %} _______________ {% endif %} padrón {% if padron %} {{ padron }} {% else %} _______________ {% endif %} Motor Nº {{ moto.num_motor }},
                 chasis Nº {{ moto.num_chasis }}
                 SEGUNDO: el precio de la compraventa se fija en U$s. $ {{ moto.precio }} En letra {{ num_letra }}
-                Pagaderos de la siguiente forma: FORMA DE PAGO
+                Pagaderos de la siguiente forma: _________________________________________________
                 TERCERO: el promitente comprador toma posesión del vehículo referido en la cláusula primera en el
                 día _______________ recibiendo del vendedor las llaves correspondientes. En consecuencia, serán de
                 cuenta desde este momento todas las responsabilidades civiles y/o penales que con el mismo se cometan, el
@@ -141,52 +141,21 @@
              
                         CI. 123654                                                          CI. {{ cliente.documento }}
             </textarea>
-            <div class="mb-3">
-                <label for="precio" class="form-label">Forma de pago</label>
-                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Forma de pago" rows="3"></textarea>
-            </div>
+            
             <div class="button-container">
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
             </div>
 
             <h4>Forma de pago</h4>
             <div class="mb-3">
-                <label for="precio" class="form-label">Valor del dólar</label>
-                <label id="precio_moto_label">$43</label>
-            </div>
-            <div class="mb-3">
-                <label for="precio" class="form-label">Moneda</label>
-                <select class="form-control" name="moneda" id="moneda">
-                    <option value="Dolares">Dólares</option>
-                    <option value="Pesos">Pesos</option>
-                </select>
-            </div>  
-            <div class="mb-3">
-                <label for="precio" class="form-label">Precio total de la moto</label>
-                <label id="precio_moto_label" value="{{ moto.precio }}">$/U$S {{ moto.precio }}</label>
-            </div>
-            <div class="mb-3">
-                <label for="seña" class="form-label">Seña</label>
-                <input type="number" class="form-control" name="seña" id="seña" placeholder="Ingrese la seña" required>
-            </div>
-            <div class="mb-3">
-                <label for="entrega_inicial" class="form-label">Entrega inicial</label>
-                <input type="number" class="form-control" name="entrega_inicial" id="entrega_inicial" placeholder="Ingrese la entrega inicial" required>
-            </div>
-            <div class="mb-3">
-                <label for="cant_cuotas" class="form-label">Cantidad de cuotas</label>
-                <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" placeholder="Ingrese la cantidad de cuotas" required>
-            </div>
-            <div class="mb-3">
-                <label for="valor_cuota" class="form-label">Valor de cada cuota</label>
-                <label id="valor_cuota">$VALOR</label>
-            </div>
-            <button type="button" class="btn btn-success" onclick="calcularCuotas()">Calcular</button>
+                <label for="precio" class="form-label">Forma de pago</label>
+                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
+            </div> 
             
             <h4>Documentación</h4>
             <div class="mb-3" id="libreta_propiedad_div">
                 <label for="libreta_propiedad" class="form-label">Papel compraventa</label>
-                <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+                <input type="file" class="form-control" name="compra_venta_moto" id="libreta_propiedad">
             </div>
             
             <button type="submit" class="btn btn-success">Generar venta</button>
@@ -207,16 +176,8 @@ function generatePDF() {
     const pageHeight = doc.internal.pageSize.height;
     let y = margin;
 
-    // Obtener contenido de los textareas
+    // Obtener contenido del textarea principal
     const mainContent = document.getElementById("previewText").value;
-    const formaPago = document.getElementById("descripcion").value;
-
-    // Dividir el texto de forma de pago para ajustarlo al ancho de la página
-    const formaPagoLines = doc.splitTextToSize(formaPago || "____________________________________________________________", pageWidth - 2 * margin);
-    const formaPagoText = formaPagoLines.join("\n");
-
-    // Reemplazar el marcador FORMA DE PAGO con las líneas ajustadas de forma de pago
-    const finalContent = mainContent.replace("FORMA DE PAGO", formaPagoText);
 
     // Calcular tamaño dinámico del logo
     const logoWidth = pageWidth / 2; // Tamaño del logo como la mitad del ancho de la página
@@ -242,7 +203,7 @@ function generatePDF() {
     const lineHeight = 5; // Espaciado entre líneas
 
     // Ajustar el contenido al margen izquierdo
-    finalContent.split("\n").forEach(line => {
+    mainContent.split("\n").forEach(line => {
         const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin); // Ajustar texto al ancho de la página
         splitText.forEach(subLine => {
             if (y + lineHeight > pageHeight - margin) {

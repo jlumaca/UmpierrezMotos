@@ -1793,9 +1793,35 @@ def form_venta_moto(req,id_moto):
         pass
 
 
-def venta_moto(req):
-    return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message_cliente":"probando clic en aceptar"})
+def venta_moto(req,id_moto,id_cliente):
+    try:
 
+        compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
+        if compra_venta:
+            #ACA MODIFICAMOS CAMPO tipo = "V"
+            return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":f"ID Moto es {id_moto}, ID Cliente es {id_cliente}"})
+        else:
+            #INGRESAMOS EN COMPRAVENTA CON VALORES: fecha_compra = datetime.now(),padron = Null, compra_venta = ,certificado_venta = , tipo = 'V',cliente_id = id_cliente, moto_id = id_moto, forma_de_pago = 
+            #CONSULTAMOS LA MOTO Y MODIFICAMOS EL CAMPO pertenece_tienda = 0
+            moto = Moto.objects.get(id=id_moto)
+            moto.pertenece_tienda = 0
+            moto.save()
+            compra_venta = req.FILES.get('compra_venta_moto')
+            nueva_venta = ComprasVentas(
+                fecha_compra = datetime.now(),
+                compra_venta = compra_venta,
+                padron = None,
+                # certificado_venta = ,
+                tipo = "V",
+                forma_de_pago = req.POST['forma_pago'],
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            nueva_venta.save()
+            #REDIRIGIR A LA FICHA DEL CLIENTE
+            return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 def vista_ventas(req):
     try:

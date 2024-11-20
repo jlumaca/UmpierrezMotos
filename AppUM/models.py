@@ -90,11 +90,13 @@ class ComprasVentas(models.Model):
     compra_venta = models.FileField(null=True, blank=True, upload_to="documentacion/compra_venta/")
     certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")
     tipo = models.CharField(max_length=20)
+    forma_de_pago = models.TextField(null=True, blank=True)
 
     class Meta:
         pass
 #tipo = V --->>> PARA CUANDO UN CLIENTE COMPRA UNA MOTO
 #tipo = CV --->>> PARA CUANDO UN CLIENTE VENDE UNA MOTO USADA
+#tipo = R --->>> PARA CUANDO UNA MOTO ESTA RESERVADA
 
 class ClienteAccesorio(models.Model):
     accesorio = models.ForeignKey(Accesorio, related_name='accesorio_cliente', on_delete=models.CASCADE)

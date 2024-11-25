@@ -21,28 +21,276 @@
             {{ error_message }}
             </div>
         {% endif %}
-    
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
-            <div class="mb-3">
-                <label for="estado" class="form-label">Estado</label>
-                <select class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
-                    <option value="usada">Usada</option>
-                    <option value="nueva">Nueva</option>
-                </select>
-            </div>
-            <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Documento del cliente</label>
-                <div class="input-group">
-                    <select class="form-control" name="tipo_documento" id="tipo_documento">
-                        <option value="cedula">Cédula</option>
-                        <option value="pasaporte">Pasaporte</option>
-                        <option value="dni">DNI</option>
-                    </select>
-                    <span class="input-group-text">-</span>
-                    <input type="number" class="form-control" name="documento" placeholder="Documento">
-                    <!-- Cambiar el botón a tipo submit -->
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
+                <option value="usada">Usada</option>
+                <option value="nueva">0KM</option>
+            </select>
+        </div>
+
+        <div id="div_moto_usada">
+            {% if consultar_moto_cliente %}
+            <form action="{% url 'BuscarClienteMoto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                <div class="mb-3" id="documento_cliente">
+                    <label for="documento" class="form-label">Documento del vendedor</label>
+                    <div class="input-group">
+                        <select class="form-control" name="tipo_documento" id="tipo_documento">
+                            <option value="CI">Cédula</option>
+                            <option value="PAS">Pasaporte</option>
+                            <option value="DNI">DNI</option>
+                        </select>
+                        <span class="input-group-text">-</span>
+                        <input type="number" class="form-control" name="documento" placeholder="Documento">
+                        <!-- Cambiar el botón a tipo submit -->
+                    </div>
                 </div>
-            </div>
+            
+                <div class="mb-3">
+                    <label for="num_motor" class="form-label">Número de motor</label>
+                    <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40" required>
+                </div>
+            
+                <button type="submit" class="btn btn-success">Aceptar</button>
+                
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+            {% endif %}
+            {% if form_moto_usada %}
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Nombre</th>
+                        <td>{{ cliente.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Apellido</th>
+                        <td>{{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Dirección</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }} {% if cliente.num_apartamento %} Apartamento {{ cliente.num_apartamento }} {% endif %}, {{ cliente.ciudad }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Telefono/Celular</th>
+                        <td>{{ telefono_principal }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <form action="{% url 'AltaMotoUsada' cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="marca" class="form-label">Marca</label>
+                    <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
+                </div>
+                <div class="mb-3">
+                    <label for="modelo" class="form-label">Modelo</label>
+                    <input type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20" required>
+                </div>
+                <div class="mb-3">
+                    <label for="motor" class="form-label">Motor(cc)</label>
+                    <input type="number" class="form-control" name="motor_moto" id="motor" placeholder="Ingrese la cilindrada" required>
+                </div>
+                <div class="mb-3">
+                    <label for="anio" class="form-label">Año</label>
+                    <input type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año" required>
+                </div>
+                
+                <div class="mb-3" id="kms">
+                    <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
+                    <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
+                </div> 
+    
+                <div class="mb-3">
+                    <label for="num_motor" class="form-label">Número de motor</label>
+                    <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40" required>
+                </div>
+    
+                <div class="mb-3">
+                    <label for="num_chasis" class="form-label">Número de chasis</label>
+                    <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40" required>
+                </div>
+    
+                <div class="mb-3" id="num_padron">
+                    <label for="num_chasis" class="form-label">Número de padrón</label>
+                    <input type="text" class="form-control" name="num_padron" id="num_padron" placeholder="Ingrese el número de padron" maxlength="40">
+                </div> 
+    
+                <div class="mb-3" id="num_cilindros">
+                    <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
+                    <input type="number" class="form-control" name="num_cilindros" id="num_padron" placeholder="Ingrese la cantidad de cilindros" required>
+                </div>
+    
+                <div class="mb-3" id="num_pasajeros">
+                    <label for="num_chasis" class="form-label">Cantidad de pasajeros</label>
+                    <input type="number" class="form-control" name="num_pasajeros" id="num_padron" placeholder="Ingrese la cantidad de pasajeros" required>
+                </div>
+    
+                <div class="mb-3" id="matr">
+                    <label for="matricula" class="form-label">Matricula</label>
+                    <div class="d-flex">
+                        <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3">
+                        <span class="mx-1">-</span>
+                        <input type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos">
+                    </div>
+                </div>
+                
+    
+                <div class="mb-3">
+                    <label for="color" class="form-label">Color</label>
+                    <input type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20" required>
+                </div>
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Precio (USD)</label>
+                    <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+                </div>
+                <div class="mb-3" id="foto_prueba">
+                    <label for="foto" class="form-label">Foto</label>
+                    <input type="file" class="form-control" name="foto_moto" id="foto">
+                </div>
+                <div class="mb-3" id="libreta_propiedad_div">
+                    <label for="libreta_propiedad" class="form-label">Libreta de propiedad</label>
+                    <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+                </div>
+                
+                <div class="mb-3">
+                    <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
+                    <label for="toggleMatr" class="form-check-label">Generar PDF</label>
+                </div>
+       
+                <button type="submit" class="btn btn-success">Guardar</button>
+                
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+            {% endif %}
+            {% if form_moto_ingresada %}
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Nombre</th>
+                        <td>{{ cliente.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Apellido</th>
+                        <td>{{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Dirección</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }} {% if cliente.num_apartamento %} Apartamento {{ cliente.num_apartamento }} {% endif %}, {{ cliente.ciudad }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Telefono/Celular</th>
+                        <td>{{ telefono_principal }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Marca</th>
+                        <td>{{ moto.marca }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Modelo</th>
+                        <td>{{ moto.modelo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Motor (cc)</th>
+                        <td>{{ moto.motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Año</th>
+                        <td>{{ moto.anio }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Estado</th>
+                        <td>{{ moto.estado }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Kilómetros</th>
+                        <td>{{ moto.kilometros }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Número de Motor</th>
+                        <td>{{ moto.num_motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Número de Chasis</th>
+                        <td>{{ moto.num_chasis }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Cantidad de cilidros</th>
+                        <td>{{ moto.num_cilindros }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Cantidad de pasajeros</th>
+                        <td>{{ moto.cantidad_pasajeros }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Color</th>
+                        <td>{{ moto.color }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Precio (USD)</th>
+                        <td>{{ moto.precio }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Descripción</th>
+                        <td class="descripcion-celda">{{ descripcion }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <form action="{% url 'ReingresarMotoUsada' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                
+                <div class="mb-3" id="kms">
+                    <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
+                    <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
+                </div> 
+                
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Precio (USD)</label>
+                    <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+                </div>
+                <div class="mb-3" id="foto_prueba">
+                    <label for="foto" class="form-label">Foto</label>
+                    <input type="file" class="form-control" name="foto_moto" id="foto">
+                </div>
+                <div class="mb-3" id="libreta_propiedad_div">
+                    <label for="libreta_propiedad" class="form-label">Libreta de propiedad</label>
+                    <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+                </div>
+                
+                <div class="mb-3">
+                    <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
+                    <label for="toggleMatr" class="form-check-label">Generar PDF</label>
+                </div>
+       
+                <button type="submit" class="btn btn-success">Guardar</button>
+                
+                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+            {% endif %}
+        </div>
+
+
+        <div id="div_moto_nueva" style="display: none;">
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
 
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
@@ -61,10 +309,10 @@
                 <input type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año" required>
             </div>
             
-            <div class="mb-3" id="kms">
+            <!-- <div class="mb-3" id="kms">
                 <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
                 <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
-            </div>
+            </div> -->
 
             <div class="mb-3">
                 <label for="num_motor" class="form-label">Número de motor</label>
@@ -76,10 +324,10 @@
                 <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40" required>
             </div>
 
-            <div class="mb-3" id="num_padron">
+            <!-- <div class="mb-3" id="num_padron">
                 <label for="num_chasis" class="form-label">Número de padrón</label>
                 <input type="text" class="form-control" name="num_padron" id="num_padron" placeholder="Ingrese el número de padron" maxlength="40">
-            </div>
+            </div> -->
 
             <div class="mb-3" id="num_cilindros">
                 <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
@@ -91,14 +339,14 @@
                 <input type="number" class="form-control" name="num_pasajeros" id="num_padron" placeholder="Ingrese la cantidad de pasajeros" required>
             </div>
 
-            <div class="mb-3" id="matr">
+            <!-- <div class="mb-3" id="matr">
                 <label for="matricula" class="form-label">Matricula</label>
                 <div class="d-flex">
                     <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3">
                     <span class="mx-1">-</span>
                     <input type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos">
                 </div>
-            </div>
+            </div> -->
             
 
             <div class="mb-3">
@@ -136,31 +384,24 @@
        
     </div>
 </div>
+</div>
 
 <script>
     function toggleFields() {
         var estado = document.getElementById("estado").value;
-        var kms = document.getElementById("kms");
-        var matr = document.getElementById("matr");
-        var cliente = document.getElementById("documento_cliente");
-        var datos_cliente = document.getElementById("datos_cliente");
-        var num_padron = document.getElementById("num_padron");
-        var libreta_propiedad = document.getElementById("libreta_propiedad_div");
-       
+        var div_moto_usada = document.getElementById("div_moto_usada");
+        var div_moto_nueva = document.getElementById("div_moto_nueva");
 
+       
+       
         if (estado === "nueva") {
-            kms.style.display = "none";
-            matr.style.display = "none";
-            cliente.style.display = "none";
-            datos_cliente.style.display = "none";
-            num_padron.style.display = "none";
-            libreta_propiedad.style.display = "none";
+            div_moto_nueva.style.display = "block";
+            div_moto_usada.style.display = "none";
+           
         }else{
-            kms.style.display = "block";
-            matr.style.display = "block";
-            cliente.style.display = "block";
-            num_padron.style.display = "block";
-            libreta_propiedad.style.display = "block";
+            div_moto_nueva.style.display = "none";
+            div_moto_usada.style.display = "block";
+           
         }
     }
 </script>

@@ -8,7 +8,14 @@ urlpatterns = [
      path('login_validacion', views.validacion_login,name="LoginValidacion"),
 
      path('motos', views.vista_inventario_motos,name="Motos"),
+
      path('moto_alta', views.form_alta_moto,name="MotoAlta"),
+     path('cliente_moto', views.cliente_moto,name="BuscarClienteMoto"),
+     path('alta_moto_usada/<int:id_cliente>', views.alta_moto_usada,name="AltaMotoUsada"),
+     path('reingresar_moto_usada/<int:id_moto>/<int:id_cliente>', views.reingresar_moto_usada,name="ReingresarMotoUsada"),
+
+
+
      path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),
      path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),
      path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),

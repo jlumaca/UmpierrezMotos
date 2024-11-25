@@ -85,7 +85,6 @@ class ComprasVentas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto_cliente', on_delete=models.CASCADE)
     cliente = models.ForeignKey(Cliente, related_name='cliente_moto', on_delete=models.CASCADE)
     fecha_compra = models.DateField()
-    padron = models.IntegerField(unique=True)
     fotocopia_libreta = models.ImageField(null=True, blank=True, upload_to="documentacion/libretas/")
     compra_venta = models.FileField(null=True, blank=True, upload_to="documentacion/compra_venta/")
     certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")

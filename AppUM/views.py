@@ -306,7 +306,181 @@ def datos_cliente_venta(req):
                 "active_page": 'Motos'
             }
             return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
+def cliente_moto(req):
+    try:
+        num_motor = req.POST['num_motor_moto'].upper()
+        documento = req.POST['tipo_documento'] + str(req.POST['documento'])
 
+        moto = Moto.objects.filter(num_motor=num_motor).first()
+        cliente = Cliente.objects.filter(documento=documento).first()
+
+        if not cliente:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message_cliente":"El cliente no existe, para ingresarlo haga clic ",
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":False,
+                                                                            "form_moto_ingresada":False})
+        elif not moto:
+            #SI LA MOTO NO EXISTE, SE INGRESA LA MOTO DESDE 0
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos"})
+        else:
+            #SI LA MOTO Y EL CLIENTE EXISTEN, ENTONCES SE MODIFICAN CAMPOS EN MOT (PERT_TIENDA = 1)
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "moto":moto,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":False,
+                                                                            "form_moto_ingresada":True,
+                                                                            "consultar_moto_cliente":False})
+    except Exception as e:
+        pass
+
+
+def alta_moto_usada(req,id_cliente):
+    try:
+    #INSERT EN MOTO
+        cliente = Cliente.objects.get(id=id_cliente)
+        num_chasis = req.POST['num_chasis_moto'].upper()
+        num_motor = req.POST['num_motor_moto'].upper()
+        existe_num_motor = Moto.objects.filter(num_motor=num_motor).first()
+        existe_num_chasis = Moto.objects.filter(num_chasis=num_chasis).first()
+        matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'].upper())
+        existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
+        if existe_num_motor:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"Ya existe el número de motor ingresado"})
+        elif existe_num_chasis:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"Ya existe el número de chasis ingresado"})
+        elif existe_matricula:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"Ya existe la matricula"})
+        else:
+            marca = req.POST['marca_moto'].upper()
+            modelo = req.POST['modelo_moto'].upper()
+            color = req.POST['color_moto'].upper()
+
+            foto = req.FILES.get('foto_moto')
+            nueva_moto = Moto(marca = marca,
+                    modelo = modelo,
+                    anio = req.POST['anio_moto'],
+                    estado = "Nueva",
+                    motor = req.POST['motor_moto'],
+                    kilometros = req.POST['km_moto'],
+                    precio = req.POST['precio_moto'],
+                    color = color,
+                    num_motor = num_motor,
+                    num_chasis = num_chasis,
+                    num_cilindros = req.POST['num_cilindros'],
+                    cantidad_pasajeros = req.POST['num_pasajeros'],
+                    pertenece_tienda = 1,
+                    pertenece_taller = 0,
+                    fecha_ingreso = datetime.now(),
+                    observaciones = req.POST['descripcion_moto'],
+                    foto = foto
+                    )
+            nueva_moto.save()
+            libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
+            cliente_moto = ComprasVentas(
+                fecha_compra = datetime.now(),
+                tipo = "CV",
+                fotocopia_libreta = libreta_propiedad,
+                cliente_id = id_cliente,
+                moto_id = nueva_moto.id
+            )
+            cliente_moto.save()
+
+            
+            checkbox = 'crear_pdf' in req.POST
+            if checkbox:
+                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                logo_um = Logos.objects.get(id=1)
+                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
+                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
+                mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                return pdf_ret
+            else:
+                messages.success(req, "Moto ingresada con éxito.")
+                return redirect('Motos')
+
+            
+    except Exception as e:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"Algo salió mal: "+e})
+
+def reingresar_moto_usada(req,id_moto,id_cliente):
+    try:
+    #UPDATE MOTO PERT_TIENDA = 1
+        moto = Moto.objects.get(id=id_moto)
+        if moto.pertenece_tienda:
+            pass
+        else:
+            moto.kilometros = req.POST['km_moto']
+            moto.precio = req.POST['precio_moto']
+            moto.observaciones = req.POST['descripcion_moto']
+            moto.foto = req.FILES.get('foto_moto')
+            moto.pertenece_tienda = 1
+            moto.fecha_ingreso = datetime.now()
+            moto.save()
+
+            compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+            libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
+            if compra_venta:
+                compra_venta.tipo = "CV"
+                compra_venta.save()
+            else:
+                c_v = ComprasVentas(
+                    fecha_compra = datetime.now(),
+                    fotocopia_libreta = libreta_propiedad,
+                    tipo = "CV",
+                    cliente_id = id_cliente,
+                    moto_id = id_moto
+                )
+                c_v.save()
+            checkbox = 'crear_pdf' in req.POST
+            if checkbox:
+                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                logo_um = Logos.objects.get(id=1)
+                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                datos_a_pdf = contexto_para_pdf_moto(moto,logo_um_url)
+                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                nombre_archivo = f"identificacion_{moto.id}.pdf"
+                mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                return pdf_ret
+            else:
+                messages.success(req, "Moto ingresada con éxito.")
+                return redirect('Motos')
+
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":e})
+                                                                            
 
 def form_alta_moto(req):
     try:
@@ -545,7 +719,8 @@ def form_alta_moto(req):
 
             # return render(req,"perfil_administrativo/motos/alta_moto.html",{})
         else:
-            return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos'})
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',
+                                                                            "consultar_moto_cliente":True})
     
     except Exception as e:
         return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__,"active_page": 'Motos'})

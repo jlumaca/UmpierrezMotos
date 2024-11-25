@@ -13,6 +13,7 @@ urlpatterns = [
      path('cliente_moto', views.cliente_moto,name="BuscarClienteMoto"),
      path('alta_moto_usada/<int:id_cliente>', views.alta_moto_usada,name="AltaMotoUsada"),
      path('reingresar_moto_usada/<int:id_moto>/<int:id_cliente>', views.reingresar_moto_usada,name="ReingresarMotoUsada"),
+     path('alta_moto_nueva', views.alta_moto_nueva,name="AltaMotoNueva"),
 
 
 

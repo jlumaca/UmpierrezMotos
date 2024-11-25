@@ -214,14 +214,8 @@
                         <th scope="row">Año</th>
                         <td>{{ moto.anio }}</td>
                     </tr>
-                    <tr>
-                        <th scope="row">Estado</th>
-                        <td>{{ moto.estado }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Kilómetros</th>
-                        <td>{{ moto.kilometros }}</td>
-                    </tr>
+
+
                     <tr>
                         <th scope="row">Número de Motor</th>
                         <td>{{ moto.num_motor }}</td>
@@ -231,24 +225,13 @@
                         <td>{{ moto.num_chasis }}</td>
                     </tr>
                     <tr>
-                        <th scope="row">Cantidad de cilidros</th>
-                        <td>{{ moto.num_cilindros }}</td>
+                        <th scope="row">Matricula</th>
+                        <td>{{ matricula }}</td>
                     </tr>
-                    <tr>
-                        <th scope="row">Cantidad de pasajeros</th>
-                        <td>{{ moto.cantidad_pasajeros }}</td>
-                    </tr>
+
                     <tr>
                         <th scope="row">Color</th>
                         <td>{{ moto.color }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Precio (USD)</th>
-                        <td>{{ moto.precio }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Descripción</th>
-                        <td class="descripcion-celda">{{ descripcion }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -290,7 +273,7 @@
 
 
         <div id="div_moto_nueva" style="display: none;">
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'AltaMotoNueva' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
 
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>

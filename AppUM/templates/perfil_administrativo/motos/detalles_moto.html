@@ -80,13 +80,7 @@
             {% if matr_actual %}
             <tr>
                 <th scope="row">Matrícula</th>
-                <td>
-                    <span style="color: green; font-weight: bold;">Actual: {{ matr_actual }}</span>
-                    <br>
-                    {% if matr_anterior %}
-                        <span style="color: red;">Anterior: {{ matr_anterior }}</span><br>
-                    {% endif %}
-                </td>
+                <td>{{ matr_actual }}</td>
             </tr>
             {% endif %}
             <tr>

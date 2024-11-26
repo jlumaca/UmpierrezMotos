@@ -15,6 +15,7 @@ from django.contrib.auth.hashers import make_password
 from decimal import Decimal
 from num2words import num2words
 from datetime import date
+from django.urls import reverse
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
@@ -1975,18 +1976,20 @@ def form_venta_moto(req,id_moto):
                 else:
                     c_2 = None
                 moto = Moto.objects.get(id=id_moto)
-                existe_matricula = Matriculas.objects.filter(moto_id=moto.id,activo=1).first()
+                existe_matricula = Matriculas.objects.filter(moto_id=id_moto).first()
                 if existe_matricula:
                     matricula = existe_matricula.matricula 
+                    padron = existe_matricula.padron
                     departamento = departamento_matricula(matricula)
                 else:
                     matricula = None
                     departamento = None
-                existe_padron = ComprasVentas.objects.filter(moto_id=moto.id).first()
-                if existe_padron:
-                    padron = existe_padron.padron
-                else:
                     padron = None
+                # existe_padron = ComprasVentas.objects.filter(moto_id=moto.id).first()
+                # if existe_padron:
+                #     padron = existe_padron.padron
+                # else:
+                #     padron = None
                 #RENDERIZAR PAPEL COMPRA-VENTA
                 numero_letra = num2words(moto.precio, lang='es').upper()
                 fecha = date.today()
@@ -2011,7 +2014,7 @@ def form_venta_moto(req,id_moto):
         else:
             return render(req,"perfil_administrativo/motos/venta_moto.html",{})
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 
 def venta_moto(req,id_moto,id_cliente):
@@ -2020,7 +2023,16 @@ def venta_moto(req,id_moto,id_cliente):
         compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
         if compra_venta:
             #ACA MODIFICAMOS CAMPO tipo = "V"
-            return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":f"ID Moto es {id_moto}, ID Cliente es {id_cliente}"})
+            # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":f"ID Moto es {id_moto}, ID Cliente es {id_cliente}"})
+            compra_venta_archivo = req.FILES.get('compra_venta_moto')
+            # compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+            compra_venta.tipo = "V"
+            compra_venta.compra_venta = compra_venta_archivo
+            compra_venta.fecha_compra = datetime.now()
+            compra_venta.forma_de_pago = req.POST['forma_pago']
+            compra_venta.save()
+            retornar_cliente = ficha_cliente(req,id_cliente)
+            return retornar_cliente
         else:
             #INGRESAMOS EN COMPRAVENTA CON VALORES: fecha_compra = datetime.now(),padron = Null, compra_venta = ,certificado_venta = , tipo = 'V',cliente_id = id_cliente, moto_id = id_moto, forma_de_pago = 
             #CONSULTAMOS LA MOTO Y MODIFICAMOS EL CAMPO pertenece_tienda = 0
@@ -2031,7 +2043,6 @@ def venta_moto(req,id_moto,id_cliente):
             nueva_venta = ComprasVentas(
                 fecha_compra = datetime.now(),
                 compra_venta = compra_venta,
-                padron = None,
                 # certificado_venta = ,
                 tipo = "V",
                 forma_de_pago = req.POST['forma_pago'],
@@ -2040,7 +2051,9 @@ def venta_moto(req,id_moto,id_cliente):
             )
             nueva_venta.save()
             #REDIRIGIR A LA FICHA DEL CLIENTE
-            return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
+            # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
+            retornar_cliente = ficha_cliente(req,id_cliente)
+            return retornar_cliente
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
@@ -2110,9 +2123,27 @@ def detalles_cuotas(req,id_cv):
         paginator = Paginator(cuotas, 5)  # 5 clientes por página
         page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
         page_obj = paginator.get_page(page_number)
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj})
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv})
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+
+def alta_pago(req,id_cv):
+    try:
+        cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+        valor_a_pagar = req.POST['valor_a_pagar']
+        nuevo_restante = int(cuota.cant_restante) - int(valor_a_pagar)
+        nueva_cuota = CuotasMoto(
+            fecha_pago = datetime.now(),
+            fecha_prox_pago = req.POST['f_prox_pago'],
+            valor_pago = valor_a_pagar,
+            cant_restante = nuevo_restante,
+            venta_id = id_cv
+        )
+        nueva_cuota.save()
+        messages.success(req, "Pago ingresado con éxito")
+        return redirect(reverse('DetallesCuotas', kwargs={'id_cv': id_cv}))
+    except Exception as e:
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
 def reservar_moto(req,id_moto):
     try:

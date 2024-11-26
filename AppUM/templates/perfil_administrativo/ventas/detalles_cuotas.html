@@ -28,24 +28,57 @@
 
 <title>Cuotas pagas</title>
 <div class="table-container" id="inventarios">
-    <h3>Clientes</h3>
-    <!-- <a href="" class="btn btn-primary mb-3 registrar-cliente">
-        <i class="fas fa-user-plus"></i> Alta de Cliente
-    </a> -->
+    <h3>Pagos</h3>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% if error_message %}
+            <div class="alert alert-danger mt-3">
+                <i class="fas fa-exclamation-circle"></i> 
+                <p>{{ error_message }}</p>
+            </div>
+    {% endif %}
+
+    <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
+        <i class="fas fa-money-check-alt"></i> Alta de Pago
+    </a>
+
+
+    <div id="div_form_pago" style="display: none;">
+        {% if id_cv %}
+        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Valor a pagar</label>
+                <input type="number" class="form-control" name="valor_a_pagar" placeholder="Valor a pagar" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Fecha del próximo pago</label>
+                <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha de nacimiento" required>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="" class="btn btn-secondary">Cancelar</a>
+        </form>
+        {% endif %}
+    </div>
+<br>
     <table class="table">
         <thead>
             <tr>
-                <th>Cuota</th> 
                 <th>Fecha</th>
-                <th>Valor</th>
+                <th>Entrega</th> 
+                <th>Cantidad restante</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
                {% for cuota in page_obj %}
                 <tr>
-                    <td>{{ cuota.cuotas_pagas }} de {{ cuota.cantidad_cuotas }}</td>
-                    <td>{{ cuota.fecha_cuota }}</td>
-                    <td>{{ cuota.valor_cuota }}</td>
+                    <td>{{ cuota.fecha_pago }}</td>
+                    <td>{{ cuota.valor_pago }}</td>
+                    <td>{{ cuota.cant_restante }}</td>
+                    <td><a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
                 </tr>
                 {% endfor %}
                
@@ -88,4 +121,12 @@
         </ul>
     </nav>
 </div>
+
+<script>
+    function mostrar_form_pago(){
+        var div_form = document.getElementById("div_form_pago")
+        div_form.style.display = "block";
+    }
+
+</script>
 {% endblock %}

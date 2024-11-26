@@ -108,7 +108,12 @@ class ClienteAccesorio(models.Model):
 class CuotasMoto(models.Model):
     fecha_pago = models.DateField()
     fecha_prox_pago = models.DateField()
-    valor_pago = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    cant_restante = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    valor_pago_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    valor_pago_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
+    observaciones = models.TextField(null=True, blank=True)
 

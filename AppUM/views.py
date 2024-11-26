@@ -427,45 +427,43 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
     try:
     #UPDATE MOTO PERT_TIENDA = 1
         moto = Moto.objects.get(id=id_moto)
-        if moto.pertenece_tienda:
-            pass
-        else:
-            moto.kilometros = req.POST['km_moto']
-            moto.precio = req.POST['precio_moto']
-            moto.observaciones = req.POST['descripcion_moto']
-            moto.foto = req.FILES.get('foto_moto')
-            moto.pertenece_tienda = 1
-            moto.fecha_ingreso = datetime.now()
-            moto.save()
+        
+        moto.kilometros = req.POST['km_moto']
+        moto.precio = req.POST['precio_moto']
+        moto.observaciones = req.POST['descripcion_moto']
+        moto.foto = req.FILES.get('foto_moto')
+        moto.pertenece_tienda = 1
+        moto.fecha_ingreso = datetime.now()
+        moto.save()
 
-            compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
-            libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
-            if compra_venta:
-                compra_venta.tipo = "CV"
-                compra_venta.save()
-            else:
-                c_v = ComprasVentas(
-                    fecha_compra = datetime.now(),
-                    fotocopia_libreta = libreta_propiedad,
-                    tipo = "CV",
-                    cliente_id = id_cliente,
-                    moto_id = id_moto
-                )
-                c_v.save()
-            checkbox = 'crear_pdf' in req.POST
-            if checkbox:
-                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
-                logo_um = Logos.objects.get(id=1)
-                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-                datos_a_pdf = contexto_para_pdf_moto(moto,logo_um_url)
-                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-                nombre_archivo = f"identificacion_{moto.id}.pdf"
-                mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
-                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-                return pdf_ret
-            else:
-                messages.success(req, "Moto ingresada con éxito.")
-                return redirect('Motos')
+        compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+        libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
+        if compra_venta:
+            compra_venta.tipo = "CV"
+            compra_venta.save()
+        else:
+            c_v = ComprasVentas(
+                fecha_compra = datetime.now(),
+                fotocopia_libreta = libreta_propiedad,
+                tipo = "CV",
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            c_v.save()
+        checkbox = 'crear_pdf' in req.POST
+        if checkbox:
+            ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+            logo_um = Logos.objects.get(id=1)
+            logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+            datos_a_pdf = contexto_para_pdf_moto(moto,logo_um_url)
+            renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+            nombre_archivo = f"identificacion_{moto.id}.pdf"
+            mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+            pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+            return pdf_ret
+        else:
+            messages.success(req, "Moto ingresada con éxito.")
+            return redirect('Motos')
 
     except Exception as e:
         return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',

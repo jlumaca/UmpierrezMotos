@@ -2120,24 +2120,42 @@ def vista_ventas(req):
 def detalles_cuotas(req,id_cv):
     try: 
         cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
+        pago_acordado = ComprasVentas.objects.get(id=id_cv)
         paginator = Paginator(cuotas, 5)  # 5 clientes por página
         page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
         page_obj = paginator.get_page(page_number)
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv})
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":pago_acordado.forma_de_pago})
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
 def alta_pago(req,id_cv):
     try:
         cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
-        valor_a_pagar = req.POST['valor_a_pagar']
-        nuevo_restante = int(cuota.cant_restante) - int(valor_a_pagar)
+        
+        moneda = req.POST['moneda_entrega']
+        precio_dolar = cuota.precio_dolar
+        if moneda == "Pesos":
+            entrega_pesos = req.POST['valor_a_pagar']
+            entrega_dolares = 0
+            resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
+            resto_dolares = resto_pesos / precio_dolar
+        else:
+            entrega_pesos = 0
+            entrega_dolares = req.POST['valor_a_pagar']
+            resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
+            resto_pesos = resto_dolares * precio_dolar
+        
         nueva_cuota = CuotasMoto(
             fecha_pago = datetime.now(),
             fecha_prox_pago = req.POST['f_prox_pago'],
-            valor_pago = valor_a_pagar,
-            cant_restante = nuevo_restante,
-            venta_id = id_cv
+            venta_id = id_cv,
+            cant_restante_dolares = resto_dolares,
+            cant_restante_pesos = resto_pesos,
+            moneda = moneda,
+            observaciones = req.POST['observaciones_pago'],
+            precio_dolar = precio_dolar,
+            valor_pago_dolares = entrega_dolares,
+            valor_pago_pesos = entrega_pesos
         )
         nueva_cuota.save()
         messages.success(req, "Pago ingresado con éxito")

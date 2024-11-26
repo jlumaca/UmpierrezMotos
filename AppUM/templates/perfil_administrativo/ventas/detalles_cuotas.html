@@ -50,23 +50,41 @@
         {% if id_cv %}
         <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Valor a pagar</label>
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
+                    <select class="form-control" name="moneda_entrega" id="moneda_entrega">
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Cantidad a pagar</label>
                 <input type="number" class="form-control" name="valor_a_pagar" placeholder="Valor a pagar" required>
             </div>
             <div class="mb-3">
                 <label for="precio" class="form-label">Fecha del próximo pago</label>
                 <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha de nacimiento" required>
             </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Observaciones</label>
+                <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
+            </div>
             <button type="submit" class="btn btn-success">Guardar</button>
             <a href="" class="btn btn-secondary">Cancelar</a>
         </form>
         {% endif %}
     </div>
+    {% if pago_acordado %}
+    <p><strong>PAGO ACORDADO CON EL CLIENTE: </strong> {{ pago_acordado }}</p>
+    {% endif %}
 <br>
     <table class="table">
         <thead>
             <tr>
+                <th>Observaciones</th>
                 <th>Fecha</th>
+                <th>Moneda</th>
                 <th>Entrega</th> 
                 <th>Cantidad restante</th>
                 <th>Acciones</th>
@@ -75,9 +93,11 @@
         <tbody>
                {% for cuota in page_obj %}
                 <tr>
+                    <td>{{ cuota.observaciones }}</td>
                     <td>{{ cuota.fecha_pago }}</td>
-                    <td>{{ cuota.valor_pago }}</td>
-                    <td>{{ cuota.cant_restante }}</td>
+                    <td>{{ cuota.moneda }}</td>
+                    <td>{% if cuota.moneda == "Pesos" %} {{ cuota.valor_pago_pesos }} {% else %} {{ cuota.valor_pago_dolares }} {% endif %}</td>
+                    <td>${{ cuota.cant_restante_pesos }}/U$s{{ cuota.cant_restante_dolares }}</td>
                     <td><a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
                 </tr>
                 {% endfor %}

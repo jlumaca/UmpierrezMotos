@@ -106,10 +106,9 @@ class ClienteAccesorio(models.Model):
     factura_documento = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_accesorios/")
 
 class CuotasMoto(models.Model):
-    fecha_cuota = models.DateField()
-    fecha_prox_cuota = models.DateField()
-    valor_cuota = models.DecimalField(max_digits=10, decimal_places=2)
-    cantidad_cuotas = models.IntegerField()
-    cuotas_pagas = models.IntegerField()
+    fecha_pago = models.DateField()
+    fecha_prox_pago = models.DateField()
+    valor_pago = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
 

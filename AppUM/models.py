@@ -116,4 +116,5 @@ class CuotasMoto(models.Model):
     precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
     observaciones = models.TextField(null=True, blank=True)
+    comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
 

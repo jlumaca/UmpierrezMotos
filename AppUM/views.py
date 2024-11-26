@@ -1932,19 +1932,19 @@ def detalles_personal(req,id_personal):
     except Exception as e:
          pass
 
-def prueba_compra_venta(req):
-    logo_um = Logos.objects.get(id=1)
-    logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-    ruta_pdf = "perfil_administrativo/motos/compra_venta.html"
+# def prueba_compra_venta(req):
+#     logo_um = Logos.objects.get(id=1)
+#     logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+#     ruta_pdf = "perfil_administrativo/motos/compra_venta.html"
 
-    regresa_moto = Moto.objects.get(id=1)
+#     regresa_moto = Moto.objects.get(id=1)
     
-    datos_a_pdf = contexto_para_pdf_moto(regresa_moto,logo_um_url)
-    renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-    nombre_archivo = "compra_venta_prueba.pdf"
-    mensaje = "PRUEBA DE MOTO MENSAJE"
-    pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,regresa_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-    return pdf_ret
+#     datos_a_pdf = contexto_para_pdf_moto(regresa_moto,logo_um_url)
+#     renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+#     nombre_archivo = "compra_venta_prueba.pdf"
+#     mensaje = "PRUEBA DE MOTO MENSAJE"
+#     pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,regresa_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+#     return pdf_ret
 
 
 def form_venta_moto(req,id_moto):
@@ -2120,10 +2120,38 @@ def vista_ventas(req):
 def detalles_cuotas(req,id_cv):
     try: 
         cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
+        
+        resultados_cuotas = (
+                CuotasMoto.objects
+                .filter(venta_id=id_cv)
+                .values(
+                    'id',
+                    'fecha_pago', 
+                    'fecha_prox_pago',  
+                    'cant_restante_dolares', 
+                    'cant_restante_pesos', 
+                    'moneda', 
+                    'observaciones',
+                    'valor_pago_dolares',
+                    'valor_pago_pesos',
+                    'comprobante_pago'
+                )
+            )
+            
+        res_documentacion = []
+        for resultado in resultados_cuotas:
+                    cm = CuotasMoto.objects.get(id=resultado['id'])
+                    res_documentacion.append({
+                    'cuota': resultado,
+                    'comprobante_pago': cm.comprobante_pago.url if cm.comprobante_pago else None
+        })
+        
         pago_acordado = ComprasVentas.objects.get(id=id_cv)
-        paginator = Paginator(cuotas, 5)  # 5 clientes por página
+        
+        paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
         page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
         page_obj = paginator.get_page(page_number)
+        
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":pago_acordado.forma_de_pago})
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
@@ -2144,7 +2172,8 @@ def alta_pago(req,id_cv):
             entrega_dolares = req.POST['valor_a_pagar']
             resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
             resto_pesos = resto_dolares * precio_dolar
-        
+
+        comprobante = req.FILES.get('comprobante_pago')
         nueva_cuota = CuotasMoto(
             fecha_pago = datetime.now(),
             fecha_prox_pago = req.POST['f_prox_pago'],
@@ -2155,11 +2184,17 @@ def alta_pago(req,id_cv):
             observaciones = req.POST['observaciones_pago'],
             precio_dolar = precio_dolar,
             valor_pago_dolares = entrega_dolares,
-            valor_pago_pesos = entrega_pesos
+            valor_pago_pesos = entrega_pesos,
+            comprobante_pago = comprobante
         )
         nueva_cuota.save()
+        comprobante_url = nueva_cuota.comprobante_pago.url
+        # messages.success(req, "Pago ingresado con éxito")
+        # return redirect(reverse('DetallesCuotas', kwargs={'id_cv': id_cv}))
         messages.success(req, "Pago ingresado con éxito")
-        return redirect(reverse('DetallesCuotas', kwargs={'id_cv': id_cv}))
+
+    # Redirección con el parámetro
+        return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 

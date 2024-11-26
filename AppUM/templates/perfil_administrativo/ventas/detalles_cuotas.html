@@ -70,6 +70,10 @@
                 <label for="descripcion" class="form-label">Observaciones</label>
                 <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
             </div>
+            <div class="mb-3">
+                <label for="libreta_propiedad" class="form-label">Comprobante de pago</label>
+                <input type="file" class="form-control" name="comprobante_pago" id="comprobante_pago">
+            </div>
             <button type="submit" class="btn btn-success">Guardar</button>
             <a href="" class="btn btn-secondary">Cancelar</a>
         </form>
@@ -87,17 +91,28 @@
                 <th>Moneda</th>
                 <th>Entrega</th> 
                 <th>Cantidad restante</th>
+                <th>Comprobante</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
                {% for cuota in page_obj %}
                 <tr>
-                    <td>{{ cuota.observaciones }}</td>
-                    <td>{{ cuota.fecha_pago }}</td>
-                    <td>{{ cuota.moneda }}</td>
-                    <td>{% if cuota.moneda == "Pesos" %} {{ cuota.valor_pago_pesos }} {% else %} {{ cuota.valor_pago_dolares }} {% endif %}</td>
-                    <td>${{ cuota.cant_restante_pesos }}/U$s{{ cuota.cant_restante_dolares }}</td>
+                    <td>{{ cuota.cuota.observaciones }}</td>
+                    <td>{{ cuota.cuota.fecha_pago }}</td>
+                    <td>{{ cuota.cuota.moneda }}</td>
+                    <td>{% if cuota.cuota.moneda == "Pesos" %} {{ cuota.cuota.valor_pago_pesos }} {% else %} {{ cuota.cuota.valor_pago_dolares }} {% endif %}</td>
+                    <td>${{ cuota.cuota.cant_restante_pesos }}/U$s{{ cuota.cuota.cant_restante_dolares }}</td>
+                    <td>
+                        {% if cuota.comprobante_pago %}
+                        <a href="{{ cuota.comprobante_pago }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-file-alt"></i> Ver Comprobante
+                        </a>
+                        
+                        {% else %}
+                            <p>SIN COMPROBANTE</p>
+                        {% endif %}
+                    </td>
                     <td><a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
                 </tr>
                 {% endfor %}

@@ -63,6 +63,7 @@ urlpatterns = [
      path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
+     path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

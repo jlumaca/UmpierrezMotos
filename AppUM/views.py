@@ -2119,8 +2119,6 @@ def vista_ventas(req):
 
 def detalles_cuotas(req,id_cv):
     try: 
-        cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
-        
         resultados_cuotas = (
                 CuotasMoto.objects
                 .filter(venta_id=id_cv)
@@ -2188,13 +2186,29 @@ def alta_pago(req,id_cv):
             comprobante_pago = comprobante
         )
         nueva_cuota.save()
-        comprobante_url = nueva_cuota.comprobante_pago.url
+        if nueva_cuota.comprobante_pago:
+            comprobante_url = nueva_cuota.comprobante_pago.url
+        else:
+            comprobante_url = None
         # messages.success(req, "Pago ingresado con éxito")
         # return redirect(reverse('DetallesCuotas', kwargs={'id_cv': id_cv}))
         messages.success(req, "Pago ingresado con éxito")
 
     # Redirección con el parámetro
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
+    except Exception as e:
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+
+def baja_pago(req,id_cm):
+    try:
+        if req.method == "POST":
+            cuota = CuotasMoto.objects.get(id=id_cm)
+            id_cv = cuota.venta_id
+            cuota.delete()
+            
+            return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+        else:
+            return render(req,"perfil_administrativo/ventas/baja_pago.html",{})
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 

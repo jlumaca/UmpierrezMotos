@@ -106,14 +106,14 @@
                     <td>
                         {% if cuota.comprobante_pago %}
                         <a href="{{ cuota.comprobante_pago }}" target="_blank" class="btn btn-primary">
-                            <i class="fas fa-file-alt"></i> Ver Comprobante
+                            <i class="fas fa-file-alt"></i>
                         </a>
                         
                         {% else %}
                             <p>SIN COMPROBANTE</p>
                         {% endif %}
                     </td>
-                    <td><a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
+                    <td><a href="{% url 'BajaPago' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
                 </tr>
                 {% endfor %}
                

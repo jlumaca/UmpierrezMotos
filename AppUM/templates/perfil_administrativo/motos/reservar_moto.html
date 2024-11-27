@@ -41,7 +41,7 @@
         </form>
 
         {% if datos_moto %}
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'MotoReserva' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
@@ -91,30 +91,29 @@
                         <th scope="row">Año</th>
                         <td>{{ moto.anio }}</td>
                     </tr>
+                    <tr>
+                        <th scope="row">Precio</th>
+                        <td>{% if moto.moneda == "Pesos" %}${{ moto.precio }} {% else %} U$s{{ moto.precio }} {% endif %}</td>
+                    </tr>
                 </tbody>
             </table>
     
             <!-- COMPROMISO COMPRA VENTA -->
             <h4>Reserva</h4>
-            <!-- <div class="mb-3">
-                <label for="precio" class="form-label">Moneda</label>
-                <select class="form-control" name="moneda" id="moneda">
-                    <option value="Dolares">Dólares</option>
-                    <option value="Pesos">Pesos</option>
-                </select>
-            </div>   -->
-            <div class="mb-3">
-                <label for="precio" class="form-label">Precio total de la moto</label>
-                <label id="precio_moto_label" value="{{ moto.precio }}">$/U$S {{ moto.precio }}</label>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda de la seña</label>
+                <div class="input-group">
+                    <select class="form-control" name="moneda_senia" id="moneda_entrega">
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="seña" class="form-label">Seña</label>
-                <input type="number" class="form-control" name="seña" id="seña" placeholder="Ingrese la seña" required>
+                <input type="number" class="form-control" name="senia" id="seña" placeholder="Ingrese la seña" required>
             </div>
-            <div class="mb-3">
-                <label for="entrega_inicial" class="form-label">Entrega inicial</label>
-                <input type="number" class="form-control" name="entrega_inicial" id="entrega_inicial" placeholder="Ingrese la entrega inicial" required>
-            </div>
+    
             <button type="submit" class="btn btn-success">Reservar</button>
                 <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
         </form>

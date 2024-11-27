@@ -17,6 +17,8 @@ from num2words import num2words
 from datetime import date
 from django.urls import reverse
 from django.db.models import Count
+from dateutil.relativedelta import relativedelta
+
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
@@ -2251,7 +2253,38 @@ def baja_pago(req,id_cm):
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
-def reservar_moto(req,id_moto):
+def reservas(req):
+    try:
+        resultados_motos = (
+                ComprasVentas.objects
+                .filter(tipo='R')
+                .select_related('moto','cliente')
+                .values(
+                    'id',
+                    'moto__marca', 
+                    'moto__modelo', 
+                    'fecha_compra', 
+                    'cliente__nombre',
+                    'cliente__apellido'
+                ).order_by('-fecha_compra')
+            )
+
+        res_documentacion = []
+        for resultado in resultados_motos:
+                cv = ComprasVentas.objects.get(id=resultado['id'])
+                res_documentacion.append({
+                'moto': resultado
+            })
+
+
+        paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)
+        return render(req,"perfil_administrativo/motos/reservas.html",{"page_obj":page_obj})
+    except Exception as e:
+        pass
+
+def form_reservar_moto(req,id_moto):
     try:
         if req.method == "POST":
             tipo_doc = req.POST['tipo_documento']
@@ -2298,6 +2331,65 @@ def reservar_moto(req,id_moto):
             return render(req,"perfil_administrativo/motos/reservar_moto.html",{})
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})
+
+def reservar_moto(req,id_moto,id_cliente):
+    # try:
+        compras_ventas = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+        if compras_ventas:
+            compras_ventas.tipo = "R"
+            compras_ventas.save()
+        else:
+            compras_ventas = ComprasVentas(
+                fecha_compra = datetime.now(),
+                tipo = "R",
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            compras_ventas.save()
+        moneda = req.POST['moneda_senia']
+        precio_dolar = 42
+        id_cv = compras_ventas.id
+
+        moto = Moto.objects.get(id=id_moto)
+
+        if moneda == "Pesos":
+                entrega_pesos = req.POST['senia']
+                entrega_dolares = 0
+                if moto.moneda_precio == "Pesos":
+                    resto_pesos = int(moto.precio) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / 42
+                else:
+                    resto_pesos = int((moto.precio * 42)) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / 42
+        else:
+                entrega_pesos = 0
+                entrega_dolares = req.POST['senia']
+                if moto.moneda_precio == "Pesos":
+                    resto_dolares = int((moto.precio / 42)) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * 42
+                else:
+                    resto_dolares = int(moto.precio) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * 42
+
+        nueva_cuota = CuotasMoto(
+                fecha_pago = datetime.now(),
+                fecha_prox_pago = datetime.now() + relativedelta(months=1),
+                venta_id = id_cv,
+                cant_restante_dolares = resto_dolares,
+                cant_restante_pesos = resto_pesos,
+                moneda = moneda,
+                precio_dolar = precio_dolar,
+                valor_pago_dolares = entrega_dolares,
+                valor_pago_pesos = entrega_pesos
+            )
+        nueva_cuota.save()
+        moto.pertenece_tienda = 0
+        moto.save()
+        messages.success(req, "Moto reservada con éxito.")
+        return redirect('Motos')
+        
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
 
 
 def estadisticas(req):

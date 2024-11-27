@@ -2156,45 +2156,83 @@ def detalles_cuotas(req,id_cv):
 
 def alta_pago(req,id_cv):
     try:
-        cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
-        
-        moneda = req.POST['moneda_entrega']
-        precio_dolar = cuota.precio_dolar
-        if moneda == "Pesos":
-            entrega_pesos = req.POST['valor_a_pagar']
-            entrega_dolares = 0
-            resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
-            resto_dolares = resto_pesos / precio_dolar
-        else:
-            entrega_pesos = 0
-            entrega_dolares = req.POST['valor_a_pagar']
-            resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
-            resto_pesos = resto_dolares * precio_dolar
-
+        existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
         comprobante = req.FILES.get('comprobante_pago')
-        nueva_cuota = CuotasMoto(
-            fecha_pago = datetime.now(),
-            fecha_prox_pago = req.POST['f_prox_pago'],
-            venta_id = id_cv,
-            cant_restante_dolares = resto_dolares,
-            cant_restante_pesos = resto_pesos,
-            moneda = moneda,
-            observaciones = req.POST['observaciones_pago'],
-            precio_dolar = precio_dolar,
-            valor_pago_dolares = entrega_dolares,
-            valor_pago_pesos = entrega_pesos,
-            comprobante_pago = comprobante
-        )
-        nueva_cuota.save()
+        moneda = req.POST['moneda_entrega']
+        if not existe_cuota:
+            cv = ComprasVentas.objects.get(id=id_cv)
+            moto = Moto.objects.get(id=cv.moto_id)
+
+            if moneda == "Pesos":
+                entrega_pesos = req.POST['valor_a_pagar']
+                entrega_dolares = 0
+                if moto.moneda_precio == "Pesos":
+                    resto_pesos = int(moto.precio) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / 42
+                else:
+                    resto_pesos = int((moto.precio * 42)) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / 42
+            else:
+                entrega_pesos = 0
+                entrega_dolares = req.POST['valor_a_pagar']
+                if moto.moneda_precio == "Pesos":
+                    resto_dolares = int((moto.precio / 42)) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * 42
+                else:
+                    resto_dolares = int(moto.precio) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * 42 
+
+            nueva_cuota = CuotasMoto(
+                fecha_pago = datetime.now(),
+                fecha_prox_pago = req.POST['f_prox_pago'],
+                venta_id = id_cv,
+                cant_restante_dolares = resto_dolares, 
+                cant_restante_pesos = resto_pesos, 
+                moneda = moneda,
+                observaciones = req.POST['observaciones_pago'],
+                precio_dolar = 42,
+                valor_pago_dolares = entrega_dolares, 
+                valor_pago_pesos = entrega_pesos, 
+                comprobante_pago = comprobante 
+            )
+            nueva_cuota.save()
+    
+        else:
+            cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+            
+            precio_dolar = cuota.precio_dolar
+            if moneda == "Pesos":
+                entrega_pesos = req.POST['valor_a_pagar']
+                entrega_dolares = 0
+                resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
+                resto_dolares = resto_pesos / precio_dolar
+            else:
+                entrega_pesos = 0
+                entrega_dolares = req.POST['valor_a_pagar']
+                resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
+                resto_pesos = resto_dolares * precio_dolar
+
+            nueva_cuota = CuotasMoto(
+                fecha_pago = datetime.now(),
+                fecha_prox_pago = req.POST['f_prox_pago'],
+                venta_id = id_cv,
+                cant_restante_dolares = resto_dolares,
+                cant_restante_pesos = resto_pesos,
+                moneda = moneda,
+                observaciones = req.POST['observaciones_pago'],
+                precio_dolar = precio_dolar,
+                valor_pago_dolares = entrega_dolares,
+                valor_pago_pesos = entrega_pesos,
+                comprobante_pago = comprobante
+            )
+            nueva_cuota.save()
+
         if nueva_cuota.comprobante_pago:
             comprobante_url = nueva_cuota.comprobante_pago.url
         else:
             comprobante_url = None
-        # messages.success(req, "Pago ingresado con éxito")
-        # return redirect(reverse('DetallesCuotas', kwargs={'id_cv': id_cv}))
+            
         messages.success(req, "Pago ingresado con éxito")
-
-    # Redirección con el parámetro
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})

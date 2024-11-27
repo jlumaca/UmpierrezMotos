@@ -28,6 +28,11 @@
 
 <title>Cuotas pagas</title>
 <div class="table-container" id="inventarios">
+    <!-- <div class="mb-3">
+        <a href="" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Regresar
+        </a>
+    </div> -->
     <h3>Pagos</h3>
     {% if messages %}
     {% for message in messages %}
@@ -44,7 +49,7 @@
     <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
         <i class="fas fa-money-check-alt"></i> Alta de Pago
     </a>
-
+    
 
     <div id="div_form_pago" style="display: none;">
         {% if id_cv %}
@@ -96,6 +101,7 @@
             </tr>
         </thead>
         <tbody>
+            {% if page_obj %}
                {% for cuota in page_obj %}
                 <tr>
                     <td>{{ cuota.cuota.observaciones }}</td>
@@ -113,14 +119,26 @@
                             <p>SIN COMPROBANTE</p>
                         {% endif %}
                     </td>
-                    <td><a href="{% url 'BajaPago' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a></td>
+                    <td>
+                        {% if cuota.mostrar_boton %}
+                        <a href="{% url 'BajaPago' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
-               
+            {% else %}
+
+            <tr>
+                <td colspan="9" class="text-center text-muted">
+                    No hay registros de pagos para esta venta.
+                </td>
+            </tr>
+            
+            
+            {% endif %}
 
         </tbody>
     </table>
-
     <!-- Paginación -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
@@ -155,6 +173,7 @@
             {% endif %}
         </ul>
     </nav>
+    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>

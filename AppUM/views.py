@@ -2140,20 +2140,23 @@ def detalles_cuotas(req,id_cv):
             )
             
         res_documentacion = []
+        i = 1
         for resultado in resultados_cuotas:
                     cm = CuotasMoto.objects.get(id=resultado['id'])
                     res_documentacion.append({
                     'cuota': resultado,
-                    'comprobante_pago': cm.comprobante_pago.url if cm.comprobante_pago else None
-        })
+                    'comprobante_pago': cm.comprobante_pago.url if cm.comprobante_pago else None,
+                    'mostrar_boton': i == len(resultados_cuotas)           
+                    })
+                    i = i + 1
         
-        pago_acordado = ComprasVentas.objects.get(id=id_cv)
+        c_v = ComprasVentas.objects.get(id=id_cv)
         
         paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
         page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
         page_obj = paginator.get_page(page_number)
         
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":pago_acordado.forma_de_pago})
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":c_v.forma_de_pago,"id_cliente":c_v.cliente_id})
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 

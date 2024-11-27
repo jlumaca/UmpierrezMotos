@@ -1729,7 +1729,7 @@ def ficha_cliente(req,id_cliente):
             'compra_venta', 
             'certificado_venta',
             # 'valor_cuota'
-        )
+        ).order_by('-fecha_compra')
     )
     #cantidad_cuotas = CuotasMoto.cantidad_cuotas
     #valor_cuota = cuotasmoto.valor_cuota
@@ -2158,8 +2158,8 @@ def detalles_cuotas(req,id_cv):
         
         c_v = ComprasVentas.objects.get(id=id_cv)
         
-        paginator = Paginator(res_documentacion, 5)  # 5 clientes por página
-        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        paginator = Paginator(res_documentacion, 30)  
+        page_number = req.GET.get('page') 
         page_obj = paginator.get_page(page_number)
         
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":c_v.forma_de_pago,"id_cliente":c_v.cliente_id})
@@ -2270,6 +2270,7 @@ def reservas(req):
                 .select_related('moto','cliente')
                 .values(
                     'id',
+                    'moto__id',
                     'moto__marca', 
                     'moto__modelo', 
                     'fecha_compra', 
@@ -2389,7 +2390,8 @@ def reservar_moto(req,id_moto,id_cliente):
                 moneda = moneda,
                 precio_dolar = precio_dolar,
                 valor_pago_dolares = entrega_dolares,
-                valor_pago_pesos = entrega_pesos
+                valor_pago_pesos = entrega_pesos,
+                observaciones = "Seña"
             )
         nueva_cuota.save()
         moto.pertenece_tienda = 0

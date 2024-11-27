@@ -37,6 +37,7 @@ class Moto(models.Model):
     identificacion_pdf = models.FileField(upload_to='motos/pdfs/', null=True, blank=True)
     observaciones = models.TextField(null=True, blank=True)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
+    moneda_precio = models.CharField(max_length=10,default=True,null=True)
 
 class Matriculas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)

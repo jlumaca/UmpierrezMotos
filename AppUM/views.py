@@ -2297,3 +2297,15 @@ def reservar_moto(req,id_moto):
             return render(req,"perfil_administrativo/motos/reservar_moto.html",{})
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})
+
+
+def estadisticas(req):
+    try:
+        anio = datetime.now().year
+        datos = []
+        for n in range(1,13):
+            cant_ventas = ComprasVentas.objects.filter(fecha_compra__year=anio,fecha_compra__month=n,tipo="V").count()
+            datos.append(int(cant_ventas))
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos})
+    except Exception as e:
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e})

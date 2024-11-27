@@ -2339,6 +2339,6 @@ def estadisticas(req):
         for resultado_moto in motos_mas_vendidas
         ]
                       
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos})
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos,"active_page":"Estadisticas"})
     except Exception as e:
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e})
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})

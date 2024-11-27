@@ -374,6 +374,7 @@ def alta_moto_usada(req,id_cliente):
                     estado = "Usada",
                     motor = req.POST['motor_moto'],
                     kilometros = req.POST['km_moto'],
+                    moneda_precio = req.POST['moneda_precio'],
                     precio = req.POST['precio_moto'],
                     color = color,
                     num_motor = num_motor,
@@ -433,6 +434,7 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
         moto = Moto.objects.get(id=id_moto)
         
         moto.kilometros = req.POST['km_moto']
+        moto.moneda_precio = req.POST['moneda_precio']
         moto.precio = req.POST['precio_moto']
         moto.observaciones = req.POST['descripcion_moto']
         moto.foto = req.FILES.get('foto_moto')
@@ -509,6 +511,7 @@ def alta_moto_nueva(req):
                     estado = "Nueva",
                     motor = req.POST['motor_moto'],
                     kilometros = 0,
+                    moneda_precio = req.POST['moneda_precio'],
                     precio = req.POST['precio_moto'],
                     color = color,
                     num_motor = num_motor,
@@ -925,7 +928,7 @@ def matricula_valid(matricula,padron,id_moto):
 def modificacion_moto(req,id_moto):
     try:
         if req.method == "POST":
-                print("ACCEDE POST")
+                
                 moto_upd = Moto.objects.get(id=id_moto)
                 num_motor = req.POST['num_motor_moto'].upper()
                 num_chasis = req.POST['num_chasis_moto'].upper()
@@ -940,6 +943,8 @@ def modificacion_moto(req,id_moto):
                     num_matricula = None
                 matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
                 padron = req.POST['num_padron']
+                if not padron:
+                    padron = None
                 validar_matricula = matricula_valid(matricula,padron,id_moto)
                 validacion_datos_moto = validacion_moto(id_moto,num_motor,num_chasis)
 
@@ -993,6 +998,7 @@ def modificacion_moto(req,id_moto):
                     moto_upd.num_cilindros = req.POST['num_cilindros']
                     moto_upd.cantidad_pasajeros = req.POST['num_pasajeros']
                     moto_upd.color = color
+                    moto_upd.moneda_precio = req.POST['moneda_precio']
                     moto_upd.precio = req.POST['precio_moto']
                     moto_upd.observaciones = req.POST['descripcion_moto']
                     moto_upd.foto = foto

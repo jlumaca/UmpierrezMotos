@@ -30,8 +30,8 @@
             <div class="mb-3">
                 <label for="estado" class="form-label">Estado</label>
                 <select value="{{ datos_moto.estado }}" class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
-                    <option value="usada">Usada</option>
-                    <option value="nueva">Nueva</option>
+                    <option value="Usada" {% if datos_moto.estado == "Usada" %}selected{% endif %}>Usada</option>
+                    <option value="Nueva" {% if datos_moto.estado == "Nueva" %}selected{% endif %}>Nueva</option>
                 </select>
             </div>
             <div class="mb-3" id="kms">
@@ -96,8 +96,17 @@
                 <label for="color" class="form-label">Color</label>
                 <input value="{{ datos_moto.color }}" type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20">
             </div>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
+                    <select value="{{ datos_moto.moneda_precio }}" class="form-control" name="moneda_precio" id="moneda_precio">
+                        <option value="Pesos" {% if datos_moto.moneda_precio == "Pesos" %}selected{% endif %}>Pesos</option>
+                        <option value="Dolares" {% if datos_moto.moneda_precio == "Dolares" %}selected{% endif %}>Dólares</option>
+                    </select>
+                </div>
+            </div>
             <div class="mb-3">
-                <label for="precio" class="form-label">Precio (USD)</label>
+                <label for="precio" class="form-label">Precio</label>
                 <input value="{{ precio }}" type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
             </div>
             <div class="mb-3">

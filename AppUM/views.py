@@ -16,6 +16,7 @@ from decimal import Decimal
 from num2words import num2words
 from datetime import date
 from django.urls import reverse
+from django.db.models import Count
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
@@ -2301,11 +2302,43 @@ def reservar_moto(req,id_moto):
 
 def estadisticas(req):
     try:
+        #VENTAS X MES
         anio = datetime.now().year
-        datos = []
-        for n in range(1,13):
+        mes_actual = datetime.now().month
+        datos_ventas = []
+        for n in range(1,mes_actual + 1):
             cant_ventas = ComprasVentas.objects.filter(fecha_compra__year=anio,fecha_compra__month=n,tipo="V").count()
-            datos.append(int(cant_ventas))
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos})
+            datos_ventas.append(int(cant_ventas))
+
+        #5 MARCAS MAS VENDIDAS
+        marcas_mas_vendidas = (
+            ComprasVentas.objects
+            .filter(tipo='V')  # Filtra solo las ventas
+            .values('moto__marca')  # Agrupa por marca de moto
+            .annotate(total_vendidas=Count('id'))  # Cuenta las ventas por marca
+            .order_by('-total_vendidas')[:5]  # Ordena de mayor a menor y toma las primeras 5
+        )
+        
+        datos_marcas = [
+        {'marca': resultado['moto__marca'], 'total_vendidas': resultado['total_vendidas']}
+        for resultado in marcas_mas_vendidas
+        ]
+
+        #5 MOTOS MAS VENDIDAS
+
+        motos_mas_vendidas = (
+            ComprasVentas.objects
+            .filter(tipo='V')  # Filtra solo las ventas
+            .values('moto__marca','moto__modelo')  # Agrupa por marca de moto
+            .annotate(total_motos_vendidas=Count('id'))  # Cuenta las ventas por marca
+            .order_by('-total_motos_vendidas')[:5]  # Ordena de mayor a menor y toma las primeras 5
+        )
+        
+        datos_motos = [
+        {'marca': resultado_moto['moto__marca'],'modelo':resultado_moto['moto__modelo'], 'total_motos_vendidas': resultado_moto['total_motos_vendidas']}
+        for resultado_moto in motos_mas_vendidas
+        ]
+                      
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos})
     except Exception as e:
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e})

@@ -19,6 +19,7 @@
             <label for="estado" class="form-label">Graficos</label>
             <select class="form-control" name="mostrarxgrafico" id="mostrarxgrafico" onchange="toggleFields()">
                 <option value="ventasxmes">Ventas por mes</option>
+                <option value="moto_mas_vendida">Motos más vendidas</option>
                 <option value="marca_mas_vendida">Marcas más vendidas</option>
             </select>
         </div>
@@ -50,19 +51,43 @@
     <div id="container_marcamasvendida" style="display: none;"></div>
        
     
-        <table id="datatable">
+        <table id="datatable_marcas">
             <thead style="display: none;">
                 <tr>
-                    <th></th>
+                    <th>Marca</th>
                     <th>Ventas</th>
                     
                 </tr>
             </thead>
             <tbody style="display: none;">
-                {% for venta in datos %}
+                {% for marca in marcas %}
                     <tr>
-                        <th></th>
-                        <td>{{ venta }}</td>
+                        <th>{{ marca.marca }}</th>
+                        <td>{{ marca.total_vendidas }}</td>
+                        
+                    </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
+    <div id="container_motomasvendida" style="display: none;"></div>
+       
+    
+        <table id="datatable_motos">
+            <thead style="display: none;">
+                <tr>
+                    <th>Marca</th>
+                    <th>Ventas</th>
+                    
+                </tr>
+            </thead>
+            <tbody style="display: none;">
+                {% for moto in motos %}
+                    <tr>
+                        <th>{{ moto.marca }} {{ moto.modelo }}</th>
+                        <td>{{ moto.total_motos_vendidas }}</td>
                         
                     </tr>
 
@@ -79,16 +104,20 @@
         var mostrarxgrafico = document.getElementById("mostrarxgrafico").value;
         var container_ventasxmes = document.getElementById("container_ventasxmes");
         var container_marcamasvendida = document.getElementById("container_marcamasvendida");
-
+        var container_motomasvendida = document.getElementById("container_motomasvendida");
 
         if (mostrarxgrafico === "ventasxmes") {
             container_ventasxmes.style.display = "block";
             container_marcamasvendida.style.display = "none";
-           
+            container_motomasvendida.style.display = "none";
+        }else if (mostrarxgrafico === "moto_mas_vendida"){
+            container_ventasxmes.style.display = "none";
+            container_marcamasvendida.style.display = "none";
+            container_motomasvendida.style.display = "block";
         }else{
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "block";
-           
+            container_motomasvendida.style.display = "none";
         }
 
     }
@@ -113,7 +142,7 @@ Highcharts.chart('container_ventasxmes', {
     },
     yAxis: {
         min: 0, // Valor mínimo en el eje y
-        max: 50, // Valor máximo en el eje y
+        
         tickInterval: 10, // Intervalo entre marcas en el eje y
         allowDecimals: false,
         title: {
@@ -124,7 +153,7 @@ Highcharts.chart('container_ventasxmes', {
 
 Highcharts.chart('container_marcamasvendida', {
     data: {
-        table: 'datatable'
+        table: 'datatable_marcas'
     },
     chart: {
         type: 'column'
@@ -133,18 +162,48 @@ Highcharts.chart('container_marcamasvendida', {
         text: 'Marcas más vendidas'
     },
     xAxis: {
-        categories: ['Ventas','Marcas'],
+       
         title: {
-            text: 'Mes'
+            text: 'Marcas'
         },
         // Ejemplo para ajustar los valores de x si fuera necesario
-        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
-        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
+         // Personaliza según tus datos
+        // Ajusta si deseas un intervalo específico entre categorías
     },
     yAxis: {
         min: 0, // Valor mínimo en el eje y
-        max: 50, // Valor máximo en el eje y
-        tickInterval: 10, // Intervalo entre marcas en el eje y
+         // Valor máximo en el eje y
+         // Intervalo entre marcas en el eje y
+        allowDecimals: false,
+        title: {
+            text: 'Ventas'
+        }
+    }
+});
+
+Highcharts.chart('container_motomasvendida', {
+    data: {
+        table: 'datatable_motos'
+    },
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Motos más vendidas'
+    },
+    xAxis: {
+       
+        title: {
+            text: 'Marcas'
+        },
+        // Ejemplo para ajustar los valores de x si fuera necesario
+         // Personaliza según tus datos
+        // Ajusta si deseas un intervalo específico entre categorías
+    },
+    yAxis: {
+        min: 0, // Valor mínimo en el eje y
+         // Valor máximo en el eje y
+         // Intervalo entre marcas en el eje y
         allowDecimals: false,
         title: {
             text: 'Ventas'

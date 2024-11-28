@@ -4,10 +4,11 @@ from AppUM import views
 from django.conf.urls.static import static
 from django.conf import settings
 urlpatterns = [
-     path('login/', views.vista_login,name="Login"),
+     path('login/', views.acceso_login,name="Login"),
+     path('cerrar_sesion', views.cerrar_sesion,name="CerrarSesion"),
+     
      # path('login_validacion', views.validacion_login,name="LoginValidacion"),
-     path('login_validacion', views.prueba_login,name="LoginValidacion"),
-     path('cerrar_sesion', views.prueba_cerrar_sesion,name="CerrarSesion"),
+     # path('login_validacion', views.prueba_login,name="LoginValidacion"),
 
      path('estadisticas', views.estadisticas,name="Estadisticas"),#
 
@@ -66,6 +67,9 @@ urlpatterns = [
      path('personal', views.vista_personal,name="Personal"),
      path('personal_alta', views.alta_personal,name="PersonalAlta"),
      path('personal_detalle/<int:id_personal>', views.detalles_personal,name="PersonalDetalle"),
+
+     path('reingresar_tienda/<int:id_personal>', views.ingresar_tienda,name="ReingresarTienda"),
+     
 
 
      path('ventas', views.vista_ventas,name="Ventas"),

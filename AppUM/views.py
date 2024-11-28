@@ -21,6 +21,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 
 # for usuario in Personal.objects.all():
@@ -32,21 +33,24 @@ from django.contrib.auth.decorators import login_required
 def vista_login(req):
     return render(req,"login/login.html",{})
 
-def prueba_login(req):
+def acceso_login(req):
     try:
-        usuario = req.POST.get('usuario_login')
-        passw = req.POST.get('pass_login')
+        if req.method == "POST":
+            usuario = req.POST.get('usuario_login')
+            passw = req.POST.get('pass_login')
 
-        exito = authenticate(username=usuario,password=passw)
-        if exito:
-            login(req,exito)
-            return render(req,"perfil_administrativo/padre_perfil_administrativo.html",{})
+            exito = authenticate(username=usuario,password=passw)
+            if exito:
+                login(req,exito)
+                return render(req,"perfil_administrativo/padre_perfil_administrativo.html",{})
+            else:
+                return render(req,"login/login.html",{"resultado":"Error usuario y/o pass"})
         else:
-            return render(req,"login/login.html",{"resultado":"Error usuario y/o pass"})
+            return render(req,"login/login.html",{})
     except Exception as e:
         pass
 
-def prueba_cerrar_sesion(req):
+def cerrar_sesion(req):
     try:
         logout(req)
         messages.success(req, "Has cerrado sesión correctamente.")  # Agrega el mensaje
@@ -1894,9 +1898,7 @@ def validar_personal(documento,telefono,correo):
             if administrativo.activo == 1: #SI EXISTIERA DEVUELVE ERROR 
                 return "existe_admin"
             else: #SI EXISTIERA Y FUE DADO DE BAJA COMO ADMINISTRATIVO (EJ. FUE ADMIN, PASO A SER MECANICO Y VUELVE A SER ADMIN), SIMPLEMENTE SE MODIFICA EL CAMPO ACTIVO = 1
-                return "update_activo"
-        else:
-            return "ingresar_en_administrativo" #SI LA PERSONA EXISTE PERO NUNCA FUE ADMINISTRATIVA, SE INGRESA COMO NUEVA ADMINISTRATIVA (EJ. MECANICO QUE EMPEZARA CON TAREAS DE ADMINISTRATIVO)
+                return "admin_desactivado"
     
     telefono_pers = Personal.objects.filter(telefono = telefono).first()
 
@@ -1931,32 +1933,25 @@ def alta_personal(req):
             correo_dominio = req.POST['dominio_correo'] 
             correo = correo_nombre + correo_dominio
             # print(documento)
+             
             valid_personal = validar_personal(documento,telefono,correo)
             # print(valid_personal)
             if valid_personal == "existe_admin":
-                return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Existe administrativo"})
+                return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"La persona que desea ingresar ya existe en el sistema"})
             elif valid_personal == "existe_telefono":
                 return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"El teléfono ingresado ya existe en el sistema, el mismo no debe estar repetido"})
             elif valid_personal == "existe_correo":
                 return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"El correo ingresado ya existe en el sistema, el mismo no debe estar repetido"})
+            elif valid_personal == "admin_desactivado":    
+                persona = Personal.objects.filter(documento=documento).first()
+                id = persona.id
+                return render(req,"perfil_administrativo/personal/alta_personal.html",{"reingresar":True,"id_personal":id})
             else:
-                # if valid_personal == "update_activo":
-                #     return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Modificar activo = 1"})
-                # elif valid_personal == "ingresar_en_administrativo":
-                #     # return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":"Ingresar nuevo administrativo"})
-                #     personal = Personal.objects.filter(documento=documento).first()
-                #     solo_administrativo = Administrativo(
-                #         personal_ptr_id = personal.id,
-                #         activo = 1
-                #     )
-                #     solo_administrativo.id
-                # else:
-                                    
-                f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
-                f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
-                usuario = nombre_usuario(req.POST['nombre'],req.POST['apellido'])
-                
-                administrativo = Administrativo.objects.create(
+                    f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                    f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+                    usuario = nombre_usuario(req.POST['nombre'],req.POST['apellido'])
+                    
+                    personal = Personal.objects.create(
                         documento=documento,
                         nombre=req.POST['nombre'].capitalize(),
                         apellido=req.POST['apellido'].capitalize(),
@@ -1964,15 +1959,67 @@ def alta_personal(req):
                         usuario=usuario,
                         contrasena="Inicio1234",
                         correo=correo,
-                        telefono=telefono,
-                        activo=True
-                     )
+                        telefono=telefono
+                    )
+                    personal.save()
+                    # Crear registro en Administrativo asociado al Personal
+                    administrativo = Administrativo.objects.create(
+                        personal_ptr=personal,  # Asociar al registro de Personal
+                        activo=True,
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono
+                    )
+                    administrativo.save()
 
-                messages.success(req, "Personal ingresado con éxito")
-                return redirect('Personal')
+                    # Crear registro en Mecanico asociado al Personal
+                    mecanico = Mecanico.objects.create(
+                        personal_ptr=personal,  # Asociar al registro de Personal
+                        activo=False,
+                        jefe=False,
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono
+                    )
+                    mecanico.save()
+
+                    user = User.objects.create_user(
+                        username=usuario,
+                        password="Inicio1234",  # La contraseña predeterminada
+                        email=correo,
+                        first_name=req.POST['nombre'].capitalize(),
+                        last_name=req.POST['apellido'].capitalize()
+                    )
+                    
+                    # Asignar permisos o grupos si es necesario
+                    user.is_staff = False  # Si deseas que tenga acceso al admin de Django
+                    user.save()
+
+                    messages.success(req, "Personal ingresado con éxito")
+                    return redirect('Personal')
                 
         else:
             return render(req,"perfil_administrativo/personal/alta_personal.html",{})
+    except Exception as e:
+        return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":e})
+
+def ingresar_tienda(req,id_personal):
+    try:
+        administrativo = Administrativo.objects.get(personal_ptr_id=id_personal)
+        administrativo.activo = 1
+        administrativo.save()
+        messages.success(req, "Personal reingresado con éxito")
+        return redirect('Personal')
     except Exception as e:
         return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":e})
 

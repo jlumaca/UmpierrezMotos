@@ -310,16 +310,20 @@ def cliente_moto(req):
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":False})
             else:
-                matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+                existe_matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+                if existe_matricula:
+                    matricula = existe_matricula.matricula
+                else:
+                    matricula = "Sin matrícula"
                 return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
                                                                                 "moto":moto,
-                                                                                "matricula":matricula.matricula,
+                                                                                "matricula":matricula,
                                                                                 "active_page": 'Motos',
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":True,
                                                                                 "consultar_moto_cliente":False})
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":e})
 
 
 def alta_moto_usada(req,id_cliente):

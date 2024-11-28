@@ -2193,24 +2193,26 @@ def alta_pago(req,id_cv):
             cv = ComprasVentas.objects.get(id=id_cv)
             moto = Moto.objects.get(id=cv.moto_id)
 
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = dolar.precio_dolar_tienda
             if moneda == "Pesos":
                 entrega_pesos = req.POST['valor_a_pagar']
                 entrega_dolares = 0
                 if moto.moneda_precio == "Pesos":
                     resto_pesos = int(moto.precio) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / 42
+                    resto_dolares = resto_pesos / precio_dolar
                 else:
-                    resto_pesos = int((moto.precio * 42)) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / 42
+                    resto_pesos = int((moto.precio * precio_dolar)) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / precio_dolar
             else:
                 entrega_pesos = 0
                 entrega_dolares = req.POST['valor_a_pagar']
                 if moto.moneda_precio == "Pesos":
-                    resto_dolares = int((moto.precio / 42)) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * 42
+                    resto_dolares = int((moto.precio / precio_dolar)) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * precio_dolar
                 else:
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * 42 
+                    resto_pesos = resto_dolares * precio_dolar 
 
             nueva_cuota = CuotasMoto(
                 fecha_pago = datetime.now(),
@@ -2220,7 +2222,7 @@ def alta_pago(req,id_cv):
                 cant_restante_pesos = resto_pesos, 
                 moneda = moneda,
                 observaciones = req.POST['observaciones_pago'],
-                precio_dolar = 42,
+                precio_dolar = precio_dolar,
                 valor_pago_dolares = entrega_dolares, 
                 valor_pago_pesos = entrega_pesos, 
                 comprobante_pago = comprobante 
@@ -2374,7 +2376,8 @@ def reservar_moto(req,id_moto,id_cliente):
         )
         compras_ventas.save()
         moneda = req.POST['moneda_senia']
-        precio_dolar = 42
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = dolar.precio_dolar_tienda
         id_cv = compras_ventas.id
 
         moto = Moto.objects.get(id=id_moto)
@@ -2384,19 +2387,19 @@ def reservar_moto(req,id_moto,id_cliente):
                 entrega_dolares = 0
                 if moto.moneda_precio == "Pesos":
                     resto_pesos = int(moto.precio) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / 42
+                    resto_dolares = resto_pesos / precio_dolar
                 else:
-                    resto_pesos = int((moto.precio * 42)) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / 42
+                    resto_pesos = int((moto.precio * precio_dolar)) - int(entrega_pesos)
+                    resto_dolares = resto_pesos / precio_dolar
         else:
                 entrega_pesos = 0
                 entrega_dolares = req.POST['senia']
                 if moto.moneda_precio == "Pesos":
-                    resto_dolares = int((moto.precio / 42)) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * 42
+                    resto_dolares = int((moto.precio / precio_dolar)) - int(entrega_dolares)
+                    resto_pesos = resto_dolares * precio_dolar
                 else:
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * 42
+                    resto_pesos = resto_dolares * precio_dolar
 
         nueva_cuota = CuotasMoto(
                 fecha_pago = datetime.now(),

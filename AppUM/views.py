@@ -18,6 +18,10 @@ from datetime import date
 from django.urls import reverse
 from django.db.models import Count
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+
 
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
@@ -27,6 +31,28 @@ from dateutil.relativedelta import relativedelta
 
 def vista_login(req):
     return render(req,"login/login.html",{})
+
+def prueba_login(req):
+    try:
+        usuario = req.POST.get('usuario_login')
+        passw = req.POST.get('pass_login')
+
+        exito = authenticate(username=usuario,password=passw)
+        if exito:
+            login(req,exito)
+            return render(req,"perfil_administrativo/padre_perfil_administrativo.html",{})
+        else:
+            return render(req,"login/login.html",{"resultado":"Error usuario y/o pass"})
+    except Exception as e:
+        pass
+
+def prueba_cerrar_sesion(req):
+    try:
+        logout(req)
+        messages.success(req, "Has cerrado sesión correctamente.")  # Agrega el mensaje
+        return redirect('Login')
+    except:
+        pass
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -133,6 +159,7 @@ def validacion_login(req):
 
     return render(req, renderizar_en, contexto)
 
+@login_required()
 def vista_inventario_motos(req):
     motos = Moto.objects.filter(pertenece_tienda=1).order_by('-fecha_ingreso')
 
@@ -145,7 +172,7 @@ def vista_inventario_motos(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
-
+@login_required()
 def vista_inventario_accesorios(req):
     return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
 
@@ -255,6 +282,7 @@ def contexto_para_pdf_moto(model_moto,logo):
         
         return datos_a_pdf
 
+@login_required()
 def datos_cliente_venta(req):
     if req.method == 'POST':
         tipo_documento = req.POST['tipo_documento']
@@ -281,6 +309,8 @@ def datos_cliente_venta(req):
                 "active_page": 'Motos'
             }
             return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
+
+@login_required()
 def cliente_moto(req):
     try:
         num_motor = req.POST['num_motor_moto'].upper()
@@ -325,7 +355,7 @@ def cliente_moto(req):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":e})
 
-
+@login_required()
 def alta_moto_usada(req,id_cliente):
     try:
     #INSERT EN MOTO
@@ -432,6 +462,7 @@ def alta_moto_usada(req,id_cliente):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})
 
+@login_required()
 def reingresar_moto_usada(req,id_moto,id_cliente):
     try:
     #UPDATE MOTO PERT_TIENDA = 1
@@ -490,6 +521,7 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})
 
+@login_required()
 def alta_moto_nueva(req):
     try:
     #INSERT EN MOTO
@@ -561,6 +593,7 @@ def alta_moto_nueva(req):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})                                                                            
 
+@login_required()
 def form_alta_moto(req):
     return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',
                                                                             "consultar_moto_cliente":True})
@@ -807,6 +840,7 @@ def form_alta_moto(req):
     #     return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__,"active_page": 'Motos'})
 
 
+@login_required()
 def baja_moto(req,id_moto):
     if req.method == 'POST':
 
@@ -937,6 +971,7 @@ def matricula_valid(matricula,padron,id_moto):
         if existe_padron.moto_id != id_moto:
             return "padron_existe"
     
+@login_required()
 def modificacion_moto(req,id_moto):
     try:
         if req.method == "POST":
@@ -1985,6 +2020,7 @@ def detalles_personal(req,id_personal):
 #     return pdf_ret
 
 
+@login_required()
 def form_venta_moto(req,id_moto):
     try:
         if req.method == "POST":
@@ -2055,6 +2091,7 @@ def form_venta_moto(req,id_moto):
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 
+@login_required()
 def venta_moto(req,id_moto,id_cliente):
     try:
 
@@ -2437,7 +2474,7 @@ def reservar_moto(req,id_moto,id_cliente):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
 
-
+@login_required()
 def estadisticas(req):
     try:
         #VENTAS X MES

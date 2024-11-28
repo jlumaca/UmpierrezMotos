@@ -54,9 +54,10 @@
                         </li>
                     </ul>
                     <span class="navbar-text ms-3 me-3">
-                        Usuario: {{ usuario }}
+                        Usuario: {{ request.user.first_name }}
                     </span>
-                    <button class="btn btn-logout">Cerrar sesión</button>
+                    <a href="{% url 'CerrarSesion' %}"><button class="btn btn-logout">Cerrar sesión</button></a>
+                    
                 </div>
             </div>
         </div>

@@ -4,26 +4,28 @@ from AppUM import views
 from django.conf.urls.static import static
 from django.conf import settings
 urlpatterns = [
-     path('login', views.vista_login,name="Login"),
-     path('login_validacion', views.validacion_login,name="LoginValidacion"),
+     path('login/', views.vista_login,name="Login"),
+     # path('login_validacion', views.validacion_login,name="LoginValidacion"),
+     path('login_validacion', views.prueba_login,name="LoginValidacion"),
+     path('cerrar_sesion', views.prueba_cerrar_sesion,name="CerrarSesion"),
 
-     path('estadisticas', views.estadisticas,name="Estadisticas"),
+     path('estadisticas', views.estadisticas,name="Estadisticas"),#
 
-     path('motos', views.vista_inventario_motos,name="Motos"),
+     path('motos', views.vista_inventario_motos,name="Motos"),#
 
-     path('moto_alta', views.form_alta_moto,name="MotoAlta"),
-     path('cliente_moto', views.cliente_moto,name="BuscarClienteMoto"),
-     path('alta_moto_usada/<int:id_cliente>', views.alta_moto_usada,name="AltaMotoUsada"),
-     path('reingresar_moto_usada/<int:id_moto>/<int:id_cliente>', views.reingresar_moto_usada,name="ReingresarMotoUsada"),
-     path('alta_moto_nueva', views.alta_moto_nueva,name="AltaMotoNueva"),
+     path('moto_alta', views.form_alta_moto,name="MotoAlta"),#
+     path('cliente_moto', views.cliente_moto,name="BuscarClienteMoto"),#
+     path('alta_moto_usada/<int:id_cliente>', views.alta_moto_usada,name="AltaMotoUsada"),#
+     path('reingresar_moto_usada/<int:id_moto>/<int:id_cliente>', views.reingresar_moto_usada,name="ReingresarMotoUsada"),#
+     path('alta_moto_nueva', views.alta_moto_nueva,name="AltaMotoNueva"),#
 
 
 
-     path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),
-     path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),
-     path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),
-     path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),
-     path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),
+     path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),#
+     path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),#
+     path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),#
+     path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#
+     path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
      
      path('reservas', views.reservas,name="Reservas"),
      path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),

@@ -11,6 +11,13 @@
 <body>
     <div class="login-container">
         <h2 class="text-center" style="color: #e3342f;">Iniciar Sesión</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-3 text-center" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
         <form action="{% url 'LoginValidacion' %}" method="POST">{% csrf_token %}
 
             <div class="mb-3">

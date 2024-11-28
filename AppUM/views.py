@@ -2263,16 +2263,15 @@ def alta_pago(req,id_cv):
 
 def baja_pago(req,id_cm):
     try:
+        cuota = CuotasMoto.objects.get(id=id_cm)
+        id_cv = cuota.venta_id
         if req.method == "POST":
-            cuota = CuotasMoto.objects.get(id=id_cm)
-            id_cv = cuota.venta_id
-            cuota.delete()
-            
+            cuota.delete()    
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:
-            return render(req,"perfil_administrativo/ventas/baja_pago.html",{})
+            return render(req,"perfil_administrativo/ventas/baja_pago.html",{"id_cv":id_cv})
     except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+        return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
 
 def reservas(req):
     try:

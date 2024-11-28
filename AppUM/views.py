@@ -2469,7 +2469,14 @@ def estadisticas(req):
 def datos_tienda(req):
     try:
         dolar = PrecioDolar.objects.get(id=1)
-        return render(req,"perfil_administrativo/tienda.html",{"dolar_precio":dolar.precio_dolar_tienda})
+        logo_tienda = Logos.objects.get(id=1)
+        logo_cv = Logos.objects.get(id=2)
+        #"foto_moto":moto.foto.url if moto.foto else None
+        imagen_logo_tienda = logo_tienda.logo_UM.url if logo_tienda.logo_UM else None
+        imagen_logo_cv = logo_cv.logo_UM.url if logo_cv.logo_UM else None
+        return render(req,"perfil_administrativo/tienda.html",{"dolar_precio":dolar.precio_dolar_tienda,
+                                                               "imagen_logo_tienda":imagen_logo_tienda,
+                                                               "imagen_logo_cv":imagen_logo_cv})
     except Exception as e:
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
 
@@ -2483,4 +2490,26 @@ def modificar_precio_dolar(req):
         return redirect('Tienda')
 
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
+
+def modificar_logo_tienda(req):
+    try:
+        logo_tienda = Logos.objects.get(id=1)
+        nuevo_logo = req.FILES.get('nuevo_logo')
+        logo_tienda.logo_UM = nuevo_logo
+        logo_tienda.save()
+        messages.success(req, "Logo modificado modificado con éxito.")
+        return redirect('Tienda')
+    except Exception as e:
+        return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
+
+def modificar_logo_cv(req):
+    try:
+        logo_cv = Logos.objects.get(id=2)
+        nuevo_logo = req.FILES.get('nuevo_logo_cv')
+        logo_cv.logo_UM = nuevo_logo
+        logo_cv.save()
+        messages.success(req, "Logo del papel compraventa modificado modificado con éxito.")
+        return redirect('Tienda')
+    except Exception as e:
+        return render(req,"perfil_administrativo/tienda.html",{"error_message":e})

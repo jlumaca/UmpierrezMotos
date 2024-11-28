@@ -73,6 +73,8 @@ urlpatterns = [
 
      path('tienda', views.datos_tienda,name="Tienda"),
      path('precio_dolar', views.modificar_precio_dolar,name="ModificarPrecioDolar"),
+     path('modificar_logo', views.modificar_logo_tienda,name="ModificarLogo"),
+     path('modificar_logo_cv', views.modificar_logo_cv,name="ModificarLogoCV"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

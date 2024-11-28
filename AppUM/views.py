@@ -52,27 +52,32 @@ def acceso_login(req):
                     administrativo = obtener_administrativo.activo
                     mecanico_jefe = obtener_mecanico.activo and obtener_mecanico.jefe
                     mecanico_empleado = obtener_mecanico.activo and not obtener_mecanico.jefe
-                    if administrativo and mecanico_jefe:
-                        renderizar_en = "login/rol_usuario.html"
-                        roles = ['Administrativo','Mecanico jefe']
-                        contexto = {"roles":roles}
-                    elif administrativo and mecanico_empleado:
-                        renderizar_en = "login/rol_usuario.html"
-                        roles = ['Administrativo','Mecanico empleado']
-                        contexto = {"roles":roles}
-                    elif administrativo:
-                        renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
-                        contexto = {}
-                    elif mecanico_jefe:
-                        renderizar_en = "login/login.html"
-                        contexto = {"resultado":"MEC JEFE"}
-                    elif mecanico_empleado:
-                        renderizar_en = "login/rol_usuario.html"
-                        roles = ['Mecanico empleado']
-                        contexto = {"roles":roles}
+
+                    if usuario_consulta.primera_sesion:
+                        return render(req,"login/cambio_pass.html",{"usuario":usuario})
                     else:
-                        renderizar_en = "login/login.html"
-                        contexto = {"resultado":"USUARIO DADO DE BAJA"}
+                    
+                        if administrativo and mecanico_jefe:
+                            renderizar_en = "login/rol_usuario.html"
+                            roles = ['Administrativo','Mecanico jefe']
+                            contexto = {"roles":roles}
+                        elif administrativo and mecanico_empleado:
+                            renderizar_en = "login/rol_usuario.html"
+                            roles = ['Administrativo','Mecanico empleado']
+                            contexto = {"roles":roles}
+                        elif administrativo:
+                            renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+                            contexto = {}
+                        elif mecanico_jefe:
+                            renderizar_en = "login/login.html"
+                            contexto = {"resultado":"MEC JEFE"}
+                        elif mecanico_empleado:
+                            renderizar_en = "login/rol_usuario.html"
+                            roles = ['Mecanico empleado']
+                            contexto = {"roles":roles}
+                        else:
+                            renderizar_en = "login/login.html"
+                            contexto = {"resultado":"USUARIO DADO DE BAJA"}
                 else:
                     #ACCEDER CON SUPER USUARIO
                     renderizar_en = "login/rol_usuario.html"
@@ -87,12 +92,39 @@ def acceso_login(req):
     except Exception as e:
         return render(req,"login/login.html",{"resultado":e})
 
+@login_required()
 def cerrar_sesion(req):
     try:
         logout(req)
         messages.success(req, "Has cerrado sesión correctamente.")  # Agrega el mensaje
         return redirect('Login')
     except:
+        pass
+
+@login_required()
+def cambio_pass(req):
+    try:
+        pass1 = req.POST.get('nueva_contrasena')
+        pass2 = req.POST.get('nueva_contrasena_2')
+       
+        if (len(pass1) < 8):
+            return render(req,"login/cambio_pass.html",{"resultado":"La contraseña debe tener un mínimo de 8 caracteres"})
+        elif pass1 != pass2:
+            return render(req,"login/cambio_pass.html",{"resultado":"Las contraseñas deben coincidir"})
+        else:
+            #usuario.contrasena = make_password(usuario.contrasena)
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            personal.primera_sesion = 0
+            personal.contrasena = make_password(pass1)
+            personal.save()
+
+            usuario.password = make_password(pass1)
+            usuario.save()
+            messages.success(req, "Contraseña cambiada correctamente.")  # Agrega el mensaje
+            return redirect('Login')
+            
+    except Exception as e:
         pass
 
 @login_required()
@@ -2044,7 +2076,8 @@ def alta_personal(req):
                         usuario=usuario,
                         contrasena="Inicio1234",
                         correo=correo,
-                        telefono=telefono
+                        telefono=telefono,
+                        primera_sesion = True
                     )
                     personal.save()
                     # Crear registro en Administrativo asociado al Personal
@@ -2058,7 +2091,8 @@ def alta_personal(req):
                         usuario=usuario,
                         contrasena="Inicio1234",
                         correo=correo,
-                        telefono=telefono
+                        telefono=telefono,
+                        primera_sesion = True
                     )
                     administrativo.save()
 
@@ -2074,7 +2108,8 @@ def alta_personal(req):
                         usuario=usuario,
                         contrasena="Inicio1234",
                         correo=correo,
-                        telefono=telefono
+                        telefono=telefono,
+                        primera_sesion = True
                     )
                     mecanico.save()
 

@@ -10,6 +10,7 @@ class Personal(models.Model):
     contrasena = models.CharField(max_length=20)
     correo = models.CharField(max_length=40,unique=True)
     telefono = models.CharField(max_length=10,unique=True) 
+    primera_sesion = models.BooleanField(default=False)
 
 class Administrativo(Personal):
     activo = models.BooleanField(default=True)

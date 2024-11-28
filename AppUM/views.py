@@ -442,20 +442,28 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
         moto.fecha_ingreso = datetime.now()
         moto.save()
 
-        compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+        # compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
         libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
-        if compra_venta:
-            compra_venta.tipo = "CV"
-            compra_venta.save()
-        else:
-            c_v = ComprasVentas(
+        # if compra_venta:
+        #     compra_venta.tipo = "CV"
+        #     compra_venta.save()
+        # else:
+        #     c_v = ComprasVentas(
+        #         fecha_compra = datetime.now(),
+        #         fotocopia_libreta = libreta_propiedad,
+        #         tipo = "CV",
+        #         cliente_id = id_cliente,
+        #         moto_id = id_moto
+        #     )
+        #     c_v.save()
+        c_v = ComprasVentas(
                 fecha_compra = datetime.now(),
                 fotocopia_libreta = libreta_propiedad,
                 tipo = "CV",
                 cliente_id = id_cliente,
                 moto_id = id_moto
             )
-            c_v.save()
+        c_v.save()
         checkbox = 'crear_pdf' in req.POST
         if checkbox:
             ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
@@ -2029,40 +2037,44 @@ def form_venta_moto(req,id_moto):
 def venta_moto(req,id_moto,id_cliente):
     try:
 
-        compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
-        if compra_venta:
-            #ACA MODIFICAMOS CAMPO tipo = "V"
-            # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":f"ID Moto es {id_moto}, ID Cliente es {id_cliente}"})
-            compra_venta_archivo = req.FILES.get('compra_venta_moto')
-            # compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
-            compra_venta.tipo = "V"
-            compra_venta.compra_venta = compra_venta_archivo
-            compra_venta.fecha_compra = datetime.now()
-            compra_venta.forma_de_pago = req.POST['forma_pago']
-            compra_venta.save()
-            retornar_cliente = ficha_cliente(req,id_cliente)
-            return retornar_cliente
-        else:
+        # compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
+        # if compra_venta:
+        #     #ACA MODIFICAMOS CAMPO tipo = "V"
+        #     # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":f"ID Moto es {id_moto}, ID Cliente es {id_cliente}"})
+        #     compra_venta_archivo = req.FILES.get('compra_venta_moto')
+        #     # compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+        #     compra_venta.tipo = "V"
+        #     compra_venta.compra_venta = compra_venta_archivo
+        #     compra_venta.fecha_compra = datetime.now()
+        #     compra_venta.forma_de_pago = req.POST['forma_pago']
+        #     compra_venta.save()
+        #     retornar_cliente = ficha_cliente(req,id_cliente)
+        #     return retornar_cliente
+        # else:
             #INGRESAMOS EN COMPRAVENTA CON VALORES: fecha_compra = datetime.now(),padron = Null, compra_venta = ,certificado_venta = , tipo = 'V',cliente_id = id_cliente, moto_id = id_moto, forma_de_pago = 
             #CONSULTAMOS LA MOTO Y MODIFICAMOS EL CAMPO pertenece_tienda = 0
-            moto = Moto.objects.get(id=id_moto)
-            moto.pertenece_tienda = 0
-            moto.save()
-            compra_venta = req.FILES.get('compra_venta_moto')
-            nueva_venta = ComprasVentas(
-                fecha_compra = datetime.now(),
-                compra_venta = compra_venta,
-                # certificado_venta = ,
-                tipo = "V",
-                forma_de_pago = req.POST['forma_pago'],
-                cliente_id = id_cliente,
-                moto_id = id_moto
-            )
-            nueva_venta.save()
-            #REDIRIGIR A LA FICHA DEL CLIENTE
-            # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
-            retornar_cliente = ficha_cliente(req,id_cliente)
-            return retornar_cliente
+        moto = Moto.objects.get(id=id_moto)
+        moto.pertenece_tienda = 0
+        moto.save()
+        existe_reserva = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
+        if existe_reserva:
+            existe_reserva.delete()
+            
+        compra_venta = req.FILES.get('compra_venta_moto')
+        nueva_venta = ComprasVentas(
+            fecha_compra = datetime.now(),
+            compra_venta = compra_venta,
+            # certificado_venta = ,
+            tipo = "V",
+            forma_de_pago = req.POST['forma_pago'],
+            cliente_id = id_cliente,
+            moto_id = id_moto
+        )
+        nueva_venta.save()
+        #REDIRIGIR A LA FICHA DEL CLIENTE
+        # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
+        retornar_cliente = ficha_cliente(req,id_cliente)
+        return retornar_cliente
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
@@ -2343,19 +2355,19 @@ def form_reservar_moto(req,id_moto):
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})
 
 def reservar_moto(req,id_moto,id_cliente):
-    # try:
-        compras_ventas = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
-        if compras_ventas:
-            compras_ventas.tipo = "R"
-            compras_ventas.save()
-        else:
-            compras_ventas = ComprasVentas(
-                fecha_compra = datetime.now(),
-                tipo = "R",
-                cliente_id = id_cliente,
-                moto_id = id_moto
-            )
-            compras_ventas.save()
+    try:
+        # compras_ventas = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
+        # if compras_ventas:
+        #     compras_ventas.tipo = "R"
+        #     compras_ventas.save()
+        # else:
+        compras_ventas = ComprasVentas(
+            fecha_compra = datetime.now(),
+            tipo = "R",
+            cliente_id = id_cliente,
+            moto_id = id_moto
+        )
+        compras_ventas.save()
         moneda = req.POST['moneda_senia']
         precio_dolar = 42
         id_cv = compras_ventas.id
@@ -2399,8 +2411,8 @@ def reservar_moto(req,id_moto,id_cliente):
         messages.success(req, "Moto reservada con éxito.")
         return redirect('Motos')
         
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
 
 
 def estadisticas(req):
@@ -2442,6 +2454,6 @@ def estadisticas(req):
         for resultado_moto in motos_mas_vendidas
         ]
                       
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos,"active_page":"Estadisticas"})
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos,"active_page":"Estadisticas","prueba":datos_marcas})
     except Exception as e:
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})

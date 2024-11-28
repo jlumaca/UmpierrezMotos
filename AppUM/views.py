@@ -22,7 +22,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from .decorators import admin_required, mecanico_jefe_required, mecanico_empleado_required
 
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
@@ -67,8 +67,9 @@ def acceso_login(req):
                         renderizar_en = "login/login.html"
                         contexto = {"resultado":"MEC JEFE"}
                     elif mecanico_empleado:
-                        renderizar_en = "login/login.html"
-                        contexto = {"resultado":"MEC EMPLEADO"}
+                        renderizar_en = "login/rol_usuario.html"
+                        roles = ['Mecanico empleado']
+                        contexto = {"roles":roles}
                     else:
                         renderizar_en = "login/login.html"
                         contexto = {"resultado":"USUARIO DADO DE BAJA"}
@@ -217,7 +218,7 @@ def departamento_matricula(matricula):
 
 #     return render(req, renderizar_en, contexto)
 
-@login_required()
+@admin_required
 def vista_inventario_motos(req):
     motos = Moto.objects.filter(pertenece_tienda=1).order_by('-fecha_ingreso')
 
@@ -230,7 +231,7 @@ def vista_inventario_motos(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
-@login_required()
+@admin_required
 def vista_inventario_accesorios(req):
     return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
 
@@ -340,7 +341,7 @@ def contexto_para_pdf_moto(model_moto,logo):
         
         return datos_a_pdf
 
-@login_required()
+@admin_required
 def datos_cliente_venta(req):
     if req.method == 'POST':
         tipo_documento = req.POST['tipo_documento']
@@ -368,7 +369,7 @@ def datos_cliente_venta(req):
             }
             return render(req,"perfil_administrativo/motos/alta_moto.html",contexto)
 
-@login_required()
+@admin_required
 def cliente_moto(req):
     try:
         num_motor = req.POST['num_motor_moto'].upper()
@@ -413,7 +414,7 @@ def cliente_moto(req):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":e})
 
-@login_required()
+@admin_required
 def alta_moto_usada(req,id_cliente):
     try:
     #INSERT EN MOTO
@@ -520,7 +521,7 @@ def alta_moto_usada(req,id_cliente):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})
 
-@login_required()
+@admin_required
 def reingresar_moto_usada(req,id_moto,id_cliente):
     try:
     #UPDATE MOTO PERT_TIENDA = 1
@@ -579,7 +580,7 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})
 
-@login_required()
+@admin_required
 def alta_moto_nueva(req):
     try:
     #INSERT EN MOTO
@@ -651,7 +652,7 @@ def alta_moto_nueva(req):
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":e})                                                                            
 
-@login_required()
+@admin_required
 def form_alta_moto(req):
     return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',
                                                                             "consultar_moto_cliente":True})
@@ -898,7 +899,7 @@ def form_alta_moto(req):
     #     return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"Algo salió mal"+ type(e).__name__,"active_page": 'Motos'})
 
 
-@login_required()
+@admin_required
 def baja_moto(req,id_moto):
     if req.method == 'POST':
 
@@ -912,6 +913,7 @@ def baja_moto(req,id_moto):
        return render(req, "perfil_administrativo/motos/baja_moto.html", {"id_moto":id_moto,"active_page": 'Motos'})
        #return HttpResponse(f"<p>{id_auto}</p>")
 
+@admin_required
 def busqueda_codigo(req):
     codigo = req.GET.get('codigo')
     #if req.method == 'get':
@@ -922,6 +924,7 @@ def busqueda_codigo(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_marca(req):
     marca = req.GET.get('marca')
     #if req.method == 'get':
@@ -932,6 +935,7 @@ def busqueda_marca(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_modelo(req):
     modelo = req.GET.get('modelo')
     #if req.method == 'get':
@@ -942,6 +946,7 @@ def busqueda_modelo(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_marca_modelo(req):
     marca = req.GET.get('marca_modelo')
     modelo = req.GET.get('modelo_marca')
@@ -953,6 +958,7 @@ def busqueda_marca_modelo(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_anio(req):
     anio = req.GET.get('anio')
     
@@ -964,6 +970,7 @@ def busqueda_anio(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_kms(req):
     km_minimo = req.GET.get('km_minimo')
     km_maximo = req.GET.get('km_maximo')
@@ -975,6 +982,7 @@ def busqueda_kms(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_precio(req):
     precio_minimo = req.GET.get('precio_minimo')
     precio_maximo = req.GET.get('precio_maximo')
@@ -986,6 +994,7 @@ def busqueda_precio(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
 
+@admin_required
 def busqueda_matricula(req):
     matricula_letras = req.GET.get('letras_matricula').upper()
     matricula_numeros = str(req.GET.get('numeros_matricula'))
@@ -1029,7 +1038,7 @@ def matricula_valid(matricula,padron,id_moto):
         if existe_padron.moto_id != id_moto:
             return "padron_existe"
     
-@login_required()
+@admin_required
 def modificacion_moto(req,id_moto):
     try:
         if req.method == "POST":
@@ -1174,6 +1183,7 @@ def modificacion_moto(req,id_moto):
             "num_matricula":num_matricula,"active_page": 'Motos',"error_message":str(e)}) 
     
 
+@admin_required
 def detalles_moto(req,id_moto):
     moto = Moto.objects.get(id=id_moto)
     
@@ -1243,7 +1253,7 @@ def detalles_moto(req,id_moto):
 
     return render(req,"perfil_administrativo/motos/detalles_moto.html",contexto)
 
-
+@admin_required
 def vista_inventario_accesorios(req):
     accesorios = Accesorio.objects.filter(activo=1).order_by('-fecha_ingreso')
 
@@ -1256,6 +1266,7 @@ def vista_inventario_accesorios(req):
 
     return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
 
+@admin_required
 def alta_accesorio(req):
     try:
         if req.method == "POST":
@@ -1296,6 +1307,7 @@ def alta_accesorio(req):
 #     except Exception as e:
 #         pass
 
+@admin_required
 def modificacion_accesorio(req,id_accesorio):
     try:
         
@@ -1315,6 +1327,7 @@ def modificacion_accesorio(req,id_accesorio):
     except Exception as e:
         pass
 
+@admin_required
 def baja_accesorio(req,id_accesorio):
     try:
         
@@ -1331,6 +1344,7 @@ def baja_accesorio(req,id_accesorio):
     except Exception as e:
         pass
 
+@admin_required
 def detalles_accesorio(req,id_accesorio):
     try:
         accesorio_detalle = Accesorio.objects.get(id=id_accesorio)
@@ -1338,12 +1352,16 @@ def detalles_accesorio(req,id_accesorio):
     except Exception as e:
         pass
 
+
+@admin_required
 def venta_accesorio(req,id_accesorio):
     try:
         pass
     except Exception as e:
         pass
 
+
+@admin_required
 def busqueda_tipo_accesorio(req):
     try:
         tipo = req.GET.get('tipo_accesorio')
@@ -1356,6 +1374,8 @@ def busqueda_tipo_accesorio(req):
     except Exception as e:
         pass
 
+
+@admin_required
 def busqueda_codigo_accesorio(req):
     try:
         codigo = req.GET.get('codigo')
@@ -1368,6 +1388,8 @@ def busqueda_codigo_accesorio(req):
     except Exception as e:
         return render(req,"perfil_administrativo/accesorios/accesorios.html",{'message': e})
 
+
+@admin_required
 def busqueda_marca_modelo_accesorio(req):
     try:
         marca = req.GET.get('marca_modelo')
@@ -1382,6 +1404,7 @@ def busqueda_marca_modelo_accesorio(req):
     except Exception as e:
         pass
 
+@admin_required
 def vista_clientes(req):
     clientes = Cliente.objects.filter(
         cliente_telefono__principal=True
@@ -1422,6 +1445,7 @@ def valid_cliente(documento,tel1,tel2,correo1,correo2):
         if existe_correo_2:
             return "existe_correo_2"
 
+@admin_required
 def alta_cliente(req):
     try:
         if req.method == "POST":
@@ -1659,6 +1683,7 @@ def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
             return "existe_correo_secundario"
         
 
+@admin_required
 def modificacion_cliente(req,id_cliente):
     try:
         if req.method == "POST":
@@ -1779,6 +1804,7 @@ def modificacion_cliente(req,id_cliente):
     except Exception as e:
         return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",{"error_message":e})
 
+@admin_required
 def buscar_por_doc(req):
     tipo_doc = req.GET.get('tipo_doc_busq')
     doc_num = req.GET.get('documento')
@@ -1796,6 +1822,7 @@ def buscar_por_doc(req):
 
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
 
+@admin_required
 def buscar_nom_ape(req):
     nombre = req.GET.get('nombre').capitalize()
     apellido = req.GET.get('apellido').capitalize()
@@ -1812,6 +1839,7 @@ def buscar_nom_ape(req):
 
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
 
+@admin_required
 def ficha_cliente(req,id_cliente):
     cliente = Cliente.objects.get(id=id_cliente)
     tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
@@ -1905,6 +1933,7 @@ def ficha_cliente(req,id_cliente):
                                                                             #  "show_acciones": show_acciones
                                                                              })
 
+@admin_required
 def alta_cuota(req,id_cv):
     try:
         if req.method == "POST":
@@ -1924,6 +1953,7 @@ def alta_cuota(req,id_cv):
 
 
 
+@admin_required
 def vista_personal(req):
     administrativos = (Administrativo.objects
                        .filter(activo=True)
@@ -1978,6 +2008,7 @@ def nombre_usuario(nombre,apellido):
         usuario = nombre[0:1:1] + apellido + str(cant_usuario)
     return usuario
 
+@admin_required
 def alta_personal(req):
     try:
         if req.method == "POST":
@@ -2067,6 +2098,8 @@ def alta_personal(req):
     except Exception as e:
         return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":e})
 
+
+@admin_required
 def ingresar_tienda(req,id_personal):
     try:
         administrativo = Administrativo.objects.get(personal_ptr_id=id_personal)
@@ -2077,6 +2110,7 @@ def ingresar_tienda(req,id_personal):
     except Exception as e:
         return render(req,"perfil_administrativo/personal/alta_personal.html",{"error_message":e})
 
+@admin_required
 def detalles_personal(req,id_personal):
     try:
         personal = Personal.objects.get(id=id_personal)
@@ -2121,7 +2155,7 @@ def detalles_personal(req,id_personal):
 #     return pdf_ret
 
 
-@login_required()
+@admin_required
 def form_venta_moto(req,id_moto):
     try:
         if req.method == "POST":
@@ -2192,7 +2226,7 @@ def form_venta_moto(req,id_moto):
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 
-@login_required()
+@admin_required
 def venta_moto(req,id_moto,id_cliente):
     try:
 
@@ -2237,6 +2271,7 @@ def venta_moto(req,id_moto,id_cliente):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
+@admin_required
 def vista_ventas(req):
     try:
             resultados_motos = (
@@ -2297,6 +2332,7 @@ def vista_ventas(req):
     except Exception as e:
         pass
 
+@admin_required
 def detalles_cuotas(req,id_cv):
     try: 
         resultados_cuotas = (
@@ -2337,6 +2373,7 @@ def detalles_cuotas(req,id_cv):
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
+@admin_required
 def alta_pago(req,id_cv):
     try:
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
@@ -2422,6 +2459,7 @@ def alta_pago(req,id_cv):
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
+@admin_required
 def baja_pago(req,id_cm):
     try:
         cuota = CuotasMoto.objects.get(id=id_cm)
@@ -2434,6 +2472,7 @@ def baja_pago(req,id_cm):
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
 
+@admin_required
 def reservas(req):
     try:
         resultados_motos = (
@@ -2466,6 +2505,7 @@ def reservas(req):
     except Exception as e:
         pass
 
+@admin_required
 def form_reservar_moto(req,id_moto):
     try:
         if req.method == "POST":
@@ -2514,6 +2554,7 @@ def form_reservar_moto(req,id_moto):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})
 
+@admin_required
 def reservar_moto(req,id_moto,id_cliente):
     try:
         # compras_ventas = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
@@ -2575,7 +2616,7 @@ def reservar_moto(req,id_moto,id_cliente):
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
 
-@login_required()
+@admin_required
 def estadisticas(req):
     try:
         #VENTAS X MES
@@ -2619,6 +2660,7 @@ def estadisticas(req):
     except Exception as e:
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})
 
+@admin_required
 def datos_tienda(req):
     try:
         dolar = PrecioDolar.objects.get(id=1)
@@ -2633,6 +2675,7 @@ def datos_tienda(req):
     except Exception as e:
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
 
+@admin_required
 def modificar_precio_dolar(req):
     try:
         precio = req.POST['precio_dolar']
@@ -2645,6 +2688,7 @@ def modificar_precio_dolar(req):
     except Exception as e:
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
 
+@admin_required
 def modificar_logo_tienda(req):
     try:
         logo_tienda = Logos.objects.get(id=1)
@@ -2656,6 +2700,7 @@ def modificar_logo_tienda(req):
     except Exception as e:
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
 
+@admin_required
 def modificar_logo_cv(req):
     try:
         logo_cv = Logos.objects.get(id=2)

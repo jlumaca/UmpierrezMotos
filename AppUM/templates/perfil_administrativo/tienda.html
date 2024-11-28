@@ -1,0 +1,51 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Datos de la tienda</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        <!-- Párrafo con el precio del dólar -->
+        <p id="precio_dolar_texto" style="cursor: pointer;" onclick="mostrarForm()">
+            Precio del dólar: <strong>${{ dolar_precio }}</strong> 
+            <small class="text-muted">(clic para editar)</small>
+        </p>
+        
+        <!-- Formulario para editar el precio del dólar -->
+        <div id="form_precio_dolar" style="display: none;">
+            <form action="{% url 'ModificarPrecioDolar' %}" enctype="multipart/form-data" method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="precio_dolar" class="form-label">Precio del dólar</label>
+                    <input type="number" step="0.01" class="form-control" name="precio_dolar" id="precio_dolar" placeholder="Ingrese el nuevo precio del dólar" required>
+                </div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-secondary" onclick="ocultarForm()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    // Función para mostrar el formulario
+    function mostrarForm() {
+        
+        document.getElementById('form_precio_dolar').style.display = 'block';
+    }
+
+    // Función para ocultar el formulario
+    function ocultarForm() {
+        document.getElementById('precio_dolar_texto').style.display = 'block';
+        document.getElementById('form_precio_dolar').style.display = 'none';
+    }
+</script>
+{% endblock %}

@@ -1241,6 +1241,12 @@ def detalles_accesorio(req,id_accesorio):
     except Exception as e:
         pass
 
+def venta_accesorio(req,id_accesorio):
+    try:
+        pass
+    except Exception as e:
+        pass
+
 def busqueda_tipo_accesorio(req):
     try:
         tipo = req.GET.get('tipo_accesorio')
@@ -2456,3 +2462,22 @@ def estadisticas(req):
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos,"active_page":"Estadisticas","prueba":datos_marcas})
     except Exception as e:
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})
+
+def datos_tienda(req):
+    try:
+        dolar = PrecioDolar.objects.get(id=1)
+        return render(req,"perfil_administrativo/tienda.html",{"dolar_precio":dolar.precio_dolar_tienda})
+    except Exception as e:
+        return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
+
+def modificar_precio_dolar(req):
+    try:
+        precio = req.POST['precio_dolar']
+        dolar = PrecioDolar.objects.get(id=1)
+        dolar.precio_dolar_tienda = precio
+        dolar.save()
+        messages.success(req, "Precio del dólar modificado con éxito.")
+        return redirect('Tienda')
+
+    except Exception as e:
+        pass

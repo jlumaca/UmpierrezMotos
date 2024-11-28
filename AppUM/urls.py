@@ -47,6 +47,7 @@ urlpatterns = [
      path('accesorio_modificacion/<int:id_accesorio>', views.modificacion_accesorio,name="AccesorioModificacion"),
      path('accesorio_baja/<int:id_accesorio>', views.baja_accesorio,name="AccesorioBaja"),
      path('accesorio_detalle/<int:id_accesorio>', views.detalles_accesorio,name="AccesorioDetalle"),
+     path('accesorio_venta/<int:id_accesorio>', views.venta_accesorio,name="AccesorioVenta"),
 
      path('busqueda_marca_modelo_accesorio', views.busqueda_marca_modelo_accesorio,name="BusquedaMarcaModeloAccesorio"),
      path('busqueda_tipo_accesorio', views.busqueda_tipo_accesorio,name="BusquedaTipoAccesorio"),
@@ -69,6 +70,9 @@ urlpatterns = [
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
      path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
+
+     path('tienda', views.datos_tienda,name="Tienda"),
+     path('precio_dolar', views.modificar_precio_dolar,name="ModificarPrecioDolar"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

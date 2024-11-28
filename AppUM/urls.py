@@ -6,6 +6,7 @@ from django.conf import settings
 urlpatterns = [
      path('login/', views.acceso_login,name="Login"),
      path('cerrar_sesion', views.cerrar_sesion,name="CerrarSesion"),
+     path('seleccion_rol', views.seleccion_rol,name="SeleccionRol"),
      
      # path('login_validacion', views.validacion_login,name="LoginValidacion"),
      # path('login_validacion', views.prueba_login,name="LoginValidacion"),

@@ -42,13 +42,49 @@ def acceso_login(req):
             exito = authenticate(username=usuario,password=passw)
             if exito:
                 login(req,exito)
-                return render(req,"perfil_administrativo/padre_perfil_administrativo.html",{})
+                usuario_consulta = Personal.objects.filter(usuario=usuario).first()
+                
+
+                if usuario_consulta:
+                    obtener_administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+                    obtener_mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+
+                    administrativo = obtener_administrativo.activo
+                    mecanico_jefe = obtener_mecanico.activo and obtener_mecanico.jefe
+                    mecanico_empleado = obtener_mecanico.activo and not obtener_mecanico.jefe
+                    if administrativo and mecanico_jefe:
+                        renderizar_en = "login/rol_usuario.html"
+                        roles = ['Administrativo','Mecanico jefe']
+                        contexto = {"roles":roles}
+                    elif administrativo and mecanico_empleado:
+                        renderizar_en = "login/rol_usuario.html"
+                        roles = ['Administrativo','Mecanico empleado']
+                        contexto = {"roles":roles}
+                    elif administrativo:
+                        renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+                        contexto = {}
+                    elif mecanico_jefe:
+                        renderizar_en = "login/login.html"
+                        contexto = {"resultado":"MEC JEFE"}
+                    elif mecanico_empleado:
+                        renderizar_en = "login/login.html"
+                        contexto = {"resultado":"MEC EMPLEADO"}
+                    else:
+                        renderizar_en = "login/login.html"
+                        contexto = {"resultado":"USUARIO DADO DE BAJA"}
+                else:
+                    #ACCEDER CON SUPER USUARIO
+                    renderizar_en = "login/rol_usuario.html"
+                    roles = ['Administrativo','Mecanico jefe','Mecanico empleado']
+                    contexto = {"roles":roles}
+
+                return render(req,renderizar_en,contexto)
             else:
                 return render(req,"login/login.html",{"resultado":"Error usuario y/o pass"})
         else:
             return render(req,"login/login.html",{})
     except Exception as e:
-        pass
+        return render(req,"login/login.html",{"resultado":e})
 
 def cerrar_sesion(req):
     try:
@@ -57,6 +93,24 @@ def cerrar_sesion(req):
         return redirect('Login')
     except:
         pass
+
+@login_required()
+def seleccion_rol(req):
+    try:
+        rol = req.POST['rol_usuario']
+        if rol == "Administrativo":
+            renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+            contexto={}
+        elif rol == "Mecanico jefe":
+            renderizar_en = ""
+            contexto={}
+        else:
+            renderizar_en = ""
+            contexto={}
+
+        return render(req,renderizar_en,contexto)
+    except Exception as e:
+        return render(req,"login/login.html",{"resultado":e})
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -101,67 +155,67 @@ def departamento_matricula(matricula):
     return departamento
 
 ##VALIDACION DE USUARIO Y CONTRASEÑA##
-def validacion_login(req):
-    if req.method == "POST":
-        usuario = req.POST.get('usuario_login')
-        passw = req.POST.get('pass_login')
+# def validacion_login(req):
+#     if req.method == "POST":
+#         usuario = req.POST.get('usuario_login')
+#         passw = req.POST.get('pass_login')
 
-        try:
-            # Buscar usuario
-            usuario_consulta = Personal.objects.filter(usuario=usuario).first()
+#         try:
+#             # Buscar usuario
+#             usuario_consulta = Personal.objects.filter(usuario=usuario).first()
 
-            if usuario_consulta and check_password(passw, usuario_consulta.contrasena):
-                # Concatenar nombre completo
-                nombre_apellido = f"{usuario_consulta.nombre} {usuario_consulta.apellido}"
+#             if usuario_consulta and check_password(passw, usuario_consulta.contrasena):
+#                 # Concatenar nombre completo
+#                 nombre_apellido = f"{usuario_consulta.nombre} {usuario_consulta.apellido}"
                 
-                # Verificar roles
-                mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
-                administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+#                 # Verificar roles
+#                 mecanico = Mecanico.objects.filter(personal_ptr_id=usuario_consulta.id).first()
+#                 administrativo = Administrativo.objects.filter(personal_ptr_id=usuario_consulta.id).first()
 
-                existe_mecanico = mecanico and mecanico.activo
-                mecanico_jefe = mecanico and mecanico.jefe
-                existe_administrativo = administrativo and administrativo.activo
+#                 existe_mecanico = mecanico and mecanico.activo
+#                 mecanico_jefe = mecanico and mecanico.jefe
+#                 existe_administrativo = administrativo and administrativo.activo
 
-                # Decidir redirección y contexto
-                if existe_administrativo and mecanico_jefe:
-                    contexto = {"resultado": "Administrativo y Mecánico Jefe"}
-                    renderizar_en = "login/login.html"
-                elif existe_administrativo and existe_mecanico:
-                    contexto = {"resultado": "Administrativo y Mecánico Empleado"}
-                    renderizar_en = "login/login.html"
-                elif existe_administrativo:
-                    contexto = {
-                        "usuario": nombre_apellido,
-                        "existe_mecanico": 0,
-                        "mecanico_jefe": 0,
-                        "existe_administrativo": 1
-                    }
-                    renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
-                elif mecanico_jefe:
-                    contexto = {"resultado": "Solo Mecánico Jefe"}
-                    renderizar_en = "login/login.html"
-                elif existe_mecanico:
-                    contexto = {"resultado": "Solo Mecánico Empleado"}
-                    renderizar_en = "login/login.html"
-                else:
-                    contexto = {"resultado": "Este usuario fue dado de baja, contacte al administrador del sistema."}
-                    renderizar_en = "login/login.html"
-            else:
-                # Usuario o contraseña incorrectos
-                contexto = {"resultado": "Error de usuario y/o contraseña"}
-                renderizar_en = "login/login.html"
+#                 # Decidir redirección y contexto
+#                 if existe_administrativo and mecanico_jefe:
+#                     contexto = {"resultado": "Administrativo y Mecánico Jefe"}
+#                     renderizar_en = "login/login.html"
+#                 elif existe_administrativo and existe_mecanico:
+#                     contexto = {"resultado": "Administrativo y Mecánico Empleado"}
+#                     renderizar_en = "login/login.html"
+#                 elif existe_administrativo:
+#                     contexto = {
+#                         "usuario": nombre_apellido,
+#                         "existe_mecanico": 0,
+#                         "mecanico_jefe": 0,
+#                         "existe_administrativo": 1
+#                     }
+#                     renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+#                 elif mecanico_jefe:
+#                     contexto = {"resultado": "Solo Mecánico Jefe"}
+#                     renderizar_en = "login/login.html"
+#                 elif existe_mecanico:
+#                     contexto = {"resultado": "Solo Mecánico Empleado"}
+#                     renderizar_en = "login/login.html"
+#                 else:
+#                     contexto = {"resultado": "Este usuario fue dado de baja, contacte al administrador del sistema."}
+#                     renderizar_en = "login/login.html"
+#             else:
+#                 # Usuario o contraseña incorrectos
+#                 contexto = {"resultado": "Error de usuario y/o contraseña"}
+#                 renderizar_en = "login/login.html"
 
-        except Exception as e:
-            # Manejar errores específicos o generales
-            contexto = {"resultado": f"Algo salió mal: {str(e)}"}
-            renderizar_en = "login/login.html"
+#         except Exception as e:
+#             # Manejar errores específicos o generales
+#             contexto = {"resultado": f"Algo salió mal: {str(e)}"}
+#             renderizar_en = "login/login.html"
 
-    else:
-        # Redirigir si el método no es POST
-        contexto = {"resultado": "Método de solicitud no válido"}
-        renderizar_en = "login/login.html"
+#     else:
+#         # Redirigir si el método no es POST
+#         contexto = {"resultado": "Método de solicitud no válido"}
+#         renderizar_en = "login/login.html"
 
-    return render(req, renderizar_en, contexto)
+#     return render(req, renderizar_en, contexto)
 
 @login_required()
 def vista_inventario_motos(req):

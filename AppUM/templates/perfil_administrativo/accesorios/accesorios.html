@@ -21,6 +21,7 @@
         <label for="estado" class="form-label">Buscar por:</label>
         <select class="form-control" name="estado_accesorio" id="tipo_busqueda" onchange="tipo_busqueda()">
             <option value="tipo">Tipo</option>
+            <option value="codigo">Código</option>
             <option value="marca_modelo">Marca y modelo</option>
 
         </select>
@@ -29,8 +30,18 @@
     <form action="{% url 'BusquedaTipoAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_tipo">{% csrf_token %}
         <div class="input-group mb-3">
             <select class="form-control" name="tipo_accesorio" id="tipo_accesorio">
-                <option value="casco">Casco</option>
-                <option value="otro">Otro</option>
+                    <option value="Aceite">Aceite</option>
+                    <option value="Casco">Casco</option>
+                    <option value="Cubremoto">Cubremoto</option>
+                    <option value="Grasa de cadena">Grasa de cadena</option>
+                    <option value="Guantes">Guantes</option>
+                    <option value="Mecanismo">Mecanismo de casco</option>
+                    <option value="Micas">Micas</option>
+                    <option value="Pasamontaña">Pasamontaña</option>
+                    <option value="Ropa">Ropa</option>
+                    <option value="Slime">Slime</option>
+                    <option value="Trancas">Trancas</option>
+                    <option value="Otro">Otro</option>
             </select>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
@@ -41,6 +52,19 @@
             </a>        
         </div>
     </form>
+    
+    <form action="{% url 'BusquedaCodigoAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_codigo" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="number" class="form-control" name="codigo" placeholder="Código">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Accesorios' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+    
 
     <form action="{% url 'BusquedaMarcaModeloAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_marca_modelo" style="display: none;">
         {% csrf_token %}
@@ -104,9 +128,10 @@
 
         var busqueda_tipo_inp = document.getElementById("busqueda_tipo");
         var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
-        
+        var busqueda_codigo = document.getElementById("busqueda_codigo");
         busqueda_tipo_inp.style.display = busqueda_tipo === "tipo" ? "block" : "none";
         busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+        busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
     }
 </script>
 {% endblock %}

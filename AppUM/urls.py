@@ -51,6 +51,7 @@ urlpatterns = [
 
      path('busqueda_marca_modelo_accesorio', views.busqueda_marca_modelo_accesorio,name="BusquedaMarcaModeloAccesorio"),
      path('busqueda_tipo_accesorio', views.busqueda_tipo_accesorio,name="BusquedaTipoAccesorio"),
+     path('busqueda_codigo_accesorio', views.busqueda_codigo_accesorio,name="BusquedaCodigoAccesorio"),
 
      path('clientes', views.vista_clientes,name="Clientes"),
      path('cliente_alta', views.alta_cliente,name="ClienteAlta"),

@@ -1259,6 +1259,17 @@ def busqueda_tipo_accesorio(req):
     except Exception as e:
         pass
 
+def busqueda_codigo_accesorio(req):
+    try:
+        codigo = req.GET.get('codigo')
+        accesorio = Accesorio.objects.filter(id=codigo)
+        paginator = Paginator(accesorio, 5)  # 10 accesorios por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+
+        return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorio})
+    except Exception as e:
+        return render(req,"perfil_administrativo/accesorios/accesorios.html",{'message': e})
 
 def busqueda_marca_modelo_accesorio(req):
     try:

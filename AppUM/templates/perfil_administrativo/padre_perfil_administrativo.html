@@ -41,23 +41,32 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Personal' %}" onclick="">Personal</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="" onclick="">Arqueo</a>
+                    </li>
                     <!-- Más ítems de la barra -->
                 </ul>
                 <div class="d-flex align-items-center">
-                    <div class="notification-bell">
-                        <a href="{% url 'NotificacionesAdministrativo' %}"><i class="fas fa-bell"></i>
-                        <span class="notification-count" id="notificationCount">3</span></a>
+                    <!-- Notificaciones -->
+                    <div class="notification-bell me-3">
+                        <a href="{% url 'NotificacionesAdministrativo' %}" class="text-decoration-none">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count" id="notificationCount">3</span>
+                        </a>
                     </div>
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'Tienda' %}" onclick="">Tienda</a>
-                        </li>
-                    </ul>
-                    <span class="navbar-text ms-3 me-3">
-                        Usuario: {{ request.user.first_name }}
+                
+                    <!-- Tienda -->
+                    <a href="{% url 'Tienda' %}" class="nav-link me-3">Tienda</a>
+                
+                    <!-- Usuario -->
+                    <span class="navbar-text me-3">
+                        <strong>Usuario:</strong> {{ request.user.first_name }}
                     </span>
-                    <a href="{% url 'CerrarSesion' %}"><button class="btn btn-logout">Cerrar sesión</button></a>
-                    
+                
+                    <!-- Cerrar sesión -->
+                    <a href="{% url 'CerrarSesion' %}">
+                        <button class="btn btn-logout">Cerrar sesión</button>
+                    </a>
                 </div>
             </div>
         </div>

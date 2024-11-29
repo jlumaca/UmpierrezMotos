@@ -2723,8 +2723,18 @@ def estadisticas(req):
         {'marca': resultado_moto['moto__marca'],'modelo':resultado_moto['moto__modelo'], 'total_motos_vendidas': resultado_moto['total_motos_vendidas']}
         for resultado_moto in motos_mas_vendidas
         ]
+        
+        datos_accesorios_ventas = []
+        for n in range(1,mes_actual + 1):
+            cant_accesorios = ClienteAccesorio.objects.filter(fecha_compra__year=anio,fecha_compra__month=n).count()
+            datos_accesorios_ventas.append(int(cant_accesorios))
                       
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,"marcas":datos_marcas,"motos":datos_motos,"active_page":"Estadisticas","prueba":datos_marcas})
+        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,
+                                                                                  "marcas":datos_marcas,
+                                                                                  "motos":datos_motos,
+                                                                                  "active_page":"Estadisticas",
+                                                                                  "prueba":datos_marcas,
+                                                                                  "accesorios":datos_accesorios_ventas})
     except Exception as e:
         return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})
 

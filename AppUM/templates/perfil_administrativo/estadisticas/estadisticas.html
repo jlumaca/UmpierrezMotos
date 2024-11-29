@@ -19,9 +19,10 @@
         <div class="mb-3">
             <label for="estado" class="form-label">Graficos</label>
             <select class="form-control" name="mostrarxgrafico" id="mostrarxgrafico" onchange="toggleFields()">
-                <option value="ventasxmes">Ventas por mes</option>
+                <option value="ventasxmes">Ventas de motos por mes</option>
                 <option value="moto_mas_vendida">Motos más vendidas</option>
-                <option value="marca_mas_vendida">Marcas más vendidas</option>
+                <option value="marca_mas_vendida">Marcas de motos más vendidas</option>
+                <option value="accesorios_ventas">Ventas de accesorios por mes</option>
             </select>
         </div>
     <figure class="highcharts-figure">
@@ -97,6 +98,31 @@
         </table>
     </figure>
 
+    <figure class="highcharts-figure">
+        <div id="container_ventas_accesoriosxmes"></div>
+       
+    
+        <table id="datatable_accesorios">
+            <thead style="display: none;">
+                <tr>
+                    <th></th>
+                    <th>Ventas</th>
+                    
+                </tr>
+            </thead>
+            <tbody style="display: none;">
+                {% for accesorio in accesorios %}
+                    <tr>
+                        <th></th>
+                        <td>{{ accesorio }}</td>
+                        
+                    </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
 
 </div>
 
@@ -106,19 +132,28 @@
         var container_ventasxmes = document.getElementById("container_ventasxmes");
         var container_marcamasvendida = document.getElementById("container_marcamasvendida");
         var container_motomasvendida = document.getElementById("container_motomasvendida");
-
+        var container_ventas_accesoriosxmes = document.getElementById("container_ventas_accesoriosxmes");
+        
         if (mostrarxgrafico === "ventasxmes") {
             container_ventasxmes.style.display = "block";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "none";
+            container_ventas_accesoriosxmes.style.display = "none";
         }else if (mostrarxgrafico === "moto_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "block";
-        }else{
+            container_ventas_accesoriosxmes.style.display = "none";
+        }else if (mostrarxgrafico === "marca_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "block";
             container_motomasvendida.style.display = "none";
+            container_ventas_accesoriosxmes.style.display = "none";
+        }else{
+            container_ventasxmes.style.display = "none";
+            container_marcamasvendida.style.display = "none";
+            container_motomasvendida.style.display = "none";
+            container_ventas_accesoriosxmes.style.display = "block";
         }
 
     }
@@ -205,6 +240,36 @@ Highcharts.chart('container_motomasvendida', {
         min: 0, // Valor mínimo en el eje y
          // Valor máximo en el eje y
          // Intervalo entre marcas en el eje y
+        allowDecimals: false,
+        title: {
+            text: 'Ventas'
+        }
+    }
+});
+
+Highcharts.chart('container_ventas_accesoriosxmes', {
+    data: {
+        table: 'datatable_accesorios'
+    },
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Ventas de accesorios por mes'
+    },
+    xAxis: {
+        categories: ['Ventas'],
+        title: {
+            text: 'Mes'
+        },
+        // Ejemplo para ajustar los valores de x si fuera necesario
+        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
+        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
+    },
+    yAxis: {
+        min: 0, // Valor mínimo en el eje y
+        
+        tickInterval: 10, // Intervalo entre marcas en el eje y
         allowDecimals: false,
         title: {
             text: 'Ventas'

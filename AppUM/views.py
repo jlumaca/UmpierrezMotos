@@ -2314,7 +2314,7 @@ def venta_moto(req,id_moto,id_cliente):
         existe_reserva = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
         if existe_reserva:
             # existe_reserva.delete() NO BORRAR YA QUE EN CASO DE HABER UN PAGO EN CUOTASMOTOS (SEÑA) SE BORRARIA TAMBIEN
-            # ADEMAS LAS RESERVAS NO ES UN DATO QUE SE NECESITE CONSERVAR UNA VEZ VENDIDA LA MOTO
+            # ADEMAS LA RESERVA NO ES UN DATO QUE SE NECESITE CONSERVAR UNA VEZ VENDIDA LA MOTO
             existe_reserva.tipo = "V"
             existe_reserva.fecha_compra = datetime.now()
             #existe_reserva.certificado_venta = ,
@@ -2334,7 +2334,7 @@ def venta_moto(req,id_moto,id_cliente):
             nueva_venta.save()
         #REDIRIGIR A LA FICHA DEL CLIENTE
         # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
-        messages.success(req, "Libreta ingresada con éxito")
+        messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})

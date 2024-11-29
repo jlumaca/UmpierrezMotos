@@ -57,6 +57,7 @@
             </form>
             {% endif %}
             {% if form_moto_usada %}
+            <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
                     <tr>
@@ -182,6 +183,7 @@
             </form>
             {% endif %}
             {% if form_moto_ingresada %}
+            <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
                     <tr>
@@ -206,6 +208,7 @@
                     </tr>
                 </tbody>
             </table>
+            <h4>Datos de la moto</h4>
             <table class="table table-bordered">
                 <tbody>
                     <tr>
@@ -245,6 +248,7 @@
                     </tr>
                 </tbody>
             </table>
+            <h4>Actualice los siguientes datos</h4>
             <form action="{% url 'ReingresarMotoUsada' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
                 
                 <div class="mb-3" id="kms">

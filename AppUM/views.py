@@ -1912,7 +1912,7 @@ def ficha_cliente(req,id_cliente):
             'compra_venta', 
             'certificado_venta',
             # 'valor_cuota'
-        ).order_by('-fecha_compra')
+        ).order_by('-id')
     )
     #cantidad_cuotas = CuotasMoto.cantidad_cuotas
     #valor_cuota = cuotasmoto.valor_cuota

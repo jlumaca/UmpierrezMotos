@@ -2351,7 +2351,8 @@ def vista_ventas(req):
                     'moto__modelo', 
                     'fecha_compra', 
                     'cliente__nombre',
-                    'cliente__apellido'
+                    'cliente__apellido',
+                    'cliente__id'
                 ).order_by('-fecha_compra')
             )
 
@@ -2378,7 +2379,8 @@ def vista_ventas(req):
                     'accesorio__modelo',
                     'fecha_compra',
                     'cliente__nombre',
-                    'cliente__apellido'
+                    'cliente__apellido',
+                    'cliente__id'
                 
                 ).order_by('-fecha_compra')
             )

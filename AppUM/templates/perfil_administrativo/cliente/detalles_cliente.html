@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <th scope="row">Correo</th>
-                <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                <td>{% if correo2 %}{{ correo1 }}{% else %} El cliente no tiene correo {% endif %}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
             </tr>
           
             <tr>

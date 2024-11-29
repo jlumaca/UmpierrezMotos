@@ -84,6 +84,9 @@ urlpatterns = [
      path('precio_dolar', views.modificar_precio_dolar,name="ModificarPrecioDolar"),
      path('modificar_logo', views.modificar_logo_tienda,name="ModificarLogo"),
      path('modificar_logo_cv', views.modificar_logo_cv,name="ModificarLogoCV"),
+
+
+     path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),
      
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

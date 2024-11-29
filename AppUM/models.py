@@ -125,3 +125,12 @@ class PrecioDolar(models.Model):
     precio_dolar_tienda = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     precio_dolar_taller = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
+class Notificaciones(models.Model):
+    descripcion = models.TextField(null=True, blank=True)
+    fecha = models.DateField()
+    tipo = models.CharField(max_length=20)
+
+class NotificacionPersonal(models.Model):
+    personal = models.ForeignKey(Personal, related_name='personal_notificacion', on_delete=models.CASCADE)
+    notificacion = models.ForeignKey(Notificaciones, related_name='notificacion_personal', on_delete=models.CASCADE)
+

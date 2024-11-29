@@ -2746,3 +2746,33 @@ def modificar_logo_cv(req):
         return redirect('Tienda')
     except Exception as e:
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
+
+def notificaciones_cumples():
+    pass
+
+def notificaciones_pagos_atrasados():
+    pass
+
+def notificaciones_administrativo(req):
+    try:
+        notificaciones = [
+        {
+        "titulo": "Pago pendiente",
+        "fecha": "2024-11-28",
+        "descripcion": "El cliente Juan Pérez tiene un pago atrasado desde hace 7 días.",
+        "acciones": [
+            {"nombre": "Ver detalle", "url": "/detalle_pago/123/"},
+            {"nombre": "Contactar cliente", "url": "/contacto_cliente/123/"}
+        ]
+        },
+        {
+        "titulo": "Cumpleaños del cliente",
+        "fecha": "2024-11-29",
+        "descripcion": "Hoy es el cumpleaños de María López. Envíale un saludo especial.",
+        "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
+            }
+            ]
+        
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":notificaciones}) 
+    except Exception as e:
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})

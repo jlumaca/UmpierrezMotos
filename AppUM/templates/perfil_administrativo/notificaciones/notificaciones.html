@@ -1,0 +1,99 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .notificaciones-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .notificacion-card {
+        background-color: #f8f9fa; /* Fondo claro */
+        border-left: 5px solid #007bff; /* Línea indicativa */
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .notificacion-card:hover {
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .notificacion-titulo {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #0056b3; /* Azul oscuro */
+    }
+
+    .notificacion-fecha {
+        font-size: 0.9em;
+        color: #6c757d; /* Gris */
+        margin-bottom: 8px;
+    }
+
+    .notificacion-descripcion {
+        font-size: 1em;
+        color: #212529; /* Negro */
+    }
+
+    .acciones-notificacion {
+        margin-top: 12px;
+    }
+
+    .acciones-notificacion .btn {
+        font-size: 0.9em;
+        padding: 6px 12px;
+        margin-right: 8px;
+    }
+</style>
+
+<title>Notificaciones</title>
+<div class="container mt-4">
+    <h3 class="mb-4">Notificaciones</h3>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% if error_message %}
+        <div class="alert alert-danger mt-3">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ error_message }}</p>
+        </div>
+    {% endif %}
+
+    <div class="notificaciones-container">
+        {% if notificaciones %}
+            {% for notificacion in notificaciones %}
+            <div class="notificacion-card">
+                <div class="notificacion-titulo">
+                    <i class="fas fa-bell"></i> {{ notificacion.titulo }}
+                </div>
+                <div class="notificacion-fecha">
+                    <i class="far fa-calendar-alt"></i> {{ notificacion.fecha }}
+                </div>
+                <div class="notificacion-descripcion">
+                    {{ notificacion.descripcion }}
+                </div>
+                <div class="acciones-notificacion">
+                    {% if notificacion.acciones %}
+                        {% for accion in notificacion.acciones %}
+                            <a href="{{ accion.url }}" class="btn btn-primary">
+                                <i class="fas fa-link"></i> {{ accion.nombre }}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-muted">No hay notificaciones en este momento.</p>
+        {% endif %}
+    </div>
+
+    <a href="" class="btn btn-secondary mt-4">Volver</a>
+</div>
+{% endblock %}

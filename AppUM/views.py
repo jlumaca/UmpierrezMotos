@@ -1497,7 +1497,6 @@ def alta_cliente(req):
             dominio_correo_2 = req.POST['dominio_correo_2']
             otro_correo_2 = req.POST['otro_correo_2']
             localidad = req.POST['localidad']
-            localidad_otro = req.POST['localidad_otro']
             calle = req.POST['calle']
             numero = req.POST['numero']
             num_apto = req.POST['num_apto']
@@ -1530,7 +1529,7 @@ def alta_cliente(req):
                 return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los correos no pueden ser iguales"})
             else:
                 if localidad == "Otro":
-                    ciudad = localidad_otro
+                    ciudad = req.POST['localidad_otro']
                 else:
                     ciudad = localidad
 

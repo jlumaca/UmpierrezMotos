@@ -64,6 +64,8 @@ urlpatterns = [
      path('busqueda_documento', views.buscar_por_doc,name="BusquedaDocumento"),
      path('busqueda_nombre_apellido', views.buscar_nom_ape,name="BusquedaNombreApellido"),
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
+     path('cargar_certificado/<int:id_cv>', views.cargar_certificado,name="CargarCertificado"),
+     path('cargar_libreta/<int:id_cv>', views.cargar_libreta,name="CargarLibreta"),
 
 
      path('personal', views.vista_personal,name="Personal"),

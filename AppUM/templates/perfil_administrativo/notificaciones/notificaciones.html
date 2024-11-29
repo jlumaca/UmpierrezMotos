@@ -70,13 +70,13 @@
             {% for notificacion in notificaciones %}
             <div class="notificacion-card">
                 <div class="notificacion-titulo">
-                    <i class="fas fa-bell"></i> {{ notificacion.titulo }}
+                    <i class="fas fa-bell"></i> {{ notificacion.notificacion.tipo }}
                 </div>
                 <div class="notificacion-fecha">
-                    <i class="far fa-calendar-alt"></i> {{ notificacion.fecha }}
+                    <i class="far fa-calendar-alt"></i> {{ notificacion.notificacion.fecha }}
                 </div>
                 <div class="notificacion-descripcion">
-                    {{ notificacion.descripcion }}
+                    {{ notificacion.notificacion.descripcion }}
                 </div>
                 <div class="acciones-notificacion">
                     {% if notificacion.acciones %}
@@ -94,6 +94,5 @@
         {% endif %}
     </div>
 
-    <a href="" class="btn btn-secondary mt-4">Volver</a>
 </div>
 {% endblock %}

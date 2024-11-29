@@ -23,6 +23,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .decorators import admin_required, mecanico_jefe_required, mecanico_empleado_required
+from django.core.mail import send_mail
 
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
@@ -1966,6 +1967,30 @@ def ficha_cliente(req,id_cliente):
                                                                              })
 
 @admin_required
+def cargar_certificado(req,id_cv):
+    try:
+         certificado = req.FILES.get('certificado_venta')
+         venta = ComprasVentas.objects.get(id=id_cv)
+         venta.certificado_venta = certificado
+         venta.save()
+         messages.success(req, "Certificado ingresado con éxito")
+         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':venta.cliente_id})}")
+    except Exception as e:
+        pass
+
+@admin_required
+def cargar_libreta(req,id_cv):
+    try:
+         libreta = req.FILES.get('libreta_venta')
+         venta = ComprasVentas.objects.get(id=id_cv)
+         venta.fotocopia_libreta = libreta
+         venta.save()
+         messages.success(req, "Libreta ingresada con éxito")
+         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':venta.cliente_id})}")
+    except Exception as e:
+        pass
+
+@admin_required
 def alta_cuota(req,id_cv):
     try:
         if req.method == "POST":
@@ -2284,25 +2309,33 @@ def venta_moto(req,id_moto,id_cliente):
         moto = Moto.objects.get(id=id_moto)
         moto.pertenece_tienda = 0
         moto.save()
+        compra_venta = req.FILES.get('compra_venta_moto')
+        
         existe_reserva = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
         if existe_reserva:
-            existe_reserva.delete()
-            
-        compra_venta = req.FILES.get('compra_venta_moto')
-        nueva_venta = ComprasVentas(
-            fecha_compra = datetime.now(),
-            compra_venta = compra_venta,
-            # certificado_venta = ,
-            tipo = "V",
-            forma_de_pago = req.POST['forma_pago'],
-            cliente_id = id_cliente,
-            moto_id = id_moto
-        )
-        nueva_venta.save()
+            # existe_reserva.delete() NO BORRAR YA QUE EN CASO DE HABER UN PAGO EN CUOTASMOTOS (SEÑA) SE BORRARIA TAMBIEN
+            # ADEMAS LAS RESERVAS NO ES UN DATO QUE SE NECESITE CONSERVAR UNA VEZ VENDIDA LA MOTO
+            existe_reserva.tipo = "V"
+            existe_reserva.fecha_compra = datetime.now()
+            #existe_reserva.certificado_venta = ,
+            existe_reserva.compra_venta = compra_venta
+            existe_reserva.forma_de_pago = req.POST['forma_pago']
+            existe_reserva.save()
+        else:
+            nueva_venta = ComprasVentas(
+                fecha_compra = datetime.now(),
+                compra_venta = compra_venta,
+                # certificado_venta = ,
+                tipo = "V",
+                forma_de_pago = req.POST['forma_pago'],
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            nueva_venta.save()
         #REDIRIGIR A LA FICHA DEL CLIENTE
         # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
-        retornar_cliente = ficha_cliente(req,id_cliente)
-        return retornar_cliente
+        messages.success(req, "Libreta ingresada con éxito")
+        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
@@ -2748,31 +2781,72 @@ def modificar_logo_cv(req):
         return render(req,"perfil_administrativo/tienda.html",{"error_message":e})
 
 def notificaciones_cumples():
-    pass
+
+    #EJECUTAR ESTA FUNCION TODOS LOS DIAS A LAS 6AM
+    today = datetime.now()
+    cumples_cliente = Cliente.objects.filter(fecha_nacimiento__month=today.month,fecha_nacimiento__day=today.day)
+    for cliente in cumples_cliente:
+        tiene_correo = ClienteCorreo.objects.filter(cliente_id=cliente.id,principal=1).first()
+        if tiene_correo:
+            correo_enviado = True
+            send_mail(
+            subject='¡Feliz cumpleaños!',
+            message=f'Hola {cliente.nombre}, ¡de parte de Umpierrez Motos y Motos Daniel te deseamos un feliz cumpleaños!',
+            #CAMBIAR POR CORREO DE UMPIERREZ MOTOS
+            from_email='lumacajuanmanuel@gmail.com',
+            #CAMBIAR POR CORREO DE CLIENTE (tiene_correo.correo)
+            recipient_list=[tiene_correo.correo],
+        )
+        else:
+            correo_enviado = False
+            
+        if correo_enviado:
+            mensaje = "Se le ha enviado un correo de saludos."
+        else:
+            mensaje = ""
+        nueva_notificacion = Notificaciones(
+            descripcion = f"¡Hoy es el cumpleaños de {cliente.nombre} {cliente.apellido}! {mensaje}",
+            fecha = datetime.now(),
+            tipo = "Cumpleaños"
+        )
+        #nueva_notificacion.save()
 
 def notificaciones_pagos_atrasados():
+    #EJECUTAR ESTA FUNCION TODOS LOS DIAS A LAS 6AM
     pass
 
 def notificaciones_administrativo(req):
     try:
-        notificaciones = [
-        {
-        "titulo": "Pago pendiente",
-        "fecha": "2024-11-28",
-        "descripcion": "El cliente Juan Pérez tiene un pago atrasado desde hace 7 días.",
-        "acciones": [
-            {"nombre": "Ver detalle", "url": "/detalle_pago/123/"},
-            {"nombre": "Contactar cliente", "url": "/contacto_cliente/123/"}
-        ]
-        },
-        {
-        "titulo": "Cumpleaños del cliente",
-        "fecha": "2024-11-29",
-        "descripcion": "Hoy es el cumpleaños de María López. Envíale un saludo especial.",
-        "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
-            }
-            ]
+        #notificaciones_cumples()
+        # notificaciones = [
+        # {
+        # "titulo": "Pago pendiente",
+        # "fecha": "2024-11-28",
+        # "descripcion": "El cliente Juan Pérez tiene un pago atrasado desde hace 7 días.",
+        # "acciones": [
+        #     {"nombre": "Ver detalle", "url": "/detalle_pago/123/"},
+        #     {"nombre": "Contactar cliente", "url": "/contacto_cliente/123/"}
+        # ]
+        # },
+        # {
+        # "titulo": "Cumpleaños del cliente",
+        # "fecha": "2024-11-29",
+        # "descripcion": "Hoy es el cumpleaños de María López. Envíale un saludo especial.",
+        # "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
+        #     }
+        #     ]
+        notificaciones = Notificaciones.objects.all()
+        data = []
+        for notificacion in notificaciones:
+            if notificacion.tipo == "Atraso en pago":
+                acciones = {"nombre": "Enviar correo", "url": ""}
+            elif notificacion.tipo == "Cumpleaños":
+                acciones = [{"nombre": "Ver detalle", "url": ""},]
+            data.append({
+                "notificacion":notificacion,
+                "acciones":acciones
+            })
         
-        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":notificaciones}) 
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":data}) 
     except Exception as e:
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})

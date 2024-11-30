@@ -20,29 +20,29 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item {% if active_page == 'Estadisticas' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'Estadisticas' %}" onclick="">Estadisticas</a>
+                        <a class="nav-link" href="{% url 'Estadisticas' %}" onclick="">ESTADISTICAS</a>
                     </li>
                     <li class="nav-item {% if active_page == 'Motos' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'Motos' %}" onclick="">Motos</a>
+                        <a class="nav-link" href="{% url 'Motos' %}" onclick="">MOTOS</a>
                     </li>
                     <!-- Más ítems de la barra -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Accesorios' %}" onclick="">Accesorios</a>
+                        <a class="nav-link" href="{% url 'Accesorios' %}" onclick="">ACCESORIOS</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Clientes' %}" onclick="">Clientes</a>
+                        <a class="nav-link" href="{% url 'Clientes' %}" onclick="">CLIENTES</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Reservas' %}" onclick="">Reservas</a>
+                        <a class="nav-link" href="{% url 'Reservas' %}" onclick="">RESERVAS</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Ventas' %}" onclick="">Ventas</a>
+                        <a class="nav-link" href="{% url 'Ventas' %}" onclick="">VENTAS</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Personal' %}" onclick="">Personal</a>
+                        <a class="nav-link" href="{% url 'Personal' %}" onclick="">PERSONAL</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="" onclick="">Arqueo</a>
+                        <a class="nav-link" href="{% url 'Arqueos' %}" onclick="">ARQUEO</a>
                     </li>
                     <!-- Más ítems de la barra -->
                 </ul>
@@ -56,11 +56,11 @@
                     </div>
                 
                     <!-- Tienda -->
-                    <a href="{% url 'Tienda' %}" class="nav-link me-3">Tienda</a>
+                    <a href="{% url 'Tienda' %}" class="nav-link me-3">TIENDA</a>
                 
                     <!-- Usuario -->
                     <span class="navbar-text me-3">
-                        <strong>Usuario:</strong> {{ request.user.first_name }}
+                        <strong>USUARIO:</strong> {{ request.user.first_name }}
                     </span>
                 
                     <!-- Cerrar sesión -->

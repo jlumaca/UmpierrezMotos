@@ -2861,3 +2861,18 @@ def notificaciones_administrativo(req):
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":data}) 
     except Exception as e:
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
+    
+def arqueos(req):
+    try:
+        return render(req,"perfil_administrativo/arqueos/arqueos.html",{})
+    except Exception as e:
+        pass 
+
+def abrir_caja(req):
+    try:
+        if req.method == "POST":
+            pass
+        else:
+            return render(req,"perfil_administrativo/arqueos/alta_caja.html",{})
+    except Exception as e:
+        pass 

@@ -2864,15 +2864,182 @@ def notificaciones_administrativo(req):
     
 def arqueos(req):
     try:
-        return render(req,"perfil_administrativo/arqueos/arqueos.html",{})
+
+
+        arqueos = Caja.objects.all().order_by('-apertura')
+        data = []
+        for arqueo in arqueos:
+            data.append({
+                "arqueo": arqueo,
+                "cierre": arqueo.cierre,  # Permite que sea None si no está definido
+                "depositos": arqueo.depositos if arqueo.depositos is not None else 0,
+                "egresos": arqueo.egresos if arqueo.egresos is not None else 0,
+                "saldo_caja": arqueo.saldo_caja if arqueo.saldo_caja is not None else 0,
+                "saldo_sistema": arqueo.saldo_sistema if arqueo.saldo_sistema is not None else 0,
+                "diferencia": arqueo.diferencia if arqueo.diferencia is not None else 0,
+            })
+
+        paginator = Paginator(data, 5)  # 5 arqueos por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)
+        return render(req, "perfil_administrativo/arqueos/arqueos.html", {"page_obj": page_obj})
+
     except Exception as e:
         pass 
+
+def validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20):
+    if total_billetes_2000 < 0:
+        error = "Ingrese un valor correcto para los billetes de $2000"
+    elif total_billetes_1000 < 0:
+        error = "Ingrese un valor correcto para los billetes de $1000"
+    elif total_billetes_500 < 0:
+        error = "Ingrese un valor correcto para los billetes de $500"
+    elif total_billetes_200 < 0:
+        error = "Ingrese un valor correcto para los billetes de $200"
+    elif total_billetes_100 < 0:
+        error = "Ingrese un valor correcto para los billetes de $100"
+    elif total_billetes_50 < 0:
+        error = "Ingrese un valor correcto para los billetes de $50"
+    elif total_billetes_20 < 0:
+        error = "Ingrese un valor correcto para los billetes de $20"
+    else:
+        error = None
+    return error
+
+def validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1):
+    if total_monedas_50 < 0:
+        error = "Ingrese un valor correcto para las monedas de $50"
+    elif total_monedas_10:
+        error = "Ingrese un valor correcto para las monedas de $10"
+    elif total_monedas_5:
+        error = "Ingrese un valor correcto para las monedas de $5"
+    elif total_monedas_2:
+        error = "Ingrese un valor correcto para las monedas de $2"
+    elif total_monedas_1:
+        error = "Ingrese un valor correcto para las monedas de $1"
+    else:
+        error = None
+    return error
+
+
 
 def abrir_caja(req):
     try:
         if req.method == "POST":
-            pass
+            caja_abierta = Caja.objects.filter(estado="Abierto").first()
+            total_billetes_2000 = (int(req.POST['billetes_2000']) * 2000) 
+            total_billetes_1000 = (int(req.POST['billetes_1000']) * 1000)
+            total_billetes_500 = (int(req.POST['billetes_500']) * 500)
+            total_billetes_200 = (int(req.POST['billetes_200']) * 200)
+            total_billetes_100 = (int(req.POST['billetes_100']) * 100)
+            total_billetes_50 = (int(req.POST['billetes_50']) * 50)
+            total_billetes_20 = (int(req.POST['billetes_20']) * 20)
+
+            total_monedas_50 = (int(req.POST['monedas_50']) * 50)
+            total_monedas_10 = (int(req.POST['monedas_10']) * 10)
+            total_monedas_5 = (int(req.POST['monedas_5']) * 5)
+            total_monedas_2 = (int(req.POST['monedas_2']) * 2)
+            total_monedas_1 = int(req.POST['monedas_1'])
+            error_dinero = validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20)
+            error_monedas = validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1)
+            if error_dinero:
+                return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_dinero})
+            elif error_monedas:
+                return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_monedas})
+            elif caja_abierta:
+                return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":"Ya existe una caja abierta."})  
+            else:
+                
+
+                saldo_inicial = (
+                    total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
+                    +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1
+                )
+
+                usuario = req.user
+                persona = Personal.objects.filter(usuario=usuario.username).first()
+                
+
+                nueva_caja = Caja(
+                    apertura = datetime.now(),
+                    cierre = None,
+                    moneda = "Pesos",
+                    monto_inicial = saldo_inicial,
+                    depositos = 0,
+                    egresos = 0,
+                    saldo_caja = 0,
+                    saldo_sistema = 0,
+                    diferencia = 0,
+                    estado = "Abierto",
+                    usuario_id = 3
+                )
+                nueva_caja.save()
+
+                messages.success(req, "Caja abierta con éxito.")
+                return redirect('Arqueos')
         else:
             return render(req,"perfil_administrativo/arqueos/alta_caja.html",{})
     except Exception as e:
-        pass 
+        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+def ingresos_caja(req,id_caja):
+    try:
+        caja = Caja.objects.get(id=id_caja)
+        ingresos = caja.depositos + int(req.POST['ingresos'])
+        caja.depositos = ingresos
+        caja.save()
+        messages.success(req, "Depositos ingresados correctamente.")
+        return redirect('Arqueos')
+    except Exception as e:
+        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+def egresos_caja(req,id_caja):
+    try:
+        caja = Caja.objects.get(id=id_caja)
+        egresos = caja.egresos + int(req.POST['egresos'])
+        caja.egresos = egresos
+        caja.save()
+        messages.success(req, "Egresos ingresados correctamente.")
+        return redirect('Arqueos')
+    except Exception as e:
+        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+def saldo_final_caja(req,id_caja):
+    try:
+            if req.method == "POST": 
+                total_billetes_2000 = (int(req.POST['billetes_2000']) * 2000) 
+                total_billetes_1000 = (int(req.POST['billetes_1000']) * 1000)
+                total_billetes_500 = (int(req.POST['billetes_500']) * 500)
+                total_billetes_200 = (int(req.POST['billetes_200']) * 200)
+                total_billetes_100 = (int(req.POST['billetes_100']) * 100)
+                total_billetes_50 = (int(req.POST['billetes_50']) * 50)
+                total_billetes_20 = (int(req.POST['billetes_20']) * 20)
+
+                total_monedas_50 = (int(req.POST['monedas_50']) * 50)
+                total_monedas_10 = (int(req.POST['monedas_10']) * 10)
+                total_monedas_5 = (int(req.POST['monedas_5']) * 5)
+                total_monedas_2 = (int(req.POST['monedas_2']) * 2)
+                total_monedas_1 = int(req.POST['monedas_1'])
+                error_dinero = validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20)
+                error_monedas = validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1)
+                if error_dinero:
+                    return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_dinero})
+                elif error_monedas:
+                    return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_monedas})
+                else:
+
+                    saldo_final = (
+                        total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
+                        +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1
+                    )
+
+                    caja = Caja.objects.get(id=id_caja)
+                    caja.saldo_caja = saldo_final
+                    caja.save()
+
+                    messages.success(req, "Saldo final ingresado con éxito.")
+                    return redirect('Arqueos')
+            else:
+                return render(req,"perfil_administrativo/arqueos/saldo_final.html",{})
+    except Exception as e:
+        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})

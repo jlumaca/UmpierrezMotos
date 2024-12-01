@@ -89,6 +89,9 @@ urlpatterns = [
 
      path('arqueos', views.arqueos,name="Arqueos"),
      path('abrir_caja', views.abrir_caja,name="AbrirCaja"),
+     path('ingresos_caja/<int:id_caja>', views.ingresos_caja,name="IngresosCaja"),
+     path('egresos_caja/<int:id_caja>', views.egresos_caja,name="EgresosCaja"),
+     path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
 
 
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),

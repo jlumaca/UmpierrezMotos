@@ -34,29 +34,72 @@
             </tr>
         </thead>
         <tbody>
-            
+            {% if page_obj %}
+                {% for arqueo in page_obj %}
                 <tr>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
-                    <td>prueba</td>
+                    <td>{{ arqueo.arqueo.apertura }}</td>
+                    <td>{% if arqueo.cierre %}{{ arqueo.cierre }}{% endif %}</td>
+                    <td>{{ arqueo.arqueo.monto_inicial }}</td>
+                    <td>{{ arqueo.depositos }}</td>
+                    <td>{{ arqueo.egresos }}</td>
+                    <td>{{ arqueo.saldo_caja }}</td>
+                    <td>{{ arqueo.saldo_sistema }}</td>
+                    <td>{{ arqueo.diferencia }}</td>
+                    <td>
+                        {% if arqueo.arqueo.estado == "Abierto" %}
+                            <span class="badge bg-success">{{ arqueo.arqueo.estado }}</span>
+                        {% elif arqueo.arqueo.estado == "Cerrado" %}
+                            <span class="badge bg-danger">{{ arqueo.arqueo.estado }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ arqueo.arqueo.estado }}</span>
+                        {% endif %}
+                    </td>
+                    <td>Juan Lumaca</td>
                     <td>
                         
                         <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                        <a href=""><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
-                        <a href=""><button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button></a>
-                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button></a>
+                        <a href="{% url 'SaldoFinalCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        <button onclick="toggleIngresos('{{ forloop.counter }}')" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button>
+                        
+                        <button onclick="toggleEgresos('{{ forloop.counter }}')" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button>
                         <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-lock"></i></button></a>
-
+                        
                     </td>
                 </tr>
-                
+                <tr id="formulario-ingresos-{{ forloop.counter }}" style="display: none;"  class="formulario-ingresos">
+                    <td colspan="4">
+                        <form method="post" enctype="multipart/form-data" action="{% url 'IngresosCaja' arqueo.arqueo.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="certificado" class="form-label">Ingresos:</label>
+                                <input type="number" class="form-control" id="ingresos" placeholder="Ingresos" name="ingresos" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleIngresos('{{ forloop.counter }}')">Cancelar</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="formulario-egresos-{{ forloop.counter }}" style="display: none;"  class="formulario-egresos">
+                    <td colspan="4">
+                        <form method="post" enctype="multipart/form-data" action="{% url 'EgresosCaja' arqueo.arqueo.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="certificado" class="form-label">Egresos:</label>
+                                <input type="number" class="form-control" id="egresos" placeholder="Egresos" name="egresos" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEgresos('{{ forloop.counter }}')">Cancelar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de arqueos disponibles.
+                    </td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
 
@@ -97,6 +140,21 @@
 </div>
 
 <script>
-
+function toggleIngresos(id) {
+        const formulario = document.getElementById(`formulario-ingresos-${id}`);
+        if (formulario.style.display === "none" || formulario.style.display === "") {
+            formulario.style.display = "table-row";
+        } else {
+            formulario.style.display = "none";
+        }
+    }
+    function toggleEgresos(id) {
+        const formulario = document.getElementById(`formulario-egresos-${id}`);
+        if (formulario.style.display === "none" || formulario.style.display === "") {
+            formulario.style.display = "table-row";
+        } else {
+            formulario.style.display = "none";
+        }
+    }
 </script>
 {% endblock %}

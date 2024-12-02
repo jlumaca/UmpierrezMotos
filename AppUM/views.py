@@ -2913,13 +2913,13 @@ def validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,
 def validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1):
     if total_monedas_50 < 0:
         error = "Ingrese un valor correcto para las monedas de $50"
-    elif total_monedas_10:
+    elif total_monedas_10 < 0:
         error = "Ingrese un valor correcto para las monedas de $10"
-    elif total_monedas_5:
+    elif total_monedas_5 < 0:
         error = "Ingrese un valor correcto para las monedas de $5"
-    elif total_monedas_2:
+    elif total_monedas_2 < 0:
         error = "Ingrese un valor correcto para las monedas de $2"
-    elif total_monedas_1:
+    elif total_monedas_1 < 0:
         error = "Ingrese un valor correcto para las monedas de $1"
     else:
         error = None
@@ -2989,26 +2989,59 @@ def abrir_caja(req):
 @admin_required
 def ingresos_caja(req,id_caja):
     try:
-        caja = Caja.objects.get(id=id_caja)
-        ingresos = caja.depositos + int(req.POST['ingresos'])
-        caja.depositos = ingresos
-        caja.save()
-        messages.success(req, "Depositos ingresados correctamente.")
-        return redirect('Arqueos')
+        if int(req.POST['ingresos']) < 0 or int(req.POST['ingresos']) == 0:
+            # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
+            messages.error(req,"El monto del ingreso es incorrecto.")
+            return redirect('Arqueos')
+        else:
+
+            caja = Caja.objects.get(id=id_caja)
+            ingresos = caja.depositos + int(req.POST['ingresos'])
+            caja.depositos = ingresos
+            caja.save()
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            movimiento = Movimientos(
+                fecha = datetime.now(),
+                movimiento = req.POST['descripcion_ingreso'],
+                tipo = "Ingreso",
+                monto = req.POST['ingresos'],
+                caja_id = id_caja,
+                usuario_id = personal.id
+            )
+            movimiento.save()
+            messages.success(req, "Depositos ingresados correctamente.")
+            return redirect('Arqueos')
     except Exception as e:
-        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+        return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
 @admin_required
 def egresos_caja(req,id_caja):
     try:
-        caja = Caja.objects.get(id=id_caja)
-        egresos = caja.egresos + int(req.POST['egresos'])
-        caja.egresos = egresos
-        caja.save()
-        messages.success(req, "Egresos ingresados correctamente.")
-        return redirect('Arqueos')
+        if int(req.POST['egresos']) < 0 or int(req.POST['egresos']) == 0:
+            # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
+            messages.error(req,"El monto del egreso es incorrecto.")
+            return redirect('Arqueos')
+        else:
+            caja = Caja.objects.get(id=id_caja)
+            egresos = caja.egresos + int(req.POST['egresos'])
+            caja.egresos = egresos
+            caja.save()
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            movimiento = Movimientos(
+                fecha = datetime.now(),
+                movimiento = req.POST['descripcion_egreso'],
+                tipo = "Egreso",
+                monto = req.POST['egresos'],
+                caja_id = id_caja,
+                usuario_id = personal.id
+            )
+            movimiento.save()
+            messages.success(req, "Egresos ingresados correctamente.")
+            return redirect('Arqueos')
     except Exception as e:
-        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+        return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
 @admin_required
 def saldo_final_caja(req,id_caja):
@@ -3070,3 +3103,23 @@ def cerrar_caja(req,id_caja):
              return render(req,"perfil_administrativo/arqueos/cierre_caja.html",{})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+@admin_required
+def movimientos_caja(req,id_caja):
+    try:
+        movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
+        data = []
+        for movimiento in movimientos:
+            usuario = Personal.objects.get(id=movimiento.usuario_id)
+            data.append({
+                "movimiento":movimiento,
+                "descripcion":movimiento.movimiento if movimiento.movimiento else "Sin descripción",
+                "usuario":usuario.nombre + " " + usuario.apellido
+            })
+
+        paginator = Paginator(data, 5)  # 5 arqueos por página
+        page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+        page_obj = paginator.get_page(page_number)
+        return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj})
+    except Exception as e:
+        return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})

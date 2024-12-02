@@ -146,5 +146,13 @@ class Caja(models.Model):
     diferencia = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=10)
     usuario = models.ForeignKey(Personal, related_name='usuario_caja', on_delete=models.CASCADE)
+
+class Movimientos(models.Model):
+    fecha = models.DateTimeField()
+    movimiento = models.TextField(null=True, blank=True)
+    tipo = models.CharField(max_length=10)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    caja = models.ForeignKey(Caja, related_name='movimiento_caja', on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Personal, related_name='usuario_movimiento', on_delete=models.CASCADE)
     
 

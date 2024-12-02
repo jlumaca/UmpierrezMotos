@@ -92,6 +92,7 @@ urlpatterns = [
      path('ingresos_caja/<int:id_caja>', views.ingresos_caja,name="IngresosCaja"),
      path('egresos_caja/<int:id_caja>', views.egresos_caja,name="EgresosCaja"),
      path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
+     path('cerrar_caja/<int:id_caja>', views.cerrar_caja,name="CerrarCaja"),
 
 
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),

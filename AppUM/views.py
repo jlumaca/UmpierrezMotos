@@ -3035,6 +3035,10 @@ def saldo_final_caja(req,id_caja):
 
                     caja = Caja.objects.get(id=id_caja)
                     caja.saldo_caja = saldo_final
+                    caja.estado = "Cuadre de caja"
+                    saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
+                    caja.saldo_sistema = saldo_sistema
+                    caja.diferencia = saldo_final - saldo_sistema
                     caja.save()
 
                     messages.success(req, "Saldo final ingresado con éxito.")
@@ -3043,3 +3047,16 @@ def saldo_final_caja(req,id_caja):
                 return render(req,"perfil_administrativo/arqueos/saldo_final.html",{})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+def cerrar_caja(req,id_caja):
+    try:
+        if req.method == "POST":
+            caja = Caja.objects.get(id=id_caja)
+            caja.estado = "Cerrado"
+            caja.cierre = datetime.now()
+            caja.save()
+            return render(req,"perfil_administrativo/arqueos/cierre_caja.html",{"message":"Caja cerrada con éxito."})
+        else:
+             return render(req,"perfil_administrativo/arqueos/cierre_caja.html",{})
+    except Exception as e:
+        pass

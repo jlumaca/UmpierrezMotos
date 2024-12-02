@@ -44,7 +44,15 @@
                     <td>{{ arqueo.egresos }}</td>
                     <td>{{ arqueo.saldo_caja }}</td>
                     <td>{{ arqueo.saldo_sistema }}</td>
-                    <td>{{ arqueo.diferencia }}</td>
+                    <td>
+                        {% if arqueo.diferencia > 0 %}
+                        <span class="badge bg-success">+{{ arqueo.diferencia }}</span>
+                        {% elif arqueo.diferencia < 0 %}
+                        <span class="badge bg-danger">-{{ arqueo.diferencia }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ arqueo.diferencia }}</span>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if arqueo.arqueo.estado == "Abierto" %}
                             <span class="badge bg-success">{{ arqueo.arqueo.estado }}</span>
@@ -56,13 +64,16 @@
                     </td>
                     <td>Juan Lumaca</td>
                     <td>
-                        
                         <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        
+                        {% if arqueo.arqueo.estado == "Abierto" %}
                         <a href="{% url 'SaldoFinalCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
                         <button onclick="toggleIngresos('{{ forloop.counter }}')" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button>
                         
                         <button onclick="toggleEgresos('{{ forloop.counter }}')" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button>
-                        <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-lock"></i></button></a>
+                        {% elif arqueo.arqueo.estado == "Cuadre de caja" %}
+                        <a href="{% url 'CerrarCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-lock"></i></button></a>
+                        {% endif %}
                         
                     </td>
                 </tr>

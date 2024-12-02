@@ -2861,7 +2861,8 @@ def notificaciones_administrativo(req):
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":data}) 
     except Exception as e:
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
-    
+
+@admin_required
 def arqueos(req):
     try:
 
@@ -2888,6 +2889,7 @@ def arqueos(req):
 
     except Exception as e:
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
+
 
 def validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20):
     if total_billetes_2000 < 0:
@@ -2924,7 +2926,7 @@ def validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_mone
     return error
 
 
-
+@admin_required
 def abrir_caja(req):
     try:
         if req.method == "POST":
@@ -2984,6 +2986,7 @@ def abrir_caja(req):
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
 
+@admin_required
 def ingresos_caja(req,id_caja):
     try:
         caja = Caja.objects.get(id=id_caja)
@@ -2995,6 +2998,7 @@ def ingresos_caja(req,id_caja):
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
 
+@admin_required
 def egresos_caja(req,id_caja):
     try:
         caja = Caja.objects.get(id=id_caja)
@@ -3006,6 +3010,7 @@ def egresos_caja(req,id_caja):
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
 
+@admin_required
 def saldo_final_caja(req,id_caja):
     try:
             if req.method == "POST": 
@@ -3052,6 +3057,7 @@ def saldo_final_caja(req,id_caja):
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
 
+@admin_required
 def cerrar_caja(req,id_caja):
     try:
         if req.method == "POST":
@@ -3063,4 +3069,4 @@ def cerrar_caja(req,id_caja):
         else:
              return render(req,"perfil_administrativo/arqueos/cierre_caja.html",{})
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})

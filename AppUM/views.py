@@ -1047,6 +1047,7 @@ def busqueda_matricula(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",contexto)
 
+@admin_required
 def busqueda_tipo_moto(req):
     tipo = req.GET.get('tipo_moto')
     moto = Moto.objects.filter(tipo=tipo).order_by('-fecha_ingreso')

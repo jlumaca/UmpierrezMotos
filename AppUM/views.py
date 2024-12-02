@@ -511,7 +511,8 @@ def alta_moto_usada(req,id_cliente):
                     pertenece_taller = 0,
                     fecha_ingreso = datetime.now(),
                     observaciones = req.POST['descripcion_moto'],
-                    foto = foto
+                    foto = foto,
+                    tipo = req.POST['tipo_moto']
                     )
             nueva_moto.save()
             libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
@@ -658,7 +659,8 @@ def alta_moto_nueva(req):
                     pertenece_taller = 0,
                     fecha_ingreso = datetime.now(),
                     observaciones = req.POST['descripcion_moto'],
-                    foto = foto
+                    foto = foto,
+                    tipo = req.POST['tipo_moto']
                     )
             nueva_moto.save()
 
@@ -961,7 +963,7 @@ def busqueda_codigo(req):
 def busqueda_marca(req):
     marca = req.GET.get('marca')
     #if req.method == 'get':
-    motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1)
+    motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -972,7 +974,7 @@ def busqueda_marca(req):
 def busqueda_modelo(req):
     modelo = req.GET.get('modelo')
     #if req.method == 'get':
-    motos = Moto.objects.filter(modelo__icontains=modelo,pertenece_tienda=1)
+    motos = Moto.objects.filter(modelo__icontains=modelo,pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -984,7 +986,7 @@ def busqueda_marca_modelo(req):
     marca = req.GET.get('marca_modelo')
     modelo = req.GET.get('modelo_marca')
     #if req.method == 'get':
-    motos = Moto.objects.filter(marca__icontains=marca,modelo__icontains=modelo,pertenece_tienda=1)
+    motos = Moto.objects.filter(marca__icontains=marca,modelo__icontains=modelo,pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -996,7 +998,7 @@ def busqueda_anio(req):
     anio = req.GET.get('anio')
     
     #if req.method == 'get':
-    motos = Moto.objects.filter(anio=anio,pertenece_tienda=1)
+    motos = Moto.objects.filter(anio=anio,pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -1008,7 +1010,7 @@ def busqueda_kms(req):
     km_minimo = req.GET.get('km_minimo')
     km_maximo = req.GET.get('km_maximo')
     #if req.method == 'get':
-    motos = Moto.objects.filter(kilometros__range=(km_minimo, km_maximo),pertenece_tienda=1)
+    motos = Moto.objects.filter(kilometros__range=(km_minimo, km_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -1020,7 +1022,7 @@ def busqueda_precio(req):
     precio_minimo = req.GET.get('precio_minimo')
     precio_maximo = req.GET.get('precio_maximo')
     #if req.method == 'get':
-    motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1)
+    motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
     paginator = Paginator(motos, 5)  # 10 motos por página
     page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
     page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
@@ -1043,6 +1045,15 @@ def busqueda_matricula(req):
     else:
         contexto = {'page_obj': None,"motos":None,"active_page": 'Motos'}
 
+    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+
+def busqueda_tipo_moto(req):
+    tipo = req.GET.get('tipo_moto')
+    moto = Moto.objects.filter(tipo=tipo).order_by('-fecha_ingreso')
+    paginator = Paginator(moto, 5)  # 10 motos por página
+    page_number = req.GET.get('page')  # Obtiene el número de página desde la URL
+    page_obj = paginator.get_page(page_number)  # Obtiene la página solicitada
+    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
     return render(req,"perfil_administrativo/motos/motos.html",contexto)
 
 
@@ -1132,6 +1143,7 @@ def modificacion_moto(req,id_moto):
                     moto_upd.modelo = modelo
                     moto_upd.motor = req.POST['motor_moto']
                     moto_upd.anio = req.POST['anio_moto']
+                    moto_upd.tipo = req.POST['tipo_moto']
 
                     if req.POST['estado_moto'] == "nueva":
                         estado = "Nueva"

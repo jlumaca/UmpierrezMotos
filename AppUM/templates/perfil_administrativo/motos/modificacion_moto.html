@@ -12,6 +12,14 @@
         {% endif %}
         <form action="{% url 'MotoModificacion' datos_moto.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
+                <label for="marca" class="form-label">Tipo</label>
+                <select class="form-control" name="tipo_moto" id="tipo_moto">
+                    <option value="Moto" {% if datos_moto.tipo == "Moto" %}selected{% endif %}>Moto</option>
+                    <option value="Cuatriciclo" {% if datos_moto.tipo == "Cuatriciclo" %}selected{% endif %}>Cuatriciclo</option>
+                    <option value="Otro" {% if datos_moto.tipo == "Otro" %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
                 <input value="{{ datos_moto.marca }}" type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20">
             </div>

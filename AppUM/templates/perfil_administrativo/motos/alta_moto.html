@@ -83,7 +83,14 @@
                 </tbody>
             </table>
             <form action="{% url 'AltaMotoUsada' cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
-
+                <div class="mb-3">
+                    <label for="marca" class="form-label">Tipo</label>
+                    <select class="form-control" name="tipo_moto" id="tipo_moto">
+                        <option value="Moto">Moto</option>
+                        <option value="Cuatriciclo">Cuatriciclo</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
                 <div class="mb-3">
                     <label for="marca" class="form-label">Marca</label>
                     <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
@@ -296,7 +303,14 @@
 
         <div id="div_moto_nueva" style="display: none;">
         <form action="{% url 'AltaMotoNueva' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
-
+            <div class="mb-3">
+                <label for="marca" class="form-label">Tipo</label>
+                <select class="form-control" name="tipo_moto" id="tipo_moto">
+                    <option value="Moto">Moto</option>
+                    <option value="Cuatriciclo">Cuatriciclo</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
                 <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>

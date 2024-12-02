@@ -2869,6 +2869,7 @@ def arqueos(req):
         arqueos = Caja.objects.all().order_by('-apertura')
         data = []
         for arqueo in arqueos:
+            usuario = Personal.objects.get(id=arqueo.usuario_id)
             data.append({
                 "arqueo": arqueo,
                 "cierre": arqueo.cierre,  # Permite que sea None si no está definido
@@ -2877,6 +2878,7 @@ def arqueos(req):
                 "saldo_caja": arqueo.saldo_caja if arqueo.saldo_caja is not None else 0,
                 "saldo_sistema": arqueo.saldo_sistema if arqueo.saldo_sistema is not None else 0,
                 "diferencia": arqueo.diferencia if arqueo.diferencia is not None else 0,
+                "usuario":usuario.nombre + " " + usuario.apellido
             })
 
         paginator = Paginator(data, 5)  # 5 arqueos por página
@@ -2885,7 +2887,7 @@ def arqueos(req):
         return render(req, "perfil_administrativo/arqueos/arqueos.html", {"page_obj": page_obj})
 
     except Exception as e:
-        pass 
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
 
 def validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20):
     if total_billetes_2000 < 0:
@@ -2971,7 +2973,7 @@ def abrir_caja(req):
                     saldo_sistema = 0,
                     diferencia = 0,
                     estado = "Abierto",
-                    usuario_id = 3
+                    usuario_id = persona.id
                 )
                 nueva_caja.save()
 
@@ -3037,8 +3039,10 @@ def saldo_final_caja(req,id_caja):
                     caja.saldo_caja = saldo_final
                     caja.estado = "Cuadre de caja"
                     saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
+                    diferencia = saldo_final - abs(saldo_sistema)
+                    saldo_sistema = abs(saldo_sistema)
                     caja.saldo_sistema = saldo_sistema
-                    caja.diferencia = saldo_final - saldo_sistema
+                    caja.diferencia = diferencia
                     caja.save()
 
                     messages.success(req, "Saldo final ingresado con éxito.")

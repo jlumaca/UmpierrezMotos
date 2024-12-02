@@ -42,15 +42,25 @@
                     <td>{{ arqueo.arqueo.monto_inicial }}</td>
                     <td>{{ arqueo.depositos }}</td>
                     <td>{{ arqueo.egresos }}</td>
-                    <td>{{ arqueo.saldo_caja }}</td>
-                    <td>{{ arqueo.saldo_sistema }}</td>
                     <td>
+                        {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
+                        {{ arqueo.saldo_caja }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
+                        {{ arqueo.saldo_sistema }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
                         {% if arqueo.diferencia > 0 %}
                         <span class="badge bg-success">+{{ arqueo.diferencia }}</span>
                         {% elif arqueo.diferencia < 0 %}
-                        <span class="badge bg-danger">-{{ arqueo.diferencia }}</span>
+                        <span class="badge bg-danger">{{ arqueo.diferencia }}</span>
                         {% else %}
                         <span class="badge bg-secondary">{{ arqueo.diferencia }}</span>
+                        {% endif %}
                         {% endif %}
                     </td>
                     <td>
@@ -62,7 +72,7 @@
                             <span class="badge bg-secondary">{{ arqueo.arqueo.estado }}</span>
                         {% endif %}
                     </td>
-                    <td>Juan Lumaca</td>
+                    <td>{{ arqueo.usuario }}</td>
                     <td>
                         <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                         

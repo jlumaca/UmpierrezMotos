@@ -24,11 +24,7 @@ from .functions import *
 #     usuario.contrasena = make_password(usuario.contrasena)
 #     usuario.save()
 
-##VISTA DEL LOGIN AL ENTRAR AL SITIO##
-
-def vista_login(req):
-    return render(req,"login/login.html",{})
-
+##VISTA DEL LOGIN AL ENTRAR AL SITIO##S
 def acceso_login(req):
     try:
         if req.method == "POST":

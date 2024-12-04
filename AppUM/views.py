@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .decorators import admin_required, mecanico_jefe_required, mecanico_empleado_required
 from django.core.mail import send_mail
+from .inserts import *
 
 # for usuario in Personal.objects.all():
 #     usuario.contrasena = make_password(usuario.contrasena)
@@ -264,9 +265,9 @@ def vista_inventario_motos(req):
 
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
-@admin_required
-def vista_inventario_accesorios(req):
-    return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
+# @admin_required
+# def vista_inventario_accesorios(req):
+#     return render(req,"perfil_administrativo/accesorios/accesorios.html",{})
 
 # def existe_matricula_moto_tienda(matr):
 #     existe_moto = Moto.objects.filter(matricula = matr).first()
@@ -374,6 +375,18 @@ def contexto_para_pdf_moto(model_moto,logo):
         
         return datos_a_pdf
 
+def checkbox_pdf(req,nueva_moto):
+    ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+    logo_um = Logos.objects.get(id=1)
+    logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+    datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
+    renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+    nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
+    mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+    pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+    return pdf_ret
+
+#EVALUAR USO
 @admin_required
 def datos_cliente_venta(req):
     if req.method == 'POST':
@@ -449,7 +462,7 @@ def cliente_moto(req):
 
 @admin_required
 def alta_moto_usada(req,id_cliente):
-    try:
+    # try:
     #INSERT EN MOTO
         cliente = Cliente.objects.get(id=id_cliente)
         num_chasis = req.POST['num_chasis_moto'].upper()
@@ -494,66 +507,72 @@ def alta_moto_usada(req,id_cliente):
             color = req.POST['color_moto'].upper()
 
             foto = req.FILES.get('foto_moto')
-            nueva_moto = Moto(marca = marca,
-                    modelo = modelo,
-                    anio = req.POST['anio_moto'],
-                    estado = "Usada",
-                    motor = req.POST['motor_moto'],
-                    kilometros = req.POST['km_moto'],
-                    moneda_precio = req.POST['moneda_precio'],
-                    precio = req.POST['precio_moto'],
-                    color = color,
-                    num_motor = num_motor,
-                    num_chasis = num_chasis,
-                    num_cilindros = req.POST['num_cilindros'],
-                    cantidad_pasajeros = req.POST['num_pasajeros'],
-                    pertenece_tienda = 1,
-                    pertenece_taller = 0,
-                    fecha_ingreso = datetime.now(),
-                    observaciones = req.POST['descripcion_moto'],
-                    foto = foto,
-                    tipo = req.POST['tipo_moto']
-                    )
-            nueva_moto.save()
+            # nueva_moto = Moto(marca = marca,
+            #         modelo = modelo,
+            #         anio = req.POST['anio_moto'],
+            #         estado = "Usada",
+            #         motor = req.POST['motor_moto'],
+            #         kilometros = req.POST['km_moto'],
+            #         moneda_precio = req.POST['moneda_precio'],
+            #         precio = req.POST['precio_moto'],
+            #         color = color,
+            #         num_motor = num_motor,
+            #         num_chasis = num_chasis,
+            #         num_cilindros = req.POST['num_cilindros'],
+            #         cantidad_pasajeros = req.POST['num_pasajeros'],
+            #         pertenece_tienda = 1,
+            #         pertenece_taller = 0,
+            #         fecha_ingreso = datetime.now(),
+            #         observaciones = req.POST['descripcion_moto'],
+            #         foto = foto,
+            #         tipo = req.POST['tipo_moto']
+            #         )
+            # nueva_moto.save()
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
             libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
-            cliente_moto = ComprasVentas(
-                fecha_compra = datetime.now(),
-                tipo = "CV",
-                fotocopia_libreta = libreta_propiedad,
-                cliente_id = id_cliente,
-                moto_id = nueva_moto.id
-            )
-            cliente_moto.save()
+            # cliente_moto = ComprasVentas(
+            #     fecha_compra = datetime.now(),
+            #     tipo = "CV",
+            #     fotocopia_libreta = libreta_propiedad,
+            #     cliente_id = id_cliente,
+            #     moto_id = nueva_moto.id
+            # )
+            # cliente_moto.save()
+            insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)
 
-            nueva_matricula = Matriculas(
-                matricula = matricula,
-                padron = padron,
-                moto_id = nueva_moto.id
-            )
-            nueva_matricula.save()
+            # nueva_matricula = Matriculas(
+            #     matricula = matricula,
+            #     padron = padron,
+            #     moto_id = nueva_moto.id
+            # )
+            # nueva_matricula.save()
+
+            insert_matriculas(matricula,padron,nueva_moto.id)
             checkbox = 'crear_pdf' in req.POST
             if checkbox:
-                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
-                logo_um = Logos.objects.get(id=1)
-                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-                datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
-                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-                nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
-                mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
-                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-                return pdf_ret
+                # ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                # logo_um = Logos.objects.get(id=1)
+                # logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                # datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
+                # renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                # nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
+                # mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                # pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                # return pdf_ret
+                pdf = checkbox_pdf(req,nueva_moto)
+                return pdf
             else:
                 messages.success(req, "Moto ingresada con éxito.")
                 return redirect('Motos')
 
             
-    except Exception as e:
-            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
-                                                                            "active_page": 'Motos',
-                                                                            "form_moto_usada":True,
-                                                                            "form_moto_ingresada":False,
-                                                                            "consultar_moto_cliente":False,
-                                                                            "error_message":e})
+    # except Exception as e:
+    #         return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+    #                                                                         "active_page": 'Motos',
+    #                                                                         "form_moto_usada":True,
+    #                                                                         "form_moto_ingresada":False,
+    #                                                                         "consultar_moto_cliente":False,
+    #                                                                         "error_message":e})
 
 @admin_required
 def reingresar_moto_usada(req,id_moto,id_cliente):
@@ -584,25 +603,28 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
         #         moto_id = id_moto
         #     )
         #     c_v.save()
-        c_v = ComprasVentas(
-                fecha_compra = datetime.now(),
-                fotocopia_libreta = libreta_propiedad,
-                tipo = "CV",
-                cliente_id = id_cliente,
-                moto_id = id_moto
-            )
-        c_v.save()
+        # c_v = ComprasVentas(
+        #         fecha_compra = datetime.now(),
+        #         fotocopia_libreta = libreta_propiedad,
+        #         tipo = "CV",
+        #         cliente_id = id_cliente,
+        #         moto_id = id_moto
+        #     )
+        # c_v.save()
+        insert_compras_ventas("CV",libreta_propiedad,id_cliente,moto.id,None,None,None)
         checkbox = 'crear_pdf' in req.POST
         if checkbox:
-            ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
-            logo_um = Logos.objects.get(id=1)
-            logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-            datos_a_pdf = contexto_para_pdf_moto(moto,logo_um_url)
-            renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-            nombre_archivo = f"identificacion_{moto.id}.pdf"
-            mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
-            pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-            return pdf_ret
+            # ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+            # logo_um = Logos.objects.get(id=1)
+            # logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+            # datos_a_pdf = contexto_para_pdf_moto(moto,logo_um_url)
+            # renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+            # nombre_archivo = f"identificacion_{moto.id}.pdf"
+            # mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+            # pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+            # return pdf_ret
+            pdf = checkbox_pdf(req,moto)
+            return pdf
         else:
             messages.success(req, "Moto ingresada con éxito.")
             return redirect('Motos')
@@ -642,39 +664,42 @@ def alta_moto_nueva(req):
             color = req.POST['color_moto'].upper()
 
             foto = req.FILES.get('foto_moto')
-            nueva_moto = Moto(marca = marca,
-                    modelo = modelo,
-                    anio = req.POST['anio_moto'],
-                    estado = "Nueva",
-                    motor = req.POST['motor_moto'],
-                    kilometros = 0,
-                    moneda_precio = req.POST['moneda_precio'],
-                    precio = req.POST['precio_moto'],
-                    color = color,
-                    num_motor = num_motor,
-                    num_chasis = num_chasis,
-                    num_cilindros = req.POST['num_cilindros'],
-                    cantidad_pasajeros = req.POST['num_pasajeros'],
-                    pertenece_tienda = 1,
-                    pertenece_taller = 0,
-                    fecha_ingreso = datetime.now(),
-                    observaciones = req.POST['descripcion_moto'],
-                    foto = foto,
-                    tipo = req.POST['tipo_moto']
-                    )
-            nueva_moto.save()
+            # nueva_moto = Moto(marca = marca,
+            #         modelo = modelo,
+            #         anio = req.POST['anio_moto'],
+            #         estado = "Nueva",
+            #         motor = req.POST['motor_moto'],
+            #         kilometros = 0,
+            #         moneda_precio = req.POST['moneda_precio'],
+            #         precio = req.POST['precio_moto'],
+            #         color = color,
+            #         num_motor = num_motor,
+            #         num_chasis = num_chasis,
+            #         num_cilindros = req.POST['num_cilindros'],
+            #         cantidad_pasajeros = req.POST['num_pasajeros'],
+            #         pertenece_tienda = 1,
+            #         pertenece_taller = 0,
+            #         fecha_ingreso = datetime.now(),
+            #         observaciones = req.POST['descripcion_moto'],
+            #         foto = foto,
+            #         tipo = req.POST['tipo_moto']
+            #         )
+            # nueva_moto.save()
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
 
             checkbox = 'crear_pdf' in req.POST
             if checkbox:
-                ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
-                logo_um = Logos.objects.get(id=1)
-                logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
-                datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
-                renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-                nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
-                mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
-                pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
-                return pdf_ret
+                # ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                # logo_um = Logos.objects.get(id=1)
+                # logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                # datos_a_pdf = contexto_para_pdf_moto(nueva_moto,logo_um_url)
+                # renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                # nombre_archivo = f"identificacion_{nueva_moto.id}.pdf"
+                # mensaje = "Moto ingresada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                # pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,nueva_moto,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                # return pdf_ret
+                pdf = checkbox_pdf(req,nueva_moto)
+                return pdf
             else:
                 messages.success(req, "Moto ingresada con éxito.")
                 return redirect('Motos')
@@ -1170,34 +1195,38 @@ def modificacion_moto(req,id_moto):
                             if matricula_actual.matricula != matricula: #EN CASO DE QUE LA MATRICULA INGRESADA EN EL TEMPLATE SEA DIFERENTE A LA EXISTENTE EN LA BASE DE DATOS, ENTONCES ACCEDE
                                 
                                 matricula_actual.delete()
-                                nueva_matricula = Matriculas(
-                                    matricula = matricula,
-                                    padron = req.POST['num_padron'],
-                                    moto_id = moto_upd.id
-                                )
-                                nueva_matricula.save()
+                                # nueva_matricula = Matriculas(
+                                #     matricula = matricula,
+                                #     padron = req.POST['num_padron'],
+                                #     moto_id = moto_upd.id
+                                # )
+                                # nueva_matricula.save()
+                                insert_matriculas(matricula,padron,moto_upd.id)
 
                         else:
-                                nueva_matricula = Matriculas(
-                                    matricula = matricula,
-                                    padron = req.POST['num_padron'],
-                                    moto_id = moto_upd.id
-                                )
-                                nueva_matricula.save()
+                                # nueva_matricula = Matriculas(
+                                #     matricula = matricula,
+                                #     padron = req.POST['num_padron'],
+                                #     moto_id = moto_upd.id
+                                # )
+                                # nueva_matricula.save()
+                                insert_matriculas(matricula,padron,moto_upd.id)
 
 
                     checkbox = 'crear_pdf' in req.POST
                     if checkbox:
-                            ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
-                            logo_um = Logos.objects.get(id=1)
-                            logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
+                            # ruta_pdf = "perfil_administrativo/motos/identificacion_moto.html"
+                            # logo_um = Logos.objects.get(id=1)
+                            # logo_um_url = req.build_absolute_uri(logo_um.logo_UM.url) if logo_um.logo_UM else None
 
-                            datos_a_pdf = contexto_para_pdf_moto(moto_upd,logo_um_url)
-                            renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
-                            nombre_archivo = f"identificacion_{moto_upd.id}.pdf"
-                            mensaje = "Moto modificada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
-                            pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto_upd,datos_a_pdf,nombre_archivo,mensaje,"UM")
-                            return pdf_ret
+                            # datos_a_pdf = contexto_para_pdf_moto(moto_upd,logo_um_url)
+                            # renderizar_en = "perfil_administrativo/motos/contenido_pdf.html"
+                            # nombre_archivo = f"identificacion_{moto_upd.id}.pdf"
+                            # mensaje = "Moto modificada con éxito. A continuación se visualiza el PDF generado para identificar fisicamente la misma."
+                            # pdf_ret = pdf_crear(req,ruta_pdf,renderizar_en,moto_upd,datos_a_pdf,nombre_archivo,mensaje,"UM")
+                            # return pdf_ret
+                            pdf = checkbox_pdf(req,moto_upd)
+                            return pdf
                     else:
                         messages.success(req, "La moto ha sido modificada con éxito.")
                         return redirect('Motos')
@@ -1564,40 +1593,44 @@ def alta_cliente(req):
 
                 nuevo_cliente.save()
                 
-                telefono_cliente = ClienteTelefono(
-                    telefono = telefono_principal,
-                    principal = 1,
+                # telefono_cliente = ClienteTelefono(
+                #     telefono = telefono_principal,
+                #     principal = 1,
                     
-                    cliente_id = nuevo_cliente.id
-                )
-                telefono_cliente.save()
+                #     cliente_id = nuevo_cliente.id
+                # )
+                # telefono_cliente.save()
+                insert_cliente_telefono(telefono_principal,1,nuevo_cliente.id)
 
                 if telefono_secundario:
-                    telefono_sec_cliente = ClienteTelefono(
-                    telefono = telefono_secundario,
-                    principal = 0,
+                #     telefono_sec_cliente = ClienteTelefono(
+                #     telefono = telefono_secundario,
+                #     principal = 0,
                    
-                    cliente_id = nuevo_cliente.id
-                )
-                    telefono_sec_cliente.save()
+                #     cliente_id = nuevo_cliente.id
+                # )
+                #     telefono_sec_cliente.save()
+                    insert_cliente_telefono(telefono_secundario,0,nuevo_cliente.id)
 
                 if correo_principal:
-                    correo_cliente = ClienteCorreo(
-                        correo = correo_principal,
-                        principal = 1,
+                    # correo_cliente = ClienteCorreo(
+                    #     correo = correo_principal,
+                    #     principal = 1,
                         
-                        cliente_id = nuevo_cliente.id
-                    )
-                    correo_cliente.save()
+                    #     cliente_id = nuevo_cliente.id
+                    # )
+                    # correo_cliente.save()
+                    insert_cliente_correo(correo_principal,1,nuevo_cliente.id)
                 
                 if correo_secundario:
-                    correo_sec_cliente = ClienteCorreo(
-                        correo = correo_secundario,
-                        principal = 0,
+                    # correo_sec_cliente = ClienteCorreo(
+                    #     correo = correo_secundario,
+                    #     principal = 0,
                         
-                        cliente_id = nuevo_cliente.id
-                    )
-                    correo_sec_cliente.save()
+                    #     cliente_id = nuevo_cliente.id
+                    # )
+                    # correo_sec_cliente.save()
+                    insert_cliente_correo(correo_secundario,0,nuevo_cliente.id)
 
 
 
@@ -1769,12 +1802,13 @@ def modificacion_cliente(req,id_cliente):
                 if tel1_actual.telefono != tel1:
                     #SI EL TEL1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL1
                     tel1_actual.delete()
-                    nuevo_tel1 = ClienteTelefono(
-                        telefono = tel1,
-                        principal = 1,
-                        cliente_id = id_cliente
-                    )
-                    nuevo_tel1.save()
+                    # nuevo_tel1 = ClienteTelefono(
+                    #     telefono = tel1,
+                    #     principal = 1,
+                    #     cliente_id = id_cliente
+                    # )
+                    # nuevo_tel1.save()
+                    insert_cliente_telefono(tel1,1,id_cliente)
 
                 if tel2:
                     tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
@@ -1782,12 +1816,13 @@ def modificacion_cliente(req,id_cliente):
                     if tel2_actual.telefono != tel2:
                         #SI EL TEL2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL2
                         tel2_actual.delete()
-                        nuevo_tel2 = ClienteTelefono(
-                            telefono = tel2,
-                            principal = 0,
-                            cliente_id = id_cliente
-                        )
-                        nuevo_tel2.save()
+                        # nuevo_tel2 = ClienteTelefono(
+                        #     telefono = tel2,
+                        #     principal = 0,
+                        #     cliente_id = id_cliente
+                        # )
+                        # nuevo_tel2.save()
+                        insert_cliente_telefono(tel2,0,id_cliente)
                     if checkbox:
                         tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
                         tel2_actual.principal = 1
@@ -1800,12 +1835,13 @@ def modificacion_cliente(req,id_cliente):
                     if correo1_actual.correo != correo1:
                         #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
                         correo1_actual.delete()
-                        nuevo_correo1 = ClienteCorreo(
-                            correo = correo1,
-                            principal = 1,
-                            cliente_id = id_cliente
-                        )
-                        nuevo_correo1.save()
+                        # nuevo_correo1 = ClienteCorreo(
+                        #     correo = correo1,
+                        #     principal = 1,
+                        #     cliente_id = id_cliente
+                        # )
+                        # nuevo_correo1.save()
+                        insert_cliente_correo(correo1,1,id_cliente)
                 
                 if req.POST['correo_2']:
                     correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
@@ -1813,12 +1849,13 @@ def modificacion_cliente(req,id_cliente):
                     if correo2_actual.correo != correo2:
                         #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
                         correo2_actual.delete()
-                        nuevo_correo2 = ClienteCorreo(
-                            correo = correo2,
-                            principal = 0,
-                            cliente_id = id_cliente
-                        )
-                        nuevo_correo2.save()
+                        # nuevo_correo2 = ClienteCorreo(
+                        #     correo = correo2,
+                        #     principal = 0,
+                        #     cliente_id = id_cliente
+                        # )
+                        # nuevo_correo2.save()
+                        insert_cliente_correo(correo2,0,id_cliente)
                     
                     if checkbox_correo:
                         correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
@@ -1904,7 +1941,7 @@ def ficha_cliente(req,id_cliente):
         c_1 = None
     
     if correo2:
-        c_2 = correo1.correo
+        c_2 = correo2.correo
     else:
         c_2 = None
     
@@ -2002,23 +2039,23 @@ def cargar_libreta(req,id_cv):
     except Exception as e:
         pass
 
-@admin_required
-def alta_cuota(req,id_cv):
-    try:
-        if req.method == "POST":
-            compra_venta = ComprasVentas.objects.get(id=id_cv)
-            compra_venta.cuotas_pagas = compra_venta.cuotas_pagas + 1
-            id_cliente = compra_venta.cliente_id
-            compra_venta.save()
+# @admin_required
+# def alta_cuota(req,id_cv):
+#     try:
+#         if req.method == "POST":
+#             compra_venta = ComprasVentas.objects.get(id=id_cv)
+#             compra_venta.cuotas_pagas = compra_venta.cuotas_pagas + 1
+#             id_cliente = compra_venta.cliente_id
+#             compra_venta.save()
 
-            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"message":"Cuota dada de alta con éxito","id_cliente":id_cliente})
-        else:
-            id_c = ComprasVentas.objects.get(id=id_cv)
-            id_cliente = id_c.cliente_id
-            return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"id_cliente":id_cliente})
+#             return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"message":"Cuota dada de alta con éxito","id_cliente":id_cliente})
+#         else:
+#             id_c = ComprasVentas.objects.get(id=id_cv)
+#             id_cliente = id_c.cliente_id
+#             return render(req,"perfil_administrativo/ventas/alta_cuota.html",{"id_cliente":id_cliente})
 
-    except Exception as e:
-        pass
+#     except Exception as e:
+#         pass
 
 
 
@@ -2334,16 +2371,17 @@ def venta_moto(req,id_moto,id_cliente):
             existe_reserva.forma_de_pago = req.POST['forma_pago']
             existe_reserva.save()
         else:
-            nueva_venta = ComprasVentas(
-                fecha_compra = datetime.now(),
-                compra_venta = compra_venta,
-                # certificado_venta = ,
-                tipo = "V",
-                forma_de_pago = req.POST['forma_pago'],
-                cliente_id = id_cliente,
-                moto_id = id_moto
-            )
-            nueva_venta.save()
+            # nueva_venta = ComprasVentas(
+            #     fecha_compra = datetime.now(),
+            #     compra_venta = compra_venta,
+            #     # certificado_venta = ,
+            #     tipo = "V",
+            #     forma_de_pago = req.POST['forma_pago'],
+            #     cliente_id = id_cliente,
+            #     moto_id = id_moto
+            # )
+            # nueva_venta.save()
+            insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
         #REDIRIGIR A LA FICHA DEL CLIENTE
         # return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":"VENTA EJECUTADA"})
         messages.success(req, "Venta generada con éxito")
@@ -2473,15 +2511,17 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
     caja.depositos = nuevo_ingreso
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
-    movimiento = Movimientos(
-        fecha = datetime.now(),
-        movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda,
-        tipo = "Ingreso",
-        monto = entrega,
-        caja_id = caja.id,
-        usuario_id = personal.id
-    )
-    movimiento.save()
+    # movimiento = Movimientos(
+    #     fecha = datetime.now(),
+    #     movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda,
+    #     tipo = "Ingreso",
+    #     monto = entrega,
+    #     caja_id = caja.id,
+    #     usuario_id = personal.id
+    # )
+    # movimiento.save()
+    movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
+    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
 
 def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago):
     # if moneda == "Pesos":
@@ -2703,15 +2743,17 @@ def baja_pago(req,id_cm):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                movimiento = Movimientos(
-                fecha = datetime.now(),
-                movimiento = "Se borra pago de moto ingresado por error",
-                tipo = "Egreso",
-                monto = quitar_deposito,
-                caja_id = caja.id,
-                usuario_id = personal.id
-                )
-                movimiento.save()
+                # movimiento = Movimientos(
+                # fecha = datetime.now(),
+                # movimiento = "Se borra pago de moto ingresado por error",
+                # tipo = "Egreso",
+                # monto = quitar_deposito,
+                # caja_id = caja.id,
+                # usuario_id = personal.id
+                # )
+                # movimiento.save()
+                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id)
+                
                 
             cuota.delete()    
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
@@ -2843,19 +2885,21 @@ def reservar_moto(req,id_moto,id_cliente):
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
                     resto_pesos = resto_dolares * precio_dolar
 
-        nueva_cuota = CuotasMoto(
-                fecha_pago = datetime.now(),
-                fecha_prox_pago = datetime.now() + relativedelta(months=1),
-                venta_id = id_cv,
-                cant_restante_dolares = resto_dolares,
-                cant_restante_pesos = resto_pesos,
-                moneda = moneda,
-                precio_dolar = precio_dolar,
-                valor_pago_dolares = entrega_dolares,
-                valor_pago_pesos = entrega_pesos,
-                observaciones = "Seña"
-            )
-        nueva_cuota.save()
+        # nueva_cuota = CuotasMoto(
+        #         fecha_pago = datetime.now(),
+        #         fecha_prox_pago = datetime.now() + relativedelta(months=1),
+        #         venta_id = id_cv,
+        #         cant_restante_dolares = resto_dolares,
+        #         cant_restante_pesos = resto_pesos,
+        #         moneda = moneda,
+        #         precio_dolar = precio_dolar,
+        #         valor_pago_dolares = entrega_dolares,
+        #         valor_pago_pesos = entrega_pesos,
+        #         observaciones = "Seña"
+        #     )
+        # nueva_cuota.save()
+        fecha_prox_pago = datetime.now() + relativedelta(months=1)
+        insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,"Seña")
         moto.pertenece_tienda = 0
         moto.save()
         messages.success(req, "Moto reservada con éxito.")
@@ -3180,15 +3224,16 @@ def ingresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            movimiento = Movimientos(
-                fecha = datetime.now(),
-                movimiento = req.POST['descripcion_ingreso'],
-                tipo = "Ingreso",
-                monto = req.POST['ingresos'],
-                caja_id = id_caja,
-                usuario_id = personal.id
-            )
-            movimiento.save()
+            # movimiento = Movimientos(
+            #     fecha = datetime.now(),
+            #     movimiento = req.POST['descripcion_ingreso'],
+            #     tipo = "Ingreso",
+            #     monto = req.POST['ingresos'],
+            #     caja_id = id_caja,
+            #     usuario_id = personal.id
+            # )
+            # movimiento.save()
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso",req.POST['ingresos'],id_caja,personal.id)
             messages.success(req, "Depositos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:
@@ -3208,15 +3253,16 @@ def egresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            movimiento = Movimientos(
-                fecha = datetime.now(),
-                movimiento = req.POST['descripcion_egreso'],
-                tipo = "Egreso",
-                monto = req.POST['egresos'],
-                caja_id = id_caja,
-                usuario_id = personal.id
-            )
-            movimiento.save()
+            # movimiento = Movimientos(
+            #     fecha = datetime.now(),
+            #     movimiento = req.POST['descripcion_egreso'],
+            #     tipo = "Egreso",
+            #     monto = req.POST['egresos'],
+            #     caja_id = id_caja,
+            #     usuario_id = personal.id
+            # )
+            # movimiento.save()
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id)
             messages.success(req, "Egresos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:

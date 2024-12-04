@@ -90,3 +90,47 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
                 observaciones = observaciones
             )
     nueva_cuota.save()
+
+def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
+    #movimiento_caja_por_pago(entrega,id_cv,moneda)
+    cv = ComprasVentas.objects.get(id=id_cv)
+    caja = Caja.objects.filter(estado = "Abierto").first()
+    usuario = req.user
+    personal = Personal.objects.filter(usuario=usuario.username).first()
+    cliente = Cliente.objects.get(id=cv.cliente_id)
+    dolar = PrecioDolar.objects.get(id=1)
+    precio_dolar = dolar.precio_dolar_tienda
+    
+    if moneda == "Pesos":
+        nuevo_ingreso = caja.depositos + int(entrega)
+    else:
+        nuevo_ingreso = caja.depositos + (int(entrega) * precio_dolar)
+    
+    caja.depositos = nuevo_ingreso
+    caja.save()  
+    cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+    movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
+    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
+
+def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago):
+    nueva_cuota = CuotasMoto(
+                    fecha_pago = datetime.now(),
+                    fecha_prox_pago = fecha_prox_pago,
+                    venta_id = id_cv,
+                    cant_restante_dolares = resto_dolares,
+                    cant_restante_pesos = resto_pesos,
+                    moneda = moneda,
+                    observaciones = observaciones_pago,
+                    precio_dolar = precio_dolar,
+                    valor_pago_dolares = entrega_dolares,
+                    valor_pago_pesos = entrega_pesos,
+                    comprobante_pago = comprobante,
+                    metodo_pago = forma_pago
+                )
+    nueva_cuota.save()
+    if nueva_cuota.comprobante_pago:
+            comprobante_url = nueva_cuota.comprobante_pago.url
+    else:
+            comprobante_url = None
+    
+    return comprobante_url

@@ -25,7 +25,7 @@ urlpatterns = [
 
 
      path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),#
-     path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),#
+     # path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),#
      path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),#
      path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#
      path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#

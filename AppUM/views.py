@@ -2455,18 +2455,86 @@ def detalles_cuotas(req,id_cv):
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
+def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
+    #movimiento_caja_por_pago(entrega,id_cv,moneda)
+    cv = ComprasVentas.objects.get(id=id_cv)
+    caja = Caja.objects.filter(estado = "Abierto").first()
+    usuario = req.user
+    personal = Personal.objects.filter(usuario=usuario.username).first()
+    cliente = Cliente.objects.get(id=cv.cliente_id)
+    dolar = PrecioDolar.objects.get(id=1)
+    precio_dolar = dolar.precio_dolar_tienda
+    
+    if moneda == "Pesos":
+        nuevo_ingreso = caja.depositos + int(entrega)
+    else:
+        nuevo_ingreso = caja.depositos + (int(entrega) * precio_dolar)
+    
+    caja.depositos = nuevo_ingreso
+    caja.save()  
+    cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+    movimiento = Movimientos(
+        fecha = datetime.now(),
+        movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda,
+        tipo = "Ingreso",
+        monto = entrega,
+        caja_id = caja.id,
+        usuario_id = personal.id
+    )
+    movimiento.save()
+
+def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago):
+    # if moneda == "Pesos":
+    #     entrega_pesos = req.POST['valor_a_pagar']
+    #     entrega_dolares = 0
+    #     resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
+    #     resto_dolares = resto_pesos / precio_dolar
+    # else:
+    #     entrega_pesos = 0
+    #     entrega_dolares = req.POST['valor_a_pagar']
+    #     resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
+    #     resto_pesos = resto_dolares * precio_dolar
+
+    nueva_cuota = CuotasMoto(
+                    fecha_pago = datetime.now(),
+                    fecha_prox_pago = fecha_prox_pago,
+                    venta_id = id_cv,
+                    cant_restante_dolares = resto_dolares,
+                    cant_restante_pesos = resto_pesos,
+                    moneda = moneda,
+                    observaciones = observaciones_pago,
+                    precio_dolar = precio_dolar,
+                    valor_pago_dolares = entrega_dolares,
+                    valor_pago_pesos = entrega_pesos,
+                    comprobante_pago = comprobante,
+                    metodo_pago = forma_pago
+                )
+    nueva_cuota.save()
+    if nueva_cuota.comprobante_pago:
+            comprobante_url = nueva_cuota.comprobante_pago.url
+    else:
+            comprobante_url = None
+    
+    return comprobante_url
+
 @admin_required
 def alta_pago(req,id_cv):
     try:
-        existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
+        caja = Caja.objects.filter(estado="Abierto").first()
+        forma_pago = req.POST['forma_pago']
+        fecha_proximo_pago = req.POST['f_prox_pago']
+        observaciones_pago = req.POST['observaciones_pago']
+        cv = ComprasVentas.objects.get(id=id_cv)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = dolar.precio_dolar_tienda
+        
+        existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
         if not existe_cuota:
-            cv = ComprasVentas.objects.get(id=id_cv)
+            #alta_cuota_funcion(req,False,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
             moto = Moto.objects.get(id=cv.moto_id)
 
-            dolar = PrecioDolar.objects.get(id=1)
-            precio_dolar = dolar.precio_dolar_tienda
             if moneda == "Pesos":
                 entrega_pesos = req.POST['valor_a_pagar']
                 entrega_dolares = 0
@@ -2476,6 +2544,26 @@ def alta_pago(req,id_cv):
                 else:
                     resto_pesos = int((moto.precio * precio_dolar)) - int(entrega_pesos)
                     resto_dolares = resto_pesos / precio_dolar
+                
+                if forma_pago == "Efectivo" and caja:
+                    movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,"Pesos")
+                    # nuevo_ingreso = caja.depositos + int(entrega_pesos)
+                    # caja.depositos = nuevo_ingreso
+                    # caja.save()
+                    # usuario = req.user
+                    # personal = Personal.objects.filter(usuario=usuario.username).first()
+                    # cliente = Cliente.objects.get(id=cv.cliente_id)
+                    # cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+                    # movimiento = Movimientos(
+                    #     fecha = datetime.now(),
+                    #     movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: Pesos",
+                    #     tipo = "Ingreso",
+                    #     monto = entrega_pesos,
+                    #     caja_id = caja.id,
+                    #     usuario_id = personal.id
+                    # )
+                    # movimiento.save()
+                
             else:
                 entrega_pesos = 0
                 entrega_dolares = req.POST['valor_a_pagar']
@@ -2485,26 +2573,47 @@ def alta_pago(req,id_cv):
                 else:
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
                     resto_pesos = resto_dolares * precio_dolar 
+                
+                if forma_pago == "Efectivo" and caja:
+                    movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,"Dolares")
+                    # nuevo_ingreso = caja.depositos + (int(entrega_dolares) * precio_dolar)
+                    # caja.depositos = nuevo_ingreso
+                    # caja.save()
+                    # usuario = req.user
+                    # personal = Personal.objects.filter(usuario=usuario.username).first()
+                    # cliente = Cliente.objects.get(id=cv.cliente_id)
+                    # cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+                    # movimiento = Movimientos(
+                    #     fecha = datetime.now(),
+                    #     movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: Dolares",
+                    #     tipo = "Ingreso",
+                    #     monto = entrega_dolares,
+                    #     caja_id = caja.id,
+                    #     usuario_id = personal.id
+                    # )
+                    # movimiento.save()
 
-            nueva_cuota = CuotasMoto(
-                fecha_pago = datetime.now(),
-                fecha_prox_pago = req.POST['f_prox_pago'],
-                venta_id = id_cv,
-                cant_restante_dolares = resto_dolares, 
-                cant_restante_pesos = resto_pesos, 
-                moneda = moneda,
-                observaciones = req.POST['observaciones_pago'],
-                precio_dolar = precio_dolar,
-                valor_pago_dolares = entrega_dolares, 
-                valor_pago_pesos = entrega_pesos, 
-                comprobante_pago = comprobante 
-            )
-            nueva_cuota.save()
+
+            # nueva_cuota = CuotasMoto(
+            #     fecha_pago = datetime.now(),
+            #     fecha_prox_pago = req.POST['f_prox_pago'],
+            #     venta_id = id_cv,
+            #     cant_restante_dolares = resto_dolares, 
+            #     cant_restante_pesos = resto_pesos, 
+            #     moneda = moneda,
+            #     observaciones = req.POST['observaciones_pago'],
+            #     precio_dolar = precio_dolar,
+            #     valor_pago_dolares = entrega_dolares, 
+            #     valor_pago_pesos = entrega_pesos, 
+            #     comprobante_pago = comprobante,
+            #     metodo_pago = forma_pago
+            # )
+            # nueva_cuota.save()
+            # alta_cuota_funcion(req,req.POST['f_prox_pago'],id_cv,resto_dolares,resto_pesos,moneda,req.POST['observaciones_pago'],precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
     
         else:
             cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
             
-            precio_dolar = cuota.precio_dolar
             if moneda == "Pesos":
                 entrega_pesos = req.POST['valor_a_pagar']
                 entrega_dolares = 0
@@ -2515,31 +2624,65 @@ def alta_pago(req,id_cv):
                 entrega_dolares = req.POST['valor_a_pagar']
                 resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
                 resto_pesos = resto_dolares * precio_dolar
+            
+            #alta_cuota_funcion(req,False,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
+            
+            
+            if forma_pago == "Efectivo" and caja:
+                # if moneda == "Dolares":
+                #     nuevo_ingreso = caja.depositos + (int(entrega_dolares) * precio_dolar)
+                #     monto = entrega_dolares
+                # else:
+                #     nuevo_ingreso = caja.depositos + int(entrega_pesos)
+                #     monto = entrega_pesos
+                movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,moneda)
+                # caja.depositos = nuevo_ingreso
+                # caja.save()
+                # usuario = req.user
+                # personal = Personal.objects.filter(usuario=usuario.username).first()
+                # cliente = Cliente.objects.get(id=cv.cliente_id)
+                # cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+                # movimiento = Movimientos(
+                #     fecha = datetime.now(),
+                #     movimiento = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: Dolares",
+                #     tipo = "Ingreso",
+                #     monto = monto,
+                #     caja_id = caja.id,
+                #     usuario_id = personal.id
+                # )
+                # movimiento.save()
 
-            nueva_cuota = CuotasMoto(
-                fecha_pago = datetime.now(),
-                fecha_prox_pago = req.POST['f_prox_pago'],
-                venta_id = id_cv,
-                cant_restante_dolares = resto_dolares,
-                cant_restante_pesos = resto_pesos,
-                moneda = moneda,
-                observaciones = req.POST['observaciones_pago'],
-                precio_dolar = precio_dolar,
-                valor_pago_dolares = entrega_dolares,
-                valor_pago_pesos = entrega_pesos,
-                comprobante_pago = comprobante
-            )
-            nueva_cuota.save()
+                    
+            # nueva_cuota = CuotasMoto(
+            #     fecha_pago = datetime.now(),
+            #     fecha_prox_pago = req.POST['f_prox_pago'],
+            #     venta_id = id_cv,
+            #     cant_restante_dolares = resto_dolares,
+            #     cant_restante_pesos = resto_pesos,
+            #     moneda = moneda,
+            #     observaciones = req.POST['observaciones_pago'],
+            #     precio_dolar = precio_dolar,
+            #     valor_pago_dolares = entrega_dolares,
+            #     valor_pago_pesos = entrega_pesos,
+            #     comprobante_pago = comprobante,
+            #     metodo_pago = forma_pago
+            # )
+            # nueva_cuota.save()
 
-        if nueva_cuota.comprobante_pago:
-            comprobante_url = nueva_cuota.comprobante_pago.url
+            #alta_cuota_funcion(req.POST['f_prox_pago'],id_cv,resto_dolares,resto_pesos,moneda,req.POST['observaciones_pago'],precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
+
+        
+        alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
+        if alta:
+            comprobante_url = alta
         else:
             comprobante_url = None
+        
             
         messages.success(req, "Pago ingresado con éxito")
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id})
 
 @admin_required
 def baja_pago(req,id_cm):
@@ -2547,6 +2690,29 @@ def baja_pago(req,id_cm):
         cuota = CuotasMoto.objects.get(id=id_cm)
         id_cv = cuota.venta_id
         if req.method == "POST":
+            if cuota.metodo_pago == "Efectivo":
+                if cuota.moneda == "Pesos":
+                    quitar_deposito = cuota.valor_pago_pesos
+                else:
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = dolar.precio_dolar_tienda
+                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
+                
+                usuario = req.user
+                personal = Personal.objects.filter(usuario=usuario.username).first()
+                caja = Caja.objects.filter(estado="Abierto").first()
+                caja.depositos = caja.depositos - quitar_deposito
+                caja.save()
+                movimiento = Movimientos(
+                fecha = datetime.now(),
+                movimiento = "Se borra pago de moto ingresado por error",
+                tipo = "Egreso",
+                monto = quitar_deposito,
+                caja_id = caja.id,
+                usuario_id = personal.id
+                )
+                movimiento.save()
+                
             cuota.delete()    
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:

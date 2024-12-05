@@ -1853,6 +1853,7 @@ def abrir_caja(req):
     try:
         if req.method == "POST":
             caja_abierta = Caja.objects.filter(estado="Abierto").first()
+            caja_abierta_2 = Caja.objects.filter(estado="Cuadre de caja").first()
             total_billetes_2000 = (int(req.POST['billetes_2000']) * 2000) 
             total_billetes_1000 = (int(req.POST['billetes_1000']) * 1000)
             total_billetes_500 = (int(req.POST['billetes_500']) * 500)
@@ -1872,7 +1873,7 @@ def abrir_caja(req):
                 return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_dinero})
             elif error_monedas:
                 return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_monedas})
-            elif caja_abierta:
+            elif caja_abierta or caja_abierta_2:
                 return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":"Ya existe una caja abierta."})  
             else:
                 

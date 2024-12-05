@@ -53,7 +53,8 @@
 
     <div id="div_form_pago" style="display: none;">
         {% if id_cv %}
-        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Moneda</label>
                 <div class="input-group">
@@ -63,34 +64,47 @@
                     </select>
                 </div>
             </div>
+        
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Cantidad a pagar</label>
-                <input type="number" class="form-control" name="valor_a_pagar" placeholder="Valor a pagar" required>
+                <input type="number" class="form-control" name="valor_a_pagar" id="valor_a_pagar" placeholder="Valor a pagar" required>
             </div>
+        
             <div class="mb-3">
-                <label for="documento" class="form-label">Forma de pago</label>
-                <div class="input-group">
-                    <select class="form-control" name="forma_pago" id="forma_pago">
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Transferencia">Transferencia</option>
-                    </select>
-                </div>
+                <label for="recargo_porcentaje" class="form-label">Porcentaje de recargo</label>
+                <input type="number" class="form-control" name="recargo_porcentaje" id="recargo_porcentaje" placeholder="Ejemplo: 5 para 5%" required>
             </div>
+        
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Recargo</label>
+                <input type="number" class="form-control" name="recargo" id="recargo" readonly>
+            </div>
+        
+            <div class="mb-3">
+                <label for="total" class="form-label">Total a Pagar</label>
+                <input type="number" class="form-control" name="total" id="total" readonly>
+            </div>
+        
             <div class="mb-3">
                 <label for="precio" class="form-label">Fecha del próximo pago</label>
                 <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha de nacimiento" required>
             </div>
+        
             <div class="mb-3">
                 <label for="descripcion" class="form-label">Observaciones</label>
                 <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
             </div>
+        
             <div class="mb-3">
                 <label for="libreta_propiedad" class="form-label">Comprobante de pago</label>
                 <input type="file" class="form-control" name="comprobante_pago" id="comprobante_pago">
             </div>
+        
             <button type="submit" class="btn btn-success">Guardar</button>
             <a href="" class="btn btn-secondary">Cancelar</a>
         </form>
+        
+        
         {% endif %}
     </div>
     {% if pago_acordado %}
@@ -190,6 +204,27 @@
         var div_form = document.getElementById("div_form_pago")
         div_form.style.display = "block";
     }
+    document.addEventListener('DOMContentLoaded', () => {
+    const valorInput = document.getElementById('valor_a_pagar');
+    const porcentajeInput = document.getElementById('recargo_porcentaje');
+    const recargoInput = document.getElementById('recargo');
+    const totalInput = document.getElementById('total');
 
+    function calcularRecargo() {
+        const valor = parseFloat(valorInput.value) || 0;
+        const porcentaje = parseFloat(porcentajeInput.value) || 0;
+
+        // Calcular el recargo basado en el porcentaje ingresado
+        const recargo = (valor * porcentaje) / 100;
+        const total = valor + recargo;
+
+        // Actualizar los campos
+        recargoInput.value = recargo.toFixed(2);
+        totalInput.value = total.toFixed(2);
+    }
+
+    valorInput.addEventListener('input', calcularRecargo);
+    porcentajeInput.addEventListener('input', calcularRecargo);
+});
 </script>
 {% endblock %}

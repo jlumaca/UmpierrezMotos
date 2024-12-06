@@ -1433,6 +1433,8 @@ def alta_pago(req,id_cv):
         cv = ComprasVentas.objects.get(id=id_cv)
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = dolar.precio_dolar_tienda
+        recargo = req.POST['recargo']
+        total = req.POST['total_luego_recargo']
         
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
         if not existe_cuota:
@@ -1449,7 +1451,7 @@ def alta_pago(req,id_cv):
                     resto_dolares = resto_pesos / precio_dolar
                 
                 if forma_pago == "Efectivo" and caja:
-                    movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,"Pesos")              
+                    movimiento_caja_por_pago(req,float(total),id_cv,"Pesos")              
             else:
                 entrega_pesos = 0
                 entrega_dolares = req.POST['valor_a_pagar']
@@ -1461,7 +1463,7 @@ def alta_pago(req,id_cv):
                     resto_pesos = resto_dolares * precio_dolar 
                 
                 if forma_pago == "Efectivo" and caja:
-                    movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,"Dolares")
+                    movimiento_caja_por_pago(req,float(total),id_cv,"Dolares")
     
         else:
             cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
@@ -1478,9 +1480,9 @@ def alta_pago(req,id_cv):
                 resto_pesos = resto_dolares * precio_dolar
               
             if forma_pago == "Efectivo" and caja:
-                movimiento_caja_por_pago(req,int(req.POST['valor_a_pagar']),id_cv,moneda)
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda)
       
-        alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago)
+        alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
         if alta:
             comprobante_url = alta
         else:

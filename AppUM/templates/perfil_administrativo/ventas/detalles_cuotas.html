@@ -58,6 +58,16 @@
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Moneda</label>
                 <div class="input-group">
+                    <select class="form-control" name="forma_pago" id="forma_pago">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Débito">Débito</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
                     <select class="form-control" name="moneda_entrega" id="moneda_entrega">
                         <option value="Pesos">Pesos</option>
                         <option value="Dolares">Dólares</option>
@@ -82,7 +92,7 @@
         
             <div class="mb-3">
                 <label for="total" class="form-label">Total a Pagar</label>
-                <input type="number" class="form-control" name="total" id="total" readonly>
+                <input type="number" class="form-control" name="total_luego_recargo" id="total" readonly>
             </div>
         
             <div class="mb-3">

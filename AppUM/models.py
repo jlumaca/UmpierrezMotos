@@ -121,6 +121,7 @@ class CuotasMoto(models.Model):
     observaciones = models.TextField(null=True, blank=True)
     comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
     metodo_pago = models.CharField(max_length=20, blank=True)
+    recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 
 class PrecioDolar(models.Model):

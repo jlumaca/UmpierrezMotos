@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ynss#^8@vl+62_65c43-dxwz7-*$ualqirgw3$-n_c+cku(wso
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 X_FRAME_OPTIONS = 'ALLOWALL'
 

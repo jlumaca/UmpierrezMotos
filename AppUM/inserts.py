@@ -112,7 +112,7 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
     movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
     insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
 
-def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago):
+def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo):
     nueva_cuota = CuotasMoto(
                     fecha_pago = datetime.now(),
                     fecha_prox_pago = fecha_prox_pago,
@@ -125,7 +125,8 @@ def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moned
                     valor_pago_dolares = entrega_dolares,
                     valor_pago_pesos = entrega_pesos,
                     comprobante_pago = comprobante,
-                    metodo_pago = forma_pago
+                    metodo_pago = forma_pago,
+                    recargo = recargo
                 )
     nueva_cuota.save()
     if nueva_cuota.comprobante_pago:

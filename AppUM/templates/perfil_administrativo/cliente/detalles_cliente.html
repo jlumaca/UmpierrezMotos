@@ -161,6 +161,8 @@
                 <th scope="row">Cuotas</th>
                 <th scope="row">Monto</th> -->
                 <th scope="row">Factura</th>
+                <th scope="row">Acciones</th>
+
             </tr>
         </thead>
         <tbody>
@@ -180,6 +182,9 @@
                         {% else %}
                         <p>SIN DOCUMENTACION</p>
                         {% endif %}
+                    </td>
+                    <td>
+                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

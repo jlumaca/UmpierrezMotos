@@ -157,5 +157,20 @@ class Movimientos(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     caja = models.ForeignKey(Caja, related_name='movimiento_caja', on_delete=models.CASCADE)
     usuario = models.ForeignKey(Personal, related_name='usuario_movimiento', on_delete=models.CASCADE)
+
+class CuotasAccesorios(models.Model):
+    fecha_pago = models.DateField()
+    fecha_prox_pago = models.DateField()
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    valor_pago_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    valor_pago_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    venta = models.ForeignKey(ClienteAccesorio, related_name='cliente_accesorio', on_delete=models.CASCADE)
+    observaciones = models.TextField(null=True, blank=True)
+    comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
+    metodo_pago = models.CharField(max_length=20, blank=True)
+    recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     
 

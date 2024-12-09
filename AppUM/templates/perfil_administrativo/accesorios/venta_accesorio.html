@@ -1,0 +1,201 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Venta</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
+        </div>
+        {% endif %}
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de búsqueda de cliente -->
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if datos_accesorio %}
+        
+        <form action="{% url 'AccesorioVenta' accesorio.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <h4>Datos del cliente</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Datos de la moto</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Código</th>
+                        <td>{{ accesorio.id }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Tipo</th>
+                        <td>{{ accesorio.tipo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Marca</th>
+                        <td>{{ accesorio.marca }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Modelo</th>
+                        <td>{{ accesorio.modelo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Precio</th>
+                        <td>{{ accesorio.precio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Forma de pago</h4>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Forma de pago</label>
+                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
+            </div> 
+            
+            <h4>Documentación</h4>
+            <div class="mb-3" id="libreta_propiedad_div">
+                <label for="libreta_propiedad" class="form-label">Factura</label>
+                <input type="file" class="form-control" name="factura_accesorio" id="factura_accesorio">
+            </div>
+            
+            <button type="submit" class="btn btn-success">Generar venta</button>
+                <a href="{% url 'Accesorios' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+        
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4"); // Configuración para hoja A4
+
+    const margin = 10; // Márgenes estándar
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    let y = margin;
+
+    // Obtener contenido del textarea principal
+    const mainContent = document.getElementById("previewText").value;
+
+    // Calcular tamaño dinámico del logo
+    const logoWidth = pageWidth / 2; // Tamaño del logo como la mitad del ancho de la página
+    const logoHeight = logoWidth * 0.4; // Proporción ajustada (relación de aspecto 5:2)
+    const xCenter = (pageWidth - logoWidth) / 2; // Centrar horizontalmente
+
+    // Agregar imagen centrada
+    const logo = document.querySelector("img").src; // Asegúrate de que el logo esté cargado
+    if (logo) {
+        doc.addImage(logo, "JPEG", xCenter, y, logoWidth, logoHeight);
+        y += logoHeight + 5; // Espacio después de la imagen
+    }
+
+    // Agregar título centrado
+    doc.setFont("Arial", "bold");
+    doc.setFontSize(14);
+    doc.text("COMPROMISO DE COMPRAVENTA", pageWidth / 2, y, { align: "center" });
+    y += 10;
+
+    // Agregar contenido principal con formato ajustado
+    doc.setFont("Arial", "normal");
+    doc.setFontSize(10); // Tamaño del texto
+    const lineHeight = 5; // Espaciado entre líneas
+
+    // Ajustar el contenido al margen izquierdo
+    mainContent.split("\n").forEach(line => {
+        const splitText = doc.splitTextToSize(line, pageWidth - 2 * margin); // Ajustar texto al ancho de la página
+        splitText.forEach(subLine => {
+            if (y + lineHeight > pageHeight - margin) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.text(margin, y, subLine); // Asegura que el texto comience desde el margen izquierdo
+            y += lineHeight;
+        });
+    });
+
+    // Guardar el PDF
+    doc.save("compromiso_compra_venta.pdf");
+}
+
+
+function calcularCuotas() {
+    // Obtener los valores de los campos
+    const seña = parseFloat(document.getElementById("seña").value);
+    const entregaInicial = parseFloat(document.getElementById("entrega_inicial").value);
+    const cantidadCuotas = parseInt(document.getElementById("cant_cuotas").value);
+    const precio = document.getElementById("precio_moto_label").innerText
+
+    // Validar que todos los campos contengan valores numéricos y sean mayores que 0
+    if (isNaN(seña) || isNaN(entregaInicial) || isNaN(cantidadCuotas) || cantidadCuotas <= 0) {
+        alert("Por favor, ingrese valores válidos para todos los campos.");
+        return;
+    }
+
+    // Calcular el valor de cada cuota
+    const total = precio - seña - entregaInicial;
+    const valorCuota = total / cantidadCuotas;
+
+    // Mostrar el valor de cada cuota en el label correspondiente
+    document.getElementById("valor_cuota").innerText = `$/U$S${valorCuota.toFixed(2)}`;
+}
+
+
+
+
+
+
+</script>
+
+{% endblock %}

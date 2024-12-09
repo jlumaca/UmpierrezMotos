@@ -709,11 +709,76 @@ def detalles_accesorio(req,id_accesorio):
 
 
 @admin_required
-def venta_accesorio(req,id_accesorio):
+def venta_accesorio(req,id_accesorio,id_cliente):
     try:
-        pass
+        doc_factura = req.FILES.get('factura_accesorio')
+        if not doc_factura:
+            doc_factura = None
+        nueva_venta_accesorio = ClienteAccesorio(
+            fecha_compra = datetime.now(),
+            accesorio_id = id_accesorio,
+            cliente_id = id_cliente,
+            factura_documento = doc_factura
+        )
+        nueva_venta_accesorio.save()
+        accesorio = Accesorio.objects.get(id=id_accesorio)
+        accesorio.activo = 0
+        accesorio.save()
+        messages.success(req, "Venta generada con éxito")
+        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+    except Exception as e:
+        return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
+
+@admin_required
+def cliente_venta_accesorio(req,id_accesorio):
+    try:
+        if req.method == "POST":
+            documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+            cliente = Cliente.objects.filter(documento=documento).first()
+            if cliente:
+                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+                tel_1 = tel1.telefono
+                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+                if tel2:
+                    tel_2 = tel2.telefono
+                else:
+                    tel_2 = None
+
+                if correo1:
+                    c_1 = correo1.correo
+                else:
+                    c_1 = None
+                
+                if correo2:
+                    c_2 = correo1.correo
+                else:
+                    c_2 = None
+                accesorio = Accesorio.objects.get(id=id_accesorio)
+
+                # print(numero_letra)
+                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_accesorio":True,
+                                                                                "cliente":cliente,
+                                                                                "accesorio":accesorio,
+                                                                                "tel1":tel_1,
+                                                                                "tel2":tel_2,
+                                                                                "correo1":c_1,
+                                                                                "correo2":c_2,
+                                                                            })
+            else:
+                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+        else:
+            return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
     except Exception as e:
         pass
+
+def pagos_accesorio(req,id_accesorio):
+    try: 
+        pass
+    except Exception as e:
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
 
 @admin_required
@@ -1037,7 +1102,7 @@ def ficha_cliente(req,id_cliente):
             'accesorio__modelo',
             'fecha_compra',
             'factura_documento'
-        )
+        ).order_by('-id')
     )
     res_facturas = []
     for resultado_accesorio in resultados_accesorios:

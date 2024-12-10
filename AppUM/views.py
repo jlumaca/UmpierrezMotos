@@ -774,11 +774,118 @@ def cliente_venta_accesorio(req,id_accesorio):
     except Exception as e:
         pass
 
-def pagos_accesorio(req,id_accesorio):
+def pagos_accesorio(req,id_venta):
     try: 
-        pass
+        resultados_cuotas = (
+                CuotasAccesorios.objects
+                .filter(venta_id=id_venta)
+                .values(
+                    'id',
+                    'fecha_pago', 
+                    'fecha_prox_pago',  
+                    'cant_restante_dolares', 
+                    'cant_restante_pesos', 
+                    'moneda', 
+                    'observaciones',
+                    'valor_pago_dolares',
+                    'valor_pago_pesos',
+                    'comprobante_pago'
+                )
+            )
+            
+        res_pagos = []
+        i = 1
+        for resultado in resultados_cuotas:
+                    ca = CuotasAccesorios.objects.get(id=resultado['id'])
+                    res_pagos.append({
+                    'cuota': resultado,
+                    'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
+                    'mostrar_boton': i == len(resultados_cuotas)           
+                    })
+                    i = i + 1
+        
+        c_v = ClienteAccesorio.objects.get(id=id_venta)
+        
+        page_obj = funcion_paginas_varias(req,res_pagos)
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_venta,"id_cliente":c_v.cliente_id})
     except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
+
+def alta_paga_accesorio(req,id_venta):
+    try:
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"LLEGA"})
+        # comprobante = req.FILES.get('comprobante_pago')
+        # moneda = req.POST['moneda_entrega']
+        # caja = Caja.objects.filter(estado="Abierto").first()
+        # forma_pago = req.POST['forma_pago']
+        # fecha_proximo_pago = req.POST['f_prox_pago']
+        # observaciones_pago = req.POST['observaciones_pago']
+        # cv = ClienteAccesorio.objects.get(id=id_venta)
+        # dolar = PrecioDolar.objects.get(id=1)
+        # precio_dolar = dolar.precio_dolar_tienda
+        # recargo = req.POST['recargo']
+        # total = req.POST['total_luego_recargo']
+        
+        # existe_cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).first()
+        # if not existe_cuota:
+        #     accesorio = Accesorio.objects.get(id=cv.accesorio_id)
+
+        #     if moneda == "Pesos":
+        #         entrega_pesos = req.POST['valor_a_pagar']
+        #         entrega_dolares = 0
+        #         if accesorio.moneda_precio == "Pesos":
+        #             resto_pesos = int(accesorio.precio) - int(entrega_pesos)
+        #             resto_dolares = resto_pesos / precio_dolar
+        #         else:
+        #             resto_pesos = int((accesorio.precio * precio_dolar)) - int(entrega_pesos)
+        #             resto_dolares = resto_pesos / precio_dolar
+                
+        #         if forma_pago == "Efectivo" and caja:
+        #             pass
+        #             #movimiento_caja_por_pago(req,float(total),id_venta,"Pesos")              
+        #     else:
+        #         entrega_pesos = 0
+        #         entrega_dolares = req.POST['valor_a_pagar']
+        #         if accesorio.moneda_precio == "Pesos":
+        #             resto_dolares = int((accesorio.precio / precio_dolar)) - int(entrega_dolares)
+        #             resto_pesos = resto_dolares * precio_dolar
+        #         else:
+        #             resto_dolares = int(accesorio.precio) - int(entrega_dolares)
+        #             resto_pesos = resto_dolares * precio_dolar 
+                
+        #         if forma_pago == "Efectivo" and caja:
+        #             pass
+        #             #movimiento_caja_por_pago(req,float(total),id_venta,"Dolares")
+    
+        # else:
+        #     cuota = CuotasMoto.objects.filter(venta_id=id_venta).latest('id')
+            
+        #     if moneda == "Pesos":
+        #         entrega_pesos = req.POST['valor_a_pagar']
+        #         entrega_dolares = 0
+        #         resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
+        #         resto_dolares = resto_pesos / precio_dolar
+        #     else:
+        #         entrega_pesos = 0
+        #         entrega_dolares = req.POST['valor_a_pagar']
+        #         resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
+        #         resto_pesos = resto_dolares * precio_dolar
+              
+        #     if forma_pago == "Efectivo" and caja:
+        #         pass
+        #         #movimiento_caja_por_pago(req,float(total),id_venta,moneda)
+      
+        # alta = alta_cuota_accesorio(req,fecha_proximo_pago,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
+        # if alta:
+        #     comprobante_url = alta
+        # else:
+        #     comprobante_url = None
+        
+            
+        # messages.success(req, "Pago ingresado con éxito")
+        # return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'id_venta':id_venta})}?comprobante_url={comprobante_url}")
+    except Exception as e:
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
 
 
 @admin_required

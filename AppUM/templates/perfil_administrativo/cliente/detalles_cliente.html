@@ -184,7 +184,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="{% url 'DetallesCompraAccesorio' item.accesorio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -55,6 +55,7 @@ class Accesorio(models.Model):
     foto = models.ImageField(null=True, blank=True, upload_to="accesorios/")
     activo = models.BooleanField()
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
+    moneda_precio = models.CharField(max_length=10,default=True,null=True)
 
 class Logos(models.Model):
     logo_UM = models.ImageField(null=True, blank=True, upload_to="logos/")
@@ -169,7 +170,7 @@ class CuotasAccesorios(models.Model):
     precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     venta = models.ForeignKey(ClienteAccesorio, related_name='cliente_accesorio', on_delete=models.CASCADE)
     observaciones = models.TextField(null=True, blank=True)
-    comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
+    comprobante_pago = models.FileField(upload_to='documentacion/facturas_accesorios/', null=True, blank=True)
     metodo_pago = models.CharField(max_length=20, blank=True)
     recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     

@@ -52,8 +52,8 @@
     
 
     <div id="div_form_pago" style="display: none;">
-        {% if id_cv %}
-        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">
+        {% if id_venta %}
+        <form action="{% url 'AltaPagoAccesorio' id_venta %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Moneda</label>
@@ -154,7 +154,7 @@
                     </td>
                     <td>
                         {% if cuota.mostrar_boton %}
-                        <a href="{% url 'BajaPago' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -206,7 +206,7 @@
             {% endif %}
         </ul>
     </nav>
-    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
+    <a href="" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>

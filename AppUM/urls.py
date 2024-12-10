@@ -65,7 +65,6 @@ urlpatterns = [
      path('cliente_modificacion/<int:id_cliente>', views.modificacion_cliente,name="ClienteModificacion"),
      path('busqueda_documento', views.buscar_por_doc,name="BusquedaDocumento"),
      path('busqueda_nombre_apellido', views.buscar_nom_ape,name="BusquedaNombreApellido"),
-     path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('cargar_certificado/<int:id_cv>', views.cargar_certificado,name="CargarCertificado"),
      path('cargar_libreta/<int:id_cv>', views.cargar_libreta,name="CargarLibreta"),
 
@@ -100,5 +99,18 @@ urlpatterns = [
 
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),
      
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
+     path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
+     path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

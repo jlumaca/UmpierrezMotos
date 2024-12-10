@@ -56,7 +56,7 @@
         <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Moneda</label>
+                <label for="documento" class="form-label">Forma de pago</label>
                 <div class="input-group">
                     <select class="form-control" name="forma_pago" id="forma_pago">
                         <option value="Efectivo">Efectivo</option>

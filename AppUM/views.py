@@ -783,6 +783,7 @@ def pagos_accesorio(req,id_venta):
         return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
 
 def alta_paga_accesorio(req,id_venta):
+    page_obj = obtener_compras_accesorios(req,id_venta)
     try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
@@ -795,72 +796,28 @@ def alta_paga_accesorio(req,id_venta):
         precio_dolar = dolar.precio_dolar_tienda
         recargo = req.POST['recargo']
         total = req.POST['total_luego_recargo']
+        existe_cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).exists()
         accesorio = Accesorio.objects.get(id=cv.accesorio_id)
-        validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],accesorio,precio_dolar)
+        validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],accesorio,precio_dolar,"Accesorio",existe_cuota,id_venta)
         validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
-        page_obj = obtener_compras_accesorios(req,id_venta)
+        valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_venta,accesorio,"Accesorio",precio_dolar)
         if validar_precio:
-            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"El pago no puede exceder el precio total del accesorio","id_venta":id_venta,"page_obj": page_obj})
+            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":validar_precio,"id_venta":id_venta,"page_obj": page_obj})
         elif validar_fecha_proximo_pago.date() < fecha_actual:
             return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj})
         else:
-            existe_cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).first()
-            if not existe_cuota:
-#valores_compras(existe_cuota,moneda,entrega,)
-                if moneda == "Pesos":
-                    entrega_pesos = req.POST['valor_a_pagar']
-                    entrega_dolares = 0
-                    if accesorio.moneda_precio == "Pesos":
-                        resto_pesos = int(accesorio.precio) - int(entrega_pesos)
-                        resto_dolares = resto_pesos / precio_dolar
-                    else:
-                        resto_pesos = int((accesorio.precio * precio_dolar)) - int(entrega_pesos)
-                        resto_dolares = resto_pesos / precio_dolar
-                    
-                    if forma_pago == "Efectivo" and caja:
-                        movimiento_caja_por_pago_accesorio(req,float(total),id_venta,"Pesos")              
-                else:
-                    entrega_pesos = 0
-                    entrega_dolares = req.POST['valor_a_pagar']
-                    if accesorio.moneda_precio == "Pesos":
-                        resto_dolares = int((accesorio.precio / precio_dolar)) - int(entrega_dolares)
-                        resto_pesos = resto_dolares * precio_dolar
-                    else:
-                        resto_dolares = int(accesorio.precio) - int(entrega_dolares)
-                        resto_pesos = resto_dolares * precio_dolar 
-                    
-                    if forma_pago == "Efectivo" and caja:
-                        movimiento_caja_por_pago_accesorio(req,float(total),id_venta,"Dolares")
-        
-            else:
-                cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).latest('id')
-                
-                if moneda == "Pesos":
-                    entrega_pesos = req.POST['valor_a_pagar']
-                    entrega_dolares = 0
-                    resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / precio_dolar
-                else:
-                    entrega_pesos = 0
-                    entrega_dolares = req.POST['valor_a_pagar']
-                    resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * precio_dolar
-                
-                if forma_pago == "Efectivo" and caja:
-                    movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda)
-        
-            alta = alta_cuota_accesorio(req,fecha_proximo_pago,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
+            if forma_pago == "Efectivo" and caja:
+                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda)
+            alta = alta_cuota_accesorio(req,fecha_proximo_pago,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
             if alta:
                 comprobante_url = alta
             else:
                 comprobante_url = None
-            
-                
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'id_venta':id_venta})}?comprobante_url={comprobante_url}")
     except Exception as e:
-        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e,"page_obj": page_obj})
 
 
 @admin_required

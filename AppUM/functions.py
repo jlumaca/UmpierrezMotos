@@ -6,6 +6,7 @@ from django.shortcuts import render
 from .models import *
 from django.core.files.base import ContentFile
 from datetime import datetime
+from.inserts import *
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -348,21 +349,36 @@ def funcion_paginas_varias(req,instancia_model):
 
     return page_obj
 
-def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar):
+def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar,elemento_tipo,existe_cuota,id_elemento):
     if moneda_entrega == "Pesos":             
         if elemento.moneda_precio == "Pesos":
             if int(entrega) > int(elemento.precio):
-                return True
+                error = "El pago no puede exceder el precio total del accesorio"
         else:
             if int(entrega) > int((elemento.precio * precio_dolar)):
-                return True            
+                error = "El pago no puede exceder el precio total del accesorio"            
     else:
         if elemento.moneda_precio == "Pesos":
             if int(int(entrega) * precio_dolar) > int(elemento.precio):
-                return True
+                error = "El pago no puede exceder el precio total del accesorio"
         else:
             if int(entrega) > int((elemento.precio * precio_dolar)):
-                return True 
+                error = "El pago no puede exceder el precio total del accesorio" 
+    
+    if existe_cuota:
+        if elemento_tipo == "Accesorio":
+            cuota = CuotasAccesorios.objects.filter(venta_id=id_elemento).latest('id')
+        else:
+            cuota = CuotasMoto.objects.filter(venta_id=id_elemento).latest('id')
+        
+        if moneda_entrega == "Pesos":
+            if int(entrega) > int(cuota.cant_restante_pesos):
+                error = "El pago no puede exceder el valor restante en pesos"
+        else:
+            if int(entrega) > int(cuota.cant_restante_dolares):
+                error = "El pago no puede exceder el valor restante en dólares"
+    
+    return error
 
 def obtener_compras_accesorios(req,id_venta):
         resultados_cuotas = (
@@ -395,3 +411,45 @@ def obtener_compras_accesorios(req,id_venta):
         page_obj = funcion_paginas_varias(req,res_pagos)
 
         return page_obj
+
+def valores_compras(existe_cuota,moneda,entrega,id_elemento,elemento,elemento_tipo,precio_dolar):
+    if not existe_cuota:
+        if moneda == "Pesos":
+            entrega_pesos = entrega
+            entrega_dolares = 0
+            if elemento.moneda_precio == "Pesos":
+                resto_pesos = int(elemento.precio) - int(entrega_pesos)
+                resto_dolares = resto_pesos / precio_dolar
+            else:
+                resto_pesos = int((elemento.precio * precio_dolar)) - int(entrega_pesos)
+                resto_dolares = resto_pesos / precio_dolar                       
+        else:
+            entrega_pesos = 0
+            entrega_dolares = entrega
+            if elemento.moneda_precio == "Pesos":
+                resto_dolares = int((elemento.precio / precio_dolar)) - int(entrega_dolares)
+                resto_pesos = resto_dolares * precio_dolar
+            else:
+                resto_dolares = int(elemento.precio) - int(entrega_dolares)
+                resto_pesos = resto_dolares * precio_dolar 
+    else:
+        if elemento_tipo == "Accesorio":
+            cuota = CuotasAccesorios.objects.filter(venta_id=id_elemento).latest('id')
+        else:
+            cuota = CuotasMoto.objects.filter(venta_id=id_elemento).latest('id')
+        
+        if moneda == "Pesos":
+            entrega_pesos = entrega
+            entrega_dolares = 0
+            resto_pesos = int(cuota.cant_restante_pesos) - int(entrega_pesos)
+            resto_dolares = resto_pesos / precio_dolar
+        else:
+            entrega_pesos = 0
+            entrega_dolares = entrega
+            resto_dolares = int(cuota.cant_restante_dolares) - int(entrega_dolares)
+            resto_pesos = resto_dolares * precio_dolar
+
+            #resto_dolares,resto_pesos,entrega_pesos,entrega_dolares
+    
+    lista = [resto_dolares,resto_pesos,entrega_pesos,entrega_dolares]
+    return lista

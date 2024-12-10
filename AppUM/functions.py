@@ -347,3 +347,51 @@ def funcion_paginas_varias(req,instancia_model):
     page_obj = paginator.get_page(page_number)
 
     return page_obj
+
+def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar):
+    if moneda_entrega == "Pesos":             
+        if elemento.moneda_precio == "Pesos":
+            if int(entrega) > int(elemento.precio):
+                return True
+        else:
+            if int(entrega) > int((elemento.precio * precio_dolar)):
+                return True            
+    else:
+        if elemento.moneda_precio == "Pesos":
+            if int(int(entrega) * precio_dolar) > int(elemento.precio):
+                return True
+        else:
+            if int(entrega) > int((elemento.precio * precio_dolar)):
+                return True 
+
+def obtener_compras_accesorios(req,id_venta):
+        resultados_cuotas = (
+                CuotasAccesorios.objects
+                .filter(venta_id=id_venta)
+                .values(
+                    'id',
+                    'fecha_pago', 
+                    'fecha_prox_pago',  
+                    'cant_restante_dolares', 
+                    'cant_restante_pesos', 
+                    'moneda', 
+                    'observaciones',
+                    'valor_pago_dolares',
+                    'valor_pago_pesos',
+                    'comprobante_pago'
+                )
+            )
+            
+        res_pagos = []
+        i = 1
+        for resultado in resultados_cuotas:
+                    ca = CuotasAccesorios.objects.get(id=resultado['id'])
+                    res_pagos.append({
+                    'cuota': resultado,
+                    'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
+                    'mostrar_boton': i == len(resultados_cuotas)           
+                    })
+                    i = i + 1
+        page_obj = funcion_paginas_varias(req,res_pagos)
+
+        return page_obj

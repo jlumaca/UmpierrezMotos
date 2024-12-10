@@ -46,7 +46,7 @@
             </div>
     {% endif %}
 
-    <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
+    <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago_accesorio()">
         <i class="fas fa-money-check-alt"></i> Pagar
     </a>
     
@@ -56,7 +56,7 @@
         <form action="{% url 'AltaPagoAccesorio' id_venta %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Moneda</label>
+                <label for="documento" class="form-label">Forma de pago</label>
                 <div class="input-group">
                     <select class="form-control" name="forma_pago" id="forma_pago">
                         <option value="Efectivo">Efectivo</option>
@@ -76,7 +76,7 @@
             </div>
         
             <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Cantidad a pagar</label>
+                <label for="documento" class="form-label">Valor de la cuota/pago</label>
                 <input type="number" class="form-control" name="valor_a_pagar" id="valor_a_pagar" placeholder="Valor a pagar" required>
             </div>
         
@@ -210,7 +210,7 @@
 </div>
 
 <script>
-    function mostrar_form_pago(){
+    function mostrar_form_pago_accesorio(){
         var div_form = document.getElementById("div_form_pago")
         div_form.style.display = "block";
     }

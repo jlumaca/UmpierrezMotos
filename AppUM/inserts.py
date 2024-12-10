@@ -112,6 +112,27 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
     movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
     insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
 
+def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
+    #movimiento_caja_por_pago(entrega,id_cv,moneda)
+    cv = ClienteAccesorio.objects.get(id=id_ca)
+    caja = Caja.objects.filter(estado = "Abierto").first()
+    usuario = req.user
+    personal = Personal.objects.filter(usuario=usuario.username).first()
+    cliente = Cliente.objects.get(id=cv.cliente_id)
+    dolar = PrecioDolar.objects.get(id=1)
+    precio_dolar = dolar.precio_dolar_tienda
+    
+    if moneda == "Pesos":
+        nuevo_ingreso = caja.depositos + int(entrega)
+    else:
+        nuevo_ingreso = caja.depositos + (int(entrega) * precio_dolar)
+    
+    caja.depositos = nuevo_ingreso
+    caja.save()  
+    cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
+    movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
+    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
+
 def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo):
     nueva_cuota = CuotasMoto(
                     fecha_pago = datetime.now(),

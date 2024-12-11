@@ -803,9 +803,9 @@ def alta_paga_accesorio(req,id_venta):
         fecha_actual = datetime.now().date()
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_venta,accesorio,"Accesorio",precio_dolar)
         if validar_precio:
-            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":validar_precio,"id_venta":id_venta,"page_obj": page_obj})
+            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":validar_precio,"id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         elif validar_fecha_proximo_pago.date() < fecha_actual:
-            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj})
+            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         else:
             if forma_pago == "Efectivo" and caja:
                 movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda)
@@ -818,6 +818,34 @@ def alta_paga_accesorio(req,id_venta):
             return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'id_venta':id_venta})}?comprobante_url={comprobante_url}")
     except Exception as e:
         return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e,"page_obj": page_obj})
+
+def baja_paga_accesorio(req,id_ca):
+    try:
+        cuota = CuotasAccesorios.objects.get(id=id_ca)
+        id_cv = cuota.venta_id
+        if req.method == "POST":
+            if cuota.metodo_pago == "Efectivo":
+                if cuota.moneda == "Pesos":
+                    quitar_deposito = cuota.valor_pago_pesos
+                else:
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = dolar.precio_dolar_tienda
+                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
+                
+                usuario = req.user
+                personal = Personal.objects.filter(usuario=usuario.username).first()
+                caja = Caja.objects.filter(estado="Abierto").first()
+                caja.depositos = caja.depositos - quitar_deposito
+                caja.save()
+                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id)
+                
+                
+            cuota.delete()    
+            return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+        else:
+            return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"id_cv":id_cv})
+    except Exception as e:
+        return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"error_message":e})
 
 
 @admin_required

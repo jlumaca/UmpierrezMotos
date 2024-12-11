@@ -154,7 +154,7 @@
                     </td>
                     <td>
                         {% if cuota.mostrar_boton %}
-                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href="{% url 'BajaPagoAccesorio' id_venta %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -206,7 +206,7 @@
             {% endif %}
         </ul>
     </nav>
-    <a href="" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>

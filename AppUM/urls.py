@@ -112,5 +112,6 @@ urlpatterns = [
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
+     path('baja_paga_accesorio/<int:id_ca>', views.baja_paga_accesorio,name="BajaPagoAccesorio"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

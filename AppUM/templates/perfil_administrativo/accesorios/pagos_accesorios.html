@@ -154,7 +154,7 @@
                     </td>
                     <td>
                         {% if cuota.mostrar_boton %}
-                        <a href="{% url 'BajaPagoAccesorio' id_venta %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href="{% url 'BajaPagoAccesorio' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
                     </td>
                 </tr>

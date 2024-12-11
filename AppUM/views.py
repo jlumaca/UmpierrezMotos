@@ -837,9 +837,7 @@ def baja_paga_accesorio(req,id_ca):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id)
-                
-                
+                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id) 
             cuota.delete()    
             return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:

@@ -95,23 +95,11 @@ urlpatterns = [
      path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
      path('cerrar_caja/<int:id_caja>', views.cerrar_caja,name="CerrarCaja"),
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
-
-
-     path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
+     path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
      path('baja_paga_accesorio/<int:id_ca>', views.baja_paga_accesorio,name="BajaPagoAccesorio"),
+     path('servicios_en_gestion', views.servicios_en_gestion,name="ServiciosEnGestion"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

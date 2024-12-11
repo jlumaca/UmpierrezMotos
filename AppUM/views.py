@@ -61,15 +61,15 @@ def acceso_login(req):
                             renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
                             contexto = {}
                         elif mecanico_jefe:
-                            renderizar_en = "login/login.html"
+                            renderizar_en = "perfil_taller/padre_perfil_taller.html"
                             contexto = {"resultado":"MEC JEFE"}
                         elif mecanico_empleado:
-                            renderizar_en = "login/rol_usuario.html"
+                            renderizar_en = "perfil_taller/padre_perfil_taller.html"
                             roles = ['Mecanico empleado']
                             contexto = {"roles":roles}
                         else:
                             renderizar_en = "login/login.html"
-                            contexto = {"resultado":"USUARIO DADO DE BAJA"}
+                            contexto = {"resultado":"Usuario dado de baja, consulte con el administrador del sistema"}
                 else:
                     #ACCEDER CON SUPER USUARIO
                     renderizar_en = "login/rol_usuario.html"
@@ -127,10 +127,10 @@ def seleccion_rol(req):
             renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
             contexto={}
         elif rol == "Mecanico jefe":
-            renderizar_en = ""
+            renderizar_en = "perfil_taller/padre_perfil_taller.html"
             contexto={}
         else:
-            renderizar_en = ""
+            renderizar_en = "perfil_taller/padre_perfil_taller.html"
             contexto={}
 
         return render(req,renderizar_en,contexto)
@@ -2096,3 +2096,32 @@ def movimientos_caja(req,id_caja):
         return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
+
+
+def servicios_en_gestion(req):
+    try:
+        servicios_motos = (
+        Servicios.objects
+        .all()
+        .select_related('moto', 'cliente')
+        .values(
+            'id',
+            'fecha_ingreso', 
+            'estado',
+            'prioridad',
+            'dias',
+            'moto__marca', 
+            'moto__modelo',
+            'cliente__nombre',
+            'cliente__apellido'      
+           ).order_by('-fecha_ingreso')
+        )
+
+        datos = []
+        for resultado in servicios_motos:
+            datos.append({
+            'servicio': resultado,
+            })
+        return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos})
+    except Exception as e:
+        pass

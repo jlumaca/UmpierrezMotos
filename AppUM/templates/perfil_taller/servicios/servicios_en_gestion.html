@@ -1,0 +1,85 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<title>Motos</title>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Incidentes en gestión</h3>
+    <a href="#" class="btn btn-primary mb-3" title="Registrar ingreso de servicio">
+        <i class="fas fa-tools"></i> Ingreso
+    </a>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número de incidente</th>
+                <th>Ingreso</th>
+                <th>Mecanicos asignados</th>
+                <th>Días en taller</th>
+                <th>Estado</th><!-- Sin asignar, En gestión, En espera, Cerrada-->
+                <th>Prioridad</th>
+                <th>Cliente</th>
+                <th>Moto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if servicios %}
+            {% for servicio in servicios %}
+                <tr>
+                    <td>{{ servicio.servicio.id }}</td>
+                    <td>{{ servicio.servicio.fecha_ingreso }}</td>
+                    <td>Daniel Umpierrez</td>
+                    <td>{{ servicio.servicio.dias }}</td>
+                    <td>{{ servicio.servicio.estado }}</td>
+                    <td>{{ servicio.servicio.prioridad }}</td>
+                    <td>{{ servicio.servicio.cliente__nombre }} {{ servicio.servicio.cliente__apellido }}</td>
+                    <td>{{ servicio.servicio.moto__marca }} {{ servicio.servicio.moto__modelo }}</td>
+                    <td>
+                        <a href="" class="btn btn-sm btn-success" title="Cerrar servicio">
+                            <i class="fas fa-check"></i>
+                        </a><!-- CERRAR INCIDENTE-->
+                        <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function tipo_busqueda() {
+        var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+        var busqueda_codigo = document.getElementById("busqueda_codigo");
+        var busqueda_marca = document.getElementById("busqueda_marca");
+        var busqueda_modelo = document.getElementById("busqueda_modelo");
+        var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
+        var busqueda_anio = document.getElementById("busqueda_anio");
+        var busqueda_kms = document.getElementById("busqueda_kms");
+        var busqueda_precio = document.getElementById("busqueda_precio");
+        var busqueda_matricula = document.getElementById("busqueda_matricula");
+        var busqueda_tipo_moto = document.getElementById("busqueda_tipo");
+
+        busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
+        busqueda_marca.style.display = busqueda_tipo === "marca" ? "block" : "none";
+        busqueda_modelo.style.display = busqueda_tipo === "modelo" ? "block" : "none";
+        busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+        busqueda_anio.style.display = busqueda_tipo === "anio" ? "block" : "none";
+        busqueda_kms.style.display = busqueda_tipo === "kms" ? "block" : "none";
+        busqueda_precio.style.display = busqueda_tipo === "precio" ? "block" : "none";
+        busqueda_matricula.style.display = busqueda_tipo === "matricula" ? "block" : "none";
+        busqueda_tipo_moto.style.display = busqueda_tipo === "tipo" ? "block" : "none";
+    
+    }
+</script>
+{% endblock %}

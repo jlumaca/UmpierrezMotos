@@ -173,5 +173,25 @@ class CuotasAccesorios(models.Model):
     comprobante_pago = models.FileField(upload_to='documentacion/facturas_accesorios/', null=True, blank=True)
     metodo_pago = models.CharField(max_length=20, blank=True)
     recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+
+class Servicios(models.Model):
+    fecha_ingreso = models.DateField()
+    descripcion_ingreso = models.TextField(null=True, blank=True)
+    estado = models.CharField(max_length=20, blank=True)
+    prioridad = models.CharField(max_length=20, blank=True)
+    fecha_estimada_cierre = models.DateField()
+    fecha_prox_servicio = models.DateField()
+    km_prox_servicio = models.IntegerField()
+    moto = models.ForeignKey(Moto, related_name='moto_servicio', on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, related_name='cliente_servicio', on_delete=models.CASCADE)
+    dias = models.IntegerField(default=0)
+
+class MecanicosServicios(models.Model):
+    mecanico = models.ForeignKey(Mecanico, related_name='mecanicos_servicios', on_delete=models.CASCADE)
+    servicio = models.ForeignKey(Servicios, related_name='servicios_mecanicos', on_delete=models.CASCADE)
+
+class TareasServicios(models.Model):
+    servicio = models.ForeignKey(Servicios, related_name='tareas_servicios', on_delete=models.CASCADE)
+    tarea = models.TextField(null=True, blank=True)
     
 

@@ -153,6 +153,9 @@ def cliente_moto(req):
 
         moto = Moto.objects.filter(num_motor=num_motor).first()
         cliente = Cliente.objects.filter(documento=documento).first()
+        if cliente:
+            telefono = ClienteTelefono.objects.filter(cliente_id=cliente.id,principal=1).first()
+            correo = ClienteCorreo.objects.filter(cliente_id=cliente.id,principal=1).first()
 
         if not cliente:
             return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message_cliente":"El cliente no existe, para ingresarlo haga clic ",
@@ -162,6 +165,8 @@ def cliente_moto(req):
         elif not moto:
             #SI LA MOTO NO EXISTE, SE INGRESA LA MOTO DESDE 0
             return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "telefono":telefono.telefono,
+                                                                            "correo":correo.correo,
                                                                             "active_page": 'Motos',
                                                                             "form_moto_usada":True,
                                                                             "form_moto_ingresada":False,
@@ -172,6 +177,8 @@ def cliente_moto(req):
             if moto.pertenece_tienda:
                 return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"La moto que usted desea ingresar ya existe en el inventario de la tienda",
                                                                                 "active_page": 'Motos',
+                                                                                "telefono":telefono.telefono,
+                                                                                 "correo":correo.correo,
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":False})
             else:
@@ -183,6 +190,8 @@ def cliente_moto(req):
                 return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
                                                                                 "moto":moto,
                                                                                 "matricula":matricula,
+                                                                                "telefono":telefono.telefono,
+                                                                                "correo":correo.correo,
                                                                                 "active_page": 'Motos',
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":True,
@@ -323,7 +332,7 @@ def alta_moto_nueva(req):
             color = req.POST['color_moto'].upper()
 
             foto = req.FILES.get('foto_moto')
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
 
             checkbox = 'crear_pdf' in req.POST
             if checkbox:
@@ -639,6 +648,7 @@ def alta_accesorio(req):
             marca = req.POST['marca_accesorio'].upper()
             modelo = req.POST['modelo_accesorio'].upper()
             precio = req.POST['precio_accesorio']
+            moneda = req.POST['moneda_precio']
 
             foto = req.FILES.get('foto_accesorio')
 
@@ -649,7 +659,8 @@ def alta_accesorio(req):
                 activo = 1,
                 foto = foto,
                 precio = precio,
-                fecha_ingreso = datetime.now()
+                fecha_ingreso = datetime.now(),
+                moneda_precio = moneda
             )
 
             nuevo_accesorio.save()

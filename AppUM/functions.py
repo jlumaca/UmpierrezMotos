@@ -350,6 +350,7 @@ def funcion_paginas_varias(req,instancia_model):
     return page_obj
 
 def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar,elemento_tipo,existe_cuota,id_elemento):
+    error = None
     if moneda_entrega == "Pesos":             
         if elemento.moneda_precio == "Pesos":
             if int(entrega) > int(elemento.precio):
@@ -410,6 +411,37 @@ def obtener_compras_accesorios(req,id_venta):
                     i = i + 1
         page_obj = funcion_paginas_varias(req,res_pagos)
 
+        return page_obj
+
+def obtener_compras_motos(req,id_cv):
+        resultados_cuotas = (
+                CuotasMoto.objects
+                .filter(venta_id=id_cv)
+                .values(
+                    'id',
+                    'fecha_pago', 
+                    'fecha_prox_pago',  
+                    'cant_restante_dolares', 
+                    'cant_restante_pesos', 
+                    'moneda', 
+                    'observaciones',
+                    'valor_pago_dolares',
+                    'valor_pago_pesos',
+                    'comprobante_pago'
+                )
+            )
+            
+        res_documentacion = []
+        i = 1
+        for resultado in resultados_cuotas:
+                    cm = CuotasMoto.objects.get(id=resultado['id'])
+                    res_documentacion.append({
+                    'cuota': resultado,
+                    'comprobante_pago': cm.comprobante_pago.url if cm.comprobante_pago else None,
+                    'mostrar_boton': i == len(resultados_cuotas)           
+                    })
+                    i = i + 1
+        page_obj = funcion_paginas_varias(req,res_documentacion)
         return page_obj
 
 def valores_compras(existe_cuota,moneda,entrega,id_elemento,elemento,elemento_tipo,precio_dolar):

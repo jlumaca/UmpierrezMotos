@@ -212,6 +212,7 @@ def alta_moto_usada(req,id_cliente):
         padron = req.POST['num_padron']
         existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
         existe_padron = Matriculas.objects.filter(padron=padron).first()
+        departamento = departamento_matricula(matricula)
         if existe_num_motor:
             return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
                                                                             "active_page": 'Motos',
@@ -240,6 +241,13 @@ def alta_moto_usada(req,id_cliente):
                                                                             "form_moto_ingresada":False,
                                                                             "consultar_moto_cliente":False,
                                                                             "error_message":"Ya existe el número de padrón ingresado"})
+        elif not departamento:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+                                                                            "active_page": 'Motos',
+                                                                            "form_moto_usada":True,
+                                                                            "form_moto_ingresada":False,
+                                                                            "consultar_moto_cliente":False,
+                                                                            "error_message":"La matrícula es incorrecta"})
         else:
             marca = req.POST['marca_moto'].upper()
             modelo = req.POST['modelo_moto'].upper()
@@ -454,42 +462,56 @@ def modificacion_moto(req,id_moto):
                 moto_upd = Moto.objects.get(id=id_moto)
                 num_motor = req.POST['num_motor_moto'].upper()
                 num_chasis = req.POST['num_chasis_moto'].upper()
+                matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
                 if req.POST['matricula_letras'] and req.POST['matricula_numeros']:
                     letras_matricula = req.POST['matricula_letras']
                     num_matricula = req.POST['matricula_numeros']
+                    validar_letra_matricula = departamento_matricula(matricula)
                 else:
                     letras_matricula = None
                     num_matricula = None
-                matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
+                    validar_letra_matricula = "No Ingresada"
                 padron = req.POST['num_padron']
                 if not padron:
                     padron = None
                 validar_matricula = matricula_valid(matricula,padron,id_moto)
                 validacion_datos_moto = validacion_moto(id_moto,num_motor,num_chasis)
+                precio = int(moto_upd.precio) if moto_upd.precio else 0
 
                 if validacion_datos_moto == "existe_num_motor":
                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"El número de motor ya se encuentra asignado a otra moto",
                                                                                             'datos_moto': moto_upd,
                                                                                             "letras_matricula":letras_matricula,
                                                                                             "num_matricula":num_matricula,
+                                                                                            "precio":precio,
                                                                                             "active_page": 'Motos'}) 
                 elif validacion_datos_moto == "existe_num_chasis":
                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"El número de chasis ya se encuentra asignado a otra moto",
                                                                                             'datos_moto': moto_upd,
                                                                                             "letras_matricula":letras_matricula,
                                                                                             "num_matricula":num_matricula,
+                                                                                            "precio":precio,
                                                                                             "active_page": 'Motos'}) 
                 elif (req.POST['matricula_letras'] and req.POST['matricula_numeros']) and (validar_matricula == "matricula_existe"): #EXISTE UNA MATRICULA REGISTRADA Y ADEMAS ES DIFERENTE
                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"La matricula ingresada ya existe",
                                                                                             'datos_moto': moto_upd,
                                                                                             "letras_matricula":letras_matricula,
                                                                                             "num_matricula":num_matricula,
+                                                                                            "precio":precio,
                                                                                             "active_page": 'Motos'}) 
                 elif (req.POST['num_padron']) and (validar_matricula == "padron_existe"):
                     return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"El número de padrón ya existe",
                                                                                             'datos_moto': moto_upd,
                                                                                             "letras_matricula":letras_matricula,
                                                                                             "num_matricula":num_matricula,
+                                                                                            "precio":precio,
+                                                                                            "active_page": 'Motos'})
+                elif not validar_letra_matricula:
+                    return render(req,"perfil_administrativo/motos/modificacion_moto.html",{"error_message":"La matrícula es incorrecta",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio,
                                                                                             "active_page": 'Motos'})
                 else:
                             

@@ -1,0 +1,322 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    form label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+form label span {
+    flex-grow: 1;
+}
+
+form label input[type="number"] {
+    max-width: 100px;
+    text-align: right;
+}
+</style>
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h2>Alta de servicio</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
+        </div>
+        {% endif %}
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de búsqueda de cliente -->
+         {% if buscar_moto_cliente %}
+        <form action="{% url 'ClienteMotoServicio' %}" enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+                <h5 class="mb-3">Información del Cliente</h5>
+                <div id="documento_cliente">
+                    <label for="documento" class="form-label">Documento del cliente</label>
+                    <div class="input-group">
+                        <select class="form-control" name="tipo_documento" id="tipo_documento">
+                            <option value="CI">Cédula</option>
+                            <option value="PAS">Pasaporte</option>
+                            <option value="DNI">DNI</option>
+                        </select>
+                        <span class="input-group-text">-</span>
+                        <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    </div>
+                </div>
+            </div>
+        
+            <div class="mb-4">
+                <h5 class="mb-3">Buscar Información de la Moto</h5>
+                <div id="dato_moto">
+                    <label for="buscar_moto_por" class="form-label">Buscar moto por</label>
+                    <div class="input-group">
+                        <select class="form-control" name="buscar_moto_por" id="buscar_moto_por" onchange="buscar_moto()">
+                            <option value="matricula">Matrícula</option>
+                            <option value="num_motor">Número de motor</option>
+                        </select>
+                        
+        
+                        <!-- Buscar por matrícula -->
+                        <div id="buscar_por_matricula" class="w-100">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <input maxlength="3" type="text" class="form-control" name="letras_matricula" placeholder="Caracteres alfabéticos">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="number" class="form-control" name="numeros_matricula" placeholder="Caracteres numéricos">
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Buscar por número de motor -->
+                        <div id="numero_de_motor" class="w-100" style="display: none;">
+                            <input type="text" class="form-control mt-2" name="numero_de_motor" placeholder="Número de motor">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">Buscar</button>
+                <a href="{% url 'ServiciosEnGestion' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+        {% endif %}
+        {% if datos_moto %}
+        <form action="{% url 'AltaServicio' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <h4>Datos del cliente</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Datos de la moto</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Marca</th>
+                        <td>{{ moto.marca }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Modelo</th>
+                        <td>{{ moto.modelo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Motor (cc)</th>
+                        <td>{{ moto.motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Año</th>
+                        <td>{{ moto.anio }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Número de motor</th>
+                        <td>{{ moto.num_motor }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Número de chasis</th>
+                        <td>{{ moto.num_chasis }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Matrícula</th>
+                        <td>{{ matricula }}</td>
+                    </tr>
+                   
+                </tbody>
+            </table>    
+            {% if error_message_alta %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message_alta }}
+            </div>
+            {% endif %}
+            <h4>Servicios de mantenimiento a realizar</h4>
+            <div id="serviciosLista" class="mb-4">
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Cambio de aceite" id="servicio1" class="me-2">
+                        <span class="flex-grow-1">Cambio de aceite</span>
+                        <input type="number" name="precio_Cambio_de_aceite" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Revisión de frenos" id="servicio2" class="me-2">
+                        <span class="flex-grow-1">Revisión de frenos</span>
+                        <input type="number" name="precio_Revision_de_frenos" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Revisión de la cadena" id="servicio3" class="me-2">
+                        <span class="flex-grow-1">Revisión de la cadena</span>
+                        <input type="number" name="precio_revision_cadena" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Reparaciones del motor" id="servicio4" class="me-2">
+                        <span class="flex-grow-1">Reparaciones del motor</span>
+                        <input type="number" name="precio_reparacion_motor" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Cambio de neumaticos" id="servicio5" class="me-2">
+                        <span class="flex-grow-1">Cambio de neumaticos</span>
+                        <input type="number" name="precio_cambio_neumaticos" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="servicios[]" value="Inspección general" id="servicio6" class="me-2">
+                        <span class="flex-grow-1">Inspección general</span>
+                        <input type="number" name="precio_inspeccion_general" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex">
+            
+                <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
+            </div>
+            <br>
+            <h4>Mecánicos a asignar</h4>
+            <div id="serviciosLista" class="mb-4">
+                {% if mecanicos %}
+                {% for mecanico in mecanicos %}
+                <div>
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="mecanicos[]" value="{{ mecanico.id }}" id="mecanicos" class="me-2">
+                        <span class="flex-grow-1">{{ mecanico.nombre }} {{ mecanico.apellido }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+                {% else %}
+                    <p>No existen mecánicos registrados en el sistema</p>
+                {% endif %}
+            </div>
+    
+    <div class="mb-3">
+        <label for="precio" class="form-label">Prioridad</label>
+        <select class="form-control" name="prioridad">
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="precio" class="form-label">Fecha estimada</label>
+        <input type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="precio" class="form-label">Anotaciones</label>
+        <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Anotaciones (sobre el servicio, estado de la moto, etc)" rows="3"></textarea>
+    </div>
+    
+            <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'ServiciosEnGestion' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+function buscar_moto() {
+        const buscarPor = document.getElementById('buscar_moto_por').value;
+        const matriculaDiv = document.getElementById('buscar_por_matricula');
+        const motorDiv = document.getElementById('numero_de_motor');
+
+        if (buscarPor === 'matricula') {
+            matriculaDiv.style.display = 'block';
+            motorDiv.style.display = 'none';
+        } else if (buscarPor === 'num_motor') {
+            matriculaDiv.style.display = 'none';
+            motorDiv.style.display = 'block';
+        }
+    }
+
+    function agregarServicio() {
+    // Contenedor donde se añaden los servicios
+    const serviciosLista = document.getElementById("serviciosLista");
+
+    // Crear un nuevo contenedor para el servicio
+    const nuevoServicio = document.createElement("div");
+    nuevoServicio.classList.add("d-flex", "align-items-center", "mb-2");
+
+    // Crear el checkbox
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "servicios[]";
+    checkbox.value = ""; // El valor se completará dinámicamente
+    checkbox.classList.add("me-2");
+
+    // Crear el texto editable para el nombre del servicio
+    const span = document.createElement("span");
+    span.classList.add("flex-grow-1");
+    span.contentEditable = true;
+    span.textContent = "Nuevo servicio";
+
+    // Crear el campo de entrada para el precio
+    const inputPrecio = document.createElement("input");
+    inputPrecio.type = "number";
+    inputPrecio.name = ""; // El nombre se completará dinámicamente
+    inputPrecio.classList.add("form-control", "w-auto", "ms-2");
+    inputPrecio.placeholder = "Precio";
+    inputPrecio.min = 0;
+    inputPrecio.step = 0.01;
+
+    // Agregar un evento para actualizar el valor y nombre del campo al editar el servicio
+    span.addEventListener("input", () => {
+        const textoServicio = span.textContent.trim().replaceAll(" ", "_");
+        checkbox.value = textoServicio;
+        inputPrecio.name = `precio_${textoServicio}`;
+    });
+
+    // Añadir los elementos al contenedor del nuevo servicio
+    nuevoServicio.appendChild(checkbox);
+    nuevoServicio.appendChild(span);
+    nuevoServicio.appendChild(inputPrecio);
+
+    // Añadir el nuevo servicio al formulario
+    serviciosLista.appendChild(nuevoServicio);
+}
+
+
+</script>
+
+{% endblock %}

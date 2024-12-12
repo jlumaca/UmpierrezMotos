@@ -2135,11 +2135,132 @@ def movimientos_caja(req,id_caja):
 
 
 def servicios_en_gestion(req):
+    # try:
+        servicios_motos = (
+        Servicios.objects
+        .all()
+        .select_related('moto', 'cliente')
+        .values(
+            'id',
+            'fecha_ingreso', 
+            'estado',
+            'prioridad',
+            'dias',
+            'moto__marca', 
+            'moto__modelo',
+            'cliente__nombre',
+            'cliente__apellido'      
+           ).order_by('-id')
+        )
+        datos = []
+        for resultado in servicios_motos:
+            mecanicos = MecanicosServicios.objects.filter(servicio_id=resultado['id'])
+            datos_mecanicos = [
+                f"{persona.nombre} {persona.apellido}"
+                for mecanico in mecanicos
+                for persona in Personal.objects.filter(id=mecanico.mecanico_id)
+            ]
+            fecha_ingreso = resultado['fecha_ingreso']  # Suponiendo que 'fecha_ingreso' es un campo de la consulta
+            dias_transcurridos = (date.today() - fecha_ingreso).days
+            datos.append({
+                'servicio': resultado,
+                'mecanicos': datos_mecanicos,  # Lista de nombres completos de mecánicos
+                'dias':dias_transcurridos
+            })
+        
+        return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos,"mecanicos":datos_mecanicos})
+    # except Exception as e:
+    #     pass
+
+def form_alta_servicio(req):
+    try:
+        return render(req,"perfil_taller/servicios/alta_servicio.html",{"buscar_moto_cliente":True})
+    except Exception as e:
+        return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":e,"buscar_moto_cliente":True})
+
+def cliente_moto_servicio(req):
+    # try:
+        documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+        cliente = Cliente.objects.filter(documento=documento).first()
+        tipo_busqueda = req.POST['buscar_moto_por']
+        if tipo_busqueda == "matricula":
+            matricula = req.POST['letras_matricula'].upper() + str(req.POST['numeros_matricula'])
+            existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
+            if existe_matricula:
+                moto = Moto.objects.get(id=existe_matricula.moto_id)
+            else:
+                moto = None
+        else:
+            moto = Moto.objects.filter(num_motor=req.POST['numero_de_motor'])
+        
+        if not cliente:
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_cliente":"El cliente no existe, para ingresarlo haga clic ","buscar_moto_cliente":True})
+        elif not moto:
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos","buscar_moto_cliente":True})
+        else:
+            mecanicos = (Mecanico.objects
+                       .filter(activo=True)
+                       .values('id', 'nombre', 'apellido')
+                       .order_by('nombre'))
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"datos_moto":True,
+                                                                            "moto":moto,
+                                                                            "cliente":cliente,
+                                                                            "matricula":existe_matricula.matricula,
+                                                                            "buscar_moto_cliente":False,
+                                                                            "mecanicos":mecanicos if mecanicos else None})
+    # except Exception as e:
+    #     return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos"})
+
+def alta_servicio(req,id_moto,id_cliente):
+    # try:
+        servicios_seleccionados = req.POST.getlist('servicios[]')
+        mecanicos_seleccionados = req.POST.getlist('mecanicos[]')
+        mecanicos = (Mecanico.objects
+                       .filter(activo=True)
+                       .values('id', 'nombre', 'apellido')
+                       .order_by('nombre'))
+        if not servicios_seleccionados:
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
+        elif not mecanicos_seleccionados:   
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún mecánico","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
+        else:
+            nuevo_servicio = Servicios(
+                fecha_ingreso = datetime.now(),
+                descripcion_ingreso = req.POST['anotaciones'],
+                estado = "Pendiente",
+                prioridad = req.POST['prioridad'],
+                fecha_estimada_cierre = req.POST['fecha_estimada'],
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            nuevo_servicio.save()
+           
+            for servicio in servicios_seleccionados:
+                tareas_servicios = TareasServicios(
+                    tarea = servicio,
+                    servicio_id = nuevo_servicio.id
+                )
+                tareas_servicios.save()
+            
+            for mecanico in mecanicos_seleccionados:
+                mecanicos_servicio = MecanicosServicios(
+                    mecanico_id = mecanico,
+                    servicio_id = nuevo_servicio.id
+                )
+                mecanicos_servicio.save()
+        
+            messages.success(req, "Servicio ingresado correctamente.")
+            return redirect('ServiciosEnGestion')
+    # except Exception as e:
+    #     pass
+
+def historial_de_servicios(req):
     try:
         servicios_motos = (
         Servicios.objects
         .all()
         .select_related('moto', 'cliente')
+        .filter(estado="Completado")
         .values(
             'id',
             'fecha_ingreso', 
@@ -2155,9 +2276,10 @@ def servicios_en_gestion(req):
 
         datos = []
         for resultado in servicios_motos:
+            mecanicos = MecanicosServicios.objects.filter(servicio_id=resultado['id'])
             datos.append({
             'servicio': resultado,
             })
-        return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos})
+        return render(req,"perfil_taller/historial_de_servicios/historial_de_servicios.html",{"servicios":datos})
     except Exception as e:
         pass

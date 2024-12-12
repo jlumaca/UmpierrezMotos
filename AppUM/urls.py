@@ -100,6 +100,12 @@ urlpatterns = [
      path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
      path('baja_paga_accesorio/<int:id_ca>', views.baja_paga_accesorio,name="BajaPagoAccesorio"),
+
+     
      path('servicios_en_gestion', views.servicios_en_gestion,name="ServiciosEnGestion"),
+     path('form_alta_servicio', views.form_alta_servicio,name="FormAltaServicio"),
+     path('cliente_moto_servicio', views.cliente_moto_servicio,name="ClienteMotoServicio"),
+     path('alta_servicio/<int:id_moto>/<int:id_cliente>', views.alta_servicio,name="AltaServicio"),
+     path('historial_de_servicios', views.historial_de_servicios,name="HistorialDeServicios"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

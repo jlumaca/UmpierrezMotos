@@ -48,6 +48,8 @@ def departamento_matricula(matricula):
         departamento = "Tacuarembó"
     elif primer_letra == "S":
         departamento = "Montevideo"
+    else: 
+        departamento = None
     return departamento
 
 def pdf_crear(req,ruta_pdf,renderizar_en,model_insert,datos_a_pdf,nombre_archivo,mensaje,negocio):

@@ -1418,6 +1418,7 @@ def form_venta_moto(req,id_moto):
                 fecha = date.today()
                 logo_cv = Logos.objects.get(id=2)
                 logo_cv_url = req.build_absolute_uri(logo_cv.logo_UM.url) if logo_cv.logo_UM else None
+                precio = int(moto.precio) if moto.precio else 0
                 # print(numero_letra)
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
                                                                                 "cliente":cliente,
@@ -1429,7 +1430,8 @@ def form_venta_moto(req,id_moto):
                                                                                 "num_letra":numero_letra,
                                                                                 "matricula":matricula,
                                                                                 "padron":padron,
-                                                                                "departamento":departamento,
+                                                                                "precio":precio,
+                                                                                "departamento":departamento if departamento else None,
                                                                                 "fecha":fecha,
                                                                                 "logo_cv":logo_cv_url})
             else:
@@ -1445,6 +1447,7 @@ def venta_moto(req,id_moto,id_cliente):
     try:
         moto = Moto.objects.get(id=id_moto)
         moto.pertenece_tienda = 0
+        moto.precio = req.POST['precio_recargo']
         moto.save()
         compra_venta = req.FILES.get('compra_venta_moto')
         

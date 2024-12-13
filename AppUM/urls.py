@@ -28,7 +28,7 @@ urlpatterns = [
      # path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),#
      path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),#
      path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#
-     path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
+     
      
      path('reservas', views.reservas,name="Reservas"),
      path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),
@@ -79,7 +79,7 @@ urlpatterns = [
 
      path('ventas', views.vista_ventas,name="Ventas"),
      # path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),
-     path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
+     
      path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
      path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
 
@@ -107,5 +107,14 @@ urlpatterns = [
      path('cliente_moto_servicio', views.cliente_moto_servicio,name="ClienteMotoServicio"),
      path('alta_servicio/<int:id_moto>/<int:id_cliente>', views.alta_servicio,name="AltaServicio"),
      path('historial_de_servicios', views.historial_de_servicios,name="HistorialDeServicios"),
+
+
+
+
+
+
+
+     path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
+     path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

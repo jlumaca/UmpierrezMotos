@@ -194,5 +194,17 @@ class MecanicosServicios(models.Model):
 class TareasServicios(models.Model):
     servicio = models.ForeignKey(Servicios, related_name='tareas_servicios', on_delete=models.CASCADE)
     tarea = models.TextField(null=True, blank=True)
+
+class Financiamientos(models.Model):
+    fecha = models.DateField()
+    recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cantidad_cuotas = models.IntegerField(default=1)
+    valor_cuota = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    moneda_cuota = models.CharField(max_length=20, blank=True)
+    actual = models.BooleanField(default=True)
+    venta = models.ForeignKey(ComprasVentas, related_name='moto_financiamientos', on_delete=models.CASCADE)
+    
+
+
     
 

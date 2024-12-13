@@ -1471,7 +1471,7 @@ def venta_moto(req,id_moto,id_cliente):
     try:
         moto = Moto.objects.get(id=id_moto)
         moto.pertenece_tienda = 0
-        # moto.precio_final = req.POST['precio_recargo']
+        moto.precio_final = req.POST['precio_recargo']
         moto.save()
         compra_venta = req.FILES.get('compra_venta_moto')
         
@@ -1487,7 +1487,19 @@ def venta_moto(req,id_moto,id_cliente):
             existe_reserva.save()
         else:
 
-            insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
+            id_cv = insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
+            print(id_cv)
+            # id_cv = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="V").first()
+            financiamiento = Financiamientos(
+                fecha = datetime.now(),
+                recargo = req.POST['recargo'],
+                cantidad_cuotas = req.POST['cant_cuotas'],
+                valor_cuota = req.POST['valor_cuota'],
+                moneda_cuota = moto.moneda_precio,
+                actual = 1,
+                venta_id = id_cv
+            )
+            financiamiento.save()
         #REDIRIGIR A LA FICHA DEL CLIENTE
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
@@ -1572,11 +1584,14 @@ def obtener_cuotas_json(req, id_cv):
 
 @admin_required
 def detalles_cuotas(req,id_cv):
-    try: 
+    # try: 
         c_v = ComprasVentas.objects.get(id=id_cv)
         page_obj = obtener_compras_motos(req,id_cv)
         cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
-        ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+        if cuotas:
+            ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+        else: 
+            ult_cuota = None
         # Serializar los datos
         cuotas_data = [
             {
@@ -1588,17 +1603,34 @@ def detalles_cuotas(req,id_cv):
         ]
         cuotas_json = json.dumps(cuotas_data)
         moto = Moto.objects.get(id=c_v.moto_id)
+        financiamiento = Financiamientos.objects.filter(venta_id=id_cv).first()
+        if financiamiento.moneda_cuota == "Pesos":
+            moneda = "$"
+        else:
+            moneda = "U$S"
+        
+        txt_financiamiento = f"{str(financiamiento.cantidad_cuotas)} x {moneda} {str(financiamiento.valor_cuota)}"
+        producto = f"{moto.marca} {moto.modelo}"
+        precio_dolar = PrecioDolar.objects.get(id=1)
+        if moto.moneda_precio == "Pesos":
+            precio_final_pesos = moto.precio_final
+            precio_final_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
+        else:
+            precio_final_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
+            precio_final_dolares = moto.precio_final
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{'cuotas_json': cuotas_json,
                                                                                "page_obj":page_obj,
                                                                                "id_cv":id_cv,
                                                                                "pago_acordado":c_v.forma_de_pago,
                                                                                "id_cliente":c_v.cliente_id,
+                                                                               "producto":producto,
                                                                                "precio_inicial":moto.precio,
                                                                                "precio_final":moto.precio_final,
-                                                                               "cant_restante_pesos":int(ult_cuota.cant_restante_pesos),
-                                                                               "cant_restante_dolares":int(ult_cuota.cant_restante_dolares)})
-    except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+                                                                               "cant_restante_pesos":int(ult_cuota.cant_restante_pesos) if ult_cuota else int(precio_final_pesos),
+                                                                               "cant_restante_dolares":int(ult_cuota.cant_restante_dolares) if ult_cuota else int(precio_final_dolares),
+                                                                               "financiamiento":txt_financiamiento})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 
 
 def refinanciar_pagos(req):
@@ -1614,8 +1646,8 @@ def refinanciar_pagos(req):
 
 @admin_required
 def alta_pago(req,id_cv):
-    page_obj = obtener_compras_motos(req,id_cv)
-    try:
+        page_obj = obtener_compras_motos(req,id_cv)
+    # try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
         caja = Caja.objects.filter(estado="Abierto").first()
@@ -1625,8 +1657,8 @@ def alta_pago(req,id_cv):
         cv = ComprasVentas.objects.get(id=id_cv)
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = dolar.precio_dolar_tienda
-        recargo = req.POST['recargo']
-        total = req.POST['total_luego_recargo']
+        # recargo = req.POST['recargo']
+        # total = req.POST['total_luego_recargo']
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).exists()
         moto = Moto.objects.get(id=cv.moto_id)
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
@@ -1639,17 +1671,17 @@ def alta_pago(req,id_cv):
         elif validar_fecha_proximo_pago.date() < fecha_actual:
             return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         else:
-            if forma_pago == "Efectivo" and caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
-            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
+            # if forma_pago == "Efectivo" and caja:
+                # movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
+            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago)
             if alta:
                 comprobante_url = alta
             else:
                 comprobante_url = None
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
-    except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
 
 @admin_required
 def baja_pago(req,id_cm):

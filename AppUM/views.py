@@ -17,6 +17,8 @@ from .decorators import admin_required, mecanico_jefe_required, mecanico_emplead
 from django.core.mail import send_mail
 from .inserts import *
 from .functions import *
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 
@@ -1469,7 +1471,7 @@ def venta_moto(req,id_moto,id_cliente):
     try:
         moto = Moto.objects.get(id=id_moto)
         moto.pertenece_tienda = 0
-        moto.precio = req.POST['precio_recargo']
+        # moto.precio_final = req.POST['precio_recargo']
         moto.save()
         compra_venta = req.FILES.get('compra_venta_moto')
         
@@ -1548,14 +1550,67 @@ def vista_ventas(req):
     except Exception as e:
         pass
 
+
+def obtener_cuotas_json(req, id_cv):
+    try:
+        # c_v = ComprasVentas.objects.get(id=id_cv)
+        cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
+        
+        # Serializar los datos
+        cuotas_data = [
+            {
+                "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
+                "monto": float(cuota.valor_pago_pesos),
+            }
+            for cuota in cuotas
+        ]
+
+        return JsonResponse({"cuotas": cuotas_data}, status=200)
+    except ComprasVentas.DoesNotExist:
+        return JsonResponse({"error": "Compra/Venta no encontrada"}, status=404)
+    
+
 @admin_required
 def detalles_cuotas(req,id_cv):
     try: 
         c_v = ComprasVentas.objects.get(id=id_cv)
         page_obj = obtener_compras_motos(req,id_cv)
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"page_obj":page_obj,"id_cv":id_cv,"pago_acordado":c_v.forma_de_pago,"id_cliente":c_v.cliente_id})
+        cuotas = CuotasMoto.objects.filter(venta_id=id_cv)
+        ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+        # Serializar los datos
+        cuotas_data = [
+            {
+                "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
+                "moneda":cuota.moneda,
+                "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "pesos" else float(cuota.valor_pago_dolares),
+            }
+            for cuota in cuotas
+        ]
+        cuotas_json = json.dumps(cuotas_data)
+        moto = Moto.objects.get(id=c_v.moto_id)
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{'cuotas_json': cuotas_json,
+                                                                               "page_obj":page_obj,
+                                                                               "id_cv":id_cv,
+                                                                               "pago_acordado":c_v.forma_de_pago,
+                                                                               "id_cliente":c_v.cliente_id,
+                                                                               "precio_inicial":moto.precio,
+                                                                               "precio_final":moto.precio_final,
+                                                                               "cant_restante_pesos":int(ult_cuota.cant_restante_pesos),
+                                                                               "cant_restante_dolares":int(ult_cuota.cant_restante_dolares)})
     except Exception as e:
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
+
+
+def refinanciar_pagos(req):
+    try:
+        pass
+        #RESTA = CANT_RESTANTE - ULTIMA_ENTREGA
+        #PORCENTAJE = (RESTA * CANT_CUOTAS * RECARGO) / 100   
+        #REFINANCIACION = RESTA + PORCENTAJE
+        #VALOR_CUOTA = REFINANCIACION / CANT_CUOTAS
+    except Exception as e:
+        pass
+
 
 @admin_required
 def alta_pago(req,id_cv):

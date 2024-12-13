@@ -163,6 +163,16 @@
             </div>
 
             <div class="mb-3">
+                <label for="recargo" class="form-label">Cantidad de cuotas</label>
+                <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Valor de cada cuota</label>
+                <input type="number" class="form-control" name="valor_cuota" id="valor_cuota" required>
+            </div>
+
+            <div class="mb-3">
                 <label for="recargo" class="form-label">Precio con recargo incluido</label>
                 <input type="number" class="form-control" name="precio_recargo" id="precio_con_recargo" readonly>
             </div>
@@ -260,23 +270,31 @@ function calcularCuotas() {
 document.addEventListener('DOMContentLoaded', () => {
     const precio_sin_recargo = document.getElementById('precio_sin_recargo');
     const recargo = document.getElementById('recargo');
+    const cant_cuotas = document.getElementById('cant_cuotas');
     const precio_con_recargo = document.getElementById('precio_con_recargo');
+    const valor_cuota = document.getElementById('valor_cuota');
+    
     
 
     function calcularRecargo() {
         const valor = parseFloat(precio_sin_recargo.value) || 0;
         const porcentaje = parseFloat(recargo.value) || 0;
+        const cuotas = parseFloat(cant_cuotas.value) || 0;
+        const calc_valor_cuota = parseFloat(valor_cuota.value) || 0;
 
         // Calcular el recargo basado en el porcentaje ingresado
-        const precio_final = (valor * porcentaje) / 100;
-        const total = valor + precio_final;
+        const sumar_recargo = (valor * porcentaje * cuotas) / 100;
+        const total = valor + sumar_recargo;
+        const total_valor_cuota = total / cuotas
 
         // Actualizar los campos
         precio_con_recargo.value = total.toFixed(2);
+        valor_cuota.value = total_valor_cuota.toFixed(2);
     }
 
     precio_sin_recargo.addEventListener('input', calcularRecargo);
     recargo.addEventListener('input', calcularRecargo);
+    cant_cuotas.addEventListener('input', calcularRecargo);
 });
 
 

@@ -40,6 +40,7 @@ class Moto(models.Model):
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     moneda_precio = models.CharField(max_length=10,default=True,null=True)
     tipo = models.CharField(max_length=20,blank=True)
+    precio_final = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 class Matriculas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)

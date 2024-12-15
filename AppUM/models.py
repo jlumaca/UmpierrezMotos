@@ -110,22 +110,6 @@ class ClienteAccesorio(models.Model):
     factura_rut = models.IntegerField(null=True)
     factura_documento = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_accesorios/")
 
-class CuotasMoto(models.Model):
-    fecha_pago = models.DateField()
-    fecha_prox_pago = models.DateField()
-    moneda = models.CharField(max_length=10,default=True,null=True)
-    valor_pago_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    valor_pago_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    cant_restante_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    cant_restante_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
-    observaciones = models.TextField(null=True, blank=True)
-    comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
-    metodo_pago = models.CharField(max_length=20, blank=True)
-    recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-
-
 class PrecioDolar(models.Model):
     precio_dolar_tienda = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     precio_dolar_taller = models.DecimalField(max_digits=10, decimal_places=2,default=0)
@@ -202,7 +186,27 @@ class Financiamientos(models.Model):
     valor_cuota = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     moneda_cuota = models.CharField(max_length=20, blank=True)
     actual = models.BooleanField(default=True)
-    venta = models.ForeignKey(ComprasVentas, related_name='moto_financiamientos', on_delete=models.CASCADE)
+    venta = models.ForeignKey(ComprasVentas, related_name='financiamientos_venta', on_delete=models.CASCADE)
+    inicial = models.BooleanField(default=False)
+
+class CuotasMoto(models.Model):
+    fecha_pago = models.DateField()
+    fecha_prox_pago = models.DateField()
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    valor_pago_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    valor_pago_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    cant_restante_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
+    observaciones = models.TextField(null=True, blank=True)
+    comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
+    metodo_pago = models.CharField(max_length=20, blank=True)
+    tipo_pago = models.CharField(max_length=20, blank=True)
+
+class CuotasFinanciacion(models.Model):
+    cuota = models.ForeignKey(CuotasMoto, related_name='cuota_financiamiento', on_delete=models.CASCADE)
+    financiamiento = models.ForeignKey(Financiamientos, related_name='financiamiento_cuota', on_delete=models.CASCADE)
     
 
 

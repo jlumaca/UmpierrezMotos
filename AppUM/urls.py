@@ -27,12 +27,10 @@ urlpatterns = [
      path('moto_baja/<int:id_moto>', views.baja_moto,name="MotoBaja"),#
      # path('datos_cliente_moto', views.datos_cliente_venta,name="DatosClienteMoto"),#
      path('moto_modificacion/<int:id_moto>', views.modificacion_moto,name="MotoModificacion"),#
-     path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#
      
      
-     path('reservas', views.reservas,name="Reservas"),
-     path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),
-     path('moto_reserva/<int:id_moto>/<int:id_cliente>', views.reservar_moto,name="MotoReserva"),
+     
+     
 
      path('moto_detalles/<int:id_moto>', views.detalles_moto,name="MotoDetalles"),
 
@@ -80,8 +78,7 @@ urlpatterns = [
      path('ventas', views.vista_ventas,name="Ventas"),
      # path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),
      
-     path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
-     path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
+     
 
      path('tienda', views.datos_tienda,name="Tienda"),
      path('precio_dolar', views.modificar_precio_dolar,name="ModificarPrecioDolar"),
@@ -114,7 +111,23 @@ urlpatterns = [
 
 
 
+
+
+
+
+
+
+
+
+
+     path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#SOLO RENDERIZA FORM Y DATOS
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
+     path('pago_por_ref/', views.buscar_pagos_por_refinanciamiento,name="PagoPorRef"),
+     path('reservas', views.reservas,name="Reservas"),
+     path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),
+     path('moto_reserva/<int:id_moto>/<int:id_cliente>', views.reservar_moto,name="MotoReserva"),
+     path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
+     path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

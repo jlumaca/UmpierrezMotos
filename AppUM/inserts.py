@@ -181,3 +181,17 @@ def alta_cuota_accesorio(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,mon
             comprobante_url = None
     
     return comprobante_url
+
+
+def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial):
+    financiamiento = Financiamientos(
+        fecha = datetime.now(),
+        recargo = recargo,
+        cantidad_cuotas = cantidad_cuotas,
+        valor_cuota = valor_cuota,
+        moneda_cuota = moneda_cuota,
+        actual = actual,
+        venta_id = venta_id,
+        inicial = inicial
+    )
+    financiamiento.save()

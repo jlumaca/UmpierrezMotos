@@ -487,3 +487,71 @@ def valores_compras(existe_cuota,moneda,entrega,id_elemento,elemento,elemento_ti
     
     lista = [resto_dolares,resto_pesos,entrega_pesos,entrega_dolares]
     return lista
+
+def obtener_detalles_cuotas_comunes(id_cv):
+    compra = ComprasVentas.objects.get(id=id_cv)
+    moto = Moto.objects.get(id=compra.moto_id)
+    producto = f"{moto.marca} {moto.modelo}"
+    primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial"]).order_by('-id')
+    primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
+    if moto.moneda_precio == "Pesos":
+        moneda = "$"
+    else:
+        moneda = "U$S"
+    financiamiento = f"{str(primer_fin.cantidad_cuotas)} x {moneda} {str(primer_fin.valor_cuota)}"
+
+
+    #LISTAR FINANCIAMIENTOS EN SELECT
+    financiamientos_select = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).order_by('-fecha')
+    data_financiamientos = []
+    for f_s in financiamientos_select:
+        fecha_str = f_s.fecha.strftime("%d/%m/%Y")  # Ajusta el formato si es necesario
+        actual = "Actual" if f_s.actual else ""
+        data_financiamientos.append({
+            "financiamientos": f"{fecha_str} {actual}".strip(),  # Quita espacios en blanco si no hay "Actual"
+            "id": f_s.id,
+        })
+    
+    data = [
+        producto,
+        moto.precio,
+        moto.precio_final,
+        compra.forma_de_pago,
+        primeros_pagos,
+        financiamiento,
+        data_financiamientos
+    ]
+    return data
+
+def obtener_detalles_cuotas_financiamiento(req,id_f):
+    resultados = (
+                CuotasFinanciacion.objects
+                .filter(financiamiento_id=id_f)
+                .select_related('cuota','financiamiento')
+                .values(
+                    'cuota__id',
+                    'cuota__fecha_pago', 
+                    'cuota__fecha_prox_pago',  
+                    'cuota__cant_restante_dolares', 
+                    'cuota__cant_restante_pesos', 
+                    'cuota__moneda', 
+                    'cuota__observaciones',
+                    'cuota__valor_pago_dolares',
+                    'cuota__valor_pago_pesos',
+                    'cuota__comprobante_pago',
+                    'cuota__tipo_pago'
+                )
+            )
+    res_pagos = []
+    i = 1
+    for resultado in resultados:
+        ca = CuotasMoto.objects.get(id=resultado['cuota__id'])
+        res_pagos.append({
+        'cuota': resultado,
+        'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
+        'mostrar_boton': i == len(resultados)           
+        })
+        i = i + 1
+
+    page_obj = funcion_paginas_varias(req,res_pagos)
+    return page_obj

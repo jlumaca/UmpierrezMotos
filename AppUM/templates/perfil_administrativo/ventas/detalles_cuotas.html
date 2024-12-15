@@ -52,50 +52,10 @@
     <a id="imprimir-resumen" class="btn btn-primary mb-3" data-id-cv="{{ id_cv }}">
         <i class="fas fa-print"></i> Imprimir Resumen
     </a>
-    {% endif %}
-    {% if pago_acordado %}
-    <p><strong>PAGO ACORDADO CON EL CLIENTE: </strong> {{ pago_acordado }}</p>
-    {% endif %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>PRODUCTO</th>
-                <th>PRECIO INICIAL</th>
-                <th>PRECIO FINAL CON RECARGO</th>
-            </tr>
-        </thead>
-        <tbody>
-            <td>{{ producto }}</td>
-            <td>{{ precio_inicial }}</td>
-            <td>{{ precio_final }} ({{ financiamiento }})</td>
-            
-        </tbody>
-    </table>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>FECHA</th>
-                <th>FINANCIACIONES HISTORIAL</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            <td>13 DE DICIEMBRE</td>
-            <td>3 x U$S200</td>
-            
-        </tbody>
-    </table>
-    <!-- <div class="mb-3" id="cb_refinanciar">
-        <input type="checkbox" id="checkbox_ref" class="form-check-input">
-        <label for="toggleMatr" class="form-check-label">Financiar</label>
-    </div> -->
-    <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
-        <i class="fas fa-money-check-alt"></i> Pagar
-    </a>
     <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_ref()">
         <i class="fas fa-money-check-alt"></i> Refinanciar
     </a>
+    {% endif %}
     <div id="div_refinanciamiento" style="display: none;">
         <form action="" enctype="multipart/form-data" method="POST">
         <div class="mb-3">
@@ -137,6 +97,158 @@
         <a href="" class="btn btn-secondary">Cancelar</a>
     </form>
     </div>
+
+    
+    <h5>Datos de la compra</h5>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>PRODUCTO</th>
+                <th>PRECIO INICIAL</th>
+                <th>PRECIO FINAL CON RECARGO</th>
+                <th>PAGO ACORDADO</th>
+            </tr>
+        </thead>
+        <tbody>
+            <td>{{ producto }}</td>
+            <td>{{ precio_inicial }}</td>
+            <td>{{ precio_final }} ({{ financiacion_inicial }})</td>
+            <td>{{ pago_acordado }}</td>
+        </tbody>
+    </table>
+
+
+    <h5>Entregas y/o señas</h5>
+    <a href="#" class="btn btn-primary mb-3">
+        <i class="fas fa-money-check-alt"></i> Pagar
+    </a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Observaciones</th>
+                <th>Fecha</th>
+                <th>Moneda</th>
+                <th>Entrega</th> 
+                <th>Cantidad restante</th>
+                <th>Comprobante</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if primeros_pagos %}
+            {% for pagos in primeros_pagos %}
+            <tr>
+                <td>{{ pagos.tipo_pago }}</td>
+                <td>{{ pagos.observaciones }}</td>
+                <td>{{ pagos.fecha_pago }}</td>
+                <td>{{ pagos.moneda }}</td>
+                <td>{% if pagos.moneda == "Pesos" %} {{ pagos.valor_pago_pesos }} {% else %} {{ pagos.valor_pago_dolares }} {% endif %}</td>
+                <td>${{ pagos.cant_restante_pesos }}/U$s{{ pagos.cant_restante_dolares }}</td>
+                <td>
+                    {% if pagos.comprobante_pago %}
+                    <a href="{{ pagos.comprobante_pago }}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
+                    
+                    {% else %}
+                        <p>SIN COMPROBANTE</p>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if cuota.mostrar_boton %}
+                    <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        
+        {% else %}
+
+            <tr>
+                <td colspan="9" class="text-center text-muted">
+                    No hay registros de entregas iniciales y/o señas para esta venta.
+                </td>
+            </tr>
+            
+            
+        {% endif %}
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Cuotas y financiaciones</h5>
+  
+    <form action="{% url 'PagoPorRef' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+    <div class="mb-3">
+        <label for="documento" class="form-label">Financiaciones</label>
+        <div class="input-group">
+            <select class="form-control" name="ref_id" id="ref_id">
+                {% for financiamiento in financiamientos %}
+                    <option value="{{ financiamiento.id }}">{{ financiamiento.financiamientos }}</option>
+                {% endfor %}
+                
+            </select>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'DetallesCuotas' id_cv %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </div>
+    </form>
+
+
+
+
+    
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>FECHA</th>
+                <th>FINANCIACION</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            <td>{{ fecha_financiacion }}</td>
+            <td>{{ financiacion_info }}</td>
+            
+        </tbody>
+    </table>
+    <!-- <div class="mb-3" id="cb_refinanciar">
+        <input type="checkbox" id="checkbox_ref" class="form-check-input">
+        <label for="toggleMatr" class="form-check-label">Financiar</label>
+    </div> -->
+
+  
+        {% if boton_pagar %}
+        <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
+            <i class="fas fa-money-check-alt"></i> Pagar
+        </a>
+        {% endif %}
+
+    
+    
     
     <div id="div_form_pago" style="display: none;">
         {% if id_cv %}
@@ -212,7 +324,7 @@
                 <th>Moneda</th>
                 <th>Entrega</th> 
                 <th>Cantidad restante</th>
-                <th>Cuotas</th>
+                
                 <th>Comprobante</th>
                 <th>Acciones</th>
             </tr>
@@ -221,13 +333,13 @@
             {% if page_obj %}
                {% for cuota in page_obj %}
                 <tr>
-                    <td>Entrega inicial</td>
-                    <td>{{ cuota.cuota.observaciones }}</td>
-                    <td>{{ cuota.cuota.fecha_pago }}</td>
-                    <td>{{ cuota.cuota.moneda }}</td>
-                    <td>{% if cuota.cuota.moneda == "Pesos" %} {{ cuota.cuota.valor_pago_pesos }} {% else %} {{ cuota.cuota.valor_pago_dolares }} {% endif %}</td>
-                    <td>${{ cuota.cuota.cant_restante_pesos }}/U$s{{ cuota.cuota.cant_restante_dolares }}</td>
-                    <td>6 X $4000</td>
+                    <td>{{ cuota.cuota.cuota__tipo_pago }}</td>
+                    <td>{{ cuota.cuota.cuota__observaciones }}</td>
+                    <td>{{ cuota.cuota.cuota__fecha_pago }}</td>
+                    <td>{{ cuota.cuota.cuota__moneda }}</td>
+                    <td>{% if cuota.cuota.cuota__moneda == "Pesos" %} {{ cuota.cuota.cuota__valor_pago_pesos }} {% else %} {{ cuota.cuota.cuota__valor_pago_dolares }} {% endif %}</td>
+                    <td>${{ cuota.cuota.cuota__cant_restante_pesos }}/U$s{{ cuota.cuota.cuota__cant_restante_dolares }}</td>
+                    
                     <td>
                         {% if cuota.comprobante_pago %}
                         <a href="{{ cuota.comprobante_pago }}" target="_blank" class="btn btn-primary">
@@ -240,7 +352,7 @@
                     </td>
                     <td>
                         {% if cuota.mostrar_boton %}
-                        <a href="{% url 'BajaPago' cuota.cuota.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -258,6 +370,8 @@
 
         </tbody>
     </table>
+
+
     <!-- Paginación -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
@@ -292,6 +406,8 @@
             {% endif %}
         </ul>
     </nav>
+
+    
     <a href="" class="btn btn-secondary">Volver</a>
 </div>
 

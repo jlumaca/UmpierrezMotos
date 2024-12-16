@@ -1666,58 +1666,154 @@ def detalles_cuotas(req,id_cv):
     
     moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
     fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
+
+    ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+    precio_dolar = PrecioDolar.objects.get(id=1)
     
+    if ult_cuota:
+        cant_restante_pesos = ult_cuota.cant_restante_pesos
+        cant_restante_dolares = ult_cuota.cant_restante_dolares
+    else:
+        cv = ComprasVentas.objects.get(id=id_cv)
+        moto = ComprasVentas.objects.get(id=cv.moto_id)
+        
+        if moto.moneda_precio == "Pesos":
+            cant_restante_pesos = moto.precio_final
+            cant_restante_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
+        else:
+            cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
+            cant_restante_dolares = moto.precio_final
     
-    return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"id_cv":id_cv,
-                                                                           "producto":datos[0],
-                                                                           "precio_inicial":datos[1],
-                                                                           "precio_final":datos[2],
-                                                                           "pago_acordado":datos[3],
-                                                                           "primeros_pagos":datos[4],
-                                                                           "financiamiento":datos[5],
-                                                                           "financiamientos":datos[6],
-                                                                           "page_obj":page_obj,
-                                                                           "financiacion_info":financiamiento,
-                                                                           "financiacion_inicial":fin_ini,
-                                                                           "fecha_financiacion":fecha,
-                                                                           "boton_pagar":mostrar_boton,
-                                                                           "fin_actual":ex_fin_actual})
+    precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
+    
+    contexto = {"id_cv":id_cv,
+                "producto":datos[0],
+                "precio_inicial":datos[1],
+                "precio_final":datos[2],
+                "pago_acordado":datos[3],
+                "primeros_pagos":datos[4],
+                "financiamiento":datos[5],
+                "financiamientos":datos[6],
+                "page_obj":page_obj,
+                "financiacion_info":financiamiento,
+                "financiacion_inicial":fin_ini,
+                "fecha_financiacion":fecha,
+                "boton_pagar":mostrar_boton,
+                "fin_actual":ex_fin_actual,
+                "cant_restante_dolares":int(cant_restante_dolares),
+                "cant_restante_pesos":int(cant_restante_pesos),
+                "precio_dolar":precio}
+    
+    return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
 def buscar_pagos_por_refinanciamiento(req):
-    try:
+    # try:
         id = int(req.POST['ref_id'])
         fin = Financiamientos.objects.filter(id=id).first()
         datos = obtener_detalles_cuotas_comunes(fin.venta_id)
+        fin_inicial = Financiamientos.objects.filter(venta_id=fin.venta_id,inicial=1).first()
+        moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
+        fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
         
         page_obj = obtener_detalles_cuotas_financiamiento(req,id)
         moneda = "$" if fin.moneda_cuota == "Pesos" else "U$S"
         financiamiento = f"{str(fin.cantidad_cuotas)} x {moneda} {str(fin.valor_cuota)}"
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"id_cv":fin.venta_id,
-                                                                           "producto":datos[0],
-                                                                           "precio_inicial":datos[1],
-                                                                           "precio_final":datos[2],
-                                                                           "pago_acordado":datos[3],
-                                                                           "primeros_pagos":datos[4],
-                                                                           "financiamiento":datos[5],
-                                                                           "financiamientos":datos[6],
-                                                                           "page_obj":page_obj,
-                                                                           "financiacion_info":financiamiento,
-                                                                           "fecha_financiacion":fin.fecha,
-                                                                           "fin_actual":True})
+        ult_cuota = CuotasMoto.objects.filter(venta_id=fin.venta_id).latest('id')
+        precio_dolar = PrecioDolar.objects.get(id=1)
+        
+        if ult_cuota:
+            cant_restante_pesos = ult_cuota.cant_restante_pesos
+            cant_restante_dolares = ult_cuota.cant_restante_dolares
+        else:
+            cv = ComprasVentas.objects.get(id=fin.venta_id)
+            moto = ComprasVentas.objects.get(id=cv.moto_id)
+            
+            if moto.moneda_precio == "Pesos":
+                cant_restante_pesos = moto.precio_final
+                cant_restante_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
+            else:
+                cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
+                cant_restante_dolares = moto.precio_final
+        
+        precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
+        contexto = {"id_cv":fin.venta_id,
+                    "producto":datos[0],
+                    "precio_inicial":datos[1],
+                    "precio_final":datos[2],
+                    "pago_acordado":datos[3],
+                    "primeros_pagos":datos[4],
+                    "financiamiento":datos[5],
+                    "financiamientos":datos[6],
+                    "page_obj":page_obj,
+                    "financiacion_info":financiamiento,
+                    "financiacion_inicial":fin_ini,
+                    "fecha_financiacion":fin.fecha,
+                    "boton_pagar":True if fin.actual else False,
+                    "fin_actual":True,
+                    "cant_restante_dolares":int(cant_restante_dolares),
+                    "cant_restante_pesos":int(cant_restante_pesos),
+                    "precio_dolar":precio}
+        
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
-    except Exception as e:
-        pass
+    # except Exception as e:
+    #     pass
 
 
-def refinanciar_pagos(req):
+def refinanciar_pagos(req,id_cv):
     try:
-        pass
-        #RESTA = CANT_RESTANTE - ULTIMA_ENTREGA
-        #PORCENTAJE = (RESTA * CANT_CUOTAS * RECARGO) / 100   
-        #REFINANCIACION = RESTA + PORCENTAJE
-        #VALOR_CUOTA = REFINANCIACION / CANT_CUOTAS
+        if req.POST['moneda_refinanciacion'] == "Pesos":
+            valor_cuota = req.POST['valor_cuota_pesos']
+        else:
+            valor_cuota = req.POST['valor_cuota_dolares']
+        alta_financiamientos(req.POST['recargo_porcentaje'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0)
+        messages.success(req, "Financiamiento ingresado con éxito")
+        return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
     except Exception as e:
         pass
+
+
+def alta_pago_cuota(req,id_cv):
+        page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
+    # try:
+        comprobante = req.FILES.get('comprobante_pago')
+        moneda = req.POST['moneda_entrega']
+        caja = Caja.objects.filter(estado="Abierto").first()
+        forma_pago = req.POST['forma_pago']
+        fecha_proximo_pago = req.POST['f_prox_pago']
+        observaciones_pago = req.POST['observaciones_pago']
+        cv = ComprasVentas.objects.get(id=id_cv)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = dolar.precio_dolar_tienda
+        # recargo = req.POST['recargo']
+        # total = req.POST['total_luego_recargo']
+        existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).exists()
+        moto = Moto.objects.get(id=cv.moto_id)
+        valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
+        
+        validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",existe_cuota,id_cv)
+        validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
+        fecha_actual = datetime.now().date()
+        if validar_precio:
+            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        elif validar_fecha_proximo_pago.date() < fecha_actual:
+            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        else:
+            # if forma_pago == "Efectivo" and caja:
+            #     movimiento_caja_por_pago(req,float(total),id_cv,moneda)
+            fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
+            cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
+            num_cuota_actual = cant_cuotas + 1
+            cuota = "Cuota " + str(num_cuota_actual)   
+            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
+            if alta:
+                comprobante_url = alta
+            else:
+                comprobante_url = None
+            messages.success(req, "Pago ingresado con éxito")
+            return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
 
 
 @admin_required
@@ -1749,7 +1845,7 @@ def alta_pago(req,id_cv):
         else:
             # if forma_pago == "Efectivo" and caja:
                 # movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
-            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago)
+            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False)
             if alta:
                 comprobante_url = alta
             else:

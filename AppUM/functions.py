@@ -492,7 +492,7 @@ def obtener_detalles_cuotas_comunes(id_cv):
     compra = ComprasVentas.objects.get(id=id_cv)
     moto = Moto.objects.get(id=compra.moto_id)
     producto = f"{moto.marca} {moto.modelo}"
-    primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial"]).order_by('-id')
+    primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-id')
     primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
     if moto.moneda_precio == "Pesos":
         moneda = "$"

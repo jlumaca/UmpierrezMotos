@@ -135,7 +135,7 @@ def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
     insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
 
-def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago):
+def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
     nueva_cuota = CuotasMoto(
                     fecha_pago = datetime.now(),
                     fecha_prox_pago = fecha_prox_pago,
@@ -149,8 +149,16 @@ def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moned
                     valor_pago_pesos = entrega_pesos,
                     comprobante_pago = comprobante,
                     metodo_pago = forma_pago,
+                    tipo_pago = tipo_pago
                 )
     nueva_cuota.save()
+    if ingresar_fin:
+         fin = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
+         c_f = CuotasFinanciacion(
+            cuota_id = nueva_cuota.id,
+            financiamiento_id = fin.id         
+        )
+         c_f.save()
     if nueva_cuota.comprobante_pago:
             comprobante_url = nueva_cuota.comprobante_pago.url
     else:
@@ -184,6 +192,11 @@ def alta_cuota_accesorio(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,mon
 
 
 def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial):
+    ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
+    if ult_fin:
+         ult_fin.actual = 0
+         ult_fin.save()
+
     financiamiento = Financiamientos(
         fecha = datetime.now(),
         recargo = recargo,

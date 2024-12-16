@@ -57,44 +57,49 @@
         <i class="fas fa-money-check-alt"></i> Refinanciar
     </a>
     <div id="div_refinanciamiento" style="display: none;">
-        <form action="" enctype="multipart/form-data" method="POST">
-        <div class="mb-3">
-            <label for="documento" class="form-label">Moneda</label>
-            <div class="input-group">
-                <select class="form-control" name="moneda_refinanciacion" id="moneda_refinanciacion">
-                    <option value="Pesos">Pesos</option>
-                    <option value="Dolares">Dólares</option>
-                </select>
+        <form action="{% url 'Refinanciar' id_cv %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
+                    <select class="form-control" name="moneda_refinanciacion" id="moneda_refinanciacion">
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="mb-3" id="cantidad_restante_pesos">
-            <label for="recargo_porcentaje" class="form-label">Cantidad restante en pesos</label>
-            <input value="{{ cant_restante_pesos }}" type="number" class="form-control" name="cantidad_restante" id="txt_cantidad_restante_pesos" placeholder="Cantidad restante" readonly>
-        </div>
-        <div class="mb-3" id="cantidad_restante_dolares">
-            <label for="recargo_porcentaje" class="form-label">Cantidad restante en dólares</label>
-            <input value="{{ cant_restante_dolares }}" type="number" class="form-control" name="cantidad_restante" id="txt_cantidad_restante_dolares" placeholder="Cantidad restante" readonly>
-        </div>
-        <div class="mb-3">
-            <label for="recargo_porcentaje" class="form-label">Porcentaje de recargo</label>
-            <input type="number" class="form-control" name="recargo_porcentaje" id="recargo_porcentaje" placeholder="Ejemplo: 5 para 5%" required>
-        </div>
-    
-        <div class="mb-3">
-            <label for="recargo" class="form-label">Cantidad de cuotas</label>
-            <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" required>
-        </div>
-    
-        <div class="mb-3">
-            <label for="total" class="form-label">Valor de las cuotas en pesos</label>
-            <input type="number" class="form-control" name="valor_cuota_pesos" id="valor_cuota" readonly>
-        </div>
-        <div class="mb-3">
-            <label for="total" class="form-label">Valor de las cuotas en dólares</label>
-            <input type="text" value="VALOR X EN DOLARES" class="form-control" name="valor_cuota_dolares" id="valor_cuota" readonly>
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <a href="" class="btn btn-secondary">Cancelar</a>
+            <div class="mb-3" id="cantidad_restante_pesos">
+                <label for="recargo_porcentaje" class="form-label">Precio del dólar actualmente:</label>
+                <!-- <input value="{{ precio_dolar|floatformat:2 }}" type="number" class="form-control" name="cantidad_restante" id="precio_dolar" placeholder="Cantidad restante" readonly> -->
+                <p>{{ precio_dolar|floatformat:2 }}</p>
+            </div>
+            <div class="mb-3" id="cantidad_restante_pesos">
+                <label for="recargo_porcentaje" class="form-label">Cantidad restante en pesos</label>
+                <input value="{{ cant_restante_pesos }}" type="number" class="form-control" name="cantidad_restante" id="txt_cantidad_restante_pesos" placeholder="Cantidad restante" readonly>
+            </div>
+            <div class="mb-3" id="cantidad_restante_dolares">
+                <label for="recargo_porcentaje" class="form-label">Cantidad restante en dólares</label>
+                <input value="{{ cant_restante_dolares }}" type="number" class="form-control" name="cantidad_restante" id="txt_cantidad_restante_dolares" placeholder="Cantidad restante" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="recargo_porcentaje" class="form-label">Porcentaje de recargo</label>
+                <input type="number" class="form-control" name="recargo_porcentaje" id="recargo_porcentaje" placeholder="Ejemplo: 5 para 5%" required>
+            </div>
+        
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Cantidad de cuotas</label>
+                <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" required>
+            </div>
+        
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en pesos</label>
+                <input type="number" class="form-control" name="valor_cuota_pesos" id="valor_cuota_pesos" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en dólares</label>
+                <input type="number" class="form-control" name="valor_cuota_dolares" id="valor_cuota_dolares" readonly>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="" class="btn btn-secondary">Cancelar</a>
     </form>
     </div>
 
@@ -119,9 +124,77 @@
 
 
     <h5>Entregas y/o señas</h5>
-    <a href="#" class="btn btn-primary mb-3">
+    <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pagos_ini()">
         <i class="fas fa-money-check-alt"></i> Pagar
     </a>
+    <div id="div_form_pago_entregas_iniciales" style="display: none;">
+        {% if id_cv %}
+        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">
+            {% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Forma de pago</label>
+                <div class="input-group">
+                    <select class="form-control" name="forma_pago" id="forma_pago">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Débito">Débito</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Pago a realizar</label>
+                <div class="input-group">
+                    <select class="form-control" name="pago_a_realizar" id="pago_a_realizar">
+                        <option value="Seña">Seña</option>
+                        <option value="Entrega inicial">Entrega inicial</option>
+                        <option value="Entrega">Entrega</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
+                    <select class="form-control" name="moneda_entrega" id="moneda_entrega">
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
+            </div>
+            
+            
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Cantidad a pagar</label>
+                <input type="number" class="form-control" name="valor_a_pagar" id="valor_a_pagar" placeholder="Valor a pagar" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Fecha del próximo pago</label>
+                <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha de nacimiento" required>
+            </div>
+        
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Observaciones</label>
+                <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
+            </div>
+        
+            <div class="mb-3">
+                <label for="libreta_propiedad" class="form-label">Comprobante de pago</label>
+                <input type="file" class="form-control" name="comprobante_pago" id="comprobante_pago">
+            </div>
+        
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <!-- <a href="{% url 'DetallesCuotas' id_cv %}" class="btn btn-secondary">Cancelar</a> -->
+            <!-- <button class="btn btn-secondary" id="cerrar_form_ent_ini">Guardar</button> -->
+            <a href="#" class="btn btn-secondary" onclick="cerrarFormPagIni()">
+                Cancelar
+            </a>
+        </form>
+        
+        
+        {% endif %}
+    </div>
+
     <table class="table">
         <thead>
             <tr>
@@ -259,9 +332,9 @@
     
     
     
-    <div id="div_form_pago" style="display: none;">
+    <div id="div_form_pago_cuotas" style="display: none;">
         {% if id_cv %}
-        <form action="{% url 'AltaPago' id_cv %}" enctype="multipart/form-data" method="POST">
+        <form action="{% url 'PagoCuotas' id_cv %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Forma de pago</label>
@@ -270,16 +343,6 @@
                         <option value="Efectivo">Efectivo</option>
                         <option value="Transferencia">Transferencia</option>
                         <option value="Débito">Débito</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Pago a realizar</label>
-                <div class="input-group">
-                    <select class="form-control" name="pago_a_realizar" id="pago_a_realizar">
-                        <option value="Seña">Seña</option>
-                        <option value="Entrega inicial">Entrega inicial</option>
-                        <option value="Cuota">Cuota</option>
                     </select>
                 </div>
             </div>
@@ -316,7 +379,8 @@
             </div>
         
             <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="" class="btn btn-secondary">Cancelar</a>
+            
+            <a href="{% url 'DetallesCuotas' id_cv %}" class="btn btn-secondary">Cancelar</a>
         </form>
         
         
@@ -422,134 +486,136 @@
 </div>
 
 <script>
-    const cuotas = JSON.parse('{{ cuotas_json|escapejs }}');
-    console.log(cuotas);
-    function mostrar_form_pago(){
-        var div_form = document.getElementById("div_form_pago")
-        var div_ref = document.getElementById("div_refinanciamiento")
-        div_form.style.display = "block";
-        div_ref.style.display = "none";
-    }
+    //############################
+    //NO BORRAR LO COMENTADO
+    //############################
+    //NO BORRAR LO COMENTADO
+    //############################
+    //NO BORRAR LO COMENTADO
+
+
+
+    // const cuotas = JSON.parse('{{ cuotas_json|escapejs }}');
+    // console.log(cuotas);
+    // function mostrar_form_pago(){
+    //     var div_form = document.getElementById("div_form_pago")
+    //     var div_ref = document.getElementById("div_refinanciamiento")
+    //     div_form.style.display = "block";
+    //     div_ref.style.display = "none";
+    // }
 
     function mostrar_form_ref(){
         var div_ref = document.getElementById("div_refinanciamiento")
-        var div_form = document.getElementById("div_form_pago")
+        var div_form = document.getElementById("div_form_pago_entregas_iniciales")
+        var div_form_pago_cuotas = document.getElementById("div_form_pago_cuotas")
         div_ref.style.display = "block";
         div_form.style.display = "none";
+        div_form_pago_cuotas.style.display = "none";
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-    const valorInput = document.getElementById('valor_a_pagar');
-    const porcentajeInput = document.getElementById('recargo_porcentaje');
-    const recargoInput = document.getElementById('recargo');
-    const totalInput = document.getElementById('total');
-    
-    function calcularRecargo() {
-        const valor = parseFloat(valorInput.value) || 0;
-        const porcentaje = parseFloat(porcentajeInput.value) || 0;
-
-        // Calcular el recargo basado en el porcentaje ingresado
-        const recargo = (valor * porcentaje) / 100;
-        const total = valor + recargo;
-
-        // Actualizar los campos
-        recargoInput.value = recargo.toFixed(2);
-        totalInput.value = total.toFixed(2);
+    function mostrar_form_pagos_ini(){
+        var div_form_pago_entregas_iniciales = document.getElementById("div_form_pago_entregas_iniciales")
+        var div_ref = document.getElementById("div_refinanciamiento")
+        var div_form_pago_cuotas = document.getElementById("div_form_pago_cuotas")
+        // var div_form = document.getElementById("div_form_pago")
+        div_form_pago_entregas_iniciales.style.display = "block";
+        div_ref.style.display = "none";
+        div_form_pago_cuotas.style.display = "none";
     }
 
-    valorInput.addEventListener('input', calcularRecargo);
-    porcentajeInput.addEventListener('input', calcularRecargo);
-});
-
-document.getElementById("imprimir-resumen").addEventListener("click", function () {
-    generarResumen(cuotas); // Aquí pasas los datos directamente a la función
-});
-
-function generarResumen(cuotas) {
-    let resumenHTML = "<h2>Resumen de Cuotas Realizadas</h2><ul>";
-    cuotas.forEach(cuota => {
-        resumenHTML += `<li>Fecha de Vencimiento: ${cuota.fecha_vencimiento}, Moneda: ${cuota.moneda}, Monto: ${cuota.monto.toFixed(2)}</li>`;
-    });
-    resumenHTML += "</ul>";
-
-    // Crear una ventana nueva para imprimir
-    const ventana = window.open("", "_blank");
-    ventana.document.write(resumenHTML);
-    ventana.document.close();
-    ventana.print();
-}
-
-function check_refinanciamiento(){
-    var pago_a_realizar = document.getElementById('pago_a_realizar').value;
-    var cb_refinanciar = document.getElementById('cb_refinanciar');
-
-    if (pago_a_realizar == "Cuota"){
-        cb_refinanciar.style.display = "block";
-    }else{
-        cb_refinanciar.style.display = "none";
+    function mostrar_form_pago(){
+        var div_form_pago_cuotas = document.getElementById("div_form_pago_cuotas")
+        var div_ref = document.getElementById("div_refinanciamiento")
+        var div_form = document.getElementById("div_form_pago_entregas_iniciales")
+        div_form_pago_cuotas.style.display = "block";
+        div_ref.style.display = "none";
+        div_form.style.display = "none";
     }
-}
+    function cerrarFormPagIni(){
+        var div_form_pago_entregas_iniciales = document.getElementById("div_form_pago_entregas_iniciales")
+        div_form_pago_entregas_iniciales.style.display = "none";
+    }
 
-// document.getElementById("checkbox_ref").addEventListener("change", function() {
-//         const div_refinanciamiento = document.getElementById("div_refinanciamiento");
-//         div_refinanciamiento.style.display = this.checked ? "block" : "none";
+    function cerrarFormRef(){
+        var div_ref = document.getElementById("div_refinanciamiento")
+        div_ref.style.display = "none";
+    }
+//############################
+    //NO BORRAR LO COMENTADO
+    //############################
+    //NO BORRAR LO COMENTADO
+    //############################
+    //NO BORRAR LO COMENTADO
+
+
+// document.getElementById("imprimir-resumen").addEventListener("click", function () {
+//     generarResumen(cuotas); // Aquí pasas los datos directamente a la función
+// });
+
+// function generarResumen(cuotas) {
+//     let resumenHTML = "<h2>Resumen de Cuotas Realizadas</h2><ul>";
+//     cuotas.forEach(cuota => {
+//         resumenHTML += `<li>Fecha de Vencimiento: ${cuota.fecha_vencimiento}, Moneda: ${cuota.moneda}, Monto: ${cuota.monto.toFixed(2)}</li>`;
 //     });
+//     resumenHTML += "</ul>";
 
-    // function moneda_refinanciacion(){
-    //     var cantidad_restante_pesos = document.getElementById("cantidad_restante_pesos")
-    //     var cantidad_restante_dolares = document.getElementById("cantidad_restante_dolares")
-    //     var moneda_refinanciacion = document.getElementById("moneda_refinanciacion").value
+//     // Crear una ventana nueva para imprimir
+//     const ventana = window.open("", "_blank");
+//     ventana.document.write(resumenHTML);
+//     ventana.document.close();
+//     ventana.print();
+// }
 
-    //     if (moneda_refinanciacion === "Pesos"){
-    //         cantidad_restante_pesos.style.display = "block";
-    //         cantidad_restante_dolares.style.display = "none";
-    //     }else{
-    //         cantidad_restante_pesos.style.display = "none";
-    //         cantidad_restante_dolares.style.display = "block";
-    //     }
-        
-    // }
+// function check_refinanciamiento(){
+//     var pago_a_realizar = document.getElementById('pago_a_realizar').value;
+//     var cb_refinanciar = document.getElementById('cb_refinanciar');
 
-    document.addEventListener('DOMContentLoaded', () => {
-    const monedaRef = document.getElementById('moneda_refinanciacion');
-    let cantidadRestante = document.getElementById('txt_cantidad_restante_pesos');
+//     if (pago_a_realizar == "Cuota"){
+//         cb_refinanciar.style.display = "block";
+//     }else{
+//         cb_refinanciar.style.display = "none";
+//     }
+// }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const txt_cantidad_restante_pesos = document.getElementById('txt_cantidad_restante_pesos');
+    const txt_cantidad_restante_dolares = document.getElementById('txt_cantidad_restante_dolares');
     const recargo = document.getElementById('recargo_porcentaje');
     const cantCuotas = document.getElementById('cant_cuotas');
-    const valorCuota = document.getElementById('valor_cuota');
+    const valorCuotaPesos = document.getElementById('valor_cuota_pesos');
+    const valorCuotaDolares = document.getElementById('valor_cuota_dolares');
+    // const precioDolarTexto = document.getElementById('precio_dolar').textContent;
+    // const precioDolar = parseFloat(precioDolarTexto);
 
-    function actualizarCantidadRestante() {
-        const moneda = monedaRef.value;
-        if (moneda === "Pesos") {
-            cantidadRestante = document.getElementById('txt_cantidad_restante_pesos');
-        } else {
-            cantidadRestante = document.getElementById('txt_cantidad_restante_dolares');
-        }
-        // Actualizar el cálculo cada vez que se cambia la moneda
-        calcularRecargoRef();
-    }
-
+    
     function calcularRecargoRef() {
-        const valor = parseFloat(cantidadRestante.value) || 0;
+        const cant_restante_pesos = parseFloat(txt_cantidad_restante_pesos.value) || 0;
+        const cant_restante_dolares = parseFloat(txt_cantidad_restante_dolares.value) || 0;
         const porcentaje = parseFloat(recargo.value) || 0;
         const cuotas = parseFloat(cantCuotas.value) || 0;
 
         // Calcular el recargo basado en el porcentaje ingresado
-        const sumarRecargo = (valor * porcentaje * cuotas) / 100;
-        const total = valor + sumarRecargo;
-        const totalValorCuota = total / cuotas;
+        const sumarRecargoPesos = (cant_restante_pesos * porcentaje * cuotas) / 100;
+        const sumarRecargoDolares = (cant_restante_dolares * porcentaje * cuotas) / 100; 
+        const totalPesos = cant_restante_pesos + sumarRecargoPesos;
+        const totalDolares = cant_restante_dolares + sumarRecargoDolares;
+        const ValorCuotaPesos = totalPesos / cuotas;
+        const ValorCuotaDolares = totalDolares / cuotas;
 
         // Actualizar los campos
-        valorCuota.value = totalValorCuota.toFixed(2);
+        valorCuotaPesos.value = ValorCuotaPesos.toFixed(0);
+        valorCuotaDolares.value = ValorCuotaDolares.toFixed(0);
     }
 
     // Listeners para actualizar según los cambios en la moneda o valores ingresados
-    monedaRef.addEventListener('change', actualizarCantidadRestante);
-    cantidadRestante.addEventListener('input', calcularRecargoRef);
+   
+    txt_cantidad_restante_pesos.addEventListener('input', calcularRecargoRef);
+    txt_cantidad_restante_dolares.addEventListener('input', calcularRecargoRef);
     recargo.addEventListener('input', calcularRecargoRef);
     cantCuotas.addEventListener('input', calcularRecargoRef);
 
-    // Inicializar el cálculo al cargar la página
-    actualizarCantidadRestante();
 });
 </script>
 {% endblock %}

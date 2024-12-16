@@ -1652,18 +1652,22 @@ def detalles_cuotas(req,id_cv):
         financiamiento = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}"
         mostrar_boton = True if fin_actual.actual else False
         fecha = fin_actual.fecha
+        ex_fin_actual = True
+        page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
     else:
         moneda = ""
         financiamiento = ""
         mostrar_boton = False
         fecha = None
+        ex_fin_actual = False
+        page_obj = None
 
     fin_inicial = Financiamientos.objects.filter(venta_id=id_cv,inicial=1).first()
     
     moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
     fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
     
-    page_obj = obtener_detalles_cuotas_financiamiento(req,fin_inicial.id)
+    
     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"id_cv":id_cv,
                                                                            "producto":datos[0],
                                                                            "precio_inicial":datos[1],
@@ -1676,7 +1680,8 @@ def detalles_cuotas(req,id_cv):
                                                                            "financiacion_info":financiamiento,
                                                                            "financiacion_inicial":fin_ini,
                                                                            "fecha_financiacion":fecha,
-                                                                           "boton_pagar":mostrar_boton})
+                                                                           "boton_pagar":mostrar_boton,
+                                                                           "fin_actual":ex_fin_actual})
 
 def buscar_pagos_por_refinanciamiento(req):
     try:
@@ -1697,7 +1702,8 @@ def buscar_pagos_por_refinanciamiento(req):
                                                                            "financiamientos":datos[6],
                                                                            "page_obj":page_obj,
                                                                            "financiacion_info":financiamiento,
-                                                                           "fecha_financiacion":fin.fecha})
+                                                                           "fecha_financiacion":fin.fecha,
+                                                                           "fin_actual":True})
 
     except Exception as e:
         pass

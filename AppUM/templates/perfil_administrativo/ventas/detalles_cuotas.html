@@ -52,10 +52,10 @@
     <a id="imprimir-resumen" class="btn btn-primary mb-3" data-id-cv="{{ id_cv }}">
         <i class="fas fa-print"></i> Imprimir Resumen
     </a>
+    {% endif %}
     <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_ref()">
         <i class="fas fa-money-check-alt"></i> Refinanciar
     </a>
-    {% endif %}
     <div id="div_refinanciamiento" style="display: none;">
         <form action="" enctype="multipart/form-data" method="POST">
         <div class="mb-3">
@@ -194,6 +194,8 @@
 
 
     <h5>Cuotas y financiaciones</h5>
+
+    {% if fin_actual %}
   
     <form action="{% url 'PagoPorRef' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
     <div class="mb-3">
@@ -215,7 +217,7 @@
         </div>
     </div>
     </form>
-
+    {% endif %}
 
 
 
@@ -230,9 +232,16 @@
             </tr>
         </thead>
         <tbody>
+            {% if fin_actual %}
             <td>{{ fecha_financiacion }}</td>
             <td>{{ financiacion_info }}</td>
-            
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center text-muted">
+                    No hay registros de financiaciones para esta venta.
+                </td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
     <!-- <div class="mb-3" id="cb_refinanciar">
@@ -240,7 +249,7 @@
         <label for="toggleMatr" class="form-check-label">Financiar</label>
     </div> -->
 
-  
+    {% if fin_actual %}
         {% if boton_pagar %}
         <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago()">
             <i class="fas fa-money-check-alt"></i> Pagar
@@ -407,7 +416,8 @@
         </ul>
     </nav>
 
-    
+
+    {% endif %}
     <a href="" class="btn btn-secondary">Volver</a>
 </div>
 

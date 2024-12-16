@@ -1468,7 +1468,7 @@ def form_venta_moto(req,id_moto):
 
 @admin_required
 def venta_moto(req,id_moto,id_cliente):
-    try:
+    # try:
         moto = Moto.objects.get(id=id_moto)
         moto.pertenece_tienda = 0
         moto.precio_final = req.POST['precio_recargo']
@@ -1492,8 +1492,8 @@ def venta_moto(req,id_moto,id_cliente):
         #REDIRIGIR A LA FICHA DEL CLIENTE
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-    except Exception as e:
-        return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 @admin_required
 def vista_ventas(req):
@@ -1667,15 +1667,16 @@ def detalles_cuotas(req,id_cv):
     moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
     fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
 
-    ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+    ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
     precio_dolar = PrecioDolar.objects.get(id=1)
     
     if ult_cuota:
+        ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
         cant_restante_pesos = ult_cuota.cant_restante_pesos
         cant_restante_dolares = ult_cuota.cant_restante_dolares
     else:
         cv = ComprasVentas.objects.get(id=id_cv)
-        moto = ComprasVentas.objects.get(id=cv.moto_id)
+        moto = Moto.objects.get(id=cv.moto_id)
         
         if moto.moneda_precio == "Pesos":
             cant_restante_pesos = moto.precio_final
@@ -1774,8 +1775,8 @@ def refinanciar_pagos(req,id_cv):
 
 
 def alta_pago_cuota(req,id_cv):
-        page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
-    # try:
+    page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
+    try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
         caja = Caja.objects.filter(estado="Abierto").first()
@@ -1790,18 +1791,27 @@ def alta_pago_cuota(req,id_cv):
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).exists()
         moto = Moto.objects.get(id=cv.moto_id)
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
+        fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
         
         validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",existe_cuota,id_cv)
         validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
         if validar_precio:
-            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req, validar_precio)
+            return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         elif validar_fecha_proximo_pago.date() < fecha_actual:
-            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual")
+            return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
+        elif int(fin_actual.valor_cuota) != int(req.POST['valor_a_pagar']):
+            #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"El valor ingresado de la cantidad a pagar es incorrecto","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
+            return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         else:
             # if forma_pago == "Efectivo" and caja:
             #     movimiento_caja_por_pago(req,float(total),id_cv,moneda)
-            fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
+            
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
             cuota = "Cuota " + str(num_cuota_actual)   
@@ -1812,8 +1822,9 @@ def alta_pago_cuota(req,id_cv):
                 comprobante_url = None
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
+    except Exception as e:
+        messages.error(req, "Algo salió mal: " +str(e))
+        return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
 
 
 @admin_required
@@ -1845,7 +1856,7 @@ def alta_pago(req,id_cv):
         else:
             # if forma_pago == "Efectivo" and caja:
                 # movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
-            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False)
+            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
             if alta:
                 comprobante_url = alta
             else:
@@ -1857,9 +1868,10 @@ def alta_pago(req,id_cv):
 
 @admin_required
 def baja_pago(req,id_cm):
-    try:
+    # try:
         cuota = CuotasMoto.objects.get(id=id_cm)
         id_cv = cuota.venta_id
+        # print(id_cv)
         if req.method == "POST":
             if cuota.metodo_pago == "Efectivo":
                 if cuota.moneda == "Pesos":
@@ -1876,13 +1888,18 @@ def baja_pago(req,id_cm):
                 caja.save()
                 insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id)
                 
-                
+            fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
+            c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
+            if c_f:
+                c_f.delete()
             cuota.delete()    
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+            # messages.success(req, "Pago borrado con éxito")
+            # return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         else:
             return render(req,"perfil_administrativo/ventas/baja_pago.html",{"id_cv":id_cv})
-    except Exception as e:
-        return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
 
 @admin_required
 def reservas(req):

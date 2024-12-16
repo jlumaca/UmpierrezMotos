@@ -192,8 +192,9 @@ def alta_cuota_accesorio(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,mon
 
 
 def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial):
-    ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
+    ult_fin = Financiamientos.objects.filter(venta_id=venta_id).first()
     if ult_fin:
+         ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
          ult_fin.actual = 0
          ult_fin.save()
 

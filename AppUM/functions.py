@@ -493,11 +493,11 @@ def obtener_detalles_cuotas_comunes(id_cv):
     moto = Moto.objects.get(id=compra.moto_id)
     producto = f"{moto.marca} {moto.modelo}"
     primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-id')
-    primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
     if moto.moneda_precio == "Pesos":
         moneda = "$"
     else:
         moneda = "U$S"
+    primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
     financiamiento = f"{str(primer_fin.cantidad_cuotas)} x {moneda} {str(primer_fin.valor_cuota)}"
 
 
@@ -539,17 +539,19 @@ def obtener_detalles_cuotas_financiamiento(req,id_f):
                     'cuota__valor_pago_dolares',
                     'cuota__valor_pago_pesos',
                     'cuota__comprobante_pago',
-                    'cuota__tipo_pago'
+                    'cuota__tipo_pago',
+                    'financiamiento__id'
                 )
             )
     res_pagos = []
     i = 1
     for resultado in resultados:
         ca = CuotasMoto.objects.get(id=resultado['cuota__id'])
+        f = Financiamientos.objects.get(id=resultado['financiamiento__id'])
         res_pagos.append({
         'cuota': resultado,
         'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
-        'mostrar_boton': i == len(resultados)           
+        'mostrar_boton': i == len(resultados) and f.actual   
         })
         i = i + 1
 

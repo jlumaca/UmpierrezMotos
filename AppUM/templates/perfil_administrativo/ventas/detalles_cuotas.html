@@ -39,15 +39,18 @@
     
     {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-{{ message.tags }} mt-3">
+            {% if message.tags == "error" %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == "success" %}
+                <i class="fas fa-check-circle"></i>
+            {% endif %}
+            {{ message }}
+        </div>
     {% endfor %}
-    {% endif %}
-    {% if error_message %}
-            <div class="alert alert-danger mt-3">
-                <i class="fas fa-exclamation-circle"></i> 
-                <p>{{ error_message }}</p>
-            </div>
-    {% endif %}
+{% endif %}
+
+    
     {% if page_obj %}
     <a id="imprimir-resumen" class="btn btn-primary mb-3" data-id-cv="{{ id_cv }}">
         <i class="fas fa-print"></i> Imprimir Resumen
@@ -229,9 +232,9 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if cuota.mostrar_boton %}
+                    
                     <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
-                    {% endif %}
+                    
                 </td>
             </tr>
             {% endfor %}
@@ -425,7 +428,7 @@
                     </td>
                     <td>
                         {% if cuota.mostrar_boton %}
-                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href="{% url 'BajaPago' cuota.cuota.cuota__id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
                     </td>
                 </tr>

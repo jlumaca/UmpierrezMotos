@@ -19,6 +19,7 @@ from .inserts import *
 from .functions import *
 from django.http import JsonResponse
 import json
+from docx import Document
 
 # Create your views here.
 
@@ -1486,9 +1487,11 @@ def venta_moto(req,id_moto,id_cliente):
             existe_reserva.save()
             id_cv = existe_reserva.id
         else:
-
             id_cv = insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
+        cliente = Cliente.objects.get(id=id_cliente)
+        telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
         alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
+        crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
         #REDIRIGIR A LA FICHA DEL CLIENTE
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")

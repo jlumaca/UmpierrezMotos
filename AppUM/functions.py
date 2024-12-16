@@ -7,6 +7,13 @@ from .models import *
 from django.core.files.base import ContentFile
 from datetime import datetime
 from.inserts import *
+from docx import Document
+import locale
+import win32com.client
+import pythoncom
+from django.conf import settings
+import os
+from django.core.files import File
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -170,6 +177,7 @@ def contexto_para_cliente(id_cliente,mensaje_error):
             doc_num = ""
             
             if tipo_documento_ci == "CI":
+                #
                 tipo_doc = "CI"
                 for i in range(2,longitud_doc):
                     doc_num = doc_num + cliente.documento[i]
@@ -557,3 +565,118 @@ def obtener_detalles_cuotas_financiamiento(req,id_f):
 
     page_obj = funcion_paginas_varias(req,res_pagos)
     return page_obj
+
+def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'certificado_venta')
+
+    # doc.save(docx_file_path)
+    # doc = Document('D:\Escritorio\SISTEMA UMPIERREZ MOTOS\cert_bikeup.docx')  # Este es el archivo de Word que quieres editar
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Ruta del archivo de plantilla (ajustado para que sea desde media)
+    plantilla_path = os.path.join(settings.BASE_DIR, 'media', 'cert_bikeup.docx')
+    
+    # Crear el documento Word a partir del archivo de plantilla
+    doc = Document(plantilla_path)
+
+    locale.setlocale(locale.LC_TIME, 'spanish')
+    fecha_actual = datetime.now()
+    fecha_formateada = fecha_actual.strftime("%d DE %B").upper()
+    longitud_doc = len(cliente.documento)
+    doc_num = ""
+    apto = "APTO " + str(cliente.num_apartamento) if cliente.num_apartamento > 0 else ""
+    direccion = cliente.calle.upper() + " " + str(cliente.numero) + apto + ", " + cliente.ciudad.upper()
+    for i in range(2,longitud_doc):
+                    doc_num = doc_num + cliente.documento[i]
+    if moto.moneda_precio == "Pesos":
+        moneda = "PESOS"
+    else:
+        moneda = "DOLARES"
+    for p in doc.paragraphs:
+        if 'FECHA_ACTUAL' in p.text:
+            p.text = p.text.replace('FECHA_ACTUAL', fecha_formateada)
+        if 'NOMBRE_CLIENTE' in p.text:
+            p.text = p.text.replace('NOMBRE_CLIENTE', cliente.nombre.upper() + " " + cliente.apellido.upper())
+        if 'DOCUMENTO_CLIENTE' in p.text:
+            p.text = p.text.replace('DOCUMENTO_CLIENTE', doc_num)
+        if 'TELEFONO_CLIENTE' in p.text:
+            p.text = p.text.replace('TELEFONO_CLIENTE', telefono)
+        if 'DIRECCION_CLIENTE' in p.text:
+            p.text = p.text.replace('DIRECCION_CLIENTE', direccion)
+        if 'MOTO_MARCA' in p.text:
+            p.text = p.text.replace('MOTO_MARCA', moto.marca)
+        if 'MOTO_MODELO' in p.text:
+            p.text = p.text.replace('MOTO_MODELO', moto.modelo)
+        if 'MOTO_CILINDROS' in p.text:
+            p.text = p.text.replace('MOTO_CILINDROS', str(moto.num_cilindros))
+        if 'MOTO_MOTOR' in p.text:
+            p.text = p.text.replace('MOTO_MOTOR', str(moto.motor))
+        if 'MOTO_PASAJEROS' in p.text:
+            p.text = p.text.replace('MOTO_PASAJEROS', str(moto.cantidad_pasajeros))
+        if 'MOTO_ANIO' in p.text:
+            p.text = p.text.replace('MOTO_ANIO', str(moto.anio))
+        if 'MOTO_NUM_MOTOR' in p.text:
+            p.text = p.text.replace('MOTO_NUM_MOTOR', moto.num_motor)
+        if 'MOTO_NUM_CHASIS' in p.text:
+            p.text = p.text.replace('MOTO_NUM_CHASIS', moto.num_chasis)
+        if 'MOTO_MONEDA' in p.text:
+            p.text = p.text.replace('MOTO_MONEDA', moneda)
+    
+    nombre_archivo = f"{moto.id}_{moto.marca}_{moto.modelo}_{cliente.nombre}_{cliente.apellido}_{id_cv}"
+    docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
+    doc.save(docx_file_path)
+
+    ruta_archivo = convertir_docx_a_pdf(docx_file_path,nombre_archivo,id_cv)
+    if os.path.exists(docx_file_path):
+        os.remove(docx_file_path)
+
+
+def convertir_docx_a_pdf(docx_file_path,nombre_archivo,id_cv):
+    # Inicializar COM
+    pythoncom.CoInitialize()
+
+    try:
+        # Iniciar una instancia de Word
+        word = win32com.client.Dispatch("Word.Application")
+        
+        # Abrir el archivo .docx
+        doc = word.Documents.Open(docx_file_path)
+
+        # Asegurarse de que el directorio para guardar el PDF exista
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'certificado_venta')
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Definir la ruta del archivo PDF de salida
+        pdf_file_path = os.path.join(output_dir, f'{nombre_archivo}.pdf')
+
+        # Guardar el documento como .pdf
+        doc.SaveAs(pdf_file_path, FileFormat=17)  # El formato 17 corresponde a PDF
+        
+        # Cerrar el documento y la aplicación de Word
+        doc.Close()
+        word.Quit()
+
+        # Eliminar el archivo .docx original después de generar el PDF
+        if os.path.exists(docx_file_path):
+            os.remove(docx_file_path)
+            print(f"El archivo .docx '{docx_file_path}' ha sido eliminado.")
+
+        # Devolver la ruta del archivo PDF generado
+        compra_venta = ComprasVentas.objects.get(id=id_cv)
+    
+    # Abrir el archivo PDF y asignarlo al campo certificado_venta
+        with open(pdf_file_path, 'rb') as pdf_file:
+            compra_venta.certificado_venta.save(f'{nombre_archivo}.pdf', File(pdf_file))
+    
+    # Guardar los cambios en la base de datos
+        compra_venta.save()
+
+        return pdf_file_path
+
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Finalizar COM (si es necesario)
+        pythoncom.CoUninitialize()

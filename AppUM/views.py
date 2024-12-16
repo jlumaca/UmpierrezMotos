@@ -1670,13 +1670,13 @@ def detalles_cuotas(req,id_cv):
     ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
     precio_dolar = PrecioDolar.objects.get(id=1)
     
+    cv = ComprasVentas.objects.get(id=id_cv)
+    moto = Moto.objects.get(id=cv.moto_id)
     if ult_cuota:
         ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
         cant_restante_pesos = ult_cuota.cant_restante_pesos
         cant_restante_dolares = ult_cuota.cant_restante_dolares
     else:
-        cv = ComprasVentas.objects.get(id=id_cv)
-        moto = Moto.objects.get(id=cv.moto_id)
         
         if moto.moneda_precio == "Pesos":
             cant_restante_pesos = moto.precio_final
@@ -1685,7 +1685,42 @@ def detalles_cuotas(req,id_cv):
             cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
             cant_restante_dolares = moto.precio_final
     
+    cuotas = CuotasMoto.objects.filter(venta_id=id_cv).order_by('-fecha_pago')
     precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
+    cliente = Cliente.objects.get(id=cv.cliente_id)
+    if cuotas:
+        cuotas_data = [
+                {   "cliente":cliente.nombre + " " + cliente.apellido,
+                    
+                    
+                    "tipo_pago":cuota.tipo_pago,
+                    "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
+                    "moneda":cuota.moneda,
+                    "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
+                    "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
+                }
+                for cuota in cuotas
+            ]
+        cuotas_json = json.dumps(cuotas_data)
+    else:
+        cuotas_json = None
+    
+    telefono = ClienteTelefono.objects.filter(cliente_id=cv.cliente_id,principal=1).first()
+    apto = "Apto " + str(cliente.num_apartamento) if int(cliente.num_apartamento) > 0 else ""
+    cliente_data = {
+        "cliente": cliente.nombre + " " + cliente.apellido,
+        "telefono": telefono.telefono,
+        "direccion": cliente.calle + str(cliente.numero) + apto + ", " + cliente.ciudad,
+        }
+    cliente_json = json.dumps(cliente_data)
+
+    detalle_data={
+        "detalle":moto.marca + " " + moto.modelo,
+        "precio_inicial":float(moto.precio),
+        "precio_final":float(moto.precio_final),
+        "financiacion":fin_ini
+    }
+    detalle_json = json.dumps(detalle_data)
     
     contexto = {"id_cv":id_cv,
                 "producto":datos[0],
@@ -1703,7 +1738,11 @@ def detalles_cuotas(req,id_cv):
                 "fin_actual":ex_fin_actual,
                 "cant_restante_dolares":int(cant_restante_dolares),
                 "cant_restante_pesos":int(cant_restante_pesos),
-                "precio_dolar":precio}
+                "precio_dolar":precio,
+                "id_cliente":cv.cliente_id,
+                'cuotas_json': cuotas_json,
+                'cliente_json': cliente_json,
+                "detalle_json":detalle_json}
     
     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
@@ -1722,11 +1761,11 @@ def buscar_pagos_por_refinanciamiento(req):
         ult_cuota = CuotasMoto.objects.filter(venta_id=fin.venta_id).latest('id')
         precio_dolar = PrecioDolar.objects.get(id=1)
         
+        cv = ComprasVentas.objects.get(id=fin.venta_id)
         if ult_cuota:
             cant_restante_pesos = ult_cuota.cant_restante_pesos
             cant_restante_dolares = ult_cuota.cant_restante_dolares
         else:
-            cv = ComprasVentas.objects.get(id=fin.venta_id)
             moto = ComprasVentas.objects.get(id=cv.moto_id)
             
             if moto.moneda_precio == "Pesos":
@@ -1753,7 +1792,8 @@ def buscar_pagos_por_refinanciamiento(req):
                     "fin_actual":True,
                     "cant_restante_dolares":int(cant_restante_dolares),
                     "cant_restante_pesos":int(cant_restante_pesos),
-                    "precio_dolar":precio}
+                    "precio_dolar":precio,
+                    "id_cliente":cv.cliente_id}
         
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 

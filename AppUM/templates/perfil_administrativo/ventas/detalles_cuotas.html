@@ -485,7 +485,7 @@
 
 
     {% endif %}
-    <a href="" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>
@@ -496,16 +496,19 @@
     //############################
     //NO BORRAR LO COMENTADO
 
-
-
-    // const cuotas = JSON.parse('{{ cuotas_json|escapejs }}');
-    // console.log(cuotas);
-    // function mostrar_form_pago(){
-    //     var div_form = document.getElementById("div_form_pago")
-    //     var div_ref = document.getElementById("div_refinanciamiento")
-    //     div_form.style.display = "block";
-    //     div_ref.style.display = "none";
-    // }
+    
+    const cuotas = JSON.parse('{{ cuotas_json|escapejs }}');
+    const cliente = JSON.parse('{{ cliente_json|escapejs }}');
+    const detalle = JSON.parse('{{ detalle_json|escapejs }}');
+    console.log(cuotas);
+    console.log(cliente);
+    console.log(detalle);
+    function mostrar_form_pago(){
+        var div_form = document.getElementById("div_form_pago")
+        var div_ref = document.getElementById("div_refinanciamiento")
+        div_form.style.display = "block";
+        div_ref.style.display = "none";
+    }
 
     function mostrar_form_ref(){
         var div_ref = document.getElementById("div_refinanciamiento")
@@ -551,23 +554,117 @@
     //NO BORRAR LO COMENTADO
 
 
-// document.getElementById("imprimir-resumen").addEventListener("click", function () {
-//     generarResumen(cuotas); // Aquí pasas los datos directamente a la función
-// });
+document.getElementById("imprimir-resumen").addEventListener("click", function () {
+    generarResumen(cuotas,cliente,detalle); // Aquí pasas los datos directamente a la función
+});
 
-// function generarResumen(cuotas) {
-//     let resumenHTML = "<h2>Resumen de Cuotas Realizadas</h2><ul>";
-//     cuotas.forEach(cuota => {
-//         resumenHTML += `<li>Fecha de Vencimiento: ${cuota.fecha_vencimiento}, Moneda: ${cuota.moneda}, Monto: ${cuota.monto.toFixed(2)}</li>`;
-//     });
-//     resumenHTML += "</ul>";
+function generarResumen(cuotas,cliente,detalle) {
+    // Construir el encabezado de la tabla con estilos en línea para impresión
+    let resumenHTML = `
+        <html>
+        <head>
+            <title>Resumen de Compra</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    color: #000;
+                    background-color: #fff;
+                    margin: 20px;
+                }
+                h5 {
+                    text-align: left;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 5px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    border: 1px solid #000;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f0f0f0;
+                    font-weight: bold;
+                }
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="cliente-info">
+                <p><strong>Nombre:</strong> ${cliente.cliente}</p>
+                <p><strong>Contacto:</strong> ${cliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+            </div>
+            <h5>DATOS DE LA COMPRA</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DETALLE</th>
+                        <th>PRECIO INICIAL</th>
+                        <th>PRECIO FINAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+    
+  
+            <tr>
+                <td>${detalle.detalle}</td>
+                <td>${detalle.precio_inicial.toFixed(0)}</td>
+                <td>${detalle.precio_final.toFixed(0)} (${detalle.financiacion})</td>
+            </tr>
+      
 
-//     // Crear una ventana nueva para imprimir
-//     const ventana = window.open("", "_blank");
-//     ventana.document.write(resumenHTML);
-//     ventana.document.close();
-//     ventana.print();
-// }
+   
+                </tbody>
+            </table>
+            <h5>PAGOS</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>TIPO</th>
+                        <th>FECHA</th>
+                        <th>MONEDA</th>
+                        <th>MONTO</th>
+                        <th>FECHA DE VENCIMIENTO</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    cuotas.forEach(cuota => {
+        resumenHTML += `
+            <tr>
+                <td>${cuota.tipo_pago}</td>
+                <td>${cuota.fecha}</td>
+                <td>${cuota.moneda}</td>
+                <td>${cuota.monto.toFixed(0)}</td>
+                <td>${cuota.fecha_vencimiento}</td>
+            </tr>
+        `;
+    });
+
+    // Cerrar tabla y añadir pie de página
+    resumenHTML += `
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `;
+
+    // Crear una ventana nueva para imprimir
+    const ventana = window.open("", "_blank");
+    ventana.document.write(resumenHTML);
+    ventana.document.close();
+    ventana.print();
+}
+
+
 
 // function check_refinanciamiento(){
 //     var pago_a_realizar = document.getElementById('pago_a_realizar').value;

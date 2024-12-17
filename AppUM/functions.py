@@ -622,7 +622,9 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
             p.text = p.text.replace('MOTO_NUM_CHASIS', moto.num_chasis)
         if 'MOTO_MONEDA' in p.text:
             p.text = p.text.replace('MOTO_MONEDA', moneda)
-    
+        if 'PRECIO_MOTO' in p.text:
+            p.text = p.text.replace('PRECIO_MOTO', str(moto.precio))
+
     nombre_archivo = f"{moto.id}_{moto.marca}_{moto.modelo}_{cliente.nombre}_{cliente.apellido}_{id_cv}"
     docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
     doc.save(docx_file_path)

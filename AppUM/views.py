@@ -1444,6 +1444,13 @@ def form_venta_moto(req,id_moto):
                 logo_cv = Logos.objects.get(id=2)
                 logo_cv_url = req.build_absolute_uri(logo_cv.logo_UM.url) if logo_cv.logo_UM else None
                 precio = int(moto.precio) if moto.precio else 0
+                usuario = req.user
+                vendedor = Personal.objects.filter(usuario=usuario.username).first()
+                nom_ape_vend = vendedor.nombre + " " + vendedor.apellido
+                longitud_doc = len(vendedor.documento)
+                doc_num = ""
+                for i in range(2,longitud_doc):
+                    doc_num = doc_num + vendedor.documento[i]
                 # print(numero_letra)
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
                                                                                 "cliente":cliente,
@@ -1458,7 +1465,9 @@ def form_venta_moto(req,id_moto):
                                                                                 "precio":precio,
                                                                                 "departamento":departamento if departamento else None,
                                                                                 "fecha":fecha,
-                                                                                "logo_cv":logo_cv_url})
+                                                                                "logo_cv":logo_cv_url,
+                                                                                "vendedor_nombre":nom_ape_vend,
+                                                                                "vendedor_ci":doc_num})
             else:
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:

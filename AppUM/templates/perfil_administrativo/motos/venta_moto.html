@@ -101,7 +101,7 @@
             <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
             <textarea id="previewText" rows="20" class="form-control" style="width: 62%;">
                 En la ciudad de Libertad, el día {{ fecha }}
-                Por una parte Brisa Morales CI: 13213213645456
+                Por una parte {{ vendedor_nombre }} CI: {{ vendedor_ci }}
                 Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} {{ cliente.documento }} 
                 Con domicilio {{ cliente.calle }} {{ cliente.numero }}, {{ cliente.ciudad }}
                 Celular {{ tel1 }}

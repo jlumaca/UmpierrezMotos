@@ -121,6 +121,7 @@ urlpatterns = [
 
      path('editar_usuario', views.editar_usuario,name="EditarUsuario"),
      path('editar_pass_usuario', views.editar_password,name="EditarPassUsuario"),
+     path('editar_pass_usuario/<int:id_u>', views.resetear_usuario,name="ResetearUsuario"),
      path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#SOLO RENDERIZA FORM Y DATOS
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#

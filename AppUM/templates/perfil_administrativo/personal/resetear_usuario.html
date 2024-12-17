@@ -1,0 +1,47 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+            <!-- Título principal con ícono de advertencia -->
+            <h5 class="card-title text-warning">
+                <i class="fas fa-sync-alt"></i> Confirmación de reseteo de usuario
+            </h5>
+            <hr>
+
+            <!-- Formulario de confirmación -->
+            <form action="" method="POST">
+                {% csrf_token %}
+                {% if not message %}
+                    <p class="mb-4">¿Está seguro que desea resetear este usuario? La contraseña será restablecida a su valor predeterminado.</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-warning mx-2">
+                            <i class="fas fa-sync-alt"></i> Resetear Usuario
+                        </button>
+                        <a href="{% url 'Personal' %}" class="btn btn-secondary mx-2">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+
+            <!-- Mensaje de éxito -->
+            {% if message %}
+                <div class="alert alert-success mt-4">
+                    <p>{{ message }}</p>
+                    <p>Para volver a la lista de personal, haz clic <a href="{% url 'Personal' %}">aquí</a>.</p>
+                </div>
+            {% else %}
+                <!-- Mensaje de error -->
+                <p class="text-danger mt-3">{{ error_message }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

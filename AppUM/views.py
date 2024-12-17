@@ -99,6 +99,23 @@ def editar_password(req):
     # except Exception as e:
     #     pass
 
+def resetear_usuario(req,id_u):
+    # try:
+        if req.method == "POST":
+            usuario = Personal.objects.get(id=id_u)
+            usuario.contrasena = make_password("Inicio1234")
+            usuario.primera_sesion = 1
+            usuario.save()
+            user = User.objects.filter(username=usuario.usuario).first()
+            user.password = make_password("Inicio1234")
+            user.save()
+            return render(req,"perfil_administrativo/personal/resetear_usuario.html",{"message":"Usuario reseteado con éxito"})
+        else:
+            return render(req,"perfil_administrativo/personal/resetear_usuario.html",{})
+
+    # except Exception as e:
+    #     pass
+
 
 def acceso_login(req):
     try:
@@ -1324,13 +1341,13 @@ def cargar_libreta(req,id_cv):
 @admin_required
 def vista_personal(req):
     administrativos = (Administrativo.objects
-                       .filter(activo=True)
-                       .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo')
+                       .filter(activo=True).exclude(usuario="adminapp")
+                       .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo','usuario')
                        .order_by('nombre'))
     page_obj = funcion_paginas_varias(req,administrativos)
 
     mecanicos = (Mecanico.objects
-                       .filter(activo=True)
+                       .filter(activo=True).exclude(usuario="adminapp")
                        .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo')
                        .order_by('nombre'))
     page_objMec = funcion_paginas_varias(req,mecanicos)

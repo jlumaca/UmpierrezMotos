@@ -150,7 +150,7 @@ def acceso_login(req):
                             roles = ['Administrativo','Mecanico empleado']
                             contexto = {"roles":roles}
                         elif administrativo:
-                            renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+                            renderizar_en = "perfil_administrativo/bienvenida.html"
                             contexto = {}
                         elif mecanico_jefe:
                             renderizar_en = "perfil_taller/padre_perfil_taller.html"
@@ -213,10 +213,10 @@ def cambio_pass(req):
 
 @login_required()
 def seleccion_rol(req):
-    try:
+    # try:
         rol = req.POST['rol_usuario']
         if rol == "Administrativo":
-            renderizar_en = "perfil_administrativo/padre_perfil_administrativo.html"
+            renderizar_en = "perfil_administrativo/bienvenida.html"
             contexto={}
         elif rol == "Mecanico jefe":
             renderizar_en = "perfil_taller/padre_perfil_taller.html"
@@ -226,8 +226,8 @@ def seleccion_rol(req):
             contexto={}
 
         return render(req,renderizar_en,contexto)
-    except Exception as e:
-        return render(req,"login/login.html",{"resultado":e})
+    # except Exception as e:
+    #     return render(req,"login/login.html",{"resultado":e})
 
 
 @admin_required

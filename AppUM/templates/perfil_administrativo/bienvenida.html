@@ -1,0 +1,57 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+    <!-- Página de bienvenida con la tienda de motos -->
+
+    <div class="container-fluid" id="content">
+        <div class="row mt-4">
+            <div class="col-md-12 text-center">
+                <h2 class="display-4 text-success">Bienvenido al Panel de Gestión Interna</h2>
+                <p class="lead text-muted">Aquí podrás gestionar las motos, repuestos, clientes y todo lo relacionado con la tienda y taller de motos.</p>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Gestión de Motos</h5>
+                        <p class="card-text">Visualiza, agrega o edita motos de la tienda.</p>
+                        <a href="{% url 'Motos' %}" class="btn btn-primary">Ir a Motos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Reservas</h5>
+                        <p class="card-text">Gestiona las reservas de motos de los clientes.</p>
+                        <a href="{% url 'Reservas' %}" class="btn btn-primary">Ir a Reservas</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Clientes</h5>
+                        <p class="card-text">Consulta o modifica los datos de los clientes.</p>
+                        <a href="{% url 'Clientes' %}" class="btn btn-primary">Ir a Clientes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Arqueos</h5>
+                        <p class="card-text">Revisa el estado del arqueo de caja.</p>
+                        <a href="{% url 'Arqueos' %}" class="btn btn-primary">Ir a Arqueos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

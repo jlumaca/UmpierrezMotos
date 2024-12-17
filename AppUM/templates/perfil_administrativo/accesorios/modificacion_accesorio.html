@@ -27,10 +27,18 @@
                 <label for="modelo" class="form-label">Modelo</label>
                 <input value="{{ datos_accesorio.modelo }}" type="text" class="form-control" name="modelo_accesorio" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
             </div>
+
+            <div class="mb-3">
+                <label for="estado" class="form-label">Moneda</label>
+                <select value="{{ datos_accesorio.moneda_precio }}" class="form-control" name="moneda_accesorio" id="tipo">
+                    <option value="Pesos" {% if datos_accesorio.moneda_precio == "Pesos" %}selected{% endif %}>Pesos</option>
+                    <option value="Dolares" {% if datos_accesorio.moneda_precio == "Dolares" %}selected{% endif %}>Dolares</option>
+                </select>
+            </div>
             
             <div class="mb-3">
                 <label for="precio" class="form-label">Precio</label>
-                <input value="{{ datos_accesorio.precio }}" type="number" class="form-control" name="precio_accesorio" id="precio" placeholder="Ingrese el precio">
+                <input value="{{ precio_accesorio }}" type="number" class="form-control" name="precio_accesorio" id="precio" placeholder="Ingrese el precio">
             </div>
             
             <div class="mb-3">

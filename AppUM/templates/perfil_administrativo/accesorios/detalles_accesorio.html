@@ -52,7 +52,13 @@
           
             <tr>
                 <th scope="row">Precio</th>
-                <td>{{ accesorio.precio }}</td>
+                <td>{% if accesorio.moneda_precio == "Pesos" %}
+                     ${{ accesorio.precio }}
+                     {% else %}
+                    U$S{{ accesorio.precio }}
+                     {% endif %}
+                    
+                </td>
             </tr>
         </tbody>
     </table>

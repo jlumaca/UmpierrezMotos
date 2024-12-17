@@ -708,17 +708,19 @@ def modificacion_accesorio(req,id_accesorio):
         
         if req.method == "POST": 
             accesorio_upd = Accesorio.objects.get(id=id_accesorio)
-            accesorio_upd.tipo = req.POST['tipo_accesorio']
-            accesorio_upd.marca = req.POST['marca_accesorio']
-            accesorio_upd.modelo = req.POST['modelo_accesorio']
+            accesorio_upd.tipo = req.POST['tipo_accesorio'].upper()
+            accesorio_upd.marca = req.POST['marca_accesorio'].upper()
+            accesorio_upd.modelo = req.POST['modelo_accesorio'].upper()
             accesorio_upd.precio = req.POST['precio_accesorio']
             accesorio_upd.foto = req.FILES.get('foto_accesorio')
+            accesorio_upd.moneda_precio = req.POST['moneda_accesorio']
             accesorio_upd.save()
             messages.success(req, "El accesorio ha sido modificado con éxito.")
             return redirect('Accesorios')
         else:
             accesorio = Accesorio.objects.get(id=id_accesorio)
-            return render(req,"perfil_administrativo/accesorios/modificacion_accesorio.html",{"datos_accesorio":accesorio})
+            precio = int(accesorio.precio) if accesorio.precio else 0
+            return render(req,"perfil_administrativo/accesorios/modificacion_accesorio.html",{"datos_accesorio":accesorio,"precio_accesorio":precio})
     except Exception as e:
         pass
 
@@ -928,8 +930,8 @@ def alta_cliente(req):
         if req.method == "POST":
             tipo_doc = req.POST['tipo_doc']
             doc = req.POST['doc']
-            nombre = req.POST['nombre']
-            apellido = req.POST['apellido']
+            nombre = req.POST['nombre'].title()
+            apellido = req.POST['apellido'].title()
             f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
             f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
             telefono_principal = req.POST['telefono_principal']
@@ -938,8 +940,8 @@ def alta_cliente(req):
             dominio_correo = req.POST['dominio_correo']
             correo_2 = req.POST['correo_2']
             dominio_correo_2 = req.POST['dominio_correo_2']
-            localidad = req.POST['localidad']
-            calle = req.POST['calle']
+            localidad = req.POST['localidad'].title()
+            calle = req.POST['calle'].title()
             numero = req.POST['numero']
             num_apto = req.POST['num_apto']
             
@@ -971,7 +973,7 @@ def alta_cliente(req):
                 return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los correos no pueden ser iguales"})
             else:
                 if localidad == "Otro":
-                    ciudad = req.POST['localidad_otro']
+                    ciudad = req.POST['localidad_otro'].title()
                 else:
                     ciudad = localidad
 
@@ -1093,11 +1095,11 @@ def modificacion_cliente(req,id_cliente):
 
                 mod_cliente = Cliente.objects.get(id=id_cliente)
                 mod_cliente.documento = documento
-                mod_cliente.nombre = req.POST['nombre'].capitalize()
-                mod_cliente.apellido = req.POST['apellido'].capitalize()
+                mod_cliente.nombre = req.POST['nombre'].title()
+                mod_cliente.apellido = req.POST['apellido'].title()
                 mod_cliente.fecha_nacimiento = f_nac
-                mod_cliente.ciudad = req.POST['localidad'].capitalize()
-                mod_cliente.calle = req.POST['calle'].capitalize()
+                mod_cliente.ciudad = req.POST['localidad'].title()
+                mod_cliente.calle = req.POST['calle'].title()
                 mod_cliente.numero = req.POST['numero']
                 mod_cliente.num_apartamento = req.POST['num_apto']
                 

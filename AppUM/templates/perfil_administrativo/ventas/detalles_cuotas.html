@@ -216,7 +216,7 @@
             {% for pagos in primeros_pagos %}
             <tr>
                 <td>{{ pagos.tipo_pago }}</td>
-                <td>{{ pagos.observaciones }}</td>
+                <td>{% if pagos.observaciones %}{{ pagos.observaciones }}{% else %} Sin observaciones {% endif %}</td>
                 <td>{{ pagos.fecha_pago }}</td>
                 <td>{{ pagos.moneda }}</td>
                 <td>{% if pagos.moneda == "Pesos" %} {{ pagos.valor_pago_pesos }} {% else %} {{ pagos.valor_pago_dolares }} {% endif %}</td>
@@ -353,7 +353,7 @@
                 </div>
             </div>
             
-            <div class="mb-3" id="documento_cliente">
+            <!-- <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Moneda</label>
                 <div class="input-group">
                     <select class="form-control" name="moneda_entrega" id="moneda_entrega">
@@ -361,6 +361,11 @@
                         <option value="Dolares">Dólares</option>
                     </select>
                 </div>
+            </div> -->
+
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda</label>
+                <input value="{{ mon_pago }}" type="text" class="form-control" name="moneda_entrega" id="moneda_entrega" placeholder="Moneda" readonly>
             </div>
             
             
@@ -497,15 +502,15 @@
     //############################
     //NO BORRAR LO COMENTADO
     //############################
-    //NO BORRAR LO COMENTADO
-
-    
+    //NO BORRAR LO COMENTADO    
     const cuotas = JSON.parse('{{ cuotas_json|default:"{}"|escapejs }}');
     const cliente = JSON.parse('{{ cliente_json|escapejs }}');
     const detalle = JSON.parse('{{ detalle_json|escapejs }}');
+    const p_pagos = JSON.parse('{{ p_pagos_json|default:"{}"|escapejs }}');
     console.log(cuotas);
     console.log(cliente);
     console.log(detalle);
+    console.log(p_pagos);
     function mostrar_form_pago(){
         var div_form = document.getElementById("div_form_pago")
         var div_ref = document.getElementById("div_refinanciamiento")
@@ -562,7 +567,7 @@
 // });
 
 function prueba(){
-    generarResumen(cuotas,cliente,detalle);
+    generarResumen(cuotas,cliente,detalle,p_pagos);
 }
 
 // function generarResumen(cuotas,cliente,detalle) {
@@ -670,7 +675,7 @@ function prueba(){
 //     ventana.document.close();
 //     ventana.print();
 // }
-function generarResumen(cuotas, cliente, detalle) {
+function generarResumen(cuotas, cliente, detalle, p_pagos) {
     // Construir el encabezado de la tabla con estilos en línea para impresión
     let resumenHTML = `
         <html>
@@ -730,7 +735,49 @@ function generarResumen(cuotas, cliente, detalle) {
                     </tr>
                 </tbody>
             </table>
-            <h5>PAGOS</h5>
+            <h5>ENTREGAS Y/O SEÑAS</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>TIPO</th>
+                        <th>FECHA</th>
+                        <th>MONEDA</th>
+                        <th>MONTO</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+
+       `;             
+       if (p_pagos && p_pagos.length > 0) {
+        p_pagos.forEach(p_p => {
+            resumenHTML += `
+                <tr>
+                    <td>${p_p.tipo_pago || "N/A"}</td>
+                    <td>${p_p.fecha || "N/A"}</td>
+                    <td>${p_p.moneda || "N/A"}</td>
+                    <td>${p_p.monto ? p_p.monto.toFixed(0) : "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        // Mostrar mensaje si no hay cuotas
+        resumenHTML += `
+            <tr>
+                <td colspan="5" style="text-align: center;">No se encontraron cuotas.</td>
+            </tr>
+        `;
+    }
+
+    // Cerrar tabla y añadir pie de página
+    resumenHTML += `
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `;
+     
+       resumenHTML += `       <h5>PAGOS</h5>
             <p><strong>FINANCIAMIENTO ACTUAL:</strong> ${detalle.financiacion || "N/A"}</p>
             <table>
                 <thead>

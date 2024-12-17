@@ -1758,6 +1758,7 @@ def detalles_cuotas(req,id_cv):
         ex_fin_actual = True
         id_f = fin_actual.id
         page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
+        mon_pago = fin_actual.moneda_cuota
     else:
         moneda = ""
         financiamiento = None
@@ -1766,6 +1767,7 @@ def detalles_cuotas(req,id_cv):
         ex_fin_actual = False
         page_obj = None
         id_f = None
+        mon_pago = None
 
     fin_inicial = Financiamientos.objects.filter(venta_id=id_cv,inicial=1).first()
     if fin_actual:
@@ -1797,15 +1799,31 @@ def detalles_cuotas(req,id_cv):
         else:
             cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
             cant_restante_dolares = moto.precio_final
+
+
+
+    primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-fecha_pago')
+    if primeros_pagos:
+        p_pagos_data = [
+                {   
+                    "tipo_pago":cuota.tipo_pago,
+                    "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
+                    "moneda":cuota.moneda,
+                    "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
+                    # "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
+                }
+                for cuota in primeros_pagos
+            ]
+        primeros_pagos_json = json.dumps(p_pagos_data)
+    else:
+        primeros_pagos_json = None
     
-    cuotas = CuotasMoto.objects.filter(venta_id=id_cv).order_by('-fecha_pago')
+    cuotas = CuotasMoto.objects.filter(venta_id=id_cv).exclude(tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-fecha_pago')
     precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
     cliente = Cliente.objects.get(id=cv.cliente_id)
     if cuotas:
         cuotas_data = [
-                {   "cliente":cliente.nombre + " " + cliente.apellido,
-                    
-                    # "financiamiento":,
+                {  
                     "tipo_pago":cuota.tipo_pago,
                     "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
                     "moneda":cuota.moneda,
@@ -1856,7 +1874,9 @@ def detalles_cuotas(req,id_cv):
                 'cuotas_json': cuotas_json,
                 'cliente_json': cliente_json,
                 "detalle_json":detalle_json,
-                "id_f":id_f}
+                "p_pagos_json":primeros_pagos_json,
+                "id_f":id_f,
+                "mon_pago":mon_pago}
     
     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
@@ -1985,7 +2005,16 @@ def alta_pago_cuota(req,id_cv):
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
             cuota = "Cuota " + str(num_cuota_actual)   
-            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
+            if cant_cuotas == 0:
+                if fin_actual.moneda_cuota == "Pesos": #DUDA
+                    resto_pesos = (int(fin_actual.cantidad_cuotas) * int(fin_actual.valor_cuota)) - int(req.POST['valor_a_pagar'])
+                    resto_dolares = int(int(resto_dolares) / float(precio_dolar))
+                else:
+                    resto_dolares = (int(fin_actual.cantidad_cuotas) * int(fin_actual.valor_cuota)) - int(req.POST['valor_a_pagar'])
+                    resto_pesos = int(int(resto_dolares) * float(precio_dolar))
+                alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
+            else:
+                alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
             if alta:
                 comprobante_url = alta
             else:
@@ -2186,7 +2215,7 @@ def reservar_moto(req,id_moto,id_cliente):
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
                     resto_pesos = resto_dolares * precio_dolar
         fecha_prox_pago = datetime.now() + relativedelta(months=1)
-        insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,"Seña")
+        insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña")
         moto.pertenece_tienda = 0
         moto.save()
         messages.success(req, "Moto reservada con éxito.")

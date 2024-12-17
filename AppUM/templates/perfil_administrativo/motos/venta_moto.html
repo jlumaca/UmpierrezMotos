@@ -288,10 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     function calcularRecargo() {
-        const valor = parseFloat(precio_sin_recargo.value) || 0;
-        const porcentaje = parseFloat(recargo.value) || 0;
-        const cuotas = parseFloat(cant_cuotas.value) || 0;
-        const calc_valor_cuota = parseFloat(valor_cuota.value) || 0;
+        const valor = parseInt(precio_sin_recargo.value) || 0;
+        const porcentaje = parseInt(recargo.value) || 0;
+        const cuotas = parseInt(cant_cuotas.value) || 0;
+        const calc_valor_cuota = parseInt(valor_cuota.value) || 0;
 
         // Calcular el recargo basado en el porcentaje ingresado
         const sumar_recargo = (valor * porcentaje * cuotas) / 100;
@@ -299,8 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const total_valor_cuota = total / cuotas
 
         // Actualizar los campos
-        precio_con_recargo.value = total.toFixed(2);
-        valor_cuota.value = total_valor_cuota.toFixed(2);
+        precio_con_recargo.value = total.toFixed(0);
+        valor_cuota.value = total_valor_cuota.toFixed(0);
     }
 
     precio_sin_recargo.addEventListener('input', calcularRecargo);

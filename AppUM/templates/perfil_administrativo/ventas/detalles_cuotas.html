@@ -50,12 +50,12 @@
     {% endfor %}
 {% endif %}
 
+
     
-    {% if page_obj %}
-    <a id="imprimir-resumen" class="btn btn-primary mb-3" data-id-cv="{{ id_cv }}">
+    <a id="imprimir-resumen" class="btn btn-primary mb-3" onclick="prueba()" data-id-cv="{{ id_cv }}">
         <i class="fas fa-print"></i> Imprimir Resumen
     </a>
-    {% endif %}
+
     <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_ref()">
         <i class="fas fa-money-check-alt"></i> Refinanciar
     </a>
@@ -304,13 +304,16 @@
             <tr>
                 <th>FECHA</th>
                 <th>FINANCIACION</th>
-                
+                <th>ACCIONES</th>
             </tr>
         </thead>
         <tbody>
             {% if fin_actual %}
             <td>{{ fecha_financiacion }}</td>
             <td>{{ financiacion_info }}</td>
+            <td>
+                <a href="{% url 'BajaFinanciamiento' id_f id_cv %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+            </td>
             {% else %}
             <tr>
                 <td colspan="9" class="text-center text-muted">
@@ -497,7 +500,7 @@
     //NO BORRAR LO COMENTADO
 
     
-    const cuotas = JSON.parse('{{ cuotas_json|escapejs }}');
+    const cuotas = JSON.parse('{{ cuotas_json|default:"{}"|escapejs }}');
     const cliente = JSON.parse('{{ cliente_json|escapejs }}');
     const detalle = JSON.parse('{{ detalle_json|escapejs }}');
     console.log(cuotas);
@@ -554,11 +557,120 @@
     //NO BORRAR LO COMENTADO
 
 
-document.getElementById("imprimir-resumen").addEventListener("click", function () {
-    generarResumen(cuotas,cliente,detalle); // Aquí pasas los datos directamente a la función
-});
+// document.getElementById("imprimir-resumen").addEventListener("click", function () {
+//     generarResumen(cuotas,cliente,detalle); // Aquí pasas los datos directamente a la función
+// });
 
-function generarResumen(cuotas,cliente,detalle) {
+function prueba(){
+    generarResumen(cuotas,cliente,detalle);
+}
+
+// function generarResumen(cuotas,cliente,detalle) {
+//     // Construir el encabezado de la tabla con estilos en línea para impresión
+//     let resumenHTML = `
+//         <html>
+//         <head>
+//             <title>Resumen de Compra</title>
+//             <style>
+//                 body {
+//                     font-family: Arial, sans-serif;
+//                     color: #000;
+//                     background-color: #fff;
+//                     margin: 20px;
+//                 }
+//                 h5 {
+//                     text-align: left;
+//                     border-bottom: 2px solid #000;
+//                     padding-bottom: 5px;
+//                 }
+//                 table {
+//                     width: 100%;
+//                     border-collapse: collapse;
+//                     margin-bottom: 20px;
+//                 }
+//                 th, td {
+//                     border: 1px solid #000;
+//                     padding: 8px;
+//                     text-align: left;
+//                 }
+//                 th {
+//                     background-color: #f0f0f0;
+//                     font-weight: bold;
+//                 }
+//                 tr:nth-child(even) {
+//                     background-color: #f9f9f9;
+//                 }
+//             </style>
+//         </head>
+//         <body>
+//             <div class="cliente-info">
+//                 <p><strong>Nombre:</strong> ${cliente.cliente}</p>
+//                 <p><strong>Contacto:</strong> ${cliente.telefono}</p>
+//                 <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+//             </div>
+//             <h5>DATOS DE LA COMPRA</h5>
+//             <table>
+//                 <thead>
+//                     <tr>
+//                         <th>DETALLE</th>
+//                         <th>PRECIO INICIAL</th>
+//                         <th>PRECIO FINAL</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+    
+  
+//             <tr>
+//                 <td>${detalle.detalle}</td>
+//                 <td>${detalle.precio_inicial.toFixed(0)}</td>
+//                 <td>${detalle.precio_final.toFixed(0)} (${detalle.financiacion})</td>
+//             </tr>
+      
+
+   
+//                 </tbody>
+//             </table>
+//             <h5>PAGOS</h5>
+//             <table>
+//                 <thead>
+//                     <tr>
+//                         <th>TIPO</th>
+//                         <th>FECHA</th>
+//                         <th>MONEDA</th>
+//                         <th>MONTO</th>
+//                         <th>FECHA DE VENCIMIENTO</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+//     `;
+
+//     cuotas.forEach(cuota => {
+//         resumenHTML += `
+//             <tr>
+//                 <td>${cuota.tipo_pago}</td>
+//                 <td>${cuota.fecha}</td>
+//                 <td>${cuota.moneda}</td>
+//                 <td>${cuota.monto.toFixed(0)}</td>
+//                 <td>${cuota.fecha_vencimiento}</td>
+//             </tr>
+//         `;
+//     });
+
+//     // Cerrar tabla y añadir pie de página
+//     resumenHTML += `
+//                 </tbody>
+//             </table>
+//         </body>
+//         </html>
+//     `;
+
+//     // Crear una ventana nueva para imprimir
+//     const ventana = window.open("", "_blank");
+//     ventana.document.write(resumenHTML);
+//     ventana.document.close();
+//     ventana.print();
+// }
+function generarResumen(cuotas, cliente, detalle) {
     // Construir el encabezado de la tabla con estilos en línea para impresión
     let resumenHTML = `
         <html>
@@ -597,9 +709,9 @@ function generarResumen(cuotas,cliente,detalle) {
         </head>
         <body>
             <div class="cliente-info">
-                <p><strong>Nombre:</strong> ${cliente.cliente}</p>
-                <p><strong>Contacto:</strong> ${cliente.telefono}</p>
-                <p><strong>Dirección:</strong> ${cliente.direccion}</p>
+                <p><strong>Nombre:</strong> ${cliente.cliente || "N/A"}</p>
+                <p><strong>Contacto:</strong> ${cliente.telefono || "N/A"}</p>
+                <p><strong>Dirección:</strong> ${cliente.direccion || "N/A"}</p>
             </div>
             <h5>DATOS DE LA COMPRA</h5>
             <table>
@@ -611,19 +723,15 @@ function generarResumen(cuotas,cliente,detalle) {
                     </tr>
                 </thead>
                 <tbody>
-    
-  
-            <tr>
-                <td>${detalle.detalle}</td>
-                <td>${detalle.precio_inicial.toFixed(0)}</td>
-                <td>${detalle.precio_final.toFixed(0)} (${detalle.financiacion})</td>
-            </tr>
-      
-
-   
+                    <tr>
+                        <td>${detalle.detalle || "N/A"}</td>
+                        <td>${detalle.precio_inicial ? detalle.precio_inicial.toFixed(0) : "N/A"}</td>
+                        <td>${detalle.precio_final ? detalle.precio_final.toFixed(0) : "N/A"} (${detalle.financiacion || "N/A"})</td>
+                    </tr>
                 </tbody>
             </table>
             <h5>PAGOS</h5>
+            <p><strong>FINANCIAMIENTO ACTUAL:</strong> ${detalle.financiacion || "N/A"}</p>
             <table>
                 <thead>
                     <tr>
@@ -637,17 +745,27 @@ function generarResumen(cuotas,cliente,detalle) {
                 <tbody>
     `;
 
-    cuotas.forEach(cuota => {
+    // Validar cuotas
+    if (cuotas && cuotas.length > 0) {
+        cuotas.forEach(cuota => {
+            resumenHTML += `
+                <tr>
+                    <td>${cuota.tipo_pago || "N/A"}</td>
+                    <td>${cuota.fecha || "N/A"}</td>
+                    <td>${cuota.moneda || "N/A"}</td>
+                    <td>${cuota.monto ? cuota.monto.toFixed(0) : "N/A"}</td>
+                    <td>${cuota.fecha_vencimiento || "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        // Mostrar mensaje si no hay cuotas
         resumenHTML += `
             <tr>
-                <td>${cuota.tipo_pago}</td>
-                <td>${cuota.fecha}</td>
-                <td>${cuota.moneda}</td>
-                <td>${cuota.monto.toFixed(0)}</td>
-                <td>${cuota.fecha_vencimiento}</td>
+                <td colspan="5" style="text-align: center;">No se encontraron cuotas.</td>
             </tr>
         `;
-    });
+    }
 
     // Cerrar tabla y añadir pie de página
     resumenHTML += `
@@ -663,7 +781,6 @@ function generarResumen(cuotas,cliente,detalle) {
     ventana.document.close();
     ventana.print();
 }
-
 
 
 // function check_refinanciamiento(){

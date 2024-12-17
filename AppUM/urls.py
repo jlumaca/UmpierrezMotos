@@ -131,6 +131,7 @@ urlpatterns = [
      path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
      path('refinanciar/<int:id_cv>', views.refinanciar_pagos,name="Refinanciar"),
      path('pago_cuota/<int:id_cv>', views.alta_pago_cuota,name="PagoCuotas"),
+     path('baja_financiamiento/<int:id_f>/<int:id_cv>', views.baja_financiamiento,name="BajaFinanciamiento"),
 
 
 

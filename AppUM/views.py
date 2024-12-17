@@ -1656,16 +1656,26 @@ def detalles_cuotas(req,id_cv):
         mostrar_boton = True if fin_actual.actual else False
         fecha = fin_actual.fecha
         ex_fin_actual = True
+        id_f = fin_actual.id
         page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
     else:
         moneda = ""
-        financiamiento = ""
+        financiamiento = None
         mostrar_boton = False
         fecha = None
         ex_fin_actual = False
         page_obj = None
+        id_f = None
 
     fin_inicial = Financiamientos.objects.filter(venta_id=id_cv,inicial=1).first()
+    if fin_actual:
+        moneda = "$" if fin_actual.moneda_cuota == "Pesos" else "U$S"
+        fin_json = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}"
+    elif fin_inicial:
+        moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
+        fin_json = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
+    else:
+        fin_json = "Sin financiamiento"
     
     moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
     fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
@@ -1695,7 +1705,7 @@ def detalles_cuotas(req,id_cv):
         cuotas_data = [
                 {   "cliente":cliente.nombre + " " + cliente.apellido,
                     
-                    
+                    # "financiamiento":,
                     "tipo_pago":cuota.tipo_pago,
                     "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
                     "moneda":cuota.moneda,
@@ -1713,7 +1723,7 @@ def detalles_cuotas(req,id_cv):
     cliente_data = {
         "cliente": cliente.nombre + " " + cliente.apellido,
         "telefono": telefono.telefono,
-        "direccion": cliente.calle + str(cliente.numero) + apto + ", " + cliente.ciudad,
+        "direccion": cliente.calle + " " + str(cliente.numero) + apto + ", " + cliente.ciudad,
         }
     cliente_json = json.dumps(cliente_data)
 
@@ -1721,7 +1731,7 @@ def detalles_cuotas(req,id_cv):
         "detalle":moto.marca + " " + moto.modelo,
         "precio_inicial":float(moto.precio),
         "precio_final":float(moto.precio_final),
-        "financiacion":fin_ini
+        "financiacion":fin_json
     }
     detalle_json = json.dumps(detalle_data)
     
@@ -1745,7 +1755,8 @@ def detalles_cuotas(req,id_cv):
                 "id_cliente":cv.cliente_id,
                 'cuotas_json': cuotas_json,
                 'cliente_json': cliente_json,
-                "detalle_json":detalle_json}
+                "detalle_json":detalle_json,
+                "id_f":id_f}
     
     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
@@ -1814,7 +1825,23 @@ def refinanciar_pagos(req,id_cv):
         messages.success(req, "Financiamiento ingresado con éxito")
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
     except Exception as e:
-        pass
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{})
+
+def baja_financiamiento(req,id_f,id_cv):
+    try:
+        if req.method == "POST":
+            fin_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=id_f)
+            for fin in fin_cuotas:
+                cuota = CuotasMoto.objects.filter(id=fin.cuota_id).first()
+                fin.delete()
+                cuota.delete()
+            financiamiento = Financiamientos.objects.get(id=id_f)
+            financiamiento.delete()
+            return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"message":"Financiamiento borrado con éxito","id_cv":id_cv})
+        else:
+            return render(req,"perfil_administrativo/ventas/baja_financiamiento.html",{"id_cv":id_cv})
+    except Exception as e:
+        return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"error_message":str(e),"id_cv":id_cv})
 
 
 def alta_pago_cuota(req,id_cv):

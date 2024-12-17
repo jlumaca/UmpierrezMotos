@@ -1,0 +1,137 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="container mt-4">
+    <!-- Título principal -->
+    <h2 class="text-center mb-5 fw-bold text-primary">Editar Perfil</h2>
+
+    <!-- Mensaje de error -->
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Datos del Usuario -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i> Datos del Usuario</h5>
+        </div>
+        <div class="card-body">
+            <form action="{% url 'EditarUsuario' %}" enctype="multipart/form-data" method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="tipo" class="form-label">Tipo de Documento</label>
+                        <select class="form-select" name="tipo_documento" id="tipo">
+                            <option value="CI" {% if tipo_doc == "CI" %}selected{% endif %}>Cédula</option>
+                            <option value="DNI" {% if tipo_doc == "DNI" %}selected{% endif %}>DNI</option>
+                            <option value="PAS" {% if tipo_doc == "PAS" %}selected{% endif %}>Pasaporte</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="documento" class="form-label">Documento</label>
+                        <input value="{{ doc_num }}" type="text" class="form-control" name="documento" id="documento" placeholder="12345678" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input value="{{ datos.nombre }}" type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese su nombre" maxlength="20" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input value="{{ datos.apellido }}" type="text" class="form-control" name="apellido" id="apellido" placeholder="Ingrese su apellido" maxlength="20" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input value="{{ f_nac }}" type="date" class="form-control" name="fecha_nacimiento" id="fecha_nacimiento" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input value="{{ datos.telefono }}" type="text" class="form-control" name="telefono" id="telefono" placeholder="099123456" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documento" class="form-label">Correo electrónico</label>
+                        <div class="input-group">
+                            <input value="{{ correo }}" type="text" class="form-control" name="correo" placeholder="Correo">
+                            <span class="input-group-text">-</span>
+                            <select class="form-control" placeholder="Dominio del correo" id="dominio_principal" name="dominio_correo" onchange="correos()">
+                                <option value="@gmail.com" {% if dom_princ == "@gmail.com" %}selected{% endif %} >@gmail.com</option>
+                                <option value="@hotmail.com" {% if dom_princ == "@hotmail.com" %}selected{% endif %} >@hotmail.com</option>
+                                <option value="@outlook.com" {% if dom_princ == "@outlook.com" %}selected{% endif %} >@outlook.com</option>
+                            </select>
+                            <span class="input-group-text">-</span>
+                            <input type="text" class="form-control" id="id_otro_correo" name="otro_correo" placeholder="Dominio del correo" style="display: none;">
+                            <!-- Cambiar el botón a tipo submit -->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password_actual" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" name="password_actual" id="password_actual" placeholder="Contraseña actual" required>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cambiar Contraseña -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0"><i class="fas fa-key me-2"></i> Cambiar Contraseña</h5>
+        </div>
+        <div class="card-body">
+            <form action="{% url 'EditarPassUsuario' %}" method="POST" onsubmit="return validarContrasenas();">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="password_actual" class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-control" name="password_actual" id="password_actual" placeholder="Contraseña actual" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password_nueva" class="form-label">Nueva Contraseña</label>
+                        <input type="password" class="form-control" name="password_nueva" id="password_nueva" placeholder="Nueva contraseña" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
+                        <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="Confirmar contraseña" required>
+                    </div>
+                </div>
+
+                <!-- Alerta de error -->
+                <div id="passwordAlert" class="alert alert-danger mt-3" style="display:none;">
+                    <i class="fas fa-exclamation-circle me-2"></i> Las contraseñas no coinciden.
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-warning"><i class="fas fa-key"></i> Cambiar Contraseña</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script de validación -->
+<script>
+    function validarContrasenas() {
+        const passwordNueva = document.getElementById("password_nueva").value;
+        const confirmPassword = document.getElementById("confirm_password").value;
+        const passwordAlert = document.getElementById("passwordAlert");
+
+        if (passwordNueva !== confirmPassword) {
+            passwordAlert.style.display = "block";
+            return false; // Detiene el envío del formulario
+        }
+        passwordAlert.style.display = "none";
+        return true; // Permite el envío
+    }
+</script>
+{% endblock %}

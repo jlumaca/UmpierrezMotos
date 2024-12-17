@@ -62,6 +62,9 @@
                     <span class="navbar-text me-3">
                         <strong>USUARIO:</strong> {{ request.user.first_name }}
                     </span>
+                    <a href="{% url 'EditarUsuario' %}" class="me-3" title="Editar Perfil">
+                        <i class="fas fa-user-edit fa-lg"></i>
+                    </a>
                 
                     <!-- Cerrar sesión -->
                     <a href="{% url 'CerrarSesion' %}">

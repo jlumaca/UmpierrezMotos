@@ -682,3 +682,53 @@ def convertir_docx_a_pdf(docx_file_path,nombre_archivo,id_cv):
     finally:
         # Finalizar COM (si es necesario)
         pythoncom.CoUninitialize()
+
+def contexto_editar_usuario(req,mensaje_error):
+    usuario = req.user
+    usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+    f_nac_formateada = usuario_actual.fecha_nacimiento.strftime('%Y-%m-%d')
+    tipo_documento_ci = usuario_actual.documento[0:2:1]
+    tipo_documento_pas_dni = usuario_actual.documento[0:3:1]
+
+    longitud_doc = len(usuario_actual.documento)
+    doc_num = ""
+    
+    if tipo_documento_ci == "CI":
+        #
+        tipo_doc = "CI"
+        for i in range(2,longitud_doc):
+            doc_num = doc_num + usuario_actual.documento[i]
+    elif tipo_documento_pas_dni == "DNI":
+        tipo_doc = "DNI"
+        for i in range(3,longitud_doc):
+            doc_num = doc_num + usuario_actual.documento[i]
+    else:
+        tipo_doc = "PAS"
+        for i in range(3,longitud_doc):
+            doc_num = doc_num + usuario_actual.documento[i]
+
+    longitud_correo_princ = len(usuario_actual.correo)
+    c_p = "" 
+    lon = 0
+    for i in range(0,longitud_correo_princ):
+        if usuario_actual.correo[i] == "@":
+            j = i
+            break
+        else:
+            lon += 1
+            c_p = c_p + usuario_actual.correo[i]
+    
+    longitud_dominio = longitud_correo_princ - lon
+    dom_princ = ""
+    pos = j
+    for j in range(pos,longitud_correo_princ):
+        dom_princ = dom_princ + usuario_actual.correo[j]
+    
+    contexto = {"datos":usuario_actual,
+                "f_nac":f_nac_formateada,
+                "tipo_doc":tipo_doc,
+                "doc_num":doc_num,
+                "correo":c_p,
+                "dom_princ":dom_princ,
+                "error_message":mensaje_error if mensaje_error else None}
+    return contexto

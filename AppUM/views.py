@@ -28,6 +28,78 @@ from docx import Document
 #     usuario.save()
 
 ##VISTA DEL LOGIN AL ENTRAR AL SITIO##S
+def editar_usuario(req):
+    try:
+            usuario = req.user
+            usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+            if req.method == "POST":
+                passw = req.POST.get('password_actual')
+                exito = authenticate(username=usuario.username,password=passw)
+                if exito:
+                    documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+                    telefono = str(req.POST['telefono'])
+                    correo = req.POST['correo'] + req.POST['dominio_correo']
+                    existe_doc = Personal.objects.filter(documento=documento).first()
+                    existe_tel = Personal.objects.filter(telefono=telefono).first()
+                    existe_cor = Personal.objects.filter(correo=correo).first()
+
+                    if (existe_doc) and (existe_doc.usuario != usuario.username):
+                        contexto = contexto_editar_usuario(req,"Ya existe el documento")
+                        return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+                    elif (existe_cor) and (existe_cor.usuario != usuario.username):
+                        contexto = contexto_editar_usuario(req,"Ya existe el correo")
+                        return render(req,"perfil_administrativo/usuario/editar_usuario.html",{contexto})
+                    elif (existe_tel) and (existe_tel.usuario != usuario.username):
+                        contexto = contexto_editar_usuario(req,"Ya existe el telefono")
+                        return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+                    else:
+                        f_nac_str = req.POST.get('fecha_nacimiento')  # Cambiado a paréntesis
+                        f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+                        usuario_actual.documento = documento
+                        usuario_actual.nombre = req.POST['nombre']
+                        usuario_actual.apellido = req.POST['apellido']
+                        usuario_actual.fecha_nacimiento = f_nac
+                        usuario_actual.correo = correo
+                        usuario_actual.telefono = telefono
+                        usuario_actual.primera_sesion = 0
+                        usuario_actual.save()
+                        messages.success(req, "Datos modificados con éxito.")
+                        return redirect('EditarUsuario')
+
+                else:
+                    contexto = contexto_editar_usuario(req,"La contraseña es incorrecta")
+                    return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+            else:
+                contexto = contexto_editar_usuario(req,None)
+                return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+    except Exception as e:
+        contexto = contexto_editar_usuario(req,"Algo salió mal" + str(e))
+        return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+
+
+def editar_password(req):
+    # try:
+        usuario = req.user
+        passw = req.POST.get('password_actual')
+        exito = authenticate(username=usuario.username,password=passw)
+        if exito:
+            usuario = req.user
+            usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+            pass_nueva = req.POST.get('confirm_password')
+            usuario_actual.contrasena = make_password(pass_nueva)
+            usuario.set_password(pass_nueva)  # Actualiza la contraseña y la encripta automáticamente
+            usuario.save()
+            usuario_actual.save()
+            
+            messages.success(req, "Contraseña modificada con éxito, debe iniciar sesión nuevamente.")
+            return redirect('Login')
+        else:
+            contexto = contexto_editar_usuario(req,"La contraseña es incorrecta")
+            return render(req,"perfil_administrativo/usuario/editar_usuario.html",contexto)
+    # except Exception as e:
+    #     pass
+
+
 def acceso_login(req):
     try:
         if req.method == "POST":

@@ -201,29 +201,39 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Tipo</th>
-                <th>Observaciones</th>
-                <th>Fecha</th>
-                <th>Moneda</th>
-                <th>Entrega</th> 
-                <th>Cantidad restante</th>
-                <th>Comprobante</th>
-                <th>Acciones</th>
+                <th>TIPO</th>
+                <th>OBSERVACIONES</th>
+                <th>FECHA</th>
+                <th>MONEDA</th>
+                <th>ENTREGA</th> 
+                <th>RESTO</th>
+                <th>COMPROBANTE</th>
+                <th>ACCIONES</th>
             </tr>
         </thead>
         <tbody>
         {% if primeros_pagos %}
             {% for pagos in primeros_pagos %}
             <tr>
-                <td>{{ pagos.tipo_pago }}</td>
-                <td>{% if pagos.observaciones %}{{ pagos.observaciones }}{% else %} Sin observaciones {% endif %}</td>
-                <td>{{ pagos.fecha_pago }}</td>
-                <td>{{ pagos.moneda }}</td>
-                <td>{% if pagos.moneda == "Pesos" %} {{ pagos.valor_pago_pesos }} {% else %} {{ pagos.valor_pago_dolares }} {% endif %}</td>
-                <td>${{ pagos.cant_restante_pesos }}/U$s{{ pagos.cant_restante_dolares }}</td>
+                <td>{{ pagos.primeros_pagos.tipo_pago }}</td>
+                <td>{% if pagos.primeros_pagos.observaciones %}
+                        {{ pagos.primeros_pagos.observaciones }}
+                    {% else %} 
+                        Sin observaciones 
+                    {% endif %}
+                </td>
+                <td>{{ pagos.primeros_pagos.fecha_pago }}</td>
+                <td>{{ pagos.primeros_pagos.moneda }}</td>
+                <td>{% if pagos.primeros_pagos.moneda == "Pesos" %} 
+                        {{ pagos.primeros_pagos.valor_pago_pesos }} 
+                    {% else %} 
+                        {{ pagos.primeros_pagos.valor_pago_dolares }} 
+                    {% endif %}
+                </td>
+                <td>${{ pagos.primeros_pagos.cant_restante_pesos }}/U$s{{ pagos.primeros_pagos.cant_restante_dolares }}</td>
                 <td>
-                    {% if pagos.comprobante_pago %}
-                    <a href="{{ pagos.comprobante_pago }}" target="_blank" class="btn btn-primary">
+                    {% if pagos.primeros_pagos.comprobante_pago %}
+                    <a href="{{ pagos.primeros_pagos.comprobante_pago }}" target="_blank" class="btn btn-primary">
                         <i class="fas fa-file-alt"></i>
                     </a>
                     
@@ -232,9 +242,9 @@
                     {% endif %}
                 </td>
                 <td>
-                    
-                    <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
-                    
+                    {% if pagos.boton_ultimo_pago %}
+                        <a href="{% url 'BajaPrimerosPagos' pagos.primeros_pagos.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

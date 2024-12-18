@@ -118,7 +118,7 @@ urlpatterns = [
 
 
 
-
+     path('baja_pago/<int:id_cm>', views.baja_primeros_pagos,name="BajaPrimerosPagos"),
      path('editar_usuario', views.editar_usuario,name="EditarUsuario"),
      path('editar_pass_usuario', views.editar_password,name="EditarPassUsuario"),
      path('editar_pass_usuario/<int:id_u>', views.resetear_usuario,name="ResetearUsuario"),

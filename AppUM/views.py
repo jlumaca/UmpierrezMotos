@@ -1951,7 +1951,7 @@ def alta_pago(req,id_cv):
 
 @admin_required
 def baja_pago(req,id_cm):
-    # try:
+    try:
         cuota = CuotasMoto.objects.get(id=id_cm)
         id_cv = cuota.venta_id
         # print(id_cv)
@@ -1981,9 +1981,21 @@ def baja_pago(req,id_cm):
             # return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         else:
             return render(req,"perfil_administrativo/ventas/baja_pago.html",{"id_cv":id_cv})
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
+    except Exception as e:
+        return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
 
+def baja_primeros_pagos(req,id_cm):
+    try:
+        cuota = CuotasMoto.objects.get(id=id_cm)
+        id_cv = cuota.venta_id
+        if req.method == "POST":
+            cuota.delete()    
+            return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+        else:
+            return render(req,"perfil_administrativo/ventas/baja_pago.html",{"id_cv":id_cv})
+    except Exception as e:
+        return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":e})
+    
 @admin_required
 def reservas(req):
     try:

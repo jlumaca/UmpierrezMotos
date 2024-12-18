@@ -502,6 +502,13 @@ def obtener_detalles_cuotas_comunes(id_cv):
     moto = Moto.objects.get(id=compra.moto_id)
     producto = f"{moto.marca} {moto.modelo}"
     primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-id')
+    ultimo_pago_general = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+    data_p_pagos = []
+    for p_p in primeros_pagos:
+        data_p_pagos.append({
+            "primeros_pagos":p_p,
+            "boton_ultimo_pago": True if p_p.id == ultimo_pago_general.id else False
+        })
     moneda = "$" if moto.moneda_precio == "Pesos" else "U$S"
     primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
     financiamiento = f"{str(primer_fin.cantidad_cuotas)} x {moneda} {str(primer_fin.valor_cuota)}"
@@ -523,9 +530,9 @@ def obtener_detalles_cuotas_comunes(id_cv):
         moto.precio,
         moto.precio_final,
         compra.forma_de_pago,
-        primeros_pagos,
+        data_p_pagos,
         financiamiento,
-        data_financiamientos
+        data_financiamientos,
     ]
     return data
 
@@ -895,7 +902,7 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 "id_f":id_f,
                 "mon_pago":moneda_pago,
                 "fin_pagos_json":data_jason[4],
-                "monto_cuota":int(fin_actual.valor_cuota)}
+                "monto_cuota":int(fin_actual.valor_cuota),}
     # datos = [
     #     cuotas_json,
     #     cliente_json,

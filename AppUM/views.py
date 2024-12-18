@@ -1748,187 +1748,68 @@ def obtener_cuotas_json(req, id_cv):
 #     # except Exception as e:
 #     #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e})
 def detalles_cuotas(req,id_cv):
-    datos = obtener_detalles_cuotas_comunes(id_cv)
-    fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1,inicial=0).first()
-    if fin_actual:
-        moneda = "$" if fin_actual.moneda_cuota == "Pesos" else "U$S"
-        financiamiento = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}"
-        mostrar_boton = True if fin_actual.actual else False
-        fecha = fin_actual.fecha
-        ex_fin_actual = True
-        id_f = fin_actual.id
-        page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
-        mon_pago = fin_actual.moneda_cuota
-    else:
-        moneda = ""
-        financiamiento = None
-        mostrar_boton = False
-        fecha = None
-        ex_fin_actual = False
-        page_obj = None
-        id_f = None
-        mon_pago = None
-
-    fin_inicial = Financiamientos.objects.filter(venta_id=id_cv,inicial=1).first()
-    if fin_actual:
-        moneda = "$" if fin_actual.moneda_cuota == "Pesos" else "U$S"
-        fin_json = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}"
-    elif fin_inicial:
-        moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
-        fin_json = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
-    else:
-        fin_json = "Sin financiamiento"
-    
-    moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
-    fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
-
-    ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
-    precio_dolar = PrecioDolar.objects.get(id=1)
-    
-    cv = ComprasVentas.objects.get(id=id_cv)
-    moto = Moto.objects.get(id=cv.moto_id)
-    if ult_cuota:
-        ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
-        cant_restante_pesos = ult_cuota.cant_restante_pesos
-        cant_restante_dolares = ult_cuota.cant_restante_dolares
-    else:
-        
-        if moto.moneda_precio == "Pesos":
-            cant_restante_pesos = moto.precio_final
-            cant_restante_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
-        else:
-            cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
-            cant_restante_dolares = moto.precio_final
-
-
-
-    primeros_pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-fecha_pago')
-    if primeros_pagos:
-        p_pagos_data = [
-                {   
-                    "tipo_pago":cuota.tipo_pago,
-                    "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
-                    "moneda":cuota.moneda,
-                    "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
-                    # "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
-                }
-                for cuota in primeros_pagos
-            ]
-        primeros_pagos_json = json.dumps(p_pagos_data)
-    else:
-        primeros_pagos_json = None
-    
-    cuotas = CuotasMoto.objects.filter(venta_id=id_cv).exclude(tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-fecha_pago')
-    precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
-    cliente = Cliente.objects.get(id=cv.cliente_id)
-    if cuotas:
-        cuotas_data = [
-                {  
-                    "tipo_pago":cuota.tipo_pago,
-                    "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
-                    "moneda":cuota.moneda,
-                    "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
-                    "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
-                }
-                for cuota in cuotas
-            ]
-        cuotas_json = json.dumps(cuotas_data)
-    else:
-        cuotas_json = None
-    
-    telefono = ClienteTelefono.objects.filter(cliente_id=cv.cliente_id,principal=1).first()
-    apto = "Apto " + str(cliente.num_apartamento) if int(cliente.num_apartamento) > 0 else ""
-    cliente_data = {
-        "cliente": cliente.nombre + " " + cliente.apellido,
-        "telefono": telefono.telefono,
-        "direccion": cliente.calle + " " + str(cliente.numero) + apto + ", " + cliente.ciudad,
-        }
-    cliente_json = json.dumps(cliente_data)
-
-    detalle_data={
-        "detalle":moto.marca + " " + moto.modelo,
-        "precio_inicial":float(moto.precio),
-        "precio_final":float(moto.precio_final),
-        "financiacion":fin_json
-    }
-    detalle_json = json.dumps(detalle_data)
-    
-    contexto = {"id_cv":id_cv,
-                "producto":datos[0],
-                "precio_inicial":datos[1],
-                "precio_final":datos[2],
-                "pago_acordado":datos[3],
-                "primeros_pagos":datos[4],
-                "financiamiento":datos[5],
-                "financiamientos":datos[6],
-                "page_obj":page_obj,
-                "financiacion_info":financiamiento,
-                "financiacion_inicial":fin_ini,
-                "fecha_financiacion":fecha,
-                "boton_pagar":mostrar_boton,
-                "fin_actual":ex_fin_actual,
-                "cant_restante_dolares":int(cant_restante_dolares),
-                "cant_restante_pesos":int(cant_restante_pesos),
-                "precio_dolar":precio,
-                "id_cliente":cv.cliente_id,
-                'cuotas_json': cuotas_json,
-                'cliente_json': cliente_json,
-                "detalle_json":detalle_json,
-                "p_pagos_json":primeros_pagos_json,
-                "id_f":id_f,
-                "mon_pago":mon_pago}
-    
+    contexto = funcion_detalles_cuotas(req,id_cv,False,None)
     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
 def buscar_pagos_por_refinanciamiento(req):
     # try:
+        # id = int(req.POST['ref_id'])
+        # fin = Financiamientos.objects.filter(id=id).first()
+        # datos = obtener_detalles_cuotas_comunes(fin.venta_id)
+        # fin_inicial = Financiamientos.objects.filter(venta_id=fin.venta_id,inicial=1).first()
+        # moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
+        # fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"#
+        
+        # page_obj = obtener_detalles_cuotas_financiamiento(req,id)
+        # moneda = "$" if fin.moneda_cuota == "Pesos" else "U$S"
+        # financiamiento = f"{str(fin.cantidad_cuotas)} x {moneda} {str(fin.valor_cuota)}"
+        # ult_cuota = CuotasMoto.objects.filter(venta_id=fin.venta_id).latest('id')
+        # precio_dolar = PrecioDolar.objects.get(id=1)
+        
+        # cv = ComprasVentas.objects.get(id=fin.venta_id)
+        # if ult_cuota:
+        #     cant_restante_pesos = ult_cuota.cant_restante_pesos
+        #     cant_restante_dolares = ult_cuota.cant_restante_dolares
+        # else:
+        #     moto = ComprasVentas.objects.get(id=cv.moto_id)
+            
+        #     if moto.moneda_precio == "Pesos":
+        #         cant_restante_pesos = moto.precio_final
+        #         cant_restante_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
+        #     else:
+        #         cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
+        #         cant_restante_dolares = moto.precio_final
+        
+        # precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
+        # data_jason = json_para_resumen_pagos(moto,cv.id)
+        # contexto = {"id_cv":fin.venta_id,
+        #             "producto":datos[0],
+        #             "precio_inicial":datos[1],
+        #             "precio_final":datos[2],
+        #             "pago_acordado":datos[3],
+        #             "primeros_pagos":datos[4],
+        #             "financiamiento":datos[5],
+        #             "financiamientos":datos[6],
+        #             "page_obj":page_obj,
+        #             "financiacion_info":financiamiento,
+        #             "financiacion_inicial":fin_ini,
+        #             "fecha_financiacion":fin.fecha,
+        #             "boton_pagar":True if fin.actual else False,
+        #             "fin_actual":True,
+        #             "cant_restante_dolares":int(cant_restante_dolares),
+        #             "cant_restante_pesos":int(cant_restante_pesos),
+        #             "precio_dolar":precio,
+        #             "id_cliente":cv.cliente_id,
+        #             'cuotas_json': data_jason[0],
+        #             'cliente_json': data_jason[1],
+        #             "detalle_json":data_jason[2],
+        #             "p_pagos_json":data_jason[3],
+        #             # "id_f":id_f, 
+        #             # "mon_pago":mon_pago, MONEDA DEL FINANCIAMIENTO ACTUAL PARA CARGAR AUTOMATICAMENTE LA MONEDA EN EL PAGO
+        #             "fin_pagos_json":data_jason[4]}
         id = int(req.POST['ref_id'])
         fin = Financiamientos.objects.filter(id=id).first()
-        datos = obtener_detalles_cuotas_comunes(fin.venta_id)
-        fin_inicial = Financiamientos.objects.filter(venta_id=fin.venta_id,inicial=1).first()
-        moneda_ini = "$" if fin_inicial.moneda_cuota == "Pesos" else "U$S"
-        fin_ini = f"{str(fin_inicial.cantidad_cuotas)} x {moneda_ini} {str(fin_inicial.valor_cuota)}"
-        
-        page_obj = obtener_detalles_cuotas_financiamiento(req,id)
-        moneda = "$" if fin.moneda_cuota == "Pesos" else "U$S"
-        financiamiento = f"{str(fin.cantidad_cuotas)} x {moneda} {str(fin.valor_cuota)}"
-        ult_cuota = CuotasMoto.objects.filter(venta_id=fin.venta_id).latest('id')
-        precio_dolar = PrecioDolar.objects.get(id=1)
-        
-        cv = ComprasVentas.objects.get(id=fin.venta_id)
-        if ult_cuota:
-            cant_restante_pesos = ult_cuota.cant_restante_pesos
-            cant_restante_dolares = ult_cuota.cant_restante_dolares
-        else:
-            moto = ComprasVentas.objects.get(id=cv.moto_id)
-            
-            if moto.moneda_precio == "Pesos":
-                cant_restante_pesos = moto.precio_final
-                cant_restante_dolares = (moto.precio_final / precio_dolar.precio_dolar_tienda)
-            else:
-                cant_restante_pesos = (moto.precio_final * precio_dolar.precio_dolar_tienda)
-                cant_restante_dolares = moto.precio_final
-        
-        precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
-        contexto = {"id_cv":fin.venta_id,
-                    "producto":datos[0],
-                    "precio_inicial":datos[1],
-                    "precio_final":datos[2],
-                    "pago_acordado":datos[3],
-                    "primeros_pagos":datos[4],
-                    "financiamiento":datos[5],
-                    "financiamientos":datos[6],
-                    "page_obj":page_obj,
-                    "financiacion_info":financiamiento,
-                    "financiacion_inicial":fin_ini,
-                    "fecha_financiacion":fin.fecha,
-                    "boton_pagar":True if fin.actual else False,
-                    "fin_actual":True,
-                    "cant_restante_dolares":int(cant_restante_dolares),
-                    "cant_restante_pesos":int(cant_restante_pesos),
-                    "precio_dolar":precio,
-                    "id_cliente":cv.cliente_id}
-        
+        contexto = funcion_detalles_cuotas(req,fin.venta_id,True,id)
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",contexto)
 
     # except Exception as e:
@@ -1957,6 +1838,9 @@ def baja_financiamiento(req,id_f,id_cv):
                 cuota.delete()
             financiamiento = Financiamientos.objects.get(id=id_f)
             financiamiento.delete()
+            fin_actual = Financiamientos.objects.filter(venta_id=id_cv).latest('id')
+            fin_actual.actual = 1
+            fin_actual.save()
             return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"message":"Financiamiento borrado con éxito","id_cv":id_cv})
         else:
             return render(req,"perfil_administrativo/ventas/baja_financiamiento.html",{"id_cv":id_cv})
@@ -2008,7 +1892,7 @@ def alta_pago_cuota(req,id_cv):
             if cant_cuotas == 0:
                 if fin_actual.moneda_cuota == "Pesos": #DUDA
                     resto_pesos = (int(fin_actual.cantidad_cuotas) * int(fin_actual.valor_cuota)) - int(req.POST['valor_a_pagar'])
-                    resto_dolares = int(int(resto_dolares) / float(precio_dolar))
+                    resto_dolares = int(int(resto_pesos) / float(precio_dolar))
                 else:
                     resto_dolares = (int(fin_actual.cantidad_cuotas) * int(fin_actual.valor_cuota)) - int(req.POST['valor_a_pagar'])
                     resto_pesos = int(int(resto_dolares) * float(precio_dolar))

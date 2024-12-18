@@ -733,14 +733,22 @@ function generarResumen(cuotas, cliente, detalle, p_pagos, fin_pagos_json) {
             </style>
         </head>
         <body>
+            <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f7ca4d; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="flex: 1; text-align: left;">
+                    <img src="http://localhost:8000/media/logos/logo.jpeg" style="width: 100%; max-width: 120px; height: auto;" alt="Logo de la tienda">
+                </div>
+                <div style="flex: 2; text-align: right; font-size: 24px; font-weight: bold; color: #000;">
+                    Umpierrez Motos
+                </div>
+            </div>
            
-                <img src="http://localhost:8000/media/logos/logo.jpeg" alt="Logo de la tienda">
+                
             
             
             <div class="cliente-info">
-                <p><strong>Nombre:</strong> ${cliente.cliente || "N/A"}</p>
-                <p><strong>Contacto:</strong> ${cliente.telefono || "N/A"}</p>
-                <p><strong>Dirección:</strong> ${cliente.direccion || "N/A"}</p>
+                <p><strong>CLIENTE:</strong> ${cliente.cliente || "N/A"}</p>
+                <p><strong>CONTACTO:</strong> ${cliente.telefono || "N/A"}</p>
+                <p><strong>DIRECCION:</strong> ${cliente.direccion || "N/A"}</p>
             </div>
             <h5>DATOS DE LA COMPRA</h5>
             <table>

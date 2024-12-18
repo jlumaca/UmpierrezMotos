@@ -557,6 +557,8 @@ def obtener_detalles_cuotas_financiamiento(req,id_f):
                 ).order_by('-cuota__id')
             )
     res_pagos = []
+    f = Financiamientos.objects.get(id=id_f)
+    ult_cuota = CuotasMoto.objects.filter(venta_id=f.venta_id).latest('id')
     i = 1
     for resultado in resultados:
         ca = CuotasMoto.objects.get(id=resultado['cuota__id'])
@@ -564,7 +566,8 @@ def obtener_detalles_cuotas_financiamiento(req,id_f):
         res_pagos.append({
         'cuota': resultado,
         'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
-        'mostrar_boton': i == len(resultados) and f.actual   
+        # 'mostrar_boton': (i == len(resultados) and f.actual) or (ca.id == ult_cuota.id)  
+         'mostrar_boton': ((ca.id == ult_cuota.id))
         })
         i = i + 1
 
@@ -823,8 +826,7 @@ def json_para_resumen_pagos(moto,id_cv):
 def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
     datos = obtener_detalles_cuotas_comunes(id_cv)
     
-    fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
-    mostrar_boton = True if fin_actual.actual else False
+    
     prueba = Financiamientos.objects.filter(venta_id=id_cv,inicial = 0).first()
     ex_fin_actual = True if prueba else False
     if buscar:
@@ -835,11 +837,22 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
         financiamiento = f"{str(financiamiento_buscado.cantidad_cuotas)} x {moneda} {str(financiamiento_buscado.valor_cuota)}" if financiamiento_buscado else None
         fecha = financiamiento_buscado.fecha if financiamiento_buscado else None
     else:
-        page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
-        moneda = "$" if fin_actual.moneda_cuota == "Pesos" else "U$S" if fin_actual else None
-        financiamiento = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}" if fin_actual else None
-        fecha = fin_actual.fecha if fin_actual else None
-        id_f = fin_actual.id if fin_actual else None
+        fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
+        if fin_actual:
+            mostrar_boton = True if fin_actual.actual else False
+            page_obj = obtener_detalles_cuotas_financiamiento(req,fin_actual.id)
+            moneda = "$" if fin_actual.moneda_cuota == "Pesos" else "U$S" if fin_actual else None
+            financiamiento = f"{str(fin_actual.cantidad_cuotas)} x {moneda} {str(fin_actual.valor_cuota)}" if fin_actual else None
+            fecha = fin_actual.fecha if fin_actual else None
+            id_f = fin_actual.id if fin_actual else None
+        else:
+            fins = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
+            mostrar_boton = True if fins.actual else False
+            page_obj = obtener_detalles_cuotas_financiamiento(req,fins.id)
+            moneda = "$" if fins.moneda_cuota == "Pesos" else "U$S" if fins else None
+            financiamiento = f"{str(fins.cantidad_cuotas)} x {moneda} {str(fins.valor_cuota)}" if fins else None
+            fecha = fins.fecha if fins else None
+            id_f = fins.id if fins else None
     
     moneda_pago = fin_actual.moneda_cuota if fin_actual else None
 
@@ -902,7 +915,7 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 "id_f":id_f,
                 "mon_pago":moneda_pago,
                 "fin_pagos_json":data_jason[4],
-                "monto_cuota":int(fin_actual.valor_cuota),}
+                "monto_cuota":int(fin_actual.valor_cuota) if fin_actual else None,}
     # datos = [
     #     cuotas_json,
     #     cliente_json,

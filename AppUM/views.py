@@ -1849,7 +1849,7 @@ def baja_financiamiento(req,id_f,id_cv):
 
 
 def alta_pago_cuota(req,id_cv):
-    page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
+    # page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
     try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
@@ -1944,6 +1944,11 @@ def alta_pago(req,id_cv):
                 comprobante_url = alta
             else:
                 comprobante_url = None
+            ult_financiamiento = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
+            if ult_financiamiento:
+                #LA ULTIMA REFINANCIACION LA DESACTIVA PARA QUE NO PUEDAN AGREGARSE MAS PAGOS EN LA MISMA
+                ult_financiamiento.actual = 0
+                ult_financiamiento.save()
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     # except Exception as e:

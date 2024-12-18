@@ -1829,7 +1829,7 @@ def refinanciar_pagos(req,id_cv):
         return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{})
 
 def baja_financiamiento(req,id_f,id_cv):
-    try:
+    # try:
         if req.method == "POST":
             fin_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=id_f)
             for fin in fin_cuotas:
@@ -1838,14 +1838,16 @@ def baja_financiamiento(req,id_f,id_cv):
                 cuota.delete()
             financiamiento = Financiamientos.objects.get(id=id_f)
             financiamiento.delete()
-            fin_actual = Financiamientos.objects.filter(venta_id=id_cv).latest('id')
-            fin_actual.actual = 1
-            fin_actual.save()
+            fin_actual = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
+            if fin_actual:
+                fin_actual = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).latest('id')
+                fin_actual.actual = 1
+                fin_actual.save()
             return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"message":"Financiamiento borrado con éxito","id_cv":id_cv})
         else:
             return render(req,"perfil_administrativo/ventas/baja_financiamiento.html",{"id_cv":id_cv})
-    except Exception as e:
-        return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"error_message":str(e),"id_cv":id_cv})
+    # except Exception as e:
+    #     return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"error_message":str(e),"id_cv":id_cv})
 
 
 def alta_pago_cuota(req,id_cv):

@@ -322,7 +322,9 @@
             <td>{{ fecha_financiacion }}</td>
             <td>{{ financiacion_info }}</td>
             <td>
-                <a href="{% url 'BajaFinanciamiento' id_f id_cv %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                {% if mostrar_boton_borrar_financiacion %}
+                    <a href="{% url 'BajaFinanciamiento' id_f id_cv %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                {% endif %}
             </td>
             {% else %}
             <tr>

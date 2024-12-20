@@ -1905,7 +1905,7 @@ def alta_pago_cuota(req,id_cv):
                 comprobante_url = alta
             else:
                 comprobante_url = None
-            messages.success(req, "Pago ingresado con éxito")
+            messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
         messages.error(req, "Algo salió mal: " +str(e))

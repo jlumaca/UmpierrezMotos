@@ -430,13 +430,21 @@
                {% for cuota in page_obj %}
                 <tr>
                     <td>{{ cuota.cuota.cuota__tipo_pago }}</td>
-                    <td>{{ cuota.cuota.cuota__observaciones }}</td>
+                    <td>
+                        {% if cuota.cuota.cuota__observaciones %}
+                        {{ cuota.cuota.cuota__observaciones }}
+                        {% else %}
+                        <p>Sin observaciones</p>
+                        {% endif %}
+                    </td>
                     <td>{{ cuota.cuota.cuota__fecha_pago }}</td>
                     <td>{{ cuota.cuota.cuota__moneda }}</td>
                     <td>{% if cuota.cuota.cuota__moneda == "Pesos" %} {{ cuota.cuota.cuota__valor_pago_pesos }} {% else %} {{ cuota.cuota.cuota__valor_pago_dolares }} {% endif %}</td>
                     <td>
                         {% if cuota.cuota.cuota__cant_restante_pesos == 0 or cuota.cuota.cuota__cant_restante_dolares == 0 %}
-                            <p>PAGO</p>
+                        <span class="badge bg-success" style="font-size: 1.2em; padding: 0.5em;">
+                            Pago
+                        </span>
                         {% else %}
                             ${{ cuota.cuota.cuota__cant_restante_pesos }}/U$s{{ cuota.cuota.cuota__cant_restante_dolares }}
                         {% endif %}

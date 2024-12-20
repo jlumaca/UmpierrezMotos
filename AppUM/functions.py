@@ -751,12 +751,8 @@ def contexto_editar_usuario(req,mensaje_error):
 def json_para_resumen_pagos(moto,id_cv):
     #SE PONE inicial = 0 PARA QUE NO MUESTRE LA PRIMER "FINANCIACION" QUE SE GUARDA AL EJECUTAR LA VENTA
     financiaciones = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).order_by('fecha')
-    cant_financiaciones = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).count()
     cv = ComprasVentas.objects.get(id=id_cv)
     primer_financiacion = Financiamientos.objects.filter(venta_id=id_cv,inicial=1).first()
-    pagos = CuotasMoto.objects.filter(venta_id=id_cv,tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('fecha_pago')
-    dolar = PrecioDolar.objects.get(id=1)
-    precio_dolar = dolar.precio_dolar_tienda
     dato_inicial = [
             {
                 "detalle":moto.marca + " " + moto.modelo,
@@ -766,21 +762,6 @@ def json_para_resumen_pagos(moto,id_cv):
                 "financiacion":f"{primer_financiacion.cantidad_cuotas} x {primer_financiacion.moneda_cuota} {primer_financiacion.valor_cuota}"
             }
         ]
-        # if pagos:
-        #     fin_data = [
-                
-        #             {   
-        #                 "detalle":moto.marca + " " + moto.modelo,
-        #                 # "precio_inicial":int((fin.cantidad_cuotas * fin.valor_cuota) - ((fin.cantidad_cuotas * fin.recargo * fin.valor_cuota)/100)),
-        #                 # "precio_inicial":int((fin.cantidad_cuotas * fin.valor_cuota)-((fin.cantidad_cuotas * fin.valor_cuota) * fin.recargo * fin.cantidad_cuotas)/100),
-        #                 "precio_inicial":int(pagos.valor_pago_pesos) if pagos.moneda == "Pesos" else int(pagos.valor_pago_dolares),
-        #                 "precio_final":int(fin.cantidad_cuotas * fin.valor_cuota),#PRECIO_FINAL = 
-        #                 "moneda":fin.moneda_cuota,
-        #                 "financiacion":f"{fin.cantidad_cuotas} x {fin.moneda_cuota} {fin.valor_cuota}"
-        #                 # "fecha_vencimiento": cuota.fecha_prox_pago.strftime('%Y-%m-%d'),
-        #             }
-        #             for fin in financiaciones
-        #         ]
     if financiaciones:
         fin_data = [
             {
@@ -817,7 +798,7 @@ def json_para_resumen_pagos(moto,id_cv):
         primeros_pagos_json = None
     
     cuotas = CuotasMoto.objects.filter(venta_id=id_cv).exclude(tipo_pago__in=["Seña", "Entrega inicial","Entrega"]).order_by('-id')
-    # precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0
+
     if cuotas:
         cuotas_data = [
                 {  
@@ -843,11 +824,18 @@ def json_para_resumen_pagos(moto,id_cv):
         }
     cliente_json = json.dumps(cliente_data)
     logo = Logos.objects.get(id=1)
+    financiamiento_actual = Financiamientos.objects.filter(venta_id=id_cv,inicial=0,actual=1).first()
+    if financiamiento_actual:
+        if financiamiento_actual.moneda_cuota == "Pesos":
+            moneda_financiamiento = "$"
+        else:
+            moneda_financiamiento = "U$S"
     detalle_data={
         "logo_empresa":logo.logo_UM.url,
         "detalle":moto.marca + " " + moto.modelo,
         "precio_inicial":float(moto.precio),
         "precio_final":float(moto.precio_final),
+        "financiacion":str(financiamiento_actual.cantidad_cuotas) + " x " + moneda_financiamiento + str(financiamiento_actual.valor_cuota) if financiamiento_actual else "Sin financiamiento"
     }
     detalle_json = json.dumps(detalle_data)
 

@@ -890,16 +890,28 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
             # financiamiento = f"{str(fins.cantidad_cuotas)} x {moneda} {str(fins.valor_cuota)}" if fins else None
             # fecha = fins.fecha if fins else None
             # id_f = fins.id if fins else None
-            
-            mostrar_boton = False
-            page_obj = False
-            moneda = False
-            financiamiento = False
-            fecha = False
-            id_f = False
-            moneda_pago = None
-            monto_cuota = None
-            mostrar_boton_borrar_financiacion = False
+            financiacion_anterior = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
+            if financiacion_anterior:
+                financiacion_anterior = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).latest('id')
+                mostrar_boton = False
+                page_obj = obtener_detalles_cuotas_financiamiento(req,financiacion_anterior.id)
+                moneda = "$" if financiacion_anterior.moneda_cuota == "Pesos" else "U$S" if financiacion_anterior else None
+                financiamiento = f"{str(financiacion_anterior.cantidad_cuotas)} x {moneda} {str(financiacion_anterior.valor_cuota)}" if financiacion_anterior else None
+                fecha = financiacion_anterior.fecha if financiacion_anterior else None
+                id_f = financiacion_anterior.id if financiacion_anterior else None
+                moneda_pago = financiacion_anterior.moneda_cuota if financiacion_anterior else None
+                monto_cuota = int(financiacion_anterior.valor_cuota) if financiacion_anterior else None
+                mostrar_boton_borrar_financiacion = False
+            else:
+                mostrar_boton = False
+                page_obj = False
+                moneda = False
+                financiamiento = False
+                fecha = False
+                id_f = False
+                moneda_pago = None
+                monto_cuota = None
+                mostrar_boton_borrar_financiacion = False
     
     
 

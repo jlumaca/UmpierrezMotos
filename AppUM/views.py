@@ -1863,7 +1863,7 @@ def alta_pago_cuota(req,id_cv):
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = dolar.precio_dolar_tienda
         # recargo = req.POST['recargo']
-        # total = req.POST['total_luego_recargo']
+        total = req.POST['valor_a_pagar']
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).exists()
         moto = Moto.objects.get(id=cv.moto_id)
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
@@ -1880,13 +1880,13 @@ def alta_pago_cuota(req,id_cv):
             #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
             messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual")
             return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
-        elif int(fin_actual.valor_cuota) != int(req.POST['valor_a_pagar']):
-            #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"El valor ingresado de la cantidad a pagar es incorrecto","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
-            messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
-            return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
+        # elif int(fin_actual.valor_cuota) != int(req.POST['valor_a_pagar']):
+        #     #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"El valor ingresado de la cantidad a pagar es incorrecto","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        #     messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
+        #     return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         else:
-            # if forma_pago == "Efectivo" and caja:
-            #     movimiento_caja_por_pago(req,float(total),id_cv,moneda)
+            if forma_pago == "Efectivo" and caja:
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda)
             
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
@@ -1905,7 +1905,7 @@ def alta_pago_cuota(req,id_cv):
                 comprobante_url = alta
             else:
                 comprobante_url = None
-            messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
+            messages.success(req, "Pago ingresado con éxito.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
         messages.error(req, "Algo salió mal: " +str(e))
@@ -1914,8 +1914,8 @@ def alta_pago_cuota(req,id_cv):
 
 @admin_required
 def alta_pago(req,id_cv):
-        page_obj = obtener_compras_motos(req,id_cv)
-    # try:
+    # page_obj = obtener_compras_motos(req,id_cv)
+    try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
         caja = Caja.objects.filter(estado="Abierto").first()
@@ -1926,21 +1926,30 @@ def alta_pago(req,id_cv):
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = dolar.precio_dolar_tienda
         # recargo = req.POST['recargo']
-        # total = req.POST['total_luego_recargo']
+        total = req.POST['valor_a_pagar']
         existe_cuota = CuotasMoto.objects.filter(venta_id=id_cv).exists()
+        if existe_cuota:
+            cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+        else:
+            cuota = None
         moto = Moto.objects.get(id=cv.moto_id)
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
         
-        validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",existe_cuota,id_cv)
+        validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",cuota,id_cv)
         validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
         if validar_precio:
-            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req, f"{validar_precio}")
+            return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         elif validar_fecha_proximo_pago.date() < fecha_actual:
-            return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual.")
+            return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
+        
         else:
-            # if forma_pago == "Efectivo" and caja:
-                # movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
+            if forma_pago == "Efectivo" and caja:
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
             alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
             if alta:
                 comprobante_url = alta
@@ -1951,10 +1960,13 @@ def alta_pago(req,id_cv):
                 #LA ULTIMA REFINANCIACION LA DESACTIVA PARA QUE NO PUEDAN AGREGARSE MAS PAGOS EN LA MISMA
                 ult_financiamiento.actual = 0
                 ult_financiamiento.save()
-            messages.success(req, "Pago ingresado con éxito")
+            messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
+    except Exception as e:
+        # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
+        print("ERROR")
+        messages.error(req, f"Algo salió mal: " + str(e))
+        return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
 
 @admin_required
 def baja_pago(req,id_cm):

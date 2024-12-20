@@ -188,6 +188,7 @@ class Financiamientos(models.Model):
     actual = models.BooleanField(default=True)
     venta = models.ForeignKey(ComprasVentas, related_name='financiamientos_venta', on_delete=models.CASCADE)
     inicial = models.BooleanField(default=False)
+    precio_moto_actual = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 class CuotasMoto(models.Model):
     fecha_pago = models.DateField()

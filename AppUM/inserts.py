@@ -195,9 +195,36 @@ def alta_cuota_accesorio(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,mon
 def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial):
     ult_fin = Financiamientos.objects.filter(venta_id=venta_id).first()
     if ult_fin:
-         ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
-         ult_fin.actual = 0
-         ult_fin.save()
+        ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
+        ult_fin.actual = 0
+        ult_fin.save()
+
+        cv = ComprasVentas.objects.get(id=venta_id)
+        moto = Moto.objects.get(id=cv.moto_id)
+        prueba_fin = CuotasMoto.objects.filter(venta_id=venta_id).first()
+        if prueba_fin:
+            resultados = CuotasMoto.objects.filter(venta_id=venta_id)
+            prueba_pesos = 0
+            prueba_dolares = 0
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = dolar.precio_dolar_tienda
+            for res in resultados:
+                    cuota = CuotasMoto.objects.get(id=res.id)
+                    if cuota.moneda == "Pesos":
+                        prueba_pesos = prueba_pesos + int(cuota.valor_pago_pesos)
+                    else:
+                        prueba_dolares = prueba_dolares + int(cuota.valor_pago_dolares)
+            if moto.moneda_precio == "Pesos":
+                total_pesos = prueba_pesos
+                total_dolares = int(prueba_pesos / precio_dolar)
+                valor_precio_en_financiamiento = int(moto.precio - total_pesos - total_dolares)
+            else:
+                total_pesos = int(prueba_pesos * precio_dolar)
+                total_dolares = prueba_dolares
+                valor_precio_en_financiamiento = int(moto.precio - total_pesos - total_dolares)
+        else:
+            valor_precio_en_financiamiento = 0
+                
 
     financiamiento = Financiamientos(
         fecha = datetime.now(),
@@ -207,6 +234,7 @@ def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual
         moneda_cuota = moneda_cuota,
         actual = actual,
         venta_id = venta_id,
-        inicial = inicial
+        inicial = inicial,
+        precio_moto_actual = valor_precio_en_financiamiento
     )
     financiamiento.save()

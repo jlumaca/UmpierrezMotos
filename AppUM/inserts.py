@@ -229,6 +229,10 @@ def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual
                 valor_precio_en_financiamiento = int(ultima_cuota.cant_restante_dolares)
         else:
             valor_precio_en_financiamiento = 0
+    else:
+        #PARA CUANDO SE VENDE UNA MOTO
+         valor_precio_en_financiamiento = 0
+         
                 
 
     financiamiento = Financiamientos(

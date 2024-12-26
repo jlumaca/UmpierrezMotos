@@ -136,5 +136,13 @@ urlpatterns = [
      path('baja_financiamiento/<int:id_f>/<int:id_cv>', views.baja_financiamiento,name="BajaFinanciamiento"),
 
 
+     path('repuestos', views.repuestos,name="Repuestos"),
+     path('alta_repuesto', views.alta_repuesto,name="AltaRepuesto"),
+     path('baja_repuesto/<int:id_rp>', views.baja_repuesto,name="BajaRepuesto"),
+     path('modificacion_repuesto/<int:id_rp>', views.modificacion_repuesto,name="ModificacionRepuesto"),
+     path('detalles_repuesto/<int:id_rp>', views.detalles_repuesto,name="DetallesRepuesto"),
+
+
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

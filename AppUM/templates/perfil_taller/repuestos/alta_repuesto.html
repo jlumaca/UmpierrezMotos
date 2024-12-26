@@ -1,0 +1,31 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de accesorio</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="marca" class="form-label">Tipo</label>
+                <input type="text" class="form-control" name="tipo_repuesto" id="marca" placeholder="Ingrese la marca" maxlength="20">
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Descripcion</label>
+                <input type="text" class="form-control" name="descripcion_repuesto" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
+            </div>
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+{% endblock %}

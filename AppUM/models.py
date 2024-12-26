@@ -208,6 +208,11 @@ class CuotasMoto(models.Model):
 class CuotasFinanciacion(models.Model):
     cuota = models.ForeignKey(CuotasMoto, related_name='cuota_financiamiento', on_delete=models.CASCADE)
     financiamiento = models.ForeignKey(Financiamientos, related_name='financiamiento_cuota', on_delete=models.CASCADE)
+
+class RepuestosPiezas(models.Model):
+    tipo_pieza = models.CharField(max_length=20)
+    descripcion = models.CharField(max_length=100)
+    activo = models.BooleanField(default=True)
     
 
 

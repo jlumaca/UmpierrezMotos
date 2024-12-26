@@ -1,0 +1,54 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-accesorio {
+        display: block;
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="table-container" id="motoDetails">
+    <h4>Detalles del {{ accesorio.tipo }}</h4>
+
+    {% if accesorio.foto %}
+        <div class="text-center">
+            <img src="{{ repuesto.foto.url }}" alt="Foto del accesorio" class="imagen-accesorio">
+        </div>
+    {% else %}
+        <div class="text-center mt-3">
+            <div class="alert alert-warning" role="alert">
+                Este repuesto no tiene una foto disponible.
+            </div>
+        </div>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Tipo</th>
+                <td>{{ repuesto.tipo_pieza }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Descripción</th>
+                <td>{{ repuesto.descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{% url 'Repuestos' %}" class="btn btn-secondary">Volver</a>
+</div>
+
+{% endblock %}

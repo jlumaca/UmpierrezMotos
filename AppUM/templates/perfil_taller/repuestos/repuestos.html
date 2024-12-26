@@ -1,0 +1,132 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert alert-success">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Repuestos y piezas</h3>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <a href="{% url 'AltaRepuesto' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-helmet-safety"></i> Alta de repuesto/pieza
+    </a>
+    <div class="mb-3">
+        <label for="estado" class="form-label">Buscar por:</label>
+        <select class="form-control" name="estado_accesorio" id="tipo_busqueda">
+            <option value="tipo">Tipo</option>
+            <option value="codigo">Descripción</option>
+        </select>
+    </div>
+
+    <form action="" enctype="multipart/form-data" method="get" id="busqueda_tipo">{% csrf_token %}
+        <div class="input-group mb-3">
+            <select class="form-control" name="tipo_accesorio" id="tipo_accesorio">
+                    <option value="Aceite">Aceite</option>
+                    <option value="Casco">Casco</option>
+                    <option value="Cubremoto">Cubremoto</option>
+                    <option value="Grasa de cadena">Grasa de cadena</option>
+                    <option value="Guantes">Guantes</option>
+                    <option value="Mecanismo">Mecanismo de casco</option>
+                    <option value="Micas">Micas</option>
+                    <option value="Pasamontaña">Pasamontaña</option>
+                    <option value="Ropa">Ropa</option>
+                    <option value="Slime">Slime</option>
+                    <option value="Trancas">Trancas</option>
+                    <option value="Valijas">Valijas</option>
+                    <option value="Otro">Otro</option>
+            </select>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for repuesto in page_obj %}
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>{{ repuesto.tipo_pieza }}</td>
+                <td>{{ repuesto.descripcion }}</td>
+                <td>
+                    <a href="{% url 'BajaRepuesto' repuesto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                    <a href="{% url 'ModificacionRepuesto' repuesto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                    <a href="{% url 'DetallesRepuesto' repuesto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de repuestos ni piezas disponibles.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="Primera">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+<script>
+//     function tipo_busqueda() {
+//         var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+
+//         var busqueda_tipo_inp = document.getElementById("busqueda_tipo");
+//         var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
+//         var busqueda_codigo = document.getElementById("busqueda_codigo");
+//         busqueda_tipo_inp.style.display = busqueda_tipo === "tipo" ? "block" : "none";
+//         busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+//         busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
+//     }
+// </script>
+{% endblock %}

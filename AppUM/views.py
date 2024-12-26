@@ -2673,3 +2673,59 @@ def historial_de_servicios(req):
         return render(req,"perfil_taller/historial_de_servicios/historial_de_servicios.html",{"servicios":datos})
     except Exception as e:
         pass
+
+def repuestos(req):
+    repuestos = RepuestosPiezas.objects.filter(activo=1).order_by('-id')
+    #repuestos = RepuestosPiezas.objects.all()
+    page_obj = funcion_paginas_varias(req,repuestos)
+    return render(req,"perfil_taller/repuestos/repuestos.html",{'page_obj': page_obj})
+
+def alta_repuesto(req):
+    try:
+        if req.method == "POST":
+            nuevo_repuesto = RepuestosPiezas(
+                tipo_pieza = req.POST['tipo_repuesto'],
+                descripcion = req.POST['descripcion_repuesto'],
+                activo = 1
+            )
+            nuevo_repuesto.save()
+            messages.success(req, "Repuesto ingresado con éxito.")
+            return redirect('Repuestos')
+        else:
+            return render(req,"perfil_taller/repuestos/alta_repuesto.html",{})
+    except Exception as e:
+        pass
+
+def baja_repuesto(req,id_rp):
+    try:
+        if req.method == "POST":
+            repuesto = RepuestosPiezas.objects.get(id=id_rp)
+            repuesto.activo = 0
+            repuesto.save()
+            # return render(req,"perfil_taller/repuestos/baja_repuesto.html",{})
+            return render(req, "perfil_taller/repuestos/baja_repuesto.html", {"message":"Repuesto borrado con éxito"})
+        else:
+            return render(req,"perfil_taller/repuestos/baja_repuesto.html",{})
+    except Exception as e:
+        pass
+
+def modificacion_repuesto(req,id_rp):
+    try:
+        repuesto = RepuestosPiezas.objects.get(id=id_rp)
+        if req.method == "POST":
+            repuesto.tipo_pieza = req.POST['tipo_repuesto']
+            repuesto.descripcion = req.POST['descripcion_repuesto']
+            repuesto.save()
+            messages.success(req, "Repuesto modificado con éxito.")
+            return redirect('Repuestos')
+        else:
+            return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto})
+    except Exception as e:
+        pass
+
+def detalles_repuesto(req,id_rp):
+    try:
+        repuesto = RepuestosPiezas.objects.get(id=id_rp)
+        return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto})
+    except Exception as e:
+        pass

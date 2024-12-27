@@ -600,8 +600,8 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
     fecha_formateada = fecha_actual.strftime("%d DE %B").upper()
     longitud_doc = len(cliente.documento)
     doc_num = ""
-    apto = "APTO " + str(cliente.num_apartamento) if cliente.num_apartamento > 0 else ""
-    direccion = cliente.calle.upper() + " " + str(cliente.numero) + apto + ", " + cliente.ciudad.upper()
+    # apto = "APTO " + str(cliente.num_apartamento) if cliente.num_apartamento > 0 else ""
+    # direccion = cliente.calle.upper() + " " + str(cliente.numero) + apto + ", " + cliente.ciudad.upper()
     for i in range(2,longitud_doc):
                     doc_num = doc_num + cliente.documento[i]
     if moto.moneda_precio == "Pesos":
@@ -618,7 +618,7 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
         if 'TELEFONO_CLIENTE' in p.text:
             p.text = p.text.replace('TELEFONO_CLIENTE', telefono)
         if 'DIRECCION_CLIENTE' in p.text:
-            p.text = p.text.replace('DIRECCION_CLIENTE', direccion)
+            p.text = p.text.replace('DIRECCION_CLIENTE', cliente.domicilio)
         if 'MOTO_MARCA' in p.text:
             p.text = p.text.replace('MOTO_MARCA', moto.marca)
         if 'MOTO_MODELO' in p.text:
@@ -816,11 +816,11 @@ def json_para_resumen_pagos(moto,id_cv):
     
     cliente = Cliente.objects.get(id=cv.cliente_id)
     telefono = ClienteTelefono.objects.filter(cliente_id=cv.cliente_id,principal=1).first()
-    apto = "Apto " + str(cliente.num_apartamento) if int(cliente.num_apartamento) > 0 else ""
+    # apto = "Apto " + str(cliente.num_apartamento) if int(cliente.num_apartamento) > 0 else ""
     cliente_data = {
         "cliente": cliente.nombre + " " + cliente.apellido,
         "telefono": telefono.telefono,
-        "direccion": cliente.calle + " " + str(cliente.numero) + apto + ", " + cliente.ciudad,
+        "direccion": cliente.domicilio,
         }
     cliente_json = json.dumps(cliente_data)
     logo = Logos.objects.get(id=1)

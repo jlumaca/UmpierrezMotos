@@ -2669,6 +2669,15 @@ def cerrar_servicio(req,id_s):
     except Exception as e:
         pass
 
+def modificar_servicio(req,id_s):
+    try:
+        if req.method == "POST":
+            pass
+        else:
+            return render(req,"perfil_taller/servicios/modificar_servicio.html",{})
+    except Exception as e:
+        pass
+
 def historial_de_servicios(req):
     try:
         servicios_motos = (
@@ -2762,7 +2771,7 @@ def estadisticas_taller(req):
         mes_actual = datetime.now().month
         datos_servicios = []
         for n in range(1,mes_actual + 1):
-            cant_servicios = Servicios.objects.filter(fecha_ingreso__year=anio,fecha_ingreso__month=n,estado="Cerrado").count()
+            cant_servicios = Servicios.objects.filter(fecha_ingreso__year=anio,fecha_ingreso__month=n,estado="Completado").count()
             datos_servicios.append(int(cant_servicios))
 
         return render(req,"perfil_taller/estadisticas/estadisticas.html",{"datos":datos_servicios})

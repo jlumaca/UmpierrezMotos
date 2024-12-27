@@ -2574,15 +2574,28 @@ def cliente_moto_servicio(req):
         documento = req.POST['tipo_documento'] + str(req.POST['documento'])
         cliente = Cliente.objects.filter(documento=documento).first()
         tipo_busqueda = req.POST['buscar_moto_por']
+        matricula = req.POST['letras_matricula'].upper() + str(req.POST['numeros_matricula'])
         if tipo_busqueda == "matricula":
-            matricula = req.POST['letras_matricula'].upper() + str(req.POST['numeros_matricula'])
             existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
             if existe_matricula:
                 moto = Moto.objects.get(id=existe_matricula.moto_id)
+                matricula = existe_matricula.matricula
             else:
                 moto = None
+                matricula = None
         else:
-            moto = Moto.objects.filter(num_motor=req.POST['numero_de_motor'])
+            print(req.POST['numero_de_motor'])
+            moto = Moto.objects.filter(num_motor=req.POST['numero_de_motor']).first()
+            if moto:
+                existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
+                if existe_matricula:
+                    matricula = existe_matricula.matricula
+                else:
+                    matricula = None
+            else:
+                moto = None
+                matricula = None
+            
         
         if not cliente:
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_cliente":"El cliente no existe, para ingresarlo haga clic ","buscar_moto_cliente":True})
@@ -2596,7 +2609,7 @@ def cliente_moto_servicio(req):
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"datos_moto":True,
                                                                             "moto":moto,
                                                                             "cliente":cliente,
-                                                                            "matricula":existe_matricula.matricula,
+                                                                            "matricula":matricula if matricula else "Sin matrícula",
                                                                             "buscar_moto_cliente":False,
                                                                             "mecanicos":mecanicos if mecanicos else None})
     # except Exception as e:

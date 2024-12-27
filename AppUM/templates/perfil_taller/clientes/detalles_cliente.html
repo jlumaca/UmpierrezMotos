@@ -1,0 +1,91 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-accesorio {
+        display: block;
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+<div class="table-container" id="clienteDetails">
+    <h1>Ficha del cliente</h1>
+    <h4>Datos personales</h4>
+    <p>{{ prueba }}</p>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Cliente</th>
+                <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Documento</th>
+                <td>{{ cliente.documento }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Contacto</th>
+                <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th scope="row">Correo</th>
+                <td>{% if correo1 %}{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %} {% else %} El cliente no tiene correo {% endif %}</td>
+            </tr>
+          
+            <tr>
+                <th scope="row">Domicilio</th>
+                <td>{{ cliente.calle }} {{ cliente.numero }}{% if cliente.num_apartamento != 0 %} Apto {{ cliente.num_apartamento }}, {% else %}, {% endif %} {{ cliente.ciudad }} </td>
+            </tr>
+        </tbody>
+    </table>
+    <h4>Motos</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="row">Detalles</th>
+                <th scope="row">Matrícula</th>
+                <th scope="row">Acciones</th>
+             
+              
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for item in page_obj %}
+                    <tr>
+                        <td>{{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}</td>
+                        <td>
+                            {{ item.matricula }}
+                        </td>
+                        <td>
+                            <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de motos.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <a href="{% url 'ClientesTaller' %}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}

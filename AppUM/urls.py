@@ -142,6 +142,13 @@ urlpatterns = [
      path('modificacion_repuesto/<int:id_rp>', views.modificacion_repuesto,name="ModificacionRepuesto"),
      path('detalles_repuesto/<int:id_rp>', views.detalles_repuesto,name="DetallesRepuesto"),
      path('estadisticas_taller', views.estadisticas_taller,name="EstadisticasTaller"),
+     path('clientes_taller', views.clientes_taller,name="ClientesTaller"),
+     path('busqueda_documento_taller', views.buscar_por_doc_taller,name="BusquedaDocumentoTaller"),
+     path('busqueda_nombre_apellido_taller', views.buscar_nom_ape_taller,name="BusquedaNombreApellidoTaller"),
+     path('alta_cliente_taller', views.alta_cliente_taller,name="AltaClienteTaller"),
+     path('modificacion_cliente_taller/<int:id_cliente>', views.modificacion_cliente_taller,name="ModificacionClienteTaller"),
+     path('detalles_cliente_taller/<int:id_cliente>', views.detalles_cliente_taller,name="DetallesClienteTaller"),
+
 
 
 

@@ -4,13 +4,13 @@
 {% block contenidoQueCambia %}
 <div class="table-container" id="inventarios">
     <div class="form-container" id="motoForm">
-        <h4>Alta de cliente</h4>
+        <h4>Modificación de cliente</h4>
         {% if error_message %}
             <div class="alert alert-danger" role="alert">
             {{ error_message }}
             </div>
         {% endif %}
-        <form action="{% url 'ClienteModificacion' datos_cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'ModificacionClienteTaller' datos_cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
@@ -114,7 +114,7 @@
 
 
 
-            <label for="estado" class="form-label">Localidad</label>
+            <!-- <label for="estado" class="form-label">Localidad</label>
             <select class="form-control" name="localidad" id="id_localidad">
                 <option value="Libertad">Libertad</option>
                 <option value="Kiyú">Kiyú</option>
@@ -123,10 +123,10 @@
                 <option value="Ciudad del Plata">Ciudad del Plata</option>
                 <option value="San José de Mayo">San José de Mayo</option>
                 <option value="Otro">Otro</option>
-            </select>
+            </select> -->
 
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="precio" class="form-label">Calle</label>
                 <input value="{{ datos_cliente.calle }}" type="text" class="form-control" name="calle" placeholder="Ingrese la calle" required>
             </div>
@@ -139,6 +139,10 @@
             <div class="mb-3">
                 <label for="precio" class="form-label">Número de apartamento</label>
                 <input value="{{ datos_cliente.num_apartamento }}" type="number" class="form-control" name="num_apto" placeholder="Ingrese el numero de apartamento">
+            </div> -->
+            <div class="mb-3">
+                <label for="precio" class="form-label">Domicilio</label>
+                <input value="{{ datos_cliente.domicilio }}" type="text" class="form-control" name="domicilio" placeholder="Ingrese el domicilio" required>
             </div>
             
             

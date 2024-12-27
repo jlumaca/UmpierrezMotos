@@ -1030,10 +1030,10 @@ def alta_cliente(req):
             dominio_correo = req.POST['dominio_correo']
             correo_2 = req.POST['correo_2']
             dominio_correo_2 = req.POST['dominio_correo_2']
-            localidad = req.POST['localidad'].title()
-            calle = req.POST['calle'].title()
-            numero = req.POST['numero']
-            num_apto = req.POST['num_apto']
+            # localidad = req.POST['localidad'].title()
+            # calle = req.POST['calle'].title()
+            # numero = req.POST['numero']
+            # num_apto = req.POST['num_apto']
             
             if correo:
                 correo_principal = correo + dominio_correo
@@ -1062,25 +1062,22 @@ def alta_cliente(req):
             elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
                 return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los correos no pueden ser iguales"})
             else:
-                if localidad == "Otro":
-                    ciudad = req.POST['localidad_otro'].title()
-                else:
-                    ciudad = localidad
+                # if localidad == "Otro":
+                #     ciudad = req.POST['localidad_otro'].title()
+                # else:
+                #     ciudad = localidad
 
-                if num_apto:
-                    n_a = num_apto
-                else:
-                    n_a = 0
+                # if num_apto:
+                #     n_a = num_apto
+                # else:
+                #     n_a = 0
 
                 nuevo_cliente = Cliente(
                     documento = doc_compuesto,
                     nombre = nombre,
                     apellido = apellido,
                     fecha_nacimiento = f_nac,
-                    ciudad = ciudad,
-                    calle = calle,
-                    numero = numero,
-                    num_apartamento = n_a
+                    domicilio = req.POST['domicilio'].title()
                 )
 
                 nuevo_cliente.save()
@@ -1188,10 +1185,11 @@ def modificacion_cliente(req,id_cliente):
                 mod_cliente.nombre = req.POST['nombre'].title()
                 mod_cliente.apellido = req.POST['apellido'].title()
                 mod_cliente.fecha_nacimiento = f_nac
-                mod_cliente.ciudad = req.POST['localidad'].title()
-                mod_cliente.calle = req.POST['calle'].title()
-                mod_cliente.numero = req.POST['numero']
-                mod_cliente.num_apartamento = req.POST['num_apto']
+                # mod_cliente.ciudad = req.POST['localidad'].title()
+                # mod_cliente.calle = req.POST['calle'].title()
+                # mod_cliente.numero = req.POST['numero']
+                # mod_cliente.num_apartamento = req.POST['num_apto']
+                mod_cliente.domicilio = req.POST['domicilio'].title()
                 
                 mod_cliente.save()
                 messages.success(req, "Cliente modificado con éxito")
@@ -2803,10 +2801,10 @@ def alta_cliente_taller(req):
             dominio_correo = req.POST['dominio_correo']
             correo_2 = req.POST['correo_2']
             dominio_correo_2 = req.POST['dominio_correo_2']
-            localidad = req.POST['localidad'].title()
-            calle = req.POST['calle'].title()
-            numero = req.POST['numero']
-            num_apto = req.POST['num_apto']
+            # localidad = req.POST['localidad'].title()
+            # calle = req.POST['calle'].title()
+            # numero = req.POST['numero']
+            # num_apto = req.POST['num_apto']
             
             if correo:
                 correo_principal = correo + dominio_correo
@@ -2835,25 +2833,26 @@ def alta_cliente_taller(req):
             elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
                 return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"Los correos no pueden ser iguales"})
             else:
-                if localidad == "Otro":
-                    ciudad = req.POST['localidad_otro'].title()
-                else:
-                    ciudad = localidad
+                # if localidad == "Otro":
+                #     ciudad = req.POST['localidad_otro'].title()
+                # else:
+                #     ciudad = localidad
 
-                if num_apto:
-                    n_a = num_apto
-                else:
-                    n_a = 0
+                # if num_apto:
+                #     n_a = num_apto
+                # else:
+                #     n_a = 0
 
                 nuevo_cliente = Cliente(
                     documento = doc_compuesto,
                     nombre = nombre,
                     apellido = apellido,
                     fecha_nacimiento = f_nac,
-                    ciudad = ciudad,
-                    calle = calle,
-                    numero = numero,
-                    num_apartamento = n_a
+                    domicilio = req.POST['domicilio'].title()
+                    # ciudad = ciudad,
+                    # calle = calle,
+                    # numero = numero,
+                    # num_apartamento = n_a
                 )
 
                 nuevo_cliente.save()
@@ -2960,10 +2959,11 @@ def modificacion_cliente_taller(req,id_cliente):
                 mod_cliente.nombre = req.POST['nombre'].title()
                 mod_cliente.apellido = req.POST['apellido'].title()
                 mod_cliente.fecha_nacimiento = f_nac
-                mod_cliente.ciudad = req.POST['localidad'].title()
-                mod_cliente.calle = req.POST['calle'].title()
-                mod_cliente.numero = req.POST['numero']
-                mod_cliente.num_apartamento = req.POST['num_apto']
+                # mod_cliente.ciudad = req.POST['localidad'].title()
+                # mod_cliente.calle = req.POST['calle'].title()
+                # mod_cliente.numero = req.POST['numero']
+                # mod_cliente.num_apartamento = req.POST['num_apto']
+                mod_cliente.domicilio = req.POST['domicilio'].title()
                 
                 mod_cliente.save()
                 messages.success(req, "Cliente modificado con éxito")

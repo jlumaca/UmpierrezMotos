@@ -114,7 +114,7 @@
 
 
 
-            <label for="estado" class="form-label">Localidad</label>
+            <!-- <label for="estado" class="form-label">Localidad</label>
             <select class="form-control" name="localidad" id="id_localidad">
                 <option value="Libertad">Libertad</option>
                 <option value="Kiyú">Kiyú</option>
@@ -139,6 +139,10 @@
             <div class="mb-3">
                 <label for="precio" class="form-label">Número de apartamento</label>
                 <input value="{{ datos_cliente.num_apartamento }}" type="number" class="form-control" name="num_apto" placeholder="Ingrese el numero de apartamento">
+            </div> -->
+            <div class="mb-3">
+                <label for="precio" class="form-label">Domicilio</label>
+                <input value="{{ datos_cliente.domicilio }}" type="text" class="form-control" name="domicilio" placeholder="Ingrese el domicilio" required>
             </div>
             
             

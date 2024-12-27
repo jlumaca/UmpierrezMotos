@@ -67,10 +67,11 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=20)
     apellido  = models.CharField(max_length=20)
     fecha_nacimiento = models.DateField(null=True,blank=True)
-    ciudad = models.CharField(max_length=40)
-    calle = models.CharField(max_length=40)
-    numero = models.IntegerField()
-    num_apartamento = models.IntegerField()
+    # ciudad = models.CharField(max_length=40)
+    # calle = models.CharField(max_length=40)
+    # numero = models.IntegerField()
+    # num_apartamento = models.IntegerField()
+    domicilio = models.CharField(max_length=500,blank=True) 
 
 
 class ClienteCorreo(models.Model):

@@ -93,8 +93,8 @@
             </tr>
         </thead>
         <tbody>
-            {% if servicios %}
-            {% for servicio in servicios %}
+            {% if page_obj %}
+            {% for servicio in page_obj %}
                 <tr>
                     <td>{{ servicio.servicio.id }}</td>
                     <td>{{ servicio.servicio.fecha_ingreso }}</td>
@@ -113,6 +113,13 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de servicios.
+                    </td>
+                </tr>
+            
                 {% endif %}
         </tbody>
     </table>

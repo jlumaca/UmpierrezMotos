@@ -2552,12 +2552,12 @@ def servicios_en_gestion(req):
             fecha_ingreso = resultado['fecha_ingreso']  # Suponiendo que 'fecha_ingreso' es un campo de la consulta
             dias_transcurridos = (date.today() - fecha_ingreso).days
             datos.append({
-                'servicio': resultado,
-                'mecanicos': datos_mecanicos,  # Lista de nombres completos de mecánicos
+                'servicio': resultado if resultado else None,
+                'mecanicos': datos_mecanicos if datos_mecanicos else None,  # Lista de nombres completos de mecánicos
                 'dias':dias_transcurridos
             })
-        
-        return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos,"mecanicos":datos_mecanicos})
+        page_obj = funcion_paginas_varias(req,datos)
+        return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos,"page_obj":page_obj})
     # except Exception as e:
     #     pass
 
@@ -2682,7 +2682,8 @@ def historial_de_servicios(req):
             datos.append({
             'servicio': resultado,
             })
-        return render(req,"perfil_taller/historial_de_servicios/historial_de_servicios.html",{"servicios":datos})
+        page_obj = funcion_paginas_varias(req,datos)
+        return render(req,"perfil_taller/historial_de_servicios/historial_de_servicios.html",{"servicios":datos,"page_obj":page_obj})
     except Exception as e:
         pass
 

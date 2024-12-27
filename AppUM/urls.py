@@ -141,6 +141,7 @@ urlpatterns = [
      path('baja_repuesto/<int:id_rp>', views.baja_repuesto,name="BajaRepuesto"),
      path('modificacion_repuesto/<int:id_rp>', views.modificacion_repuesto,name="ModificacionRepuesto"),
      path('detalles_repuesto/<int:id_rp>', views.detalles_repuesto,name="DetallesRepuesto"),
+     path('estadisticas_taller', views.estadisticas_taller,name="EstadisticasTaller"),
 
 
 

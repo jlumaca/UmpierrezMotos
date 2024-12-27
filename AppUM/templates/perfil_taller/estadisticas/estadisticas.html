@@ -1,0 +1,80 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<div class="table-container">
+    {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+
+    <figure class="highcharts-figure">
+        <div id="container_serviciosxmes"></div>
+       
+    
+        <table id="datatable">
+            <thead style="display: none;">
+                <tr>
+                    <th></th>
+                    <th>Ventas</th>
+                    
+                </tr>
+            </thead>
+            <tbody style="display: none;">
+                {% for venta in datos %}
+                    <tr>
+                        <th></th>
+                        <td>{{ venta }}</td>
+                        
+                    </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
+    
+</div>
+
+<script>
+
+Highcharts.chart('container_serviciosxmes', {
+    data: {
+        table: 'datatable'
+    },
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Ventas de motos por mes'
+    },
+    xAxis: {
+        categories: ['Ventas','Marcas'],
+        title: {
+            text: 'Mes'
+        },
+        // Ejemplo para ajustar los valores de x si fuera necesario
+        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
+        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
+    },
+    yAxis: {
+        min: 0, // Valor mínimo en el eje y
+        
+        tickInterval: 10, // Intervalo entre marcas en el eje y
+        allowDecimals: false,
+        title: {
+            text: 'Ventas'
+        }
+    }
+});
+
+</script>
+{% endblock %}

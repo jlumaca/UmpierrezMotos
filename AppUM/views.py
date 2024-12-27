@@ -2729,3 +2729,17 @@ def detalles_repuesto(req,id_rp):
         return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto})
     except Exception as e:
         pass
+
+def estadisticas_taller(req):
+    try:
+        anio = datetime.now().year
+        mes_actual = datetime.now().month
+        datos_servicios = []
+        for n in range(1,mes_actual + 1):
+            cant_servicios = Servicios.objects.filter(fecha_ingreso__year=anio,fecha_ingreso__month=n,estado="Cerrado").count()
+            datos_servicios.append(int(cant_servicios))
+
+        return render(req,"perfil_taller/estadisticas/estadisticas.html",{"datos":datos_servicios})
+                                                                                  
+    except Exception as e:
+        pass

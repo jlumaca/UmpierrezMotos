@@ -1132,7 +1132,7 @@ def modificacion_cliente(req,id_cliente):
             elif tel1 == tel2:
                 contexto = contexto_para_cliente(id_cliente,"Los telefonos no pueden ser iguales")
                 return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
-            elif correo1 == correo2:
+            elif (correo1 == correo2) and (req.POST['correo_1'] and req.POST['correo_2']):
                 contexto = contexto_para_cliente(id_cliente,"Los correos no pueden ser iguales")
                 return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
             else:

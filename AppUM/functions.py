@@ -241,7 +241,7 @@ def contexto_para_cliente(id_cliente,mensaje_error):
             else:
                 c_s = ""
                 dom_sec = None
-            f_nac_formateada = cliente.fecha_nacimiento.strftime('%Y-%m-%d')
+            f_nac_formateada = cliente.fecha_nacimiento.strftime('%Y-%m-%d') if cliente.fecha_nacimiento else None
             contexto = {"datos_cliente":cliente,
                         "tipo_doc":tipo_doc,
                         "doc_num":doc_num,

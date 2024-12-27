@@ -18,8 +18,9 @@ from django.core.mail import send_mail
 from .inserts import *
 from .functions import *
 from django.http import JsonResponse
-import json
-from docx import Document
+from django.db.models import Max
+# import json
+# from docx import Document
 
 # Create your views here.
 
@@ -2999,8 +3000,10 @@ def detalles_cliente_taller(req,id_cliente):
     .filter(cliente__id=id_cliente)
     .select_related('moto', 'cliente')
     .values('moto__marca', 'moto__modelo','moto__id')  # Agrupar por estos campos
-    .annotate(total_servicios=Count('id'))  # Contar servicios por cada grupo
-    .order_by('-total_servicios')  # Ordenar por la cantidad de servicios
+    # .annotate(total_servicios=Count('id'))  # Contar servicios por cada grupo
+    # .order_by('-total_servicios')  # Ordenar por la cantidad de servicios
+    .annotate(ultima_fecha_ingreso=Max('fecha_ingreso'))
+    .order_by('-ultima_fecha_ingreso')
     )
 
     res_data = []

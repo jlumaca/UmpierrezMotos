@@ -2656,6 +2656,19 @@ def alta_servicio(req,id_moto,id_cliente):
     # except Exception as e:
     #     pass
 
+def cerrar_servicio(req,id_s):
+    try:
+        if req.method == "POST":
+            servicio = Servicios.objects.get(id=id_s)
+            servicio.estado = "Completado"
+            servicio.save()
+            messages.success(req, "Servicio cerrado correctamente.")
+            return redirect('ServiciosEnGestion')
+        else:
+            return render(req,"perfil_taller/servicios/cerrar_servicio.html",{})
+    except Exception as e:
+        pass
+
 def historial_de_servicios(req):
     try:
         servicios_motos = (

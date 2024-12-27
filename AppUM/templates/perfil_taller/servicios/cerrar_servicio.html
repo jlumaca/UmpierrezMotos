@@ -1,0 +1,50 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    form label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+form label span {
+    flex-grow: 1;
+}
+
+form label input[type="number"] {
+    max-width: 100px;
+    text-align: right;
+}
+</style>
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h2>Cierre de servicio</h4>
+
+        
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="precio" class="form-label">Descripción</label>
+                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Detalle lo realizado en el servicio" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Fecha del próximo servicio</label>
+                <input type="date" class="form-control" name="f_prox_servicio" placeholder="Fecha del próximo servicio (si se requiere)">
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Kilometraje del próximo servicio</label>
+                <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Kilometraje del próximo servicio (si se requiere)">
+            </div>
+    
+            <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'ServiciosEnGestion' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+        
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+{% endblock %}

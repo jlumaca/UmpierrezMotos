@@ -148,6 +148,8 @@ urlpatterns = [
      path('alta_cliente_taller', views.alta_cliente_taller,name="AltaClienteTaller"),
      path('modificacion_cliente_taller/<int:id_cliente>', views.modificacion_cliente_taller,name="ModificacionClienteTaller"),
      path('detalles_cliente_taller/<int:id_cliente>', views.detalles_cliente_taller,name="DetallesClienteTaller"),
+     path('cerrar_servicio/<int:id_s>', views.cerrar_servicio,name="CerrarServicio"),
+
 
 
 

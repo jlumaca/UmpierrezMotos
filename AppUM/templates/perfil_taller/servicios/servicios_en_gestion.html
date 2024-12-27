@@ -48,7 +48,7 @@
             <td>{{ servicio.servicio.cliente__nombre }} {{ servicio.servicio.cliente__apellido }}</td>
             <td>{{ servicio.servicio.moto__marca }} {{ servicio.servicio.moto__modelo }}</td>
             <td>
-                <a href="" class="btn btn-sm btn-success" title="Cerrar servicio">
+                <a href="{% url 'CerrarServicio' servicio.servicio.id %}" class="btn btn-sm btn-success" title="Cerrar servicio">
                     <i class="fas fa-check"></i>
                 </a>
                 <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>

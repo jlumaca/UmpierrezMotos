@@ -3074,3 +3074,96 @@ def detalles_cliente_taller(req,id_cliente):
                                                                     "correo1":c_1,
                                                                     "correo2":c_2, 
                                                                     })
+
+def pedidos(req):
+    # try:
+        pedidos = Pedidos.objects.all().order_by('fecha')
+        data = []
+        for pedido in pedidos:
+            cliente = Cliente.objects.get(id=pedido.cliente_id)
+            cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
+
+            data.append({
+                "id_pedido":pedido.id,
+                "pedido":pedido.detalle,
+                "fecha":pedido.fecha,
+                "cliente":cliente.nombre + " " + cliente.apellido,
+                "telefono":cliente_telefono.telefono
+            })
+        page_obj = funcion_paginas_varias(req,data)
+        return render(req,"perfil_administrativo/pedidos/pedidos.html",{'page_obj': page_obj})
+    # except Exception as e:
+    #     pass
+
+def cliente_pedido(req):
+    try:
+        if req.method == "POST":
+            documento = req.POST['tipo_doc'] + str(req.POST['doc'])
+            cliente = Cliente.objects.filter(documento=documento).first()
+            if not cliente:
+                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+            else:
+                correo = ClienteCorreo.objects.filter(cliente_id=cliente.id,principal=1).first()
+                if correo:
+                    correo = correo.correo
+                else:
+                    correo = "El cliente no cuenta con correo"
+                telefono = ClienteTelefono.objects.filter(cliente_id=cliente.id,principal=1).first()
+                if telefono:
+                    telefono = telefono.telefono
+                else:
+                    telefono = "El cliente no cuenta con teléfono"
+                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":True,"cliente":cliente,"correo":correo,"telefono":telefono})
+        else:
+            return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False})
+    except Exception as e:
+        pass
+
+def alta_pedido(req,id_cliente):
+    try:
+        nuevo_pedido = Pedidos(
+            detalle = req.POST['pedido'],
+            fecha = datetime.now(),
+            cliente_id = id_cliente
+        )
+        nuevo_pedido.save()
+        messages.success(req, "Pedido ingresado con éxito")
+        return redirect('Pedidos')
+    
+    except Exception as e:
+        pass
+
+def baja_pedido(req,id_pedido):
+    try:
+        if req.method == "POST":
+            pedido = Pedidos.objects.get(id=id_pedido)
+            pedido.delete()
+            messages.success(req, "Pedido borrado con éxito")
+            return redirect('Pedidos')
+        else:
+            return render(req,"perfil_administrativo/pedidos/baja_pedido.html",{})
+    except Exception as e:
+        pass
+
+def cerrar_pedido(req,id_pedido):
+    try:
+        pedido = Pedidos.objects.get(id=id_pedido)
+        correo = ClienteCorreo.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
+        if req.method == "POST":
+            checkbox = 'notificar_cliente' in req.POST
+            if correo and checkbox:
+                cliente = Cliente.objects.get(id=pedido.cliente_id)
+                titulo = "Encargue Umpierrez Motos"
+                mensaje = f"Estimado/a {cliente.nombre} {cliente.apellido}, le informamos que su {pedido.detalle} ha llegado a nuestro local. Puede pasar por el mismo cuando desee."
+                enviar_correo(titulo,mensaje,correo.correo)
+            pedido.delete()
+            messages.success(req, "Pedido cerrado con éxito")
+            return redirect('Pedidos')
+        else:
+            if correo:
+                mostrar_cbox = True
+            else:
+                mostrar_cbox = False
+            return render(req,"perfil_administrativo/pedidos/cierre_pedido.html",{"mostrar_cbox":mostrar_cbox})
+    except Exception as e:
+        pass

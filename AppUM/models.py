@@ -214,6 +214,11 @@ class RepuestosPiezas(models.Model):
     tipo_pieza = models.CharField(max_length=20)
     descripcion = models.CharField(max_length=100)
     activo = models.BooleanField(default=True)
+
+class Pedidos(models.Model):
+    detalle = models.CharField(max_length=200)
+    fecha = models.DateField()
+    cliente = models.ForeignKey(Cliente, related_name='pedido_cliente', on_delete=models.CASCADE)
     
 
 

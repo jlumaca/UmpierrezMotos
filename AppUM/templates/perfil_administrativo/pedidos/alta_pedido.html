@@ -1,0 +1,79 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de cliente</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        {% if error_message_cliente %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
+        </div>
+        {% endif %}
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_doc">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="doc" placeholder="Documento" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Aceptar</button>
+        
+            <a href="{% url 'Pedidos' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+
+            {% if ingresar_pedido %}
+            <form action="{% url 'AltaPedido' cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ telefono }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.domicilio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Detalle del pedido</label>
+                <input type="text" class="form-control" name="pedido" placeholder="Ingrese el pedido" maxlength="200" required>
+            </div>  
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+        
+            <a href="{% url 'Pedidos' %}" class="btn btn-secondary">Cancelar</a>
+
+            {% endif %}
+        </form>
+       
+    </div>
+</div>
+
+{% endblock %}

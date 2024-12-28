@@ -15,6 +15,7 @@ from django.conf import settings
 import os
 from django.core.files import File
 import json
+from django.core.mail import send_mail
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -997,3 +998,13 @@ def crear_num_chasis():
     moto = moto + 1
     numero_motor = "SNC" + str(moto)
     return numero_motor
+
+def enviar_correo(titulo,mensaje,destino):
+    send_mail(
+            subject=titulo,
+            message=mensaje,
+            #CAMBIAR POR CORREO DE UMPIERREZ MOTOS
+            from_email='lumacajuanmanuel@gmail.com',
+            #CAMBIAR POR CORREO DE CLIENTE (tiene_correo.correo)
+            recipient_list=[destino],
+        )

@@ -152,6 +152,17 @@ urlpatterns = [
      path('modificar_servicio/<int:id_s>', views.modificar_servicio,name="ModificarServicio"),
 
 
+     path('pedidos', views.pedidos,name="Pedidos"),
+     path('cliente_pedido', views.cliente_pedido,name="ClientePedido"),
+     path('alta_pedido/<int:id_cliente>', views.alta_pedido,name="AltaPedido"),
+     path('baja_pedido/<int:id_pedido>', views.baja_pedido,name="BajaPedido"),
+     path('cerrar_pedido/<int:id_pedido>', views.cerrar_pedido,name="CerrarPedido"),
+
+
+
+     
+
+
 
 
 

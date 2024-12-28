@@ -240,7 +240,7 @@ def vista_inventario_motos(req):
 
 @admin_required
 def cliente_moto(req):
-    try:
+    # try:
         num_motor = req.POST['num_motor_moto'].upper()
         documento = req.POST['tipo_documento'] + str(req.POST['documento'])
 
@@ -259,7 +259,7 @@ def cliente_moto(req):
             #SI LA MOTO NO EXISTE, SE INGRESA LA MOTO DESDE 0
             return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
                                                                             "telefono":telefono.telefono,
-                                                                            "correo":correo.correo,
+                                                                            "correo":correo.correo if correo else "El cliente no cuenta con correo",
                                                                             "active_page": 'Motos',
                                                                             "form_moto_usada":True,
                                                                             "form_moto_ingresada":False,
@@ -284,13 +284,13 @@ def cliente_moto(req):
                                                                                 "moto":moto,
                                                                                 "matricula":matricula,
                                                                                 "telefono":telefono.telefono,
-                                                                                "correo":correo.correo,
+                                                                                "correo":correo.correo if correo else "El cliente no cuenta con correo",
                                                                                 "active_page": 'Motos',
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":True,
                                                                                 "consultar_moto_cliente":False})
-    except Exception as e:
-        return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":e})
 
 @admin_required
 def alta_moto_usada(req,id_cliente):

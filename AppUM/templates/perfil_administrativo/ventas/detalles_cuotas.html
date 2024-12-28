@@ -112,15 +112,13 @@
         <thead>
             <tr>
                 <th>PRODUCTO</th>
-                <th>PRECIO INICIAL</th>
-                <th>PRECIO FINAL CON RECARGO</th>
+                <th>PRECIO</th>
                 <th>PAGO ACORDADO</th>
             </tr>
         </thead>
         <tbody>
             <td>{{ producto }}</td>
             <td>{{ precio_inicial }}</td>
-            <td>{{ precio_final }} ({{ financiacion_inicial }})</td>
             <td>{{ pago_acordado }}</td>
         </tbody>
     </table>
@@ -765,8 +763,8 @@ function generarResumen(cuotas, cliente, detalle, p_pagos, fin_pagos_json) {
                     
                     <tr>
                         <th>DETALLE</th>
-                        <th>PRECIO INICIAL</th>
-                        <th>PRECIO FINAL</th>
+                        <th>PRECIO</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -778,7 +776,7 @@ function generarResumen(cuotas, cliente, detalle, p_pagos, fin_pagos_json) {
                 <tr>
                         <td>${fins.detalle || "N/A"}</td>
                         <td>${fins.precio_inicial ? fins.precio_inicial.toFixed(0) : "N/A"}</td>
-                        <td>${fins.precio_final ? fins.precio_final.toFixed(0) : "N/A"} (${fins.financiacion || "N/A"})</td>
+                
                 </tr>
             `;
         });

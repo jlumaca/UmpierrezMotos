@@ -511,9 +511,9 @@ def obtener_detalles_cuotas_comunes(id_cv):
                 "primeros_pagos":p_p,
                 "boton_ultimo_pago": True if p_p.id == ultimo_pago_general.id else False
             })
-        moneda = "$" if moto.moneda_precio == "Pesos" else "U$S"
-        primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
-        financiamiento = f"{str(primer_fin.cantidad_cuotas)} x {moneda} {str(primer_fin.valor_cuota)}"
+        # moneda = "$" if moto.moneda_precio == "Pesos" else "U$S"
+        # primer_fin = Financiamientos.objects.filter(venta_id=id_cv).order_by('id').first()
+        # financiamiento = f"{str(primer_fin.cantidad_cuotas)} x {moneda} {str(primer_fin.valor_cuota)}"
     else:
         data_p_pagos = None
         financiamiento = None
@@ -536,7 +536,7 @@ def obtener_detalles_cuotas_comunes(id_cv):
         moto.precio_final,
         compra.forma_de_pago,
         data_p_pagos,
-        financiamiento,
+        # financiamiento,
         data_financiamientos,
     ]
     return data
@@ -759,25 +759,25 @@ def json_para_resumen_pagos(moto,id_cv):
                 "precio_inicial":int(moto.precio) ,
                 "precio_final":int(moto.precio_final),
                 "moneda":moto.moneda_precio,
-                "financiacion":f"{primer_financiacion.cantidad_cuotas} x {primer_financiacion.moneda_cuota} {primer_financiacion.valor_cuota}"
+                # "financiacion":f"{primer_financiacion.cantidad_cuotas} x {primer_financiacion.moneda_cuota} {primer_financiacion.valor_cuota}"
             }
         ]
-    if financiaciones:
-        fin_data = [
-            {
-                "detalle": moto.marca + " " + moto.modelo,
-                "precio_inicial":int(fin.precio_moto_actual),
-                "precio_final": int(fin.cantidad_cuotas * fin.valor_cuota),
-                "moneda": fin.moneda_cuota,
-                "financiacion": f"{fin.cantidad_cuotas} x {fin.moneda_cuota} {fin.valor_cuota}"
-            }
-            for fin in financiaciones
-        ]
-        union = dato_inicial + fin_data
-        fin_pagos_json = json.dumps(union)
+    # if financiaciones:
+    #     fin_data = [
+    #         {
+    #             "detalle": moto.marca + " " + moto.modelo,
+    #             "precio_inicial":int(fin.precio_moto_actual),
+    #             "precio_final": int(fin.cantidad_cuotas * fin.valor_cuota),
+    #             "moneda": fin.moneda_cuota,
+    #             "financiacion": f"{fin.cantidad_cuotas} x {fin.moneda_cuota} {fin.valor_cuota}"
+    #         }
+    #         for fin in financiaciones
+    #     ]
+    #     union = dato_inicial + fin_data
+    #     fin_pagos_json = json.dumps(union)
     
-    union = dato_inicial + fin_data if financiaciones else dato_inicial
-    fin_pagos_json = json.dumps(union)
+    # union = dato_inicial + fin_data if financiaciones else dato_inicial
+    fin_pagos_json = json.dumps(dato_inicial)
     
 
 
@@ -956,10 +956,10 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 "pago_acordado":datos[3],
                 "primeros_pagos":datos[4],
                 "financiamiento":datos[5],
-                "financiamientos":datos[6],
+                # "financiamientos":datos[6],
                 "page_obj":page_obj,
                 "financiacion_info":financiamiento,
-                "financiacion_inicial":fin_ini,
+                # "financiacion_inicial":fin_ini,
                 "fecha_financiacion":fecha,
                 "boton_pagar":mostrar_boton,
                 "fin_actual":existen_refinanciaciones,

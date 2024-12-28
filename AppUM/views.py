@@ -347,8 +347,21 @@ def alta_moto_usada(req,id_cliente):
             color = req.POST['color_moto'].upper()
 
             foto = req.FILES.get('foto_moto')
+
+            checkbox_num_motor = 'sin_num_motor' in req.POST
+            if checkbox_num_motor:
+                numero_de_motor = crear_num_motor()
+            else:
+                numero_de_motor = num_motor
+
+
+            checkbox_num_chasis = 'sin_num_chasis' in req.POST
+            if checkbox_num_chasis:
+                numero_de_chasis = crear_num_chasis()
+            else:
+                numero_de_chasis = num_chasis
             
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
             libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
            
             insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)

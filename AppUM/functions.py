@@ -985,3 +985,15 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
     # ]
     
     return contexto
+
+def crear_num_motor():
+    moto = Moto.objects.filter(num_motor__contains="SNM").count()
+    moto = moto + 1
+    numero_motor = "SNM" + str(moto)
+    return numero_motor
+
+def crear_num_chasis():
+    moto = Moto.objects.filter(num_chasis__contains="SNC").count()
+    moto = moto + 1
+    numero_motor = "SNC" + str(moto)
+    return numero_motor

@@ -2548,6 +2548,7 @@ def servicios_en_gestion(req):
             'estado',
             'prioridad',
             'dias',
+            'titulo',
             'moto__marca', 
             'moto__modelo',
             'cliente__nombre',
@@ -2628,6 +2629,8 @@ def cliente_moto_servicio(req):
 
 def alta_servicio(req,id_moto,id_cliente):
     # try:
+        # print(id_moto)
+        # print(id_cliente)
         servicios_seleccionados = req.POST.getlist('servicios[]')
         mecanicos_seleccionados = req.POST.getlist('mecanicos[]')
         mecanicos = (Mecanico.objects
@@ -2646,14 +2649,20 @@ def alta_servicio(req,id_moto,id_cliente):
                 prioridad = req.POST['prioridad'],
                 fecha_estimada_cierre = req.POST['fecha_estimada'],
                 cliente_id = id_cliente,
-                moto_id = id_moto
+                moto_id = id_moto,
+                titulo = req.POST['titulo_servicio']
             )
             nuevo_servicio.save()
-           
+           #inputPrecio.name = `precio_${textoServicio}`;
             for servicio in servicios_seleccionados:
+                prueba = servicio.replace(" ","_")
+                # print(prueba)
+                precio = req.POST[f'precio_{prueba}']
+                # print("PRUEBA: " + str(precio))
                 tareas_servicios = TareasServicios(
                     tarea = servicio,
-                    servicio_id = nuevo_servicio.id
+                    servicio_id = nuevo_servicio.id,
+                    precio = precio
                 )
                 tareas_servicios.save()
             

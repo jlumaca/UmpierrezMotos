@@ -22,6 +22,7 @@
             <tr>
                 <th>Número de incidente</th>
                 <th>Ingreso</th>
+                <th>Tipo</th>
                 <th>Mecanicos asignados</th>
                 <th>Días en taller</th>
                 <th>Estado</th><!-- Pendiente, En Proceso, Completado-->
@@ -37,6 +38,7 @@
         <tr>
             <td>{{ servicio.servicio.id }}</td>
             <td>{{ servicio.servicio.fecha_ingreso }}</td>
+            <td>{{ servicio.servicio.titulo }}</td>
             <td>
                 {% for mecanico in servicio.mecanicos %}
                     {{ mecanico }}{% if not forloop.last %}, {% endif %}

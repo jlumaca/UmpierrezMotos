@@ -161,7 +161,12 @@ form label input[type="number"] {
                 {{ error_message_alta }}
             </div>
             {% endif %}
+            <div class="mb-3">
+                <label for="color" class="form-label">Titulo del servicio</label>
+                <input type="text" class="form-control" name="titulo_servicio" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" required>
+            </div>
             <h4>Servicios de mantenimiento a realizar</h4>
+            
             <div id="serviciosLista" class="mb-4">
                 <div>
                     <label class="d-flex align-items-center mb-2">
@@ -172,37 +177,37 @@ form label input[type="number"] {
                 </div>
                 <div>
                     <label class="d-flex align-items-center mb-2">
-                        <input type="checkbox" name="servicios[]" value="Revisión de frenos" id="servicio2" class="me-2">
-                        <span class="flex-grow-1">Revisión de frenos</span>
+                        <input type="checkbox" name="servicios[]" value="Revision de frenos" id="servicio2" class="me-2">
+                        <span class="flex-grow-1">Revision de frenos</span>
                         <input type="number" name="precio_Revision_de_frenos" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
                     </label>
                 </div>
                 <div>
                     <label class="d-flex align-items-center mb-2">
-                        <input type="checkbox" name="servicios[]" value="Revisión de la cadena" id="servicio3" class="me-2">
-                        <span class="flex-grow-1">Revisión de la cadena</span>
-                        <input type="number" name="precio_revision_cadena" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                        <input type="checkbox" name="servicios[]" value="Revision de la cadena" id="servicio3" class="me-2">
+                        <span class="flex-grow-1">Revision de la cadena</span>
+                        <input type="number" name="precio_Revision_de_la_cadena" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
                     </label>
                 </div>
                 <div>
                     <label class="d-flex align-items-center mb-2">
                         <input type="checkbox" name="servicios[]" value="Reparaciones del motor" id="servicio4" class="me-2">
                         <span class="flex-grow-1">Reparaciones del motor</span>
-                        <input type="number" name="precio_reparacion_motor" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                        <input type="number" name="precio_Reparaciones_del_motor" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
                     </label>
                 </div>
                 <div>
                     <label class="d-flex align-items-center mb-2">
                         <input type="checkbox" name="servicios[]" value="Cambio de neumaticos" id="servicio5" class="me-2">
                         <span class="flex-grow-1">Cambio de neumaticos</span>
-                        <input type="number" name="precio_cambio_neumaticos" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                        <input type="number" name="precio_Cambio_de_neumaticos" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
                     </label>
                 </div>
                 <div>
                     <label class="d-flex align-items-center mb-2">
-                        <input type="checkbox" name="servicios[]" value="Inspección general" id="servicio6" class="me-2">
+                        <input type="checkbox" name="servicios[]" value="Inspeccion general" id="servicio6" class="me-2">
                         <span class="flex-grow-1">Inspección general</span>
-                        <input type="number" name="precio_inspeccion_general" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
+                        <input type="number" name="precio_Inspeccion_general" class="form-control w-auto ms-2" placeholder="Precio" min="0" step="0.01">
                     </label>
                 </div>
             </div>

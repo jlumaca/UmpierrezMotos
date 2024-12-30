@@ -2692,13 +2692,44 @@ def cerrar_servicio(req,id_s):
         pass
 
 def modificar_servicio(req,id_s):
-    try:
+    # try:
+        servicio = Servicios.objects.get(id=id_s)
+        cliente = Cliente.objects.get(id=servicio.cliente_id)
+        moto = Moto.objects.get(id=servicio.moto_id)
+        matricula = Matriculas.objects.filter(moto_id=servicio.moto_id).first()
+        telefono = ClienteTelefono.objects.filter(cliente_id=servicio.cliente_id,principal=1).first()
+        correo = ClienteCorreo.objects.filter(cliente_id=servicio.cliente_id,principal=1).first()
+        tareas_realizadas = TareasServicios.objects.filter(servicio_id=id_s,realizado=1)
+        tareas_pendientes = TareasServicios.objects.filter(servicio_id=id_s,realizado=0)
+        mecanicos = MecanicosServicios.objects.filter(servicio_id=id_s)
+        data_mecanicos = []
+        for mecanico in mecanicos:
+            mec = Mecanico.objects.get(id=mecanico.mecanico_id)
+            data_mecanicos.append({
+                "mecanico":mec
+            })
+        
+        resto_mecanicos = Mecanico.objects.exclude(servicio_id=id_s)
+        data_resto_mec = []
+        for mecanico in resto_mecanicos:
+            mec = Mecanico.objects.get(id=mecanico.mecanico_id)
+            data_resto_mec.append({
+                "mecanico":mec
+            })
         if req.method == "POST":
             pass
         else:
-            return render(req,"perfil_taller/servicios/modificar_servicio.html",{})
-    except Exception as e:
-        pass
+            return render(req,"perfil_taller/servicios/modificar_servicio.html",{"moto":moto,
+                                                                                "cliente":cliente,
+                                                                                "matricula":matricula.matricula if matricula else "Sin matricula",
+                                                                                "telefono":telefono.telefono if telefono else "El cliente no cuenta con teléfono",
+                                                                                "correo":correo.correo if correo else "El cliente no cuenta con correo",
+                                                                                "tareas_realizadas":tareas_realizadas,
+                                                                                "tareas_pendientes":tareas_pendientes,
+                                                                                "mecanicos":data_mecanicos,
+                                                                                "resto_mecanicos":data_resto_mec})
+    # except Exception as e:
+    #     pass
 
 def historial_de_servicios(req):
     try:

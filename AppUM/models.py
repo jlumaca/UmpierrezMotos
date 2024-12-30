@@ -181,6 +181,7 @@ class TareasServicios(models.Model):
     servicio = models.ForeignKey(Servicios, related_name='tareas_servicios', on_delete=models.CASCADE)
     tarea = models.TextField(null=True, blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    realizado = models.BooleanField(default=0)
 
 class Financiamientos(models.Model):
     fecha = models.DateField()

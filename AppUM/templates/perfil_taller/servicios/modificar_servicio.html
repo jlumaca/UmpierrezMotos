@@ -53,11 +53,11 @@ form label input[type="number"] {
                     </tr>
                     <tr>
                         <th scope="row">Contacto</th>
-                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                        <td>{{ telefono }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Correo</th>
-                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                        <td>{{ correo }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Domicilio</th>
@@ -102,23 +102,50 @@ form label input[type="number"] {
             </table>    
             <h4>Servicios de mantenimiento realizados</h4>
             <div id="serviciosLista" class="mb-4">
-                <p>LISTA CON LOS SERVICIOS YA REALIZADOS</p>
+                {% for servicio in tareas_realizadas %}
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                            <span class="text-success ms-2">✔️</span>
+                        
+                    </div>
+                {% endfor %}
             </div>
+            
+            
 
             <h4>Servicios de mantenimiento pendientes</h4>
-            <div id="serviciosLista" class="mb-4">
-                <p>LISTA CON LOS SERVICIOS PENDIENTES</p>
+            <div id="serviciosPendientes" class="mb-4">
+                {% for servicio in tareas_pendientes %}
+                    <label class="d-flex align-items-center mb-2">
+                        <input type="checkbox" name="" value="{{ servicio.id }}" id="servicio6" class="me-2">
+                        <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                    </label>
+                {% endfor %}
             </div>
 
             <h4>Agregar más servicios de mantenimiento</h4>
             <div id="serviciosLista" class="mb-4">
-                <p>LISTA CON MAS SERVICIOS POSIBLES</p>
+                <div class="d-flex">
+            
+                    <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
+                </div>
             </div>
 
-            <h4>Mecánicos asignados</h4>
+            <!-- <h4>Mecánicos asignados</h4> -->
+            <h4 class="mb-3">🔧 Mecánicos Asignados</h4>
             <div id="serviciosLista" class="mb-4">
-                <p>LISTA CON MECANICOS ASIGNADOS AL SERVICIO</p>
+                <ul class="list-group">
+                    {% for mecanico in mecanicos %}
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">👷‍♂️</span>
+                            <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No hay mecánicos asignados a este servicio.</li>
+                    {% endfor %}
+                </ul>
             </div>
+            
 
             <h4>Asignar más mecánicos al servicio</h4>
             <div id="serviciosLista" class="mb-4">
@@ -188,7 +215,7 @@ form label input[type="number"] {
 <script>
     function agregarServicio() {
     // Contenedor donde se añaden los servicios
-    const serviciosLista = document.getElementById("serviciosLista");
+    const serviciosLista = document.getElementById("serviciosPendientes");
 
     // Crear un nuevo contenedor para el servicio
     const nuevoServicio = document.createElement("div");

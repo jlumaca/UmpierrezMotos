@@ -3167,3 +3167,25 @@ def cerrar_pedido(req,id_pedido):
             return render(req,"perfil_administrativo/pedidos/cierre_pedido.html",{"mostrar_cbox":mostrar_cbox})
     except Exception as e:
         pass
+
+def busqueda_pedido_por_doc_cliente(req):
+    # try:
+        documento = req.POST['fsfsdfadgsadg'] + str(req.POST['documento'])
+        cliente_busq = Cliente.objects.filter(documento="CI123456789").first()
+        pedidos = Pedidos.objects.filter(cliente_id=cliente_busq.id).order_by('fecha')
+        data = []
+        for pedido in pedidos:
+            cliente = Cliente.objects.get(id=pedido.cliente_id)
+            cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
+
+            data.append({
+                "id_pedido":pedido.id,
+                "pedido":pedido.detalle,
+                "fecha":pedido.fecha,
+                "cliente":cliente.nombre + " " + cliente.apellido,
+                "telefono":cliente_telefono.telefono
+            })
+        page_obj = funcion_paginas_varias(req,data)
+        return render(req,"perfil_administrativo/pedidos/pedidos.html",{'page_obj': page_obj})
+    # except Exception as e:
+    #     pass

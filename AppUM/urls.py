@@ -157,6 +157,10 @@ urlpatterns = [
      path('alta_pedido/<int:id_cliente>', views.alta_pedido,name="AltaPedido"),
      path('baja_pedido/<int:id_pedido>', views.baja_pedido,name="BajaPedido"),
      path('cerrar_pedido/<int:id_pedido>', views.cerrar_pedido,name="CerrarPedido"),
+     path('buscar_pedido_documento', views.busqueda_pedido_por_doc_cliente,name="PedidoPorDocumento"),
+
+
+     
 
 
 

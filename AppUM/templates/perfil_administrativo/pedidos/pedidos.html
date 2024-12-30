@@ -55,9 +55,9 @@
     </div>
 
     <!-- Formulario de búsqueda por marca -->
-    <form action="{% url 'BusquedaDocumento' %}" enctype="multipart/form-data" method="get" id="busqueda_documento">{% csrf_token %}
+    <form action="{% url 'PedidoPorDocumento' %}" enctype="multipart/form-data" method="get" id="busqueda_documento">{% csrf_token %}
         <div class="input-group mb-3">
-            <select class="form-control" name="tipo_doc_busq" id="tipo_doc">
+            <select class="form-control" name="fsfsdfadgsadg">
                 <option value="CI">Cédula</option>
                 <option value="PAS">Pasaporte</option>
                 <option value="DNI">DNI</option>
@@ -74,7 +74,7 @@
         </div>
     </form>
 
-    <form action="{% url 'BusquedaNombreApellido' %}" enctype="multipart/form-data" method="get" id="busqueda_nombre_apellido" style="display: none;">{% csrf_token %}
+    <form action="" enctype="multipart/form-data" method="get" id="busqueda_nombre_apellido" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre">
             <span class="input-group-text">-</span>

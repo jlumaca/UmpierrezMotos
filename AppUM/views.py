@@ -2571,15 +2571,6 @@ def servicios_en_gestion(req):
                 for mecanico in mecanicos
                 for persona in Personal.objects.filter(id=mecanico.mecanico_id)
             ]
-            # data_boton = []
-            # if mecanicos.exists():
-            #     for mecanico in mecanicos:
-            #         if (mecanico.mecanico_id == mecanico_usuario.id) or jefe:
-            #             #MOSTRAR BOTON = TRUE
-            #             pass
-            #         else:
-            #             #MOSTRAR BOTON = FALSE
-            #             pass
 
             cambiar_nombre_variable = MecanicosServicios.objects.filter(servicio_id=resultado['id'],mecanico_id = mecanico_usuario.id).first()
             if cambiar_nombre_variable or jefe:
@@ -2985,6 +2976,22 @@ def historial_de_servicios(req):
         return render(req,"perfil_taller/historial_de_servicios/historial_de_servicios.html",{"servicios":datos,"page_obj":page_obj})
     except Exception as e:
         pass
+
+def detalles_servicios_cerrados(req,id_s):
+    contexto = contexto_modificar_servicio(id_s,None)
+    return render(req,"perfil_taller/historial_de_servicios/detalles_servicio.html",{ "moto":contexto[0],
+                                                                            "cliente":contexto[1],
+                                                                            "matricula":contexto[2],
+                                                                            "telefono":contexto[3],
+                                                                            "correo":contexto[4],
+                                                                            "tareas_realizadas":contexto[5],
+                                                                            "tareas_pendientes":contexto[6],
+                                                                            "mecanicos":contexto[7],
+                                                                            "id_servicio":contexto[9],
+                                                                            "anotaciones":contexto[10],
+                                                                            "info_servicio":contexto[12],
+                                                                            "fecha_cierre":contexto[13],
+                                                                            })
 
 def repuestos(req):
     repuestos = RepuestosPiezas.objects.filter(activo=1).order_by('-id')

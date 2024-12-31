@@ -83,10 +83,6 @@
             <tr>
                 <th>Número de incidente</th>
                 <th>Ingreso</th>
-                <th>Mecanicos asignados</th>
-                <th>Días en taller</th>
-                <th>Estado</th><!-- Sin asignar, En gestión, En espera, Cerrada-->
-                <th>Prioridad</th>
                 <th>Cliente</th>
                 <th>Moto</th>
                 <th>Acciones</th>
@@ -98,18 +94,10 @@
                 <tr>
                     <td>{{ servicio.servicio.id }}</td>
                     <td>{{ servicio.servicio.fecha_ingreso }}</td>
-                    <td>Daniel Umpierrez</td>
-                    <td>{{ servicio.servicio.dias }}</td>
-                    <td>{{ servicio.servicio.estado }}</td>
-                    <td>{{ servicio.servicio.prioridad }}</td>
                     <td>{{ servicio.servicio.cliente__nombre }} {{ servicio.servicio.cliente__apellido }}</td>
                     <td>{{ servicio.servicio.moto__marca }} {{ servicio.servicio.moto__modelo }}</td>
                     <td>
-                        <a href="" class="btn btn-sm btn-success" title="Cerrar servicio">
-                            <i class="fas fa-check"></i>
-                        </a><!-- CERRAR INCIDENTE-->
-                        <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="{% url 'DetallesServicioCerrado' servicio.servicio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

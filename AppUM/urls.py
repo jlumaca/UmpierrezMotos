@@ -157,6 +157,9 @@ urlpatterns = [
      path('borrar_mecanico_servicio/<int:id_s>/<int:id_mecanico>', views.borrar_mecanico_servicio,name="BorrarMecanicoServicio"),
      path('modificar_servicio/<int:id_s>', views.modificar_datos_servicio,name="ModificarServicio"),
      path('detalles_servicio/<int:id_s>', views.detalles_servicios,name="DetallesServicio"),
+     path('detalles_servicio_cerrado/<int:id_s>', views.detalles_servicios_cerrados,name="DetallesServicioCerrado"),
+
+     
      
      
 

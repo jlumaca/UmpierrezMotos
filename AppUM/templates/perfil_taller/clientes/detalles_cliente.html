@@ -73,7 +73,7 @@
                             {{ item.matricula }}
                         </td>
                         <td>
-                            <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                            <a href="{% url 'ServiciosPorMoto' item.moto.moto__id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                         </td>
                     </tr>
                 {% endfor %}

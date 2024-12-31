@@ -1,0 +1,110 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    form label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+form label span {
+    flex-grow: 1;
+}
+
+form label input[type="number"] {
+    max-width: 100px;
+    text-align: right;
+}
+</style>
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h2>Detalles del servicio</h4>  
+            <h4>Tareas de mantenimiento realizadas</h4>
+            <div id="serviciosLista" class="mb-4">
+                <ul id="serviciosLista" class="list-group mb-4">
+                    {% for servicio in tareas_realizadas %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ servicio.tarea }}  ${{ servicio.precio }}</span>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Aún no hay tareas realizadas.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+             
+            <br>
+            <!-- <h4>Mecánicos asignados</h4> -->
+            <h4 class="mb-3">🔧 Mecánicos Asignados</h4>
+            <div id="serviciosLista" class="mb-4">
+                    <ul id="serviciosLista" class="list-group mb-4">
+                        {% for mecanico in mecanicos %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
+                            </div>
+                        </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No existen mecánicos asignados a este servicio.</li>
+                        {% endfor %}  
+                    </ul>
+                </div>
+            
+            <h4>Actuaciones y/o anotaciones</h4>
+            <div id="serviciosLista" class="mb-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>DETALLE</th>
+                            <th>FECHA</th>
+                            <th>MECANICO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% if anotaciones %}
+                    {% for anotacion in anotaciones %}
+                        <tr>
+                            <td>{{ anotacion.anotacion.anotaciones }}</td>
+                            <td>{{ anotacion.anotacion.fecha }}</td>
+                            <td>
+                                {{ anotacion.mecanico.nombre }} {{ anotacion.mecanico.apellido }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Aún no hay anotaciones
+                    </td>
+                </tr>
+                {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Información sobre el servicio</h4>
+            <!-- {% url 'AgregarAnotacionServicio' id_servicio %} -->
+            <div class="mb-3">
+                <label for="color" class="form-label">Tipo de servicio</label>
+                <input value="{{ info_servicio.titulo }}" type="text" class="form-control" name="tipo_servicio_modificar" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" readonly>
+            </div>
+            <div class="mb-3">
+                    <label for="precio" class="form-label">Prioridad</label>
+                    <input value="{{ info_servicio.prioridad }}" type="date" class="form-control" name="fecha_estimada" readonly>
+            </div>
+                
+            <div class="mb-3">
+                    <label for="precio" class="form-label">Fecha estimada</label>
+                    <input value="{{ fecha_cierre }}" type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" readonly>
+            </div>
+            <a href="" class="btn btn-secondary">Cancelar</a>
+            
+        
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+{% endblock %}

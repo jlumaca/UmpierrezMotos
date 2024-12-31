@@ -3346,6 +3346,41 @@ def detalles_cliente_taller(req,id_cliente):
                                                                     "correo2":c_2, 
                                                                     })
 
+def servicios_por_moto_de_cliente(req,id_moto):
+    try:
+        servicios_moto = (
+        Servicios.objects
+        .all()
+        .select_related('moto')
+        .filter(estado="Completado",moto_id=id_moto)
+        .values(
+            'id',
+            'fecha_ingreso',  
+            'titulo'     
+           ).order_by('-fecha_ingreso')
+        )
+        page_obj = funcion_paginas_varias(req,servicios_moto)
+        return render(req,"perfil_taller/clientes/servicios_por_moto.html",{"page_obj":page_obj})                                                          
+                                                                   
+    except Exception as e:
+        pass
+
+def detalle_de_cada_servicio_de_moto(req,id_s):
+    contexto = contexto_modificar_servicio(id_s,None)
+    return render(req,"perfil_taller/clientes/detalles_servicio.html",{ "moto":contexto[0],
+                                                                            "cliente":contexto[1],
+                                                                            "matricula":contexto[2],
+                                                                            "telefono":contexto[3],
+                                                                            "correo":contexto[4],
+                                                                            "tareas_realizadas":contexto[5],
+                                                                            "tareas_pendientes":contexto[6],
+                                                                            "mecanicos":contexto[7],
+                                                                            "id_servicio":contexto[9],
+                                                                            "anotaciones":contexto[10],
+                                                                            "info_servicio":contexto[12],
+                                                                            "fecha_cierre":contexto[13],
+                                                                            })
+
 def pedidos(req):
     # try:
         pedidos = Pedidos.objects.all().order_by('fecha')

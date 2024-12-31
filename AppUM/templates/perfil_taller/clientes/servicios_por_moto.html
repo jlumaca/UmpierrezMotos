@@ -1,0 +1,50 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<title>Motos</title>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Historial de servicios</h3>
+      
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número de incidente</th>
+                <th>Titulo</th>
+                <th>Ingreso</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+            {% for servicio in page_obj %}
+                <tr>
+                    <td>{{ servicio.id }}</td>
+                    <td>{{ servicio.titulo }}</td>
+                    <td>{{ servicio.fecha_ingreso }}</td>
+                    <td>
+                        <a href="{% url 'DetallesPorServicios' servicio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de servicios para esta moto.
+                    </td>
+                </tr>
+            
+                {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

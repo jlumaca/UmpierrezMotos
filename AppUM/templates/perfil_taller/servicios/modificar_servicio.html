@@ -190,6 +190,7 @@ form label input[type="number"] {
                 </div>
                 
                 
+            {% if mostrar_boton %}
             <form action="{% url 'AgregarMecanicoServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
                 <h4>Asignar más mecánicos al servicio</h4>
                 <div id="serviciosLista" class="mb-4">
@@ -211,12 +212,11 @@ form label input[type="number"] {
                         {% endfor %}
                     </ul>
                 </div>
-                {% if mostrar_boton %}
                 <button type="submit" class="btn btn-success">Guardar</button>
                 <button type="button" class="btn btn-secondary">Cancelar</button>
-                {% endif %}
             </form>
             <br>
+            {% endif %}
 
             <h4>Actuaciones y/o anotaciones</h4>
             <div id="serviciosLista" class="mb-4">

@@ -50,10 +50,10 @@
             <td>{{ servicio.servicio.cliente__nombre }} {{ servicio.servicio.cliente__apellido }}</td>
             <td>{{ servicio.servicio.moto__marca }} {{ servicio.servicio.moto__modelo }}</td>
             <td>
+                {% if servicio.mostrar_boton %}
                 <a href="{% url 'CerrarServicio' servicio.servicio.id %}" class="btn btn-sm btn-success" title="Cerrar servicio">
                     <i class="fas fa-check"></i>
                 </a>
-                {% if servicio.mostrar_boton %}
                 <a href="{% url 'FormModificarServicio' servicio.servicio.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                 {% else %}
                 <a href="{% url 'DetallesServicio' servicio.servicio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>

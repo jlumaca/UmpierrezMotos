@@ -26,7 +26,7 @@ form label input[type="number"] {
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="precio" class="form-label">Descripción</label>
-                <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Detalle lo realizado en el servicio" rows="3"></textarea>
+                <textarea class="form-control" name="anotacion_cierre" id="descripcion" placeholder="Detalle lo realizado en el servicio" rows="3"></textarea>
             </div>
             <div class="mb-3">
                 <label for="precio" class="form-label">Fecha del próximo servicio</label>
@@ -35,7 +35,7 @@ form label input[type="number"] {
 
             <div class="mb-3">
                 <label for="precio" class="form-label">Kilometraje del próximo servicio</label>
-                <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Kilometraje del próximo servicio (si se requiere)">
+                <input type="number" class="form-control" name="km_prox_servicio" id="precio" placeholder="Kilometraje del próximo servicio (si se requiere)">
             </div>
     
             <button type="submit" class="btn btn-success">Guardar</button>

@@ -2553,7 +2553,8 @@ def servicios_en_gestion(req):
             'moto__modelo',
             'cliente__nombre',
             'cliente__apellido'      
-           ).order_by('-id')
+           ).filter(estado__in=["Pendiente","En espera"])
+           .order_by('-id')
         )
         usuario = req.user
         usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
@@ -2619,7 +2620,6 @@ def cliente_moto_servicio(req):
                 moto = None
                 matricula = None
         else:
-            print(req.POST['numero_de_motor'])
             moto = Moto.objects.filter(num_motor=req.POST['numero_de_motor']).first()
             if moto:
                 existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
@@ -2706,7 +2706,27 @@ def cerrar_servicio(req,id_s):
         if req.method == "POST":
             servicio = Servicios.objects.get(id=id_s)
             servicio.estado = "Completado"
+            if req.POST['f_prox_servicio']:
+                fecha = req.POST.get('f_prox_servicio')  # Cambiado a paréntesis
+                f_prox_service = datetime.strptime(fecha, '%Y-%m-%d').date() if fecha else None
+                servicio.fecha_prox_servicio = f_prox_service
+            if req.POST['km_prox_servicio']:
+                servicio.km_prox_servicio = req.POST['km_prox_servicio']
             servicio.save()
+            anotacion = req.POST['anotacion_cierre']
+            usuario = req.user
+            usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+            if anotacion:
+                anotacion_editada = "Servicio cerrado con la siguiente descripción: " + anotacion
+            else:
+                anotacion_editada = "Servicio cerrado sin descripción"
+            ultima_anotacion = AnotacionesServicio(
+                anotaciones = anotacion_editada,
+                fecha = datetime.now(),
+                mecanico_id = usuario_actual.id,
+                servicio_id = id_s
+            )
+            ultima_anotacion.save()
             messages.success(req, "Servicio cerrado correctamente.")
             return redirect('ServiciosEnGestion')
         else:

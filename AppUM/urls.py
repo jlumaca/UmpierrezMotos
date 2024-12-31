@@ -150,6 +150,9 @@ urlpatterns = [
      path('detalles_cliente_taller/<int:id_cliente>', views.detalles_cliente_taller,name="DetallesClienteTaller"),
      path('cerrar_servicio/<int:id_s>', views.cerrar_servicio,name="CerrarServicio"),
      path('modificar_servicio/<int:id_s>', views.modificar_servicio,name="ModificarServicio"),
+     path('agregar_servicio/<int:id_s>', views.agregar_quitar_servicios,name="AgregarServicio"),
+     path('agregar_anotacion_servicio/<int:id_s>', views.agregar_anotacion_servicio,name="AgregarAnotacionServicio"),
+     path('borrar_servicio/<int:id_tarea>', views.borrar_servicio,name="BorrarServicio"),
 
 
      path('pedidos', views.pedidos,name="Pedidos"),
@@ -158,6 +161,9 @@ urlpatterns = [
      path('baja_pedido/<int:id_pedido>', views.baja_pedido,name="BajaPedido"),
      path('cerrar_pedido/<int:id_pedido>', views.cerrar_pedido,name="CerrarPedido"),
      path('buscar_pedido_documento', views.busqueda_pedido_por_doc_cliente,name="PedidoPorDocumento"),
+
+
+
 
 
      

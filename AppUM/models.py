@@ -222,6 +222,15 @@ class Pedidos(models.Model):
     detalle = models.CharField(max_length=200)
     fecha = models.DateField()
     cliente = models.ForeignKey(Cliente, related_name='pedido_cliente', on_delete=models.CASCADE)
+
+class AnotacionesServicio(models.Model):
+    anotaciones = models.TextField(null=True, blank=True)
+    fecha = models.DateField(null=True, blank=True)
+    mecanico = models.ForeignKey(Mecanico, related_name='anotacion_mecanicos', on_delete=models.CASCADE)
+    servicio = models.ForeignKey(Servicios, related_name='anotacion_servicio', on_delete=models.CASCADE)
+
+
+
     
 
 

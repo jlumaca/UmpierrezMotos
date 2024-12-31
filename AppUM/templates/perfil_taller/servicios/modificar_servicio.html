@@ -21,11 +21,11 @@ form label input[type="number"] {
 <div class="table-container" id="inventarios">
     <div class="form-container" id="motoForm">
         <h2>Modificación de servicio</h4>
-        {% if messages %}
-        <div class="messages">
-            <div class="alert alert alert-success">{{ message }}</div>
-        </div>
-        {% endif %}
+            {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+         {% endif %}
         {% if error_message_cliente %}
         <div class="alert alert-danger" role="alert">
             {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
@@ -39,7 +39,7 @@ form label input[type="number"] {
 
         <!-- Formulario de búsqueda de cliente -->
        
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <!-- <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %} -->
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
@@ -101,84 +101,134 @@ form label input[type="number"] {
                 </tbody>
             </table>    
             <h4>Servicios de mantenimiento realizados</h4>
-            <div id="serviciosLista" class="mb-4">
-                {% for servicio in tareas_realizadas %}
-                    <div class="d-flex align-items-center mb-2">
-                        <span class="flex-grow-1">{{ servicio.tarea }}</span>
-                            <span class="text-success ms-2">✔️</span>
-                        
-                    </div>
-                {% endfor %}
-            </div>
-            
-            
 
+            <div id="serviciosLista" class="mb-4">
+                <ul id="serviciosLista" class="list-group mb-4">
+                    {% for servicio in tareas_realizadas %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                                <!-- Botón para eliminar el servicio -->
+                                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="confirmarEliminacion('{{ servicio.id }}')">❌</button>
+                            </div>
+                            <!-- Contenedor para el mensaje de confirmación -->
+                            <div id="confirmacion-{{ servicio.id }}" class="mt-2 text-center text-danger d-none">
+                                <p>¿Estás seguro de que deseas eliminar este servicio?</p>
+                                    <a href="{% url 'BorrarServicio' servicio.id %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                                    <!-- <button type="button" class="btn btn-sm btn-danger">Confirmar</button>  -->
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacion('{{ servicio.id }}')">Cancelar</button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+             
+            <form action="{% url 'AgregarServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Servicios de mantenimiento pendientes</h4>
             <div id="serviciosPendientes" class="mb-4">
                 {% for servicio in tareas_pendientes %}
                     <label class="d-flex align-items-center mb-2">
-                        <input type="checkbox" name="" value="{{ servicio.id }}" id="servicio6" class="me-2">
+                        <input type="checkbox" name="servicios_pendientes[]" value="{{ servicio.id }}" id="servicio6" class="me-2">
                         <span class="flex-grow-1">{{ servicio.tarea }}</span>
                     </label>
                 {% endfor %}
             </div>
 
-            <h4>Agregar más servicios de mantenimiento</h4>
             <div id="serviciosLista" class="mb-4">
                 <div class="d-flex">
             
                     <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
                 </div>
             </div>
-
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary">Cancelar</button>
+            </form>
+            <br>
             <!-- <h4>Mecánicos asignados</h4> -->
             <h4 class="mb-3">🔧 Mecánicos Asignados</h4>
             <div id="serviciosLista" class="mb-4">
                 <ul class="list-group">
                     {% for mecanico in mecanicos %}
                         <li class="list-group-item d-flex align-items-center">
-                            <span class="me-2">👷‍♂️</span>
+                            <input 
+                                type="checkbox" 
+                                class="form-check-input me-2"
+                                name="mecanicos_seleccionados"
+                                value="{{ mecanico.mecanico.id }}"
+                                checked
+                            >
                             <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
                         </li>
                     {% empty %}
                         <li class="list-group-item text-muted">No hay mecánicos asignados a este servicio.</li>
                     {% endfor %}
                 </ul>
+                
             </div>
             
 
             <h4>Asignar más mecánicos al servicio</h4>
             <div id="serviciosLista" class="mb-4">
-                <p>LISTA CON MECANICOS</p>
+                <ul class="list-group">
+                    {% for mecanico in mecanicos %}
+                        <li class="list-group-item d-flex align-items-center">
+                            <input 
+                                type="checkbox" 
+                                class="form-check-input me-2"
+                                name="mecanicos_seleccionados"
+                                value="{{ mecanico.resto_mecanicos.id }}"
+                            >
+                            <span class="flex-grow-1">{{ mecanico.resto_mecanicos.nombre }} {{ mecanico.resto_mecanicos.apellido }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No hay mecánicos asignados a este servicio.</li>
+                    {% endfor %}
+                </ul>
             </div>
 
 
-            <h4>Actuaciones</h4>
+            <h4>Actuaciones y/o anotaciones</h4>
             <div id="serviciosLista" class="mb-4">
+                <div class="d-flex">
+            
+                    <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarAnotacion()">Agregar</button>
+                </div>
+                <div id="form_anotacion" style="display: none;">
+                    <form action="{% url 'AgregarAnotacionServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                        <label for="precio" class="form-label">Anotaciones</label>
+                        <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Anotaciones" rows="3"></textarea>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <button type="button" class="btn btn-secondary" onclick="cerrarAnotacion()">Cancelar</button>
+                        <!-- <a href="" class="btn btn-secondary">Cancelar</a> -->
+                    </form>
+                </div>
+                <br>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Tarea</th>
-                            <th>Fecha</th>
-                            <th>Mecanico</th>
+                            <th>DETALLE</th>
+                            <th>FECHA</th>
+                            <th>MECANICO</th>
                         </tr>
                     </thead>
                     <tbody>
-                
-                    <tr>
-                        <td>se cambia la cadena por falla de fabrica</td>
-                        <td>27 de diciembre</td>
-                        <td>
-                            Juan
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>cambio de piñon</td>
-                        <td>28 de diciembre</td>
-                        <td>
-                            Daniel
-                        </td>
-                    </tr>
+                {% if anotaciones %}
+                    {% for anotacion in anotaciones %}
+                        <tr>
+                            <td>{{ anotacion.anotacion.anotaciones }}</td>
+                            <td>{{ anotacion.anotacion.fecha }}</td>
+                            <td>
+                                {{ anotacion.mecanico.nombre }} {{ anotacion.mecanico.apellido }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Aún no hay anotaciones
+                    </td>
+                </tr>
+                {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -206,13 +256,26 @@ form label input[type="number"] {
     
             <button type="submit" class="btn btn-success">Guardar</button>
                 <a href="{% url 'ServiciosEnGestion' %}" class="btn btn-secondary">Cancelar</a>
-        </form>
+        <!-- </form> -->
         
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
+
+    function agregarAnotacion(){
+
+        var form_anotacion = document.getElementById("form_anotacion")
+        form_anotacion.style.display = "block";
+    }
+
+
+    function cerrarAnotacion(){
+
+        var form_anotacion = document.getElementById("form_anotacion")
+        form_anotacion.style.display = "none";
+    }
     function agregarServicio() {
     // Contenedor donde se añaden los servicios
     const serviciosLista = document.getElementById("serviciosPendientes");
@@ -258,6 +321,20 @@ form label input[type="number"] {
     // Añadir el nuevo servicio al formulario
     serviciosLista.appendChild(nuevoServicio);
 }
+
+
+function confirmarEliminacion(servicioId) {
+    // Mostrar el mensaje de confirmación
+    const confirmacion = document.getElementById(`confirmacion-${servicioId}`);
+    confirmacion.classList.remove('d-none');
+}
+
+function cancelarEliminacion(servicioId) {
+    // Ocultar el mensaje de confirmación
+    const confirmacion = document.getElementById(`confirmacion-${servicioId}`);
+    confirmacion.classList.add('d-none');
+}
+
 
 
 </script>

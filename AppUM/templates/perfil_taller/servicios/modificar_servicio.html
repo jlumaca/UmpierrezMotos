@@ -169,8 +169,9 @@ form label input[type="number"] {
                         <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
                             <div class="d-flex w-100 align-items-center">
                                 <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
-                                
+                                {% if mostrar_boton %}
                                 <button type="button" class="btn btn-sm btn-danger ms-2" onclick="confirmarEliminacionMecanico('{{ mecanico.mecanico.id }}')">❌</button>
+                                {% endif %}
                             </div>
                             <!-- Contenedor para el mensaje de confirmación -->
                             <div id="confirmacionEliminarMecanico-{{ mecanico.mecanico.id }}" class="mt-2 text-center text-danger d-none">
@@ -195,12 +196,14 @@ form label input[type="number"] {
                     <ul class="list-group">
                         {% for mecanico in resto_mecanicos %}
                             <li class="list-group-item d-flex align-items-center">
+                                {% if mostrar_boton %}
                                 <input 
                                     type="checkbox" 
                                     class="form-check-input me-2"
                                     name="mecanicos_seleccionados[]"
                                     value="{{ mecanico.resto_mecanicos.id }}"
                                 >
+                                {% endif %}
                                 <span class="flex-grow-1">{{ mecanico.resto_mecanicos.nombre }} {{ mecanico.resto_mecanicos.apellido }}</span>
                             </li>
                         {% empty %}
@@ -208,8 +211,10 @@ form label input[type="number"] {
                         {% endfor %}
                     </ul>
                 </div>
+                {% if mostrar_boton %}
                 <button type="submit" class="btn btn-success">Guardar</button>
                 <button type="button" class="btn btn-secondary">Cancelar</button>
+                {% endif %}
             </form>
             <br>
 

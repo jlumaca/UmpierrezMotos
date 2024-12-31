@@ -2555,6 +2555,13 @@ def servicios_en_gestion(req):
             'cliente__apellido'      
            ).order_by('-id')
         )
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        mecanico_usuario = Mecanico.objects.get(id=usuario_actual.id)
+        if mecanico_usuario.jefe:
+            jefe = True
+        else:
+            jefe = False
         datos = []
         for resultado in servicios_motos:
             mecanicos = MecanicosServicios.objects.filter(servicio_id=resultado['id'])
@@ -2563,12 +2570,28 @@ def servicios_en_gestion(req):
                 for mecanico in mecanicos
                 for persona in Personal.objects.filter(id=mecanico.mecanico_id)
             ]
+            # data_boton = []
+            # if mecanicos.exists():
+            #     for mecanico in mecanicos:
+            #         if (mecanico.mecanico_id == mecanico_usuario.id) or jefe:
+            #             #MOSTRAR BOTON = TRUE
+            #             pass
+            #         else:
+            #             #MOSTRAR BOTON = FALSE
+            #             pass
+
+            cambiar_nombre_variable = MecanicosServicios.objects.filter(servicio_id=resultado['id'],mecanico_id = mecanico_usuario.id).first()
+            if cambiar_nombre_variable or jefe:
+                mostrar_boton = True
+            else:
+                mostrar_boton = False
             fecha_ingreso = resultado['fecha_ingreso']  # Suponiendo que 'fecha_ingreso' es un campo de la consulta
             dias_transcurridos = (date.today() - fecha_ingreso).days
             datos.append({
                 'servicio': resultado if resultado else None,
                 'mecanicos': datos_mecanicos if datos_mecanicos else None,  # Lista de nombres completos de mecánicos
-                'dias':dias_transcurridos
+                'dias':dias_transcurridos,
+                "mostrar_boton":mostrar_boton
             })
         page_obj = funcion_paginas_varias(req,datos)
         return render(req,"perfil_taller/servicios/servicios_en_gestion.html",{"servicios":datos,"page_obj":page_obj})
@@ -2726,30 +2749,6 @@ def contexto_modificar_servicio(id_s,mensaje):
                         "resto_mecanicos":mecanico
                     })
     
-    # todos_los_mecanicos = Mecanico.objects.all()
-    # for mecanico in todos_los_mecanicos:
-    #     mecanico_en_servicio = MecanicosServicios.objects.filter(servicio_id=id_s,mecanico=mecanico).first()
-    #     if mecanico_en_servicio:
-    #         pass
-
-        # mecanico_no_servicio = 
-    
-
-    
-
-
-    
-    # datos = [
-    #     moto,
-    #     cliente,
-    #     matricula.matricula if matricula else "Sin matricula",
-    #     telefono.telefono if telefono else "El cliente no cuenta con teléfono",
-    #     correo.correo if correo else "El cliente no cuenta con correo",
-    #     tareas_realizadas,
-    #     tareas_pendientes,
-    #     data_mecanicos,
-    # ]
-
     anotaciones = AnotacionesServicio.objects.filter(servicio_id=id_s)
     data_anotaciones = []
     for anotacion in anotaciones:
@@ -2758,18 +2757,7 @@ def contexto_modificar_servicio(id_s,mensaje):
             "anotacion":anotacion,
             "mecanico":mecanico
         })
-    # contexto = {"moto":moto,
-    #             "cliente":cliente,
-    #             "matricula":matricula.matricula if matricula else "Sin matricula",
-    #             "telefono":telefono.telefono if telefono else "El cliente no cuenta con teléfono",
-    #             "correo":correo.correo if correo else "El cliente no cuenta con correo",
-    #             "tareas_realizadas":tareas_realizadas,
-    #             "tareas_pendientes":tareas_pendientes,
-    #             "mecanicos":data_mecanicos,
-    #             "messages":mensaje if mensaje else None,
-    #             "id_servicio":id_s,
-    #             "anotaciones":data_anotaciones
-    #             }
+
     f_cierre_formateada = servicio.fecha_estimada_cierre.strftime('%Y-%m-%d') if servicio.fecha_estimada_cierre else None
     data = [
         moto,
@@ -2792,6 +2780,9 @@ def contexto_modificar_servicio(id_s,mensaje):
 
 def form_modificar_servicio(req,id_s):
     contexto = contexto_modificar_servicio(id_s,None)
+    usuario = req.user
+    usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+    mecanico_usuario = Mecanico.objects.get(id=usuario_actual.id)
     return render(req,"perfil_taller/servicios/modificar_servicio.html",{ "moto":contexto[0],
                                                                             "cliente":contexto[1],
                                                                             "matricula":contexto[2],
@@ -2805,6 +2796,7 @@ def form_modificar_servicio(req,id_s):
                                                                             "resto_mecanicos":contexto[11],
                                                                             "info_servicio":contexto[12],
                                                                             "fecha_cierre":contexto[13],
+                                                                            "mostrar_boton":True if mecanico_usuario.jefe else False
                                                                             })
 
 

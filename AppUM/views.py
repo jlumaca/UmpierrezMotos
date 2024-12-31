@@ -2907,6 +2907,23 @@ def modificar_datos_servicio(req,id_s):
     except Exception as e:
         pass
 
+def detalles_servicios(req,id_s):
+    contexto = contexto_modificar_servicio(id_s,None)
+    return render(req,"perfil_taller/servicios/detalles_servicio.html",{ "moto":contexto[0],
+                                                                            "cliente":contexto[1],
+                                                                            "matricula":contexto[2],
+                                                                            "telefono":contexto[3],
+                                                                            "correo":contexto[4],
+                                                                            "tareas_realizadas":contexto[5],
+                                                                            "tareas_pendientes":contexto[6],
+                                                                            "mecanicos":contexto[7],
+                                                                            "id_servicio":contexto[9],
+                                                                            "anotaciones":contexto[10],
+                                                                            "info_servicio":contexto[12],
+                                                                            "fecha_cierre":contexto[13],
+                                                                            })
+
+
 def historial_de_servicios(req):
     try:
         servicios_motos = (

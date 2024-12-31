@@ -2701,18 +2701,43 @@ def contexto_modificar_servicio(id_s,mensaje):
     tareas_realizadas = TareasServicios.objects.filter(servicio_id=id_s,realizado=1)
     tareas_pendientes = TareasServicios.objects.filter(servicio_id=id_s,realizado=0)
 
-    data_mecanicos = []
+    data_mecanicos_servicio = []
     mecanicos_en_el_servicio = MecanicosServicios.objects.filter(servicio_id=id_s)
 
     for mecanico in mecanicos_en_el_servicio:
-            mec = Mecanico.objects.get(id=mecanico.mecanico_id)
-            resto_de_mecanicos = Mecanico.objects.exclude(id=mecanico.mecanico_id)
-            for demas_mecanicos in resto_de_mecanicos:
-                mecanico_otro = Mecanico.objects.get(id=demas_mecanicos.id)
-                data_mecanicos.append({
+            mec = Mecanico.objects.filter(id=mecanico.mecanico_id,activo=1).first()
+            # resto_de_mecanicos = Mecanico.objects.exclude(id=mecanico.mecanico_id)
+            # for demas_mecanicos in resto_de_mecanicos:
+            #     mecanico_otro = Mecanico.objects.get(id=demas_mecanicos.id)
+            data_mecanicos_servicio.append({
                     "mecanico":mec,
-                    "resto_mecanicos":mecanico_otro
+                    # "resto_mecanicos":mecanico_otro
                 })
+    
+    # resto_mecanicos = MecanicosServicios.objects.exclude(servicio_id=id_s)
+    resto_mecanicos = Mecanico.objects.filter(activo=1)
+    data_mecanicos_no_servicio = []
+    for mecanico in resto_mecanicos:
+        # mec = Mecanico.objects.get(id=mecanico.mecanico_id)
+        mecanico_en_este_servicio = MecanicosServicios.objects.filter(servicio_id=id_s,mecanico=mecanico).first()
+        if not mecanico_en_este_servicio:
+            data_mecanicos_no_servicio.append({
+                        # "mecanico":mec,
+                        "resto_mecanicos":mecanico
+                    })
+    
+    # todos_los_mecanicos = Mecanico.objects.all()
+    # for mecanico in todos_los_mecanicos:
+    #     mecanico_en_servicio = MecanicosServicios.objects.filter(servicio_id=id_s,mecanico=mecanico).first()
+    #     if mecanico_en_servicio:
+    #         pass
+
+        # mecanico_no_servicio = 
+    
+
+    
+
+
     
     # datos = [
     #     moto,
@@ -2745,7 +2770,7 @@ def contexto_modificar_servicio(id_s,mensaje):
     #             "id_servicio":id_s,
     #             "anotaciones":data_anotaciones
     #             }
-    
+    f_cierre_formateada = servicio.fecha_estimada_cierre.strftime('%Y-%m-%d') if servicio.fecha_estimada_cierre else None
     data = [
         moto,
         cliente,
@@ -2754,43 +2779,34 @@ def contexto_modificar_servicio(id_s,mensaje):
         correo.correo if correo else "El cliente no cuenta con correo",
         tareas_realizadas,
         tareas_pendientes,
-        data_mecanicos,
+        data_mecanicos_servicio,
         mensaje if mensaje else None,
         id_s,
-        data_anotaciones
+        data_anotaciones,
+        data_mecanicos_no_servicio,
+        servicio,
+        f_cierre_formateada
     ]
 
     return data
 
-def modificar_servicio(req,id_s):
-    # try:
-        contexto = contexto_modificar_servicio(id_s,None)
+def form_modificar_servicio(req,id_s):
+    contexto = contexto_modificar_servicio(id_s,None)
+    return render(req,"perfil_taller/servicios/modificar_servicio.html",{ "moto":contexto[0],
+                                                                            "cliente":contexto[1],
+                                                                            "matricula":contexto[2],
+                                                                            "telefono":contexto[3],
+                                                                            "correo":contexto[4],
+                                                                            "tareas_realizadas":contexto[5],
+                                                                            "tareas_pendientes":contexto[6],
+                                                                            "mecanicos":contexto[7],
+                                                                            "id_servicio":contexto[9],
+                                                                            "anotaciones":contexto[10],
+                                                                            "resto_mecanicos":contexto[11],
+                                                                            "info_servicio":contexto[12],
+                                                                            "fecha_cierre":contexto[13],
+                                                                            })
 
-        if req.method == "POST":
-            pass
-        else:
-            return render(req,"perfil_taller/servicios/modificar_servicio.html",{ "moto":contexto[0],
-                                                                                "cliente":contexto[1],
-                                                                                "matricula":contexto[2],
-                                                                                "telefono":contexto[3],
-                                                                                "correo":contexto[4],
-                                                                                "tareas_realizadas":contexto[5],
-                                                                                "tareas_pendientes":contexto[6],
-                                                                                "mecanicos":contexto[7],
-                                                                                "id_servicio":contexto[9],
-                                                                                "anotaciones":contexto[10]
-                                                                                })
-    # except Exception as e:
-    #     pass
-
-    # "moto":contexto[0],
-    #                                                                             "cliente":contexto[1],
-    #                                                                             "matricula":contexto[2],
-    #                                                                             "telefono":contexto[3],
-    #                                                                             "correo":contexto[4],
-    #                                                                             "tareas_realizadas":contexto[5],
-    #                                                                             "tareas_pendientes":contexto[6],
-    #                                                                             "mecanicos":contexto[7],
 
 def agregar_quitar_servicios(req,id_s):
     try:
@@ -2816,7 +2832,7 @@ def agregar_quitar_servicios(req,id_s):
             servicio_realizado.realizado = 1
             servicio_realizado.save()
         messages.success(req, "Servicios actualizados correctamente.")
-        return redirect(reverse('ModificarServicio', kwargs={'id_s': id_s}))
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
     except Exception as e:
         pass
 
@@ -2826,7 +2842,35 @@ def borrar_servicio(req,id_tarea):
         id_s = servicio.servicio_id
         servicio.delete()
         messages.success(req, "Servicios actualizados correctamente.")
-        return redirect(reverse('ModificarServicio', kwargs={'id_s': id_s}))
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+    except Exception as e:
+        pass
+
+def agregar_mecanico_servicio(req,id_s):
+    try:
+        mecanicos_seleccionados = req.POST.getlist('mecanicos_seleccionados[]')
+        if not mecanicos_seleccionados:
+            pass
+        else:
+            for mecanico in mecanicos_seleccionados:
+                # servicio = Servicios.objects.get(id=id_s)
+                # print("PRUEBA: " + str(mecanico))
+                nuevo_mecanico = MecanicosServicios(
+                    servicio_id = id_s,
+                    mecanico_id = mecanico
+                )
+                nuevo_mecanico.save()
+            messages.success(req, "Mecanicos actualizados correctamente.")
+            return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+    except Exception as e:
+        pass
+
+def borrar_mecanico_servicio(req,id_s,id_mecanico):
+    try:
+        mecanico = MecanicosServicios.objects.filter(servicio_id=id_s,mecanico_id=id_mecanico).first()
+        mecanico.delete()
+        messages.success(req, "Mecanicos actualizados correctamente.")
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
     except Exception as e:
         pass
 
@@ -2843,9 +2887,25 @@ def agregar_anotacion_servicio(req,id_s):
         )
         nueva_anotacion.save()
         messages.success(req, "Anotación agregada correctamente.")
-        return redirect(reverse('ModificarServicio', kwargs={'id_s': id_s}))
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
     # except Exception as e:
     #     pass
+
+def modificar_datos_servicio(req,id_s):
+    try:
+        servicio = Servicios.objects.get(id=id_s)
+        servicio.titulo = req.POST['tipo_servicio_modificar']
+        servicio.prioridad = req.POST['prioridad']
+        servicio.fecha_estimada_cierre = req.POST['fecha_estimada']
+        servicio.save()
+        
+        messages.success(req, "Datos del servicio modificados correctamente.")
+        
+        # messages.success(req, "PRUEBA")
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+
+    except Exception as e:
+        pass
 
 def historial_de_servicios(req):
     try:

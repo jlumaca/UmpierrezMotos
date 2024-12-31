@@ -147,45 +147,71 @@ form label input[type="number"] {
             <!-- <h4>Mecánicos asignados</h4> -->
             <h4 class="mb-3">🔧 Mecánicos Asignados</h4>
             <div id="serviciosLista" class="mb-4">
-                <ul class="list-group">
-                    {% for mecanico in mecanicos %}
-                        <li class="list-group-item d-flex align-items-center">
-                            <input 
-                                type="checkbox" 
-                                class="form-check-input me-2"
-                                name="mecanicos_seleccionados"
-                                value="{{ mecanico.mecanico.id }}"
-                                checked
-                            >
-                            <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
-                        </li>
-                    {% empty %}
+                    <!-- <ul class="list-group">
+                        {% for mecanico in mecanicos %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input me-2"
+                                    name="mecanicos_seleccionados"
+                                    value="{{ mecanico.mecanico.id }}"
+                                    checked
+                                >
+                                <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
+                            </li>
+                        {% empty %}
                         <li class="list-group-item text-muted">No hay mecánicos asignados a este servicio.</li>
-                    {% endfor %}
-                </ul>
+                        {% endfor %}
+                    </ul> -->
+                    
+                    <ul id="serviciosLista" class="list-group mb-4">
+                        {% for mecanico in mecanicos %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
+                                
+                                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="confirmarEliminacionMecanico('{{ mecanico.mecanico.id }}')">❌</button>
+                            </div>
+                            <!-- Contenedor para el mensaje de confirmación -->
+                            <div id="confirmacionEliminarMecanico-{{ mecanico.mecanico.id }}" class="mt-2 text-center text-danger d-none">
+                                <p>¿Estás seguro de que deseas desvincular este mecánico de este servicio?</p>
+                                <a href="{% url 'BorrarMecanicoServicio' id_servicio mecanico.mecanico.id %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                                <!-- <button type="button" class="btn btn-sm btn-danger">Confirmar</button>  -->
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionMecanico('{{ mecanico.mecanico.id }}')">Cancelar</button>
+                            </div>
+                        </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No existen mecánicos asignados a este servicio.</li>
+                        {% endfor %}
+                       
+                    </ul>
+                    
+                </div>
                 
-            </div>
-            
-
-            <h4>Asignar más mecánicos al servicio</h4>
-            <div id="serviciosLista" class="mb-4">
-                <ul class="list-group">
-                    {% for mecanico in mecanicos %}
-                        <li class="list-group-item d-flex align-items-center">
-                            <input 
-                                type="checkbox" 
-                                class="form-check-input me-2"
-                                name="mecanicos_seleccionados"
-                                value="{{ mecanico.resto_mecanicos.id }}"
-                            >
-                            <span class="flex-grow-1">{{ mecanico.resto_mecanicos.nombre }} {{ mecanico.resto_mecanicos.apellido }}</span>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item text-muted">No hay mecánicos asignados a este servicio.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
+                
+            <form action="{% url 'AgregarMecanicoServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                <h4>Asignar más mecánicos al servicio</h4>
+                <div id="serviciosLista" class="mb-4">
+                    <ul class="list-group">
+                        {% for mecanico in resto_mecanicos %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input me-2"
+                                    name="mecanicos_seleccionados[]"
+                                    value="{{ mecanico.resto_mecanicos.id }}"
+                                >
+                                <span class="flex-grow-1">{{ mecanico.resto_mecanicos.nombre }} {{ mecanico.resto_mecanicos.apellido }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No existen más mecánicos ingresados en el sistema.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-secondary">Cancelar</button>
+            </form>
+            <br>
 
             <h4>Actuaciones y/o anotaciones</h4>
             <div id="serviciosLista" class="mb-4">
@@ -232,31 +258,30 @@ form label input[type="number"] {
                     </tbody>
                 </table>
             </div>
-    
-    <div class="mb-3">
-        <label for="precio" class="form-label">Prioridad</label>
-        <select class="form-control" name="prioridad">
-            <option value="Alta">Alta</option>
-            <option value="Media">Media</option>
-            <option value="Baja">Baja</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label for="precio" class="form-label">Fecha estimada</label>
-        <input type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="precio" class="form-label">Anotaciones</label>
-        <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Anotaciones" rows="3"></textarea>
-    </div>
-    
-    
-    
-            <button type="submit" class="btn btn-success">Guardar</button>
+            <form action="{% url 'ModificarServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <h4>Información sobre el servicio</h4>
+            <!-- {% url 'AgregarAnotacionServicio' id_servicio %} -->
+            <div class="mb-3">
+                <label for="color" class="form-label">Tipo de servicio</label>
+                <input value="{{ info_servicio.titulo }}" type="text" class="form-control" name="tipo_servicio_modificar" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" required>
+                </div>
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Prioridad</label>
+                    <select class="form-control" name="prioridad">
+                        <option value="Alta" {% if info_servicio.prioridad == "Alta" %}selected{% endif %}>Alta</option>
+                        <option value="Media" {% if info_servicio.prioridad == "Media" %}selected{% endif %}>Media</option>
+                        <option value="Baja" {% if info_servicio.prioridad == "Baja" %}selected{% endif %}>Baja</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Fecha estimada</label>
+                    <input value="{{ fecha_cierre }}" type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Guardar</button>
                 <a href="{% url 'ServiciosEnGestion' %}" class="btn btn-secondary">Cancelar</a>
-        <!-- </form> -->
+            </form>
         
     </div>
 </div>
@@ -332,6 +357,19 @@ function confirmarEliminacion(servicioId) {
 function cancelarEliminacion(servicioId) {
     // Ocultar el mensaje de confirmación
     const confirmacion = document.getElementById(`confirmacion-${servicioId}`);
+    confirmacion.classList.add('d-none');
+}
+
+
+function confirmarEliminacionMecanico(mecanicoId) {
+    // Mostrar el mensaje de confirmación
+    const confirmacion = document.getElementById(`confirmacionEliminarMecanico-${mecanicoId}`);
+    confirmacion.classList.remove('d-none');
+}
+
+function cancelarEliminacionMecanico(mecanicoId) {
+    // Ocultar el mensaje de confirmación
+    const confirmacion = document.getElementById(`confirmacionEliminarMecanico-${mecanicoId}`);
     confirmacion.classList.add('d-none');
 }
 

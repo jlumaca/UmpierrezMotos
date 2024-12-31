@@ -149,11 +149,14 @@ urlpatterns = [
      path('modificacion_cliente_taller/<int:id_cliente>', views.modificacion_cliente_taller,name="ModificacionClienteTaller"),
      path('detalles_cliente_taller/<int:id_cliente>', views.detalles_cliente_taller,name="DetallesClienteTaller"),
      path('cerrar_servicio/<int:id_s>', views.cerrar_servicio,name="CerrarServicio"),
-     path('modificar_servicio/<int:id_s>', views.modificar_servicio,name="ModificarServicio"),
+     path('form_modificar_servicio/<int:id_s>', views.form_modificar_servicio,name="FormModificarServicio"),
      path('agregar_servicio/<int:id_s>', views.agregar_quitar_servicios,name="AgregarServicio"),
      path('agregar_anotacion_servicio/<int:id_s>', views.agregar_anotacion_servicio,name="AgregarAnotacionServicio"),
      path('borrar_servicio/<int:id_tarea>', views.borrar_servicio,name="BorrarServicio"),
-
+     path('agregar_mecanico_servicio/<int:id_s>', views.agregar_mecanico_servicio,name="AgregarMecanicoServicio"),
+     path('borrar_mecanico_servicio/<int:id_s>/<int:id_mecanico>', views.borrar_mecanico_servicio,name="BorrarMecanicoServicio"),
+     path('modificar_servicio/<int:id_s>', views.modificar_datos_servicio,name="ModificarServicio"),
+     
 
      path('pedidos', views.pedidos,name="Pedidos"),
      path('cliente_pedido', views.cliente_pedido,name="ClientePedido"),

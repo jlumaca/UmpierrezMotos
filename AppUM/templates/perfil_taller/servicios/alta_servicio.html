@@ -217,21 +217,23 @@ form label input[type="number"] {
                 <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
             </div>
             <br>
-            <h4>Mecánicos a asignar</h4>
-            <div id="serviciosLista" class="mb-4">
-                {% if mecanicos %}
-                {% for mecanico in mecanicos %}
-                <div>
-                    <label class="d-flex align-items-center mb-2">
-                        <input type="checkbox" name="mecanicos[]" value="{{ mecanico.id }}" id="mecanicos" class="me-2">
-                        <span class="flex-grow-1">{{ mecanico.nombre }} {{ mecanico.apellido }}</span>
-                    </label>
+            {% if div_mecanicos %}
+                <h4>Mecánicos a asignar</h4>
+                <div id="serviciosLista" class="mb-4">
+                    {% if mecanicos %}
+                    {% for mecanico in mecanicos %}
+                    <div>
+                        <label class="d-flex align-items-center mb-2">
+                            <input type="checkbox" name="mecanicos[]" value="{{ mecanico.id }}" id="mecanicos" class="me-2">
+                            <span class="flex-grow-1">{{ mecanico.nombre }} {{ mecanico.apellido }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                        <p>No existen mecánicos registrados en el sistema</p>
+                    {% endif %}
                 </div>
-                {% endfor %}
-                {% else %}
-                    <p>No existen mecánicos registrados en el sistema</p>
-                {% endif %}
-            </div>
+            {% endif %}
     
     <div class="mb-3">
         <label for="precio" class="form-label">Prioridad</label>

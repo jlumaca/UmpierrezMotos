@@ -2601,7 +2601,7 @@ def servicios_en_gestion(req):
 
 def form_alta_servicio(req):
     try:
-        return render(req,"perfil_taller/servicios/alta_servicio.html",{"buscar_moto_cliente":True})
+        return render(req,"perfil_taller/servicios/alta_servicio.html",{"buscar_moto_cliente":True,"div_mecanicos":False})
     except Exception as e:
         return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":e,"buscar_moto_cliente":True})
 
@@ -2637,16 +2637,25 @@ def cliente_moto_servicio(req):
         elif not moto:
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos","buscar_moto_cliente":True})
         else:
-            mecanicos = (Mecanico.objects
-                       .filter(activo=True)
-                       .values('id', 'nombre', 'apellido')
-                       .order_by('nombre'))
+            usuario = req.user
+            usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+            mecanico_actual = Mecanico.objects.get(id=usuario_actual.id)
+            if mecanico_actual.jefe:
+                div_mecanicos = True
+                mecanicos = (Mecanico.objects
+                        .filter(activo=True)
+                        .values('id', 'nombre', 'apellido')
+                        .order_by('nombre'))
+            else:
+                div_mecanicos = False
+                mecanicos = False
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"datos_moto":True,
                                                                             "moto":moto,
                                                                             "cliente":cliente,
                                                                             "matricula":matricula if matricula else "Sin matrícula",
                                                                             "buscar_moto_cliente":False,
-                                                                            "mecanicos":mecanicos if mecanicos else None})
+                                                                            "mecanicos":mecanicos if mecanicos else None,
+                                                                            "div_mecanicos":div_mecanicos})
     # except Exception as e:
     #     return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos"})
 
@@ -2660,9 +2669,12 @@ def alta_servicio(req,id_moto,id_cliente):
                        .filter(activo=True)
                        .values('id', 'nombre', 'apellido')
                        .order_by('nombre'))
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        mecanico_actual = Mecanico.objects.get(id=usuario_actual.id)
         if not servicios_seleccionados:
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
-        elif not mecanicos_seleccionados:   
+        elif not mecanicos_seleccionados and mecanico_actual.jefe:   
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún mecánico","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
         else:
             nuevo_servicio = Servicios(
@@ -2689,12 +2701,19 @@ def alta_servicio(req,id_moto,id_cliente):
                 )
                 tareas_servicios.save()
             
-            for mecanico in mecanicos_seleccionados:
+            if not mecanico_actual.jefe:
                 mecanicos_servicio = MecanicosServicios(
-                    mecanico_id = mecanico,
-                    servicio_id = nuevo_servicio.id
-                )
+                        mecanico_id = mecanico_actual.id,
+                        servicio_id = nuevo_servicio.id
+                    )
                 mecanicos_servicio.save()
+            else:
+                for mecanico in mecanicos_seleccionados:
+                    mecanicos_servicio = MecanicosServicios(
+                        mecanico_id = mecanico,
+                        servicio_id = nuevo_servicio.id
+                    )
+                    mecanicos_servicio.save()
         
             messages.success(req, "Servicio ingresado correctamente.")
             return redirect('ServiciosEnGestion')

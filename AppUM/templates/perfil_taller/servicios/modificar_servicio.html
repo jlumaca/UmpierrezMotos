@@ -107,7 +107,7 @@ form label input[type="number"] {
                     {% for servicio in tareas_realizadas %}
                         <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
                             <div class="d-flex w-100 align-items-center">
-                                <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                                <span class="flex-grow-1">{{ servicio.tarea }}  ${{ servicio.precio }}</span>
                                 <!-- Botón para eliminar el servicio -->
                                 <button type="button" class="btn btn-sm btn-danger ms-2" onclick="confirmarEliminacion('{{ servicio.id }}')">❌</button>
                             </div>
@@ -129,7 +129,7 @@ form label input[type="number"] {
                 {% for servicio in tareas_pendientes %}
                     <label class="d-flex align-items-center mb-2">
                         <input type="checkbox" name="servicios_pendientes[]" value="{{ servicio.id }}" id="servicio6" class="me-2">
-                        <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                        <span class="flex-grow-1">{{ servicio.tarea }} ${{ servicio.precio }}</span>
                     </label>
                 {% endfor %}
             </div>
@@ -287,7 +287,7 @@ form label input[type="number"] {
     // Crear el checkbox
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.name = "servicios[]";
+    checkbox.name = "nuevos_servicios[]";
     checkbox.value = ""; // El valor se completará dinámicamente
     checkbox.classList.add("me-2");
 

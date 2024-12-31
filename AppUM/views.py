@@ -2795,6 +2795,22 @@ def modificar_servicio(req,id_s):
 def agregar_quitar_servicios(req,id_s):
     try:
         servicios_seleccionados = req.POST.getlist('servicios_pendientes[]')
+        nuevos_servicios = req.POST.getlist('nuevos_servicios[]')
+
+        if nuevos_servicios:
+            serv = Servicios.objects.get(id=id_s)
+            for servicio in nuevos_servicios:
+                servicio = servicio.replace("_", " ")
+                prueba = servicio.replace(" ","_")
+                precio = req.POST[f'precio_{prueba}']
+                nuevo_servicio = TareasServicios(
+                    servicio = serv,
+                    tarea = servicio,
+                    realizado = 0,
+                    precio = precio
+                )
+                nuevo_servicio.save()
+        
         for servicio in servicios_seleccionados:
             servicio_realizado = TareasServicios.objects.get(id=servicio)
             servicio_realizado.realizado = 1

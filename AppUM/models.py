@@ -41,6 +41,8 @@ class Moto(models.Model):
     moneda_precio = models.CharField(max_length=10,default=True,null=True)
     tipo = models.CharField(max_length=20,blank=True)
     precio_final = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    contiene_num_motor = models.BooleanField(default=1)
+    contiene_num_chasis = models.BooleanField(default=1)
 
 class Matriculas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)

@@ -617,6 +617,17 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
         moneda = "PESOS"
     else:
         moneda = "DOLARES"
+    
+    domicilio = cliente.domicilio.upper()
+    if moto.contiene_num_motor:
+        numero_motor = moto.num_motor
+    else:
+        numero_motor = "SIN NUMERO DE MOTOR"
+
+    if moto.contiene_num_chasis:
+        numero_chasis = moto.num_chasis
+    else:
+        numero_chasis = "SIN NUMERO DE CHASIS"
     for p in doc.paragraphs:
         if 'FECHA_ACTUAL' in p.text:
             p.text = p.text.replace('FECHA_ACTUAL', fecha_formateada)
@@ -627,7 +638,7 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
         if 'TELEFONO_CLIENTE' in p.text:
             p.text = p.text.replace('TELEFONO_CLIENTE', telefono)
         if 'DIRECCION_CLIENTE' in p.text:
-            p.text = p.text.replace('DIRECCION_CLIENTE', cliente.domicilio)
+            p.text = p.text.replace('DIRECCION_CLIENTE', domicilio)
         if 'MOTO_MARCA' in p.text:
             p.text = p.text.replace('MOTO_MARCA', moto.marca)
         if 'MOTO_MODELO' in p.text:
@@ -641,9 +652,9 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
         if 'MOTO_ANIO' in p.text:
             p.text = p.text.replace('MOTO_ANIO', str(moto.anio))
         if 'MOTO_NUM_MOTOR' in p.text:
-            p.text = p.text.replace('MOTO_NUM_MOTOR', moto.num_motor)
+            p.text = p.text.replace('MOTO_NUM_MOTOR', numero_motor)
         if 'MOTO_NUM_CHASIS' in p.text:
-            p.text = p.text.replace('MOTO_NUM_CHASIS', moto.num_chasis)
+            p.text = p.text.replace('MOTO_NUM_CHASIS', numero_chasis)
         if 'MOTO_MONEDA' in p.text:
             p.text = p.text.replace('MOTO_MONEDA', moneda)
         if 'PRECIO_MOTO' in p.text:

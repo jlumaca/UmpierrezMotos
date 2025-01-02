@@ -1,7 +1,7 @@
 from .models import *
 from datetime import date
 from datetime import datetime
-def insert_moto(marca,modelo,anio,estado,cc_motor,kilometros,moneda,precio,color,num_motor,num_chasis,num_cilindros,num_pasajeros,pert_tienda,pert_taller,observaciones,foto,tipo_moto):
+def insert_moto(marca,modelo,anio,estado,cc_motor,kilometros,moneda,precio,color,num_motor,num_chasis,num_cilindros,num_pasajeros,pert_tienda,pert_taller,observaciones,foto,tipo_moto,tiene_numero_motor,tiene_numero_chasis):
     nueva_moto = Moto(marca = marca,
                     modelo = modelo,
                     anio = anio,
@@ -20,7 +20,9 @@ def insert_moto(marca,modelo,anio,estado,cc_motor,kilometros,moneda,precio,color
                     fecha_ingreso = datetime.now(),
                     observaciones = observaciones,
                     foto = foto,
-                    tipo = tipo_moto
+                    tipo = tipo_moto,
+                    contiene_num_motor = tiene_numero_motor,
+                    contiene_num_chasis = tiene_numero_chasis,
                     )
     nueva_moto.save()
 

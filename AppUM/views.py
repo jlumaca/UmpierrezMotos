@@ -294,7 +294,7 @@ def cliente_moto(req):
 
 @admin_required
 def alta_moto_usada(req,id_cliente):
-    try:
+    # try:
     #INSERT EN MOTO
         cliente = Cliente.objects.get(id=id_cliente)
         num_chasis = req.POST['num_chasis_moto'].upper()
@@ -351,17 +351,21 @@ def alta_moto_usada(req,id_cliente):
             checkbox_num_motor = 'sin_num_motor' in req.POST
             if checkbox_num_motor:
                 numero_de_motor = crear_num_motor()
+                tiene_numero_motor = 0
             else:
                 numero_de_motor = num_motor
+                tiene_numero_motor = 1
 
 
             checkbox_num_chasis = 'sin_num_chasis' in req.POST
             if checkbox_num_chasis:
                 numero_de_chasis = crear_num_chasis()
+                tiene_numero_chasis = 0
             else:
                 numero_de_chasis = num_chasis
+                tiene_numero_chasis = 1
             
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],tiene_numero_motor,tiene_numero_chasis)
             libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
            
             insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)
@@ -378,13 +382,13 @@ def alta_moto_usada(req,id_cliente):
                 return redirect('Motos')
 
             
-    except Exception as e:
-             return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
-                                                                             "active_page": 'Motos',
-                                                                             "form_moto_usada":True,
-                                                                             "form_moto_ingresada":False,
-                                                                             "consultar_moto_cliente":False,
-                                                                             "error_message":e})
+    # except Exception as e:
+    #          return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+    #                                                                          "active_page": 'Motos',
+    #                                                                          "form_moto_usada":True,
+    #                                                                          "form_moto_ingresada":False,
+    #                                                                          "consultar_moto_cliente":False,
+    #                                                                          "error_message":e})
 
 @admin_required
 def reingresar_moto_usada(req,id_moto,id_cliente):
@@ -446,7 +450,7 @@ def alta_moto_nueva(req):
             color = req.POST['color_moto'].upper()
 
             foto = req.FILES.get('foto_moto')
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'])
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],1,1)
 
             checkbox = 'crear_pdf' in req.POST
             if checkbox:
@@ -1603,7 +1607,8 @@ def venta_moto(req,id_moto,id_cliente):
         cliente = Cliente.objects.get(id=id_cliente)
         telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
         # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
-        crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
+        if moto.estado == "Nueva":
+            crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
         #REDIRIGIR A LA FICHA DEL CLIENTE
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")

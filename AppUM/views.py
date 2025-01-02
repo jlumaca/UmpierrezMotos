@@ -3496,3 +3496,170 @@ def busqueda_pedido_por_doc_cliente(req):
         return render(req,"perfil_administrativo/pedidos/pedidos.html",{'page_obj': page_obj})
     # except Exception as e:
     #     pass
+
+def personal_taller(req):
+
+    usuario = req.user
+    usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+    mecanico_actual = Mecanico.objects.filter(id=usuario_actual.id).first()
+    mostrar_botones = True if mecanico_actual.jefe else False
+    administrativos = (Administrativo.objects
+                       .filter(activo=True).exclude(usuario="adminapp")
+                       .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo','usuario')
+                       .order_by('nombre'))
+    page_obj = funcion_paginas_varias(req,administrativos)
+
+    mecanicos = (Mecanico.objects
+                       .filter(activo=True).exclude(usuario="adminapp")
+                       .values('id', 'nombre', 'apellido', 'telefono', 'correo', 'activo')
+                       .order_by('nombre'))
+    page_objMec = funcion_paginas_varias(req,mecanicos)
+
+    return render(req,"perfil_taller/personal/personal.html",{"page_obj":page_obj,"page_objMec":page_objMec, "mostrar_botones":mostrar_botones})
+
+def alta_personal_taller(req):
+    try:
+        if req.method == "POST":
+            documento = req.POST['tipo_doc'] + str(req.POST['doc'])
+            telefono = req.POST['telefono'] 
+            correo_nombre = req.POST['correo'] 
+            correo_dominio = req.POST['dominio_correo'] 
+            correo = correo_nombre + correo_dominio
+
+            valid_personal = validar_personal(documento,telefono,correo)
+
+            if valid_personal == "existe_mecanico":
+                return render(req,"perfil_taller/personal/alta_personal.html",{"error_message":"La persona que desea ingresar ya existe en el sistema"})
+            elif valid_personal == "existe_telefono":
+                return render(req,"perfil_taller/personal/alta_personal.html",{"error_message":"El teléfono ingresado ya existe en el sistema, el mismo no debe estar repetido"})
+            elif valid_personal == "existe_correo":
+                return render(req,"perfil_taller/personal/alta_personal.html",{"error_message":"El correo ingresado ya existe en el sistema, el mismo no debe estar repetido"})
+            elif valid_personal == "mecanico_desactivado":    
+                persona = Personal.objects.filter(documento=documento).first()
+                id = persona.id
+                return render(req,"perfil_taller/personal/alta_personal.html",{"reingresar":True,"id_personal":id})
+            else:
+                    f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                    f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+                    usuario = nombre_usuario(req.POST['nombre'],req.POST['apellido'])
+                    
+                    personal = Personal.objects.create(
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono,
+                        primera_sesion = True
+                    )
+                    personal.save()
+                    # Crear registro en Administrativo asociado al Personal
+                    administrativo = Administrativo.objects.create(
+                        personal_ptr=personal,  # Asociar al registro de Personal
+                        activo=False,
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono,
+                        primera_sesion = True
+                    )
+                    administrativo.save()
+
+                    # Crear registro en Mecanico asociado al Personal
+
+                    jefe = True if req.POST['permiso_del_mecanico'] == "jefe" else False
+                    mecanico = Mecanico.objects.create(
+                        personal_ptr=personal,  # Asociar al registro de Personal
+                        activo=True,
+                        jefe=jefe,
+                        documento=documento,
+                        nombre=req.POST['nombre'].capitalize(),
+                        apellido=req.POST['apellido'].capitalize(),
+                        fecha_nacimiento=f_nac,
+                        usuario=usuario,
+                        contrasena="Inicio1234",
+                        correo=correo,
+                        telefono=telefono,
+                        primera_sesion = True
+                    )
+                    mecanico.save()
+
+                    user = User.objects.create_user(
+                        username=usuario,
+                        password="Inicio1234",  # La contraseña predeterminada
+                        email=correo,
+                        first_name=req.POST['nombre'].capitalize(),
+                        last_name=req.POST['apellido'].capitalize()
+                    )
+                    
+                    # Asignar permisos o grupos si es necesario
+                    user.is_staff = False  # Si deseas que tenga acceso al admin de Django
+                    user.save()
+
+                    messages.success(req, "Personal ingresado con éxito")
+                    return redirect('PersonalTaller')
+        else:
+            return render(req,"perfil_taller/personal/alta_personal.html",{})
+    except Exception as e:
+        pass
+
+def ingresar_taller(req,id_personal):
+    try:
+        jefe = True if req.POST['permiso_del_mecanico_reingreso'] == "jefe" else False
+        mecanico = Mecanico.objects.get(personal_ptr_id=id_personal)
+        mecanico.activo = 1
+        mecanico.jefe = jefe
+        mecanico.save()
+        messages.success(req, "Personal reingresado con éxito")
+        return redirect('PersonalTaller')
+    except Exception as e:
+        return render(req,"perfil_taller/personal/alta_personal.html",{"error_message":e})
+
+def detalles_personal_taller(req,id_personal):
+    try:
+        personal = Personal.objects.get(id=id_personal)
+        administrativo = Administrativo.objects.filter(personal_ptr_id = id_personal,activo = 1).first()
+        if administrativo:
+            admin = True
+        else:
+            admin = False
+        
+        mecanico = Mecanico.objects.filter(personal_ptr_id = id_personal,activo = 1).first()
+        if mecanico:
+            mec = True
+            if mecanico.jefe == 1:
+                jefe = True
+            else:
+                jefe = False
+        else:
+            mec = False
+            jefe = False
+        contexto = {
+            "personal":personal,
+            "admin":admin,
+            "mec":mec,
+            "jefe":jefe
+        }
+        return render(req,"perfil_taller/personal/detalles_personal.html",contexto)
+    except Exception as e:
+         pass
+
+def resetear_usuario_taller(req,id_u):
+    # try:
+        if req.method == "POST":
+            usuario = Personal.objects.get(id=id_u)
+            usuario.contrasena = make_password("Inicio1234")
+            usuario.primera_sesion = 1
+            usuario.save()
+            user = User.objects.filter(username=usuario.usuario).first()
+            user.password = make_password("Inicio1234")
+            user.save()
+            return render(req,"perfil_taller/personal/resetear_usuario.html",{"message":"Usuario reseteado con éxito"})
+        else:
+            return render(req,"perfil_taller/personal/resetear_usuario.html",{})

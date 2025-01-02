@@ -172,6 +172,12 @@ urlpatterns = [
      path('cerrar_pedido/<int:id_pedido>', views.cerrar_pedido,name="CerrarPedido"),
      path('buscar_pedido_documento', views.busqueda_pedido_por_doc_cliente,name="PedidoPorDocumento"),
 
+     path('personal_taller', views.personal_taller,name="PersonalTaller"),
+     path('alta_personal_taller', views.alta_personal_taller,name="AltaPersonalTaller"),
+     path('reingresar_taller/<int:id_personal>', views.ingresar_taller,name="ReingresarTaller"),
+     path('personal_taller_detalle/<int:id_personal>', views.detalles_personal_taller,name="PersonalTallerDetalle"),
+     path('resetear_usuario_taller/<int:id_u>', views.resetear_usuario_taller,name="ResetearUsuarioTaller"),
+
 
 
 

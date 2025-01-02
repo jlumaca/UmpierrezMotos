@@ -294,6 +294,13 @@ def validar_personal(documento,telefono,correo):
                 return "existe_admin"
             else: #SI EXISTIERA Y FUE DADO DE BAJA COMO ADMINISTRATIVO (EJ. FUE ADMIN, PASO A SER MECANICO Y VUELVE A SER ADMIN), SIMPLEMENTE SE MODIFICA EL CAMPO ACTIVO = 1
                 return "admin_desactivado"
+        
+        mecanico = Mecanico.objects.filter(personal_ptr_id = personal.id).first()
+        if mecanico:
+            if mecanico.activo == 1: #SI EXISTIERA DEVUELVE ERROR 
+                return "existe_mecanico"
+            else: #SI EXISTIERA Y FUE DADO DE BAJA COMO ADMINISTRATIVO (EJ. FUE ADMIN, PASO A SER MECANICO Y VUELVE A SER ADMIN), SIMPLEMENTE SE MODIFICA EL CAMPO ACTIVO = 1
+                return "mecanico_desactivado"
     
     telefono_pers = Personal.objects.filter(telefono = telefono).first()
 
@@ -317,7 +324,8 @@ def nombre_usuario(nombre,apellido):
     cant_usuario = Personal.objects.filter(usuario__contains=usuario).count()
     if cant_usuario > 0: #EXISTE MAS DE UN jperez
         usuario = nombre[0:1:1] + apellido + str(cant_usuario)
-    return usuario
+    usuario_minuscula = usuario.lower()
+    return usuario_minuscula
 
 def validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20):
     if total_billetes_2000 < 0:

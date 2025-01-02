@@ -100,7 +100,7 @@ form label input[type="number"] {
                     <label for="precio" class="form-label">Fecha estimada</label>
                     <input value="{{ fecha_cierre }}" type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" readonly>
             </div>
-            <a href="" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'ServiciosPorMoto' moto.id id_cliente %}" class="btn btn-secondary">Volver</a>
             
         
     </div>

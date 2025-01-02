@@ -31,7 +31,7 @@
                     <td>{{ servicio.titulo }}</td>
                     <td>{{ servicio.fecha_ingreso }}</td>
                     <td>
-                        <a href="{% url 'DetallesPorServicios' servicio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href="{% url 'DetallesPorServicios' servicio.id id_cliente %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -45,6 +45,7 @@
                 {% endif %}
         </tbody>
     </table>
+    <a href="{% url 'DetallesClienteTaller' id_cliente %}" class="btn btn-secondary">Volver</a>
 </div>
 
 {% endblock %}

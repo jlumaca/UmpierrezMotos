@@ -3346,7 +3346,7 @@ def detalles_cliente_taller(req,id_cliente):
                                                                     "correo2":c_2, 
                                                                     })
 
-def servicios_por_moto_de_cliente(req,id_moto):
+def servicios_por_moto_de_cliente(req,id_moto,id_cliente):
     try:
         servicios_moto = (
         Servicios.objects
@@ -3360,12 +3360,12 @@ def servicios_por_moto_de_cliente(req,id_moto):
            ).order_by('-fecha_ingreso')
         )
         page_obj = funcion_paginas_varias(req,servicios_moto)
-        return render(req,"perfil_taller/clientes/servicios_por_moto.html",{"page_obj":page_obj})                                                          
+        return render(req,"perfil_taller/clientes/servicios_por_moto.html",{"page_obj":page_obj,"id_cliente":id_cliente})                                                          
                                                                    
     except Exception as e:
         pass
 
-def detalle_de_cada_servicio_de_moto(req,id_s):
+def detalle_de_cada_servicio_de_moto(req,id_s,id_cliente):
     contexto = contexto_modificar_servicio(id_s,None)
     return render(req,"perfil_taller/clientes/detalles_servicio.html",{ "moto":contexto[0],
                                                                             "cliente":contexto[1],
@@ -3379,6 +3379,7 @@ def detalle_de_cada_servicio_de_moto(req,id_s):
                                                                             "anotaciones":contexto[10],
                                                                             "info_servicio":contexto[12],
                                                                             "fecha_cierre":contexto[13],
+                                                                            "id_cliente":id_cliente,
                                                                             })
 
 def pedidos(req):

@@ -119,6 +119,8 @@ form label input[type="number"] {
                                     <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacion('{{ servicio.id }}')">Cancelar</button>
                             </div>
                         </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Aún no hay tareas realizadas.</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -131,6 +133,8 @@ form label input[type="number"] {
                         <input type="checkbox" name="servicios_pendientes[]" value="{{ servicio.id }}" id="servicio6" class="me-2">
                         <span class="flex-grow-1">{{ servicio.tarea }} ${{ servicio.precio }}</span>
                     </label>
+                {% empty %}
+                    <li class="list-group-item text-muted">No existen tareas pendientes.</li>
                 {% endfor %}
             </div>
 
@@ -141,7 +145,6 @@ form label input[type="number"] {
                 </div>
             </div>
             <button type="submit" class="btn btn-success">Guardar</button>
-            <button type="button" class="btn btn-secondary">Cancelar</button>
             </form>
             <br>
             <!-- <h4>Mecánicos asignados</h4> -->
@@ -213,7 +216,6 @@ form label input[type="number"] {
                     </ul>
                 </div>
                 <button type="submit" class="btn btn-success">Guardar</button>
-                <button type="button" class="btn btn-secondary">Cancelar</button>
             </form>
             <br>
             {% endif %}

@@ -392,18 +392,24 @@
                 <label for="color" class="form-label">Color</label>
                 <input type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20" required>
             </div>
-            <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Moneda</label>
-                <div class="input-group">
-                    <select class="form-control" name="moneda_precio" id="moneda_precio">
-                        <option value="Pesos">Pesos</option>
-                        <option value="Dolares">Dólares</option>
-                    </select>
+            <div id="div_precio_moto_nueva">
+                <div class="mb-3">
+                    <label for="documento" class="form-label">Moneda</label>
+                    <div class="input-group">
+                        <select class="form-control" name="moneda_precio" id="moneda_precio">
+                            <option value="Pesos">Pesos</option>
+                            <option value="Dolares">Dólares</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="precio" class="form-label">Precio</label>
+                    <input type="number" class="form-control" name="precio_moto" id="precio_moto_nueva" placeholder="Ingrese el precio" required>
                 </div>
             </div>
             <div class="mb-3">
-                <label for="precio" class="form-label">Precio</label>
-                <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
+                <input type="checkbox" id="cbox_precio_moto_nueva" name="cbox_precio_moto" class="form-check-input" onchange="mostrarPrecioMotoNueva()">
+                <label for="toggleMatr" class="form-check-label">Pondré el precio más adelante</label>
             </div>
             <div class="mb-3">
                 <label for="descripcion" class="form-label">Descripción</label>
@@ -487,6 +493,26 @@
         } else {
             agregar_num_chasisDiv.style.display = "block";
             agregar_num_chasisTxt.setAttribute("required", "required");
+        }
+    }
+
+    function mostrarPrecioMotoNueva(){
+        const cbox = document.getElementById("cbox_precio_moto_nueva");
+        const precioDiv = document.getElementById("div_precio_moto_nueva");
+        const precio_motoTxt = document.getElementById("precio_moto_nueva");
+        // const moneda_precio = document.getElementById("moneda_precio");
+
+        
+        if (cbox.checked) {
+            precioDiv.style.display = "none";
+            precio_motoTxt.removeAttribute("required");
+            precio_motoTxt.value = ""; // Limpia el campo si no es necesario
+            // moneda_precio.removeAttribute("required");
+            // moneda_precio.value = "";
+        } else {
+            precioDiv.style.display = "block";
+            precio_motoTxt.setAttribute("required", "required");
+            // moneda_precio.setAttribute("required", "required");
         }
     }
 

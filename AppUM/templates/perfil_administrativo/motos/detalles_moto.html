@@ -102,7 +102,13 @@
             </tr>
             <tr>
                 <th scope="row">Precio (USD)</th>
-                <td>{{ moto.precio }}</td>
+                <td>
+                    {% if moto.precio == 0 %}
+                    Sin precio
+                    {% else %}
+                    {{ moto.precio }}
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <th scope="row">Descripción</th>

@@ -464,10 +464,16 @@ def alta_moto_nueva(req):
             modelo = req.POST['modelo_moto'].upper()
             color = req.POST['color_moto'].upper()
 
-            
+            cbox_precio = 'cbox_precio_moto' in req.POST
+            if cbox_precio:
+                precio = 0
+                moneda = "Sin precio"
+            else:
+                precio = req.POST['precio_moto']
+                moneda = req.POST['moneda_precio']
 
             foto = req.FILES.get('foto_moto')
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],contiene_num_motor,contiene_num_chasis)
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,moneda,precio,color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],contiene_num_motor,contiene_num_chasis)
 
             checkbox = 'crear_pdf' in req.POST
             if checkbox:

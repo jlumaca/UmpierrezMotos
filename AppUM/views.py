@@ -1326,7 +1326,7 @@ def ficha_cliente(req,id_cliente):
     
     resultados_motos = (
         ComprasVentas.objects
-        .filter(cliente__id=id_cliente, tipo='V')
+        .filter(cliente__id=id_cliente, tipo__in=['V','R'])
         .select_related('moto', 'cliente')
         .values(
             'id',
@@ -1352,7 +1352,8 @@ def ficha_cliente(req,id_cliente):
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
-            'facturas': cv.facturas.url if cv.facturas else None
+            'facturas': cv.facturas.url if cv.facturas else None,
+            'tipo':cv.tipo
             # 'cantidad_cuotas':cv.cantidad_cuotas
         })
 

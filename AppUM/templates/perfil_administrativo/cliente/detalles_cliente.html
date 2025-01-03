@@ -18,6 +18,28 @@
         border-radius: 8px;
         object-fit: cover;
     }
+
+    .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.875em;
+    font-weight: bold;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-reserva {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+.badge-venta {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
 </style>
 {% if messages %}
     {% for message in messages %}
@@ -59,7 +81,7 @@
             <tr>
                 <th scope="row">Detalles</th>
                 <th scope="row">Fecha</th>
-               
+                <th scope="row">Estado</th>
                 <th scope="row">Documentacion</th>
          
                 <th scope="row">Acciones</th>
@@ -73,7 +95,14 @@
                     <tr>
                         <td>{{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}</td>
                         <td>{{ item.moto.fecha_compra }}</td>
-                        
+                        <td>
+                            {% if item.tipo == "R" %}
+                                <span class="badge badge-reserva">Reserva</span>
+                            {% else %}
+                                <span class="badge badge-venta">Venta</span>
+                            {% endif %}
+
+                        </td>
                         <td>
                             {% if item.libreta or item.compra_venta or item.certificado_venta or item.facturas %}
                                 {% if item.libreta %}

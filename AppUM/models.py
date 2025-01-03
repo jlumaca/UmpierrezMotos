@@ -74,6 +74,8 @@ class Cliente(models.Model):
     # numero = models.IntegerField()
     # num_apartamento = models.IntegerField()
     domicilio = models.CharField(max_length=500,blank=True) 
+    fondo_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    fondo_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 
 class ClienteCorreo(models.Model):

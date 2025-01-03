@@ -95,6 +95,10 @@ urlpatterns = [
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
+     path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),
+
+
+
      path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
      path('baja_paga_accesorio/<int:id_ca>', views.baja_paga_accesorio,name="BajaPagoAccesorio"),

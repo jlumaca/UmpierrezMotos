@@ -73,8 +73,39 @@
                 <th scope="row">Domicilio</th>
                 <td>{{ cliente.domicilio }}</td>
             </tr>
+
+            <tr>
+                <th scope="row">Fondos en pesos</th>
+                <td>${{ cliente.fondo_pesos }}</td>
+            </tr>
+
+            <tr>
+                <th scope="row">Fondos en dolares</th>
+                <td>U$S{{ cliente.fondo_dolares }}</td>
+            </tr>
         </tbody>
     </table>
+    <a onclick="mostrar_div_fondos()" class="btn btn-primary mb-3">
+        <i class="fas fa-motorcycle"></i> Fondos
+    </a>
+    <div id="fondos_cliente" style="display: none;">
+        <form method="post" enctype="multipart/form-data" action="{% url 'FondosCliente' cliente.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="certificado" class="form-label">Moneda:</label>
+                <select class="form-control" name="moneda_fondos" id="tipo_busqueda">
+                    <option value="Pesos">Pesos</option>
+                    <option value="Dolares">Dólares</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="certificado" class="form-label">Monto:</label>
+                <input type="number" name="monto_fondos" class="form-control" placeholder="Monto" required>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a onclick="ocultar_div_fondos()"><button type="button" class="btn btn-secondary">Cancelar</button></a>
+        </form>
+    </div>
     <h4>Motos</h4>
     <table class="table">
         <thead>
@@ -142,6 +173,9 @@
                         </td>
                         <td>
                         <a href="{% url 'DetallesCuotas' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        {% if item.tipo == "R" %}
+                        <a href=""><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        {% endif %}
                         {% if not item.certificado_venta %}
                         <button class="btn btn-sm btn-warning" onclick="toggleFormulario('{{ forloop.counter }}')"><i class="fas fa-upload"></i> Certificado</button>
                         {% endif %}
@@ -204,6 +238,7 @@
                     </td>
                 </tr>
             {% endif %}
+            
         </tbody>
     </table>
     <h4>Accesorios</h4>
@@ -282,5 +317,16 @@ function toggleFormulario(id) {
         }
     }
 
+    function mostrar_div_fondos(){
+        var fondos_cliente = document.getElementById("fondos_cliente");
+
+        fondos_cliente.style.display = "block";
+    }
+
+    function ocultar_div_fondos(){
+        var fondos_cliente = document.getElementById("fondos_cliente");
+
+        fondos_cliente.style.display = "none";
+    }
 </script>
 {% endblock %}

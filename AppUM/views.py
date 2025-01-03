@@ -1391,6 +1391,21 @@ def ficha_cliente(req,id_cliente):
                                                                             #  "show_acciones": show_acciones
                                                                              })
 
+def fondos_cliente(req,id_cliente):
+    try:
+        cliente = Cliente.objects.get(id=id_cliente)
+        if req.POST['moneda_fondos'] == "Pesos":
+            cliente.fondo_pesos = req.POST['monto_fondos']
+        else:
+            cliente.fondo_dolares = req.POST['monto_fondos']
+        
+        cliente.save()
+        messages.success(req, "Fondos agregados correctamente.")
+        return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+
+    except Exception as e:
+        pass
+
 @admin_required
 def cargar_certificado(req,id_cv):
     try:

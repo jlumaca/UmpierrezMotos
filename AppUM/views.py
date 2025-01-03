@@ -2011,7 +2011,7 @@ def alta_pago(req,id_cv):
         moneda = req.POST['moneda_entrega']
         caja = Caja.objects.filter(estado="Abierto").first()
         forma_pago = req.POST['forma_pago']
-        fecha_proximo_pago = req.POST['f_prox_pago']
+        # fecha_proximo_pago = req.POST['f_prox_pago']
         observaciones_pago = req.POST['observaciones_pago']
         cv = ComprasVentas.objects.get(id=id_cv)
         dolar = PrecioDolar.objects.get(id=1)
@@ -2027,21 +2027,21 @@ def alta_pago(req,id_cv):
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_cv,moto,"Moto",precio_dolar)
         
         validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",cuota,id_cv)
-        validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
+        # validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
         if validar_precio:
             # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
             messages.error(req, f"{validar_precio}")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
-        elif validar_fecha_proximo_pago.date() < fecha_actual:
-            # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
-            messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual.")
-            return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
+        # elif validar_fecha_proximo_pago.date() < fecha_actual:
+        #     # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        #     messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual.")
+        #     return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         
         else:
             if forma_pago == "Efectivo" and caja:
                 movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
-            alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
+            alta = alta_cuota_funcion(req,None,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
             if alta:
                 comprobante_url = alta
             else:

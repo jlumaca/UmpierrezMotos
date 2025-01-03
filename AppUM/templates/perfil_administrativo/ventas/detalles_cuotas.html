@@ -119,7 +119,13 @@
         <tbody>
             <td>{{ producto }}</td>
             <td>{{ precio_inicial }}</td>
-            <td>{{ pago_acordado }}</td>
+            <td>
+                {% if pago_acordado %}
+                {{ pago_acordado }}
+                {% else %}
+                No se ha detallado una forma de pago
+                {% endif %}
+            </td>
         </tbody>
     </table>
 
@@ -169,11 +175,6 @@
                 <input type="number" class="form-control" name="valor_a_pagar" id="valor_a_pagar" placeholder="Valor a pagar" required>
             </div>
             
-            <div class="mb-3">
-                <label for="precio" class="form-label">Fecha del próximo pago</label>
-                <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha de nacimiento" required>
-            </div>
-        
             <div class="mb-3">
                 <label for="descripcion" class="form-label">Observaciones</label>
                 <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
@@ -231,7 +232,7 @@
                 <td>${{ pagos.primeros_pagos.cant_restante_pesos }}/U$s{{ pagos.primeros_pagos.cant_restante_dolares }}</td>
                 <td>
                     {% if pagos.primeros_pagos.comprobante_pago %}
-                    <a href="{{ pagos.primeros_pagos.comprobante_pago }}" target="_blank" class="btn btn-primary">
+                    <a href="{{ pagos.primeros_pagos.comprobante_pago.url }}" target="_blank" class="btn btn-primary">
                         <i class="fas fa-file-alt"></i>
                     </a>
                     

@@ -47,15 +47,37 @@
                 <input value="{{ datos_moto.kilometros }}" type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
             </div>
 
+            {% if datos_moto.contiene_num_motor %}
             <div class="mb-3">
                 <label for="num_motor" class="form-label">Número de motor</label>
                 <input value="{{ datos_moto.num_motor }}" type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40">
             </div>
+            {% else %}
+            <div class="mb-3" style="display: none;" id="agregar_num_motor">
+                <label for="num_chasis" class="form-label">Número de motor</label>
+                <input type="text" class="form-control" name="num_motor_moto_agregado" id="num_motor_moto_agregado" placeholder="Ingrese el número de motor" maxlength="40">
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" id="con_num_motor" class="form-check-input" name="con_num_motor" onchange="mostrarNumMotor()">
+                <label for="toggleMatr" class="form-check-label">Agregar número de motor</label>
+            </div>
+            {% endif %}
 
+            {% if datos_moto.contiene_num_chasis %}
             <div class="mb-3">
                 <label for="num_chasis" class="form-label">Número de chasis</label>
                 <input value="{{ datos_moto.num_chasis }}" type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
             </div>
+            {% else %}
+            <div class="mb-3" style="display: none;" id="agregar_num_chasis">
+                <label for="num_chasis" class="form-label">Número de chasis</label>
+                <input type="text" class="form-control" name="num_chasis_moto_agregado" id="num_chasis_moto_agregado" placeholder="Ingrese el número de chasis" maxlength="40">
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" id="con_num_chasis" class="form-check-input" name="con_num_chasis" onchange="mostrarNumChasis()">
+                <label for="toggleMatr" class="form-check-label">Agregar número de chasis</label>
+            </div>
+            {% endif %}
             <div class="mb-3" id="num_cilindros">
                 <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
                 <input value="{{ datos_moto.num_cilindros }}" type="number" class="form-control" name="num_cilindros" id="num_padron" placeholder="Ingrese la cantidad de cilindros" required>
@@ -162,6 +184,75 @@
         const matrDiv = document.getElementById("matr");
         matrDiv.style.display = this.checked ? "block" : "none";
     });
+
+    // document.getElementById("con_num_motor").addEventListener("change", function() {
+    // const agregar_num_motorDiv = document.getElementById("agregar_num_motor");
+    // const agregar_num_motorTxt = document.getElementById("num_motor_moto_agregado");
+
+    // if (this.checked) {
+    //     agregar_num_motorDiv.style.display = "block";
+    //     agregar_num_motorTxt.setAttribute("required", "required");
+    // } else {
+    //     agregar_num_motorDiv.style.display = "none";
+    //     agregar_num_motorTxt.removeAttribute("required");
+    //     agregar_num_motorTxt.value = ""; // Limpia el campo si no es necesario
+    // }
+    // });
+
+    // document.getElementById("con_num_chasis").addEventListener("change", function() {
+    //     const agregar_num_chasisDiv = document.getElementById("agregar_num_chasis");
+    //     const agregar_num_chasisTxt = document.getElementById("num_chasis_moto_agregado");
+    //     agregar_num_chasisDiv.style.display = this.checked ? "block" : "none";
+    // });
+    function mostrarNumMotor(){
+        const cbox = document.getElementById("con_num_motor");
+        const agregar_num_motorDiv = document.getElementById("agregar_num_motor");
+        const agregar_num_motorTxt = document.getElementById("num_motor_moto_agregado");
+
+        if (cbox.checked) {
+            agregar_num_motorDiv.style.display = "block";
+            agregar_num_motorTxt.setAttribute("required", "required");
+        } else {
+            agregar_num_motorDiv.style.display = "none";
+            agregar_num_motorTxt.removeAttribute("required");
+            agregar_num_motorTxt.value = ""; // Limpia el campo si no es necesario
+        }
+        
+
+    }
+
+
+    function mostrarNumChasis(){
+        const agregar_num_chasisDiv = document.getElementById("agregar_num_chasis");
+        const agregar_num_chasisTxt = document.getElementById("num_chasis_moto_agregado");
+        const cbox = document.getElementById("con_num_chasis");
+        
+
+        if (cbox.checked) {
+            agregar_num_chasisDiv.style.display = "block";
+            agregar_num_chasisTxt.setAttribute("required", "required");
+        } else {
+            agregar_num_chasisDiv.style.display = "none";
+            agregar_num_chasisTxt.removeAttribute("required");
+            agregar_num_chasisTxt.value = ""; // Limpia el campo si no es necesario
+        }
+
+    }
+
+//     document.getElementById("con_num_chasis").addEventListener("change", function() {
+//         const agregar_num_chasisDiv = document.getElementById("agregar_num_chasis");
+//         const agregar_num_chasisTxt = document.getElementById("num_chasis_moto_agregado");
+        
+
+//     if (this.checked) {
+//         agregar_num_chasisDiv.style.display = "block";
+//         agregar_num_chasisTxt.setAttribute("required", "required");
+//     } else {
+//         agregar_num_chasisDiv.style.display = "none";
+//         agregar_num_chasisTxt.removeAttribute("required");
+//         agregar_num_chasisTxt.value = ""; // Limpia el campo si no es necesario
+//     }
+// });
 </script>
 
 {% endblock %}

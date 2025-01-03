@@ -161,11 +161,20 @@ form label input[type="number"] {
                 {{ error_message_alta }}
             </div>
             {% endif %}
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="color" class="form-label">Titulo del servicio</label>
                 <input type="text" class="form-control" name="titulo_servicio" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" required>
+            </div> -->
+            <div class="mb-3">
+                <label for="marca" class="form-label">Tipo</label>
+                <select class="form-control" name="titulo_servicio" id="tipo_moto">
+                    <option value="">Primer servicio</option>
+                    <option value="">Segundo servicio</option>
+                    <option value="">Tercer servicio</option>
+                    <option value="">Soldaduras</option>
+                </select>
             </div>
-            <h4>Servicios de mantenimiento a realizar</h4>
+            <h4>Tareas a realizar</h4>
             
             <div id="serviciosLista" class="mb-4">
                 <div>

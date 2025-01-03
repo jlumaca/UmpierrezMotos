@@ -63,11 +63,24 @@
             </tr>
             <tr>
                 <th scope="row">Número de Motor</th>
-                <td>{{ moto.num_motor }}</td>
+                <td>
+                    {% if moto.contiene_num_motor %}
+                    {{ moto.num_motor }}
+                    {% else %}
+                    Sin número de motor
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <th scope="row">Número de Chasis</th>
-                <td>{{ moto.num_chasis }}</td>
+                <td>
+                    {% if moto.contiene_num_chasis %}
+                    {{ moto.num_chasis }}
+                    {% else %}
+                    Sin número de chasis
+                    {% endif %}
+
+                </td>
             </tr>
             <tr>
                 <th scope="row">Cantidad de cilidros</th>

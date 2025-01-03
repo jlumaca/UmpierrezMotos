@@ -426,8 +426,23 @@ def reingresar_moto_usada(req,id_moto,id_cliente):
 def alta_moto_nueva(req):
     try:
     #INSERT EN MOTO
-        num_chasis = req.POST['num_chasis_moto'].upper()
-        num_motor = req.POST['num_motor_moto'].upper()
+        checkbox_num_motor = 'sin_num_motor' in req.POST
+        if checkbox_num_motor:
+            num_motor = crear_num_motor()
+            contiene_num_motor = 0
+        else:
+            num_motor = req.POST['num_motor_moto'].upper()
+            contiene_num_motor = 1
+
+        checkbox_num_chasis = 'sin_num_chasis' in req.POST
+        if checkbox_num_chasis:
+            num_chasis = crear_num_chasis()
+            contiene_num_chasis = 0
+        else:
+            num_chasis = req.POST['num_chasis_moto'].upper()
+            contiene_num_chasis = 1
+            
+
         existe_num_motor = Moto.objects.filter(num_motor=num_motor).first()
         existe_num_chasis = Moto.objects.filter(num_chasis=num_chasis).first()
         if existe_num_motor:
@@ -449,8 +464,10 @@ def alta_moto_nueva(req):
             modelo = req.POST['modelo_moto'].upper()
             color = req.POST['color_moto'].upper()
 
+            
+
             foto = req.FILES.get('foto_moto')
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],1,1)
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Nueva",req.POST['motor_moto'],0,req.POST['moneda_precio'],req.POST['precio_moto'],color,num_motor,num_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],contiene_num_motor,contiene_num_chasis)
 
             checkbox = 'crear_pdf' in req.POST
             if checkbox:
@@ -570,8 +587,24 @@ def modificacion_moto(req,id_moto):
         if req.method == "POST":
                 
                 moto_upd = Moto.objects.get(id=id_moto)
-                num_motor = req.POST['num_motor_moto'].upper()
-                num_chasis = req.POST['num_chasis_moto'].upper()
+                checkbox_num_motor = 'con_num_motor' in req.POST
+                if moto_upd.contiene_num_motor:
+                    num_motor = req.POST['num_motor_moto'].upper()
+                else:
+                    if checkbox_num_motor:
+                        num_motor = req.POST['num_motor_moto_agregado'].upper()
+                    else:
+                        num_motor = None
+                
+                checkbox_num_chasis = 'con_num_chasis' in req.POST
+                if moto_upd.contiene_num_chasis:
+                    num_chasis = req.POST['num_chasis_moto'].upper()
+                else:
+                    if checkbox_num_chasis:
+                        num_chasis = req.POST['num_chasis_moto_agregado'].upper()
+                    else:
+                        num_chasis = None
+                # num_chasis = req.POST['num_chasis_moto'].upper()
                 matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
                 if req.POST['matricula_letras'] and req.POST['matricula_numeros']:
                     letras_matricula = req.POST['matricula_letras']
@@ -635,6 +668,16 @@ def modificacion_moto(req,id_moto):
                     moto_upd.marca = marca
                     moto_upd.modelo = modelo
                     moto_upd.motor = req.POST['motor_moto']
+                    
+                    
+                    if moto_upd.contiene_num_motor or checkbox_num_motor:
+                        moto_upd.num_motor = num_motor
+                        moto_upd.contiene_num_motor = 1
+                    
+                    if moto_upd.contiene_num_chasis or checkbox_num_chasis:
+                        moto_upd.num_chasis = num_chasis
+                        moto_upd.contiene_num_chasis = 1
+                
                     moto_upd.anio = req.POST['anio_moto']
                     moto_upd.tipo = req.POST['tipo_moto']
 
@@ -645,8 +688,8 @@ def modificacion_moto(req,id_moto):
                         
                     moto_upd.estado = estado
                     moto_upd.kilometros = req.POST['km_moto']
-                    moto_upd.num_motor = num_motor
-                    moto_upd.num_chasis = num_chasis
+                    
+                    # moto_upd.num_chasis = num_chasis
                     moto_upd.num_cilindros = req.POST['num_cilindros']
                     moto_upd.cantidad_pasajeros = req.POST['num_pasajeros']
                     moto_upd.color = color

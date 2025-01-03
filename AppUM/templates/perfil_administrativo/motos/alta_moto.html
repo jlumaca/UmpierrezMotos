@@ -343,14 +343,24 @@
                 <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros">
             </div> -->
 
-            <div class="mb-3">
+            <div class="mb-3" id="div_num_motor_moto_nueva">
                 <label for="num_motor" class="form-label">Número de motor</label>
-                <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40" required>
+                <input type="text" class="form-control" name="num_motor_moto" id="num_motor_moto_nueva" placeholder="Ingrese el número de motor" maxlength="40" required>
             </div>
 
             <div class="mb-3">
+                <input type="checkbox" id="sin_num_motor_moto_nueva" name="sin_num_motor" class="form-check-input" onchange="mostrarNumMotor()">
+                <label for="toggleMatr" class="form-check-label">Sin número de motor</label>
+            </div>
+
+            <div class="mb-3" id="div_num_chasis_moto_nueva">
                 <label for="num_chasis" class="form-label">Número de chasis</label>
-                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40" required>
+                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis_moto_nueva" placeholder="Ingrese el número de chasis" maxlength="40" required>
+            </div>
+
+            <div class="mb-3">
+                <input type="checkbox" id="sin_num_chasis_moto_nueva" name="sin_num_chasis" class="form-check-input" onchange="mostrarNumChasis()">
+                <label for="toggleMatr" class="form-check-label">Sin número de chasis</label>
             </div>
 
             <!-- <div class="mb-3" id="num_padron">
@@ -448,6 +458,38 @@
         const matrDiv = document.getElementById("div_num_chasis");
         matrDiv.style.display = this.checked ? "none" : "block";
     });
+
+    function mostrarNumMotor(){
+
+        const cbox = document.getElementById("sin_num_motor_moto_nueva");
+        const agregar_num_motorDiv = document.getElementById("div_num_motor_moto_nueva");
+        const agregar_num_motorTxt = document.getElementById("num_motor_moto_nueva");
+
+        if (cbox.checked) {
+            agregar_num_motorDiv.style.display = "none";
+            agregar_num_motorTxt.removeAttribute("required");
+            agregar_num_motorTxt.value = ""; // Limpia el campo si no es necesario
+        } else {
+            agregar_num_motorDiv.style.display = "block";
+            agregar_num_motorTxt.setAttribute("required", "required");
+        }
+    }
+
+    function mostrarNumChasis(){
+        const cbox = document.getElementById("sin_num_chasis_moto_nueva");
+        const agregar_num_chasisDiv = document.getElementById("div_num_chasis_moto_nueva");
+        const agregar_num_chasisTxt = document.getElementById("num_chasis_moto_nueva");
+
+        if (cbox.checked) {
+            agregar_num_chasisDiv.style.display = "none";
+            agregar_num_chasisTxt.removeAttribute("required");
+            agregar_num_chasisTxt.value = ""; // Limpia el campo si no es necesario
+        } else {
+            agregar_num_chasisDiv.style.display = "block";
+            agregar_num_chasisTxt.setAttribute("required", "required");
+        }
+    }
+
 </script>
 
 {% endblock %}

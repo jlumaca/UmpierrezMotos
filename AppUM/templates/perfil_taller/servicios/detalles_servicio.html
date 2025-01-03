@@ -88,7 +88,7 @@ form label input[type="number"] {
                     {% for servicio in tareas_realizadas %}
                         <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
                             <div class="d-flex w-100 align-items-center">
-                                <span class="flex-grow-1">{{ servicio.tarea }}  ${{ servicio.precio }}</span>
+                                <span class="flex-grow-1">{{ servicio.tarea }}</span>
                             </div>
                         </li>
                     {% empty %}
@@ -103,7 +103,7 @@ form label input[type="number"] {
                 {% for servicio in tareas_pendientes %}
                     <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
                         <div class="d-flex w-100 align-items-center">
-                            <span class="flex-grow-1">{{ servicio.tarea }}  ${{ servicio.precio }}</span>
+                            <span class="flex-grow-1">{{ servicio.tarea }}</span>
                         </div>
                     </li>
                 {% empty %}

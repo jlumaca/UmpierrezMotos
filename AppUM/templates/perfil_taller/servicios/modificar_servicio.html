@@ -268,9 +268,32 @@ form label input[type="number"] {
             <form action="{% url 'ModificarServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Información sobre el servicio</h4>
             <!-- {% url 'AgregarAnotacionServicio' id_servicio %} -->
-            <div class="mb-3">
-                <label for="color" class="form-label">Tipo de servicio</label>
-                <input value="{{ info_servicio.titulo }}" type="text" class="form-control" name="tipo_servicio_modificar" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" required>
+                <div class="mb-3">
+                    <!-- <label for="color" class="form-label">Tipo de servicio</label>
+                    <input value="{{ info_servicio.titulo }}" type="text" class="form-control" name="tipo_servicio_modificar" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" required>
+                     -->
+                     <select class="form-control" name="titulo_servicio" id="tipo_moto">
+                        <option value="Primer servicio de mantenimiento" {% if info_servicio.titulo == "Primer servicio de mantenimiento" %}selected{% endif %}>Primer servicio de mantenimiento</option>
+                        <option value="Segundo servicio de mantenimiento" {% if info_servicio.titulo == "Segundo servicio de mantenimiento" %}selected{% endif %}>Segundo servicio de mantenimiento</option>
+                        <option value="Tercer servicio de mantenimiento" {% if info_servicio.titulo == "Tercer servicio de mantenimiento" %}selected{% endif %}>Tercer servicio de mantenimiento</option>
+                        <option value="Servicio de mantenimiento" {% if info_servicio.titulo == "Servicio de mantenimiento" %}selected{% endif %}>Servicio de mantenimiento</option>
+                        <option value="Reparar motor" {% if info_servicio.titulo == "Reparar motor" %}selected{% endif %}>Reparar motor</option>
+                        <option value="Repuestos varios" {% if info_servicio.titulo == "Repuestos varios" %}selected{% endif %}>Repuestos varios</option>
+                        <option value="Cascos" {% if info_servicio.titulo == "Cascos" %}selected{% endif %}>Cascos</option>
+                        <option value="Aceite" {% if info_servicio.titulo == "Aceite" %}selected{% endif %}>Aceite</option>
+                        <option value="Reparación, desarme y arme" {% if info_servicio.titulo == "Reparación, desarme y arme" %}selected{% endif %}>Reparación, desarme y arme</option>
+                        <option value="Por servicios de gomería" {% if info_servicio.titulo == "Por servicios de gomería" %}selected{% endif %}>Por servicios de gomería</option>
+                        <option value="Cubiertas y cámara" {% if info_servicio.titulo == "Cubiertas y cámara" %}selected{% endif %}>Cubiertas y cámara</option>
+                        <option value="Mano de obra por garantía" {% if info_servicio.titulo == "Mano de obra por garantía" %}selected{% endif %}>Mano de obra por garantía</option>
+                        <option value="Armado de motos" {% if info_servicio.titulo == "Armado de motos" %}selected{% endif %}>Armado de motos</option>
+                        <option value="Cupones pre-entrega" {% if info_servicio.titulo == "Cupones pre-entrega" %}selected{% endif %}>Cupones pre-entrega</option>
+                        <option value="Reparación de moto" {% if info_servicio.titulo == "Reparación de moto" %}selected{% endif %}>Reparación de moto</option>
+                        <option value="Soldaduras" {% if info_servicio.titulo == "Soldaduras" %}selected{% endif %}>Soldaduras</option>
+                        <option value="Reparación de chasis" {% if info_servicio.titulo == "Reparación de chasis" %}selected{% endif %}>Reparación de chasis</option>
+                        <option value="Reparación de suspensión" {% if info_servicio.titulo == "Reparación de suspensión" %}selected{% endif %}>Reparación de suspensión</option>
+                        <option value="Indumentaria para motos" {% if info_servicio.titulo == "Indumentaria para motos" %}selected{% endif %}>Indumentaría para motos</option>
+                        <option value="Otro" {% if info_servicio.titulo == "Otro" %}selected{% endif %}>Otro</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="precio" class="form-label">Prioridad</label>

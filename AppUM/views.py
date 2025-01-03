@@ -2983,7 +2983,7 @@ def agregar_anotacion_servicio(req,id_s):
 def modificar_datos_servicio(req,id_s):
     try:
         servicio = Servicios.objects.get(id=id_s)
-        servicio.titulo = req.POST['tipo_servicio_modificar']
+        servicio.titulo = req.POST['titulo_servicio']
         servicio.prioridad = req.POST['prioridad']
         servicio.fecha_estimada_cierre = req.POST['fecha_estimada']
         servicio.save()

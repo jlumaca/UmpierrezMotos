@@ -1750,26 +1750,45 @@ def venta_moto(req,id_moto,id_cliente):
             total_fondos_dolares = int(cliente.fondo_dolares)
             precio_moto = int(moto.precio)
 
-            if (total_fondos_pesos < precio_moto) and (moto.precio == "Pesos"):
+            if (total_fondos_pesos < precio_moto) and (moto.moneda_precio == "Pesos"):
                 nuevo_fondo_pesos = 0
                 nuevo_fondo_dolares = 0 
-            elif (total_fondos_dolares < precio_moto) and (moto.precio == "Dolares" or moto.precio == "Dólares"):
+                resto_pesos = precio_moto - total_fondos_pesos
+                resto_dolares = int(precio_moto / precio_dolar) - total_fondos_dolares
+                
+            elif (total_fondos_dolares < precio_moto) and (moto.moneda_precio == "Dolares" or moto.moneda_precio == "Dólares"):
                 nuevo_fondo_pesos = 0
                 nuevo_fondo_dolares = 0
+                resto_dolares = precio_moto - total_fondos_dolares
+                resto_pesos = int(precio_moto * precio_dolar) - total_fondos_pesos
             else:
                 if moto.moneda_precio == "Pesos":
                     nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio) 
                     nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio / precio_dolar) 
+                    
                     # nuevo_fondo_pesos = int(cliente.fondo_pesos) - int(moto.precio)
                     # nuevo_fondo_dolares = int(cliente.fondo_dolares) - int(moto.precio / precio_dolar)
                 else:
                     nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio * precio_dolar)
                     nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio)
+                resto_pesos = nuevo_fondo_pesos
+                resto_dolares = nuevo_fondo_dolares
             
+            #alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
+            ult_cuota_moto = CuotasMoto.objects.filter(venta_id=id_cv).first()
+            if ult_cuota_moto:
+                ult_cuota_moto = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+                # ult_cuota_moto.cant_restante_pesos = int(ult_cuota_moto.cant_restante_pesos) - total_fondos_pesos
+                # ult_cuota_moto.cant_restante_dolares = int(ult_cuota_moto.cant_restante_dolares) - total_fondos_pesos
+                # ult_cuota_moto.save()
+                resto_pesos = int(ult_cuota_moto.cant_restante_pesos) - total_fondos_pesos
+                resto_dolares = int(ult_cuota_moto.cant_restante_dolares) - total_fondos_dolares
+            
+            alta_cuota_funcion(req,None,id_cv,resto_dolares,resto_pesos,moto.moneda_precio,None,precio_dolar,total_fondos_dolares,total_fondos_pesos,None,"Fondos",False,"Entrega")
             cliente.fondo_pesos = nuevo_fondo_pesos
             cliente.fondo_dolares = nuevo_fondo_dolares
             cliente.save()
-            
+        
         telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
         # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
         if moto.estado == "Nueva":

@@ -2745,14 +2745,14 @@ def alta_servicio(req,id_moto,id_cliente):
             nuevo_servicio.save()
            #inputPrecio.name = `precio_${textoServicio}`;
             for servicio in servicios_seleccionados:
-                prueba = servicio.replace(" ","_")
+                # prueba = servicio.replace(" ","_")
                 # print(prueba)
-                precio = req.POST[f'precio_{prueba}']
+                # precio = req.POST[f'precio_{prueba}']
                 # print("PRUEBA: " + str(precio))
                 tareas_servicios = TareasServicios(
                     tarea = servicio,
                     servicio_id = nuevo_servicio.id,
-                    precio = precio
+                    # precio = precio
                 )
                 tareas_servicios.save()
             
@@ -2902,14 +2902,14 @@ def agregar_quitar_servicios(req,id_s):
         if nuevos_servicios:
             serv = Servicios.objects.get(id=id_s)
             for servicio in nuevos_servicios:
-                servicio = servicio.replace("_", " ")
-                prueba = servicio.replace(" ","_")
-                precio = req.POST[f'precio_{prueba}']
+                # servicio = servicio.replace("_", " ")
+                # prueba = servicio.replace(" ","_")
+                # precio = req.POST[f'precio_{prueba}']
                 nuevo_servicio = TareasServicios(
                     servicio = serv,
                     tarea = servicio,
                     realizado = 0,
-                    precio = precio
+                    # precio = precio
                 )
                 nuevo_servicio.save()
         

@@ -107,7 +107,7 @@ form label input[type="number"] {
                     {% for servicio in tareas_realizadas %}
                         <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
                             <div class="d-flex w-100 align-items-center">
-                                <span class="flex-grow-1">{{ servicio.tarea }}  ${{ servicio.precio }}</span>
+                                <span class="flex-grow-1">{{ servicio.tarea }}</span>
                                 <!-- Botón para eliminar el servicio -->
                                 <button type="button" class="btn btn-sm btn-danger ms-2" onclick="confirmarEliminacion('{{ servicio.id }}')">❌</button>
                             </div>
@@ -131,7 +131,7 @@ form label input[type="number"] {
                 {% for servicio in tareas_pendientes %}
                     <label class="d-flex align-items-center mb-2">
                         <input type="checkbox" name="servicios_pendientes[]" value="{{ servicio.id }}" id="servicio6" class="me-2">
-                        <span class="flex-grow-1">{{ servicio.tarea }} ${{ servicio.precio }}</span>
+                        <span class="flex-grow-1">{{ servicio.tarea }}</span>
                     </label>
                 {% empty %}
                     <li class="list-group-item text-muted">No existen tareas pendientes.</li>
@@ -330,25 +330,25 @@ form label input[type="number"] {
     span.textContent = "Nuevo servicio";
 
     // Crear el campo de entrada para el precio
-    const inputPrecio = document.createElement("input");
-    inputPrecio.type = "number";
-    inputPrecio.name = ""; // El nombre se completará dinámicamente
-    inputPrecio.classList.add("form-control", "w-auto", "ms-2");
-    inputPrecio.placeholder = "Precio";
-    inputPrecio.min = 0;
-    inputPrecio.step = 0.01;
+    // const inputPrecio = document.createElement("input");
+    // inputPrecio.type = "number";
+    // inputPrecio.name = ""; // El nombre se completará dinámicamente
+    // inputPrecio.classList.add("form-control", "w-auto", "ms-2");
+    // inputPrecio.placeholder = "Precio";
+    // inputPrecio.min = 0;
+    // inputPrecio.step = 0.01;
 
     // Agregar un evento para actualizar el valor y nombre del campo al editar el servicio
     span.addEventListener("input", () => {
-        const textoServicio = span.textContent.trim().replaceAll(" ", "_");
+        const textoServicio = span.textContent.trim().replaceAll(" ", " ");
         checkbox.value = textoServicio;
-        inputPrecio.name = `precio_${textoServicio}`;
+        // inputPrecio.name = `precio_${textoServicio}`;
     });
 
     // Añadir los elementos al contenedor del nuevo servicio
     nuevoServicio.appendChild(checkbox);
     nuevoServicio.appendChild(span);
-    nuevoServicio.appendChild(inputPrecio);
+    // nuevoServicio.appendChild(inputPrecio);
 
     // Añadir el nuevo servicio al formulario
     serviciosLista.appendChild(nuevoServicio);

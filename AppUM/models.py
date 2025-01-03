@@ -174,6 +174,7 @@ class Servicios(models.Model):
     cliente = models.ForeignKey(Cliente, related_name='cliente_servicio', on_delete=models.CASCADE)
     dias = models.IntegerField(default=0)
     titulo = models.CharField(max_length=20, blank=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2,default=0)
 
 class MecanicosServicios(models.Model):
     mecanico = models.ForeignKey(Mecanico, related_name='mecanicos_servicios', on_delete=models.CASCADE)
@@ -182,7 +183,6 @@ class MecanicosServicios(models.Model):
 class TareasServicios(models.Model):
     servicio = models.ForeignKey(Servicios, related_name='tareas_servicios', on_delete=models.CASCADE)
     tarea = models.TextField(null=True, blank=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     realizado = models.BooleanField(default=0)
 
 class Financiamientos(models.Model):

@@ -75,7 +75,7 @@
                         <td>{{ item.moto.fecha_compra }}</td>
                         
                         <td>
-                            {% if item.libreta or item.compra_venta or item.certificado_venta %}
+                            {% if item.libreta or item.compra_venta or item.certificado_venta or item.facturas %}
                                 {% if item.libreta %}
                                     <a href="{{ item.libreta }}" target="_blank">
                                         <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
@@ -98,6 +98,14 @@
                                     </a>
                                 {% endif %}
 
+                                {% if item.facturas %}
+                                    <a href="{{ item.facturas }}" target="_blank">
+                                        <button class="btn btn-sm btn-dark" title="Ver Factura">
+                                            <i class="fas fa-receipt"></i> Factura
+                                        </button>
+                                    </a>
+                                {% endif %}
+
                             {% else %}
                                 <p>SIN DOCUMENTACION</p>
                             {% endif %}
@@ -112,6 +120,11 @@
                         <button class="btn btn-sm btn-warning" onclick="toggleLibreta('{{ forloop.counter }}')">
                             <i class="fas fa-book"></i> Libreta
                         </button>
+                        {% endif %}
+                        {% if not item.facturas %}
+                            <button class="btn btn-sm btn-warning" onclick="toggleFactura('{{ forloop.counter }}')">
+                                <i class="fas fa-book"></i> Factura
+                            </button>
                         {% endif %}
                         </td>
                     </tr>
@@ -138,6 +151,19 @@
                                 </div>
                                 <button type="submit" class="btn btn-success">Guardar</button>
                                 <button type="button" class="btn btn-secondary" onclick="toggleLibreta('{{ forloop.counter }}')">Cancelar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr id="formulario-factura-{{ forloop.counter }}" style="display: none;"  class="formulario-factura">
+                        <td colspan="4">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'CargarFactura' item.moto.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="certificado" class="form-label">Subir factura:</label>
+                                    <input type="file" class="form-control" id="factura" name="factura_venta" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">Guardar</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleFactura('{{ forloop.counter }}')">Cancelar</button>
                             </form>
                         </td>
                     </tr>
@@ -211,6 +237,15 @@ function toggleFormulario(id) {
 
     function toggleLibreta(id) {
         const formulario = document.getElementById(`formulario-libreta-${id}`);
+        if (formulario.style.display === "none" || formulario.style.display === "") {
+            formulario.style.display = "table-row";
+        } else {
+            formulario.style.display = "none";
+        }
+    }
+
+    function toggleFactura(id) {
+        const formulario = document.getElementById(`formulario-factura-${id}`);
         if (formulario.style.display === "none" || formulario.style.display === "") {
             formulario.style.display = "table-row";
         } else {

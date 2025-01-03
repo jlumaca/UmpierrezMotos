@@ -98,6 +98,7 @@ class ComprasVentas(models.Model):
     certificado_venta = models.FileField(null=True, blank=True, upload_to="documentacion/certificado_venta/")
     tipo = models.CharField(max_length=20)
     forma_de_pago = models.TextField(null=True, blank=True)
+    facturas = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_motos/")
 
     class Meta:
         pass

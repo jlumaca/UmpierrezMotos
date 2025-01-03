@@ -1339,6 +1339,7 @@ def ficha_cliente(req,id_cliente):
             'fotocopia_libreta', 
             'compra_venta', 
             'certificado_venta',
+            'facturas'
             # 'valor_cuota'
         ).order_by('-id')
     )
@@ -1351,6 +1352,7 @@ def ficha_cliente(req,id_cliente):
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
+            'facturas': cv.facturas.url if cv.facturas else None
             # 'cantidad_cuotas':cv.cantidad_cuotas
         })
 
@@ -1408,6 +1410,18 @@ def cargar_libreta(req,id_cv):
          venta.fotocopia_libreta = libreta
          venta.save()
          messages.success(req, "Libreta ingresada con éxito")
+         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':venta.cliente_id})}")
+    except Exception as e:
+        pass
+
+@admin_required
+def cargar_factura(req,id_cv):
+    try:
+         factura = req.FILES.get('factura_venta')
+         venta = ComprasVentas.objects.get(id=id_cv)
+         venta.facturas = factura
+         venta.save()
+         messages.success(req, "Factura ingresada con éxito")
          return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':venta.cliente_id})}")
     except Exception as e:
         pass

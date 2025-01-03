@@ -40,6 +40,7 @@ def editar_usuario(req):
                     documento = req.POST['tipo_documento'] + str(req.POST['documento'])
                     telefono = str(req.POST['telefono'])
                     correo = req.POST['correo'] + req.POST['dominio_correo']
+                    correo = correo.lower()
                     existe_doc = Personal.objects.filter(documento=documento).first()
                     existe_tel = Personal.objects.filter(telefono=telefono).first()
                     existe_cor = Personal.objects.filter(correo=correo).first()
@@ -1103,11 +1104,13 @@ def alta_cliente(req):
             
             if correo:
                 correo_principal = correo + dominio_correo
+                correo_principal = correo_principal.lower()
             else:
                 correo_principal = None
             
             if correo_2:
                 correo_secundario = correo_2 + dominio_correo_2
+                correo_secundario = correo_secundario.lower()
             else:
                 correo_secundario = None
             
@@ -1153,9 +1156,11 @@ def alta_cliente(req):
                     insert_cliente_telefono(telefono_secundario,0,nuevo_cliente.id)
 
                 if correo_principal:
+                    correo_principal = correo_principal.lower()
                     insert_cliente_correo(correo_principal,1,nuevo_cliente.id)
                 
                 if correo_secundario:
+                    correo_secundario = correo_secundario.lower()
                     insert_cliente_correo(correo_secundario,0,nuevo_cliente.id)
                 messages.success(req, "El cliente fue ingresado con éxito.")
                 return redirect('Clientes')
@@ -1175,7 +1180,9 @@ def modificacion_cliente(req,id_cliente):
             tel2 = req.POST['telefono_secundario']
             correo1 = req.POST['correo_1'] + req.POST['dominio_correo']
             correo2 = req.POST['correo_2'] + req.POST['dominio_correo_2']
-    
+
+            correo1 = correo1.lower()
+            correo2 = correo2.lower()
             valid_cliente = valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2)
             if valid_cliente == "existe_cliente":
                 contexto = contexto_para_cliente(id_cliente,"El documento ingresado ya existe")
@@ -1226,6 +1233,7 @@ def modificacion_cliente(req,id_cliente):
                     if correo1_actual.correo != correo1:
                         #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
                         correo1_actual.delete()
+                        correo1 = correo1.lower()
                         insert_cliente_correo(correo1,1,id_cliente)
                 
                 if req.POST['correo_2']:
@@ -1234,6 +1242,7 @@ def modificacion_cliente(req,id_cliente):
                     if correo2_actual.correo != correo2:
                         #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
                         correo2_actual.delete()
+                        correo2 = correo2.lower()
                         insert_cliente_correo(correo2,0,id_cliente)
                     
                     if checkbox_correo:
@@ -1429,6 +1438,7 @@ def alta_personal(req):
             correo_nombre = req.POST['correo'] 
             correo_dominio = req.POST['dominio_correo'] 
             correo = correo_nombre + correo_dominio
+            correo = correo.lower()
 
             valid_personal = validar_personal(documento,telefono,correo)
 
@@ -3579,6 +3589,7 @@ def alta_personal_taller(req):
             correo_nombre = req.POST['correo'] 
             correo_dominio = req.POST['dominio_correo'] 
             correo = correo_nombre + correo_dominio
+            correo = correo.lower()
 
             valid_personal = validar_personal(documento,telefono,correo)
 

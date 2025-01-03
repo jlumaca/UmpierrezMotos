@@ -2776,9 +2776,9 @@ def alta_servicio(req,id_moto,id_cliente):
     #     pass
 
 def cerrar_servicio(req,id_s):
-    try:
+    # try:
+        servicio = Servicios.objects.get(id=id_s)
         if req.method == "POST":
-            servicio = Servicios.objects.get(id=id_s)
             servicio.estado = "Completado"
             if req.POST['f_prox_servicio']:
                 fecha = req.POST.get('f_prox_servicio')  # Cambiado a paréntesis
@@ -2786,6 +2786,8 @@ def cerrar_servicio(req,id_s):
                 servicio.fecha_prox_servicio = f_prox_service
             if req.POST['km_prox_servicio']:
                 servicio.km_prox_servicio = req.POST['km_prox_servicio']
+            
+            servicio.precio = req.POST['precio_servicio']
             servicio.save()
             anotacion = req.POST['anotacion_cierre']
             usuario = req.user
@@ -2804,9 +2806,10 @@ def cerrar_servicio(req,id_s):
             messages.success(req, "Servicio cerrado correctamente.")
             return redirect('ServiciosEnGestion')
         else:
-            return render(req,"perfil_taller/servicios/cerrar_servicio.html",{})
-    except Exception as e:
-        pass
+            datos = json_para_servicio(id_s)
+            return render(req,"perfil_taller/servicios/cerrar_servicio.html",{"datos_fijos":datos[0],"tareas":datos[1]})
+    # except Exception as e:
+    #     pass
 
 def contexto_modificar_servicio(id_s,mensaje):
     servicio = Servicios.objects.get(id=id_s)
@@ -3043,6 +3046,7 @@ def historial_de_servicios(req):
 
 def detalles_servicios_cerrados(req,id_s):
     contexto = contexto_modificar_servicio(id_s,None)
+    datos = json_para_servicio(id_s)
     return render(req,"perfil_taller/historial_de_servicios/detalles_servicio.html",{ "moto":contexto[0],
                                                                             "cliente":contexto[1],
                                                                             "matricula":contexto[2],
@@ -3055,6 +3059,8 @@ def detalles_servicios_cerrados(req,id_s):
                                                                             "anotaciones":contexto[10],
                                                                             "info_servicio":contexto[12],
                                                                             "fecha_cierre":contexto[13],
+                                                                            "datos_fijos":datos[0],
+                                                                            "tareas":datos[1]
                                                                             })
 
 def repuestos(req):
@@ -3431,6 +3437,7 @@ def servicios_por_moto_de_cliente(req,id_moto,id_cliente):
 
 def detalle_de_cada_servicio_de_moto(req,id_s,id_cliente):
     contexto = contexto_modificar_servicio(id_s,None)
+    datos = json_para_servicio(id_s)
     return render(req,"perfil_taller/clientes/detalles_servicio.html",{ "moto":contexto[0],
                                                                             "cliente":contexto[1],
                                                                             "matricula":contexto[2],
@@ -3444,6 +3451,8 @@ def detalle_de_cada_servicio_de_moto(req,id_s,id_cliente):
                                                                             "info_servicio":contexto[12],
                                                                             "fecha_cierre":contexto[13],
                                                                             "id_cliente":id_cliente,
+                                                                            "datos_fijos":datos[0],
+                                                                            "tareas":datos[1]
                                                                             })
 
 def pedidos(req):

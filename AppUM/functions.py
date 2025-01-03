@@ -1027,3 +1027,41 @@ def enviar_correo(titulo,mensaje,destino):
             #CAMBIAR POR CORREO DE CLIENTE (tiene_correo.correo)
             recipient_list=[destino],
         )
+
+def json_para_servicio(id_s):
+    servicio = Servicios.objects.get(id=id_s)
+    moto = Moto.objects.get(id=servicio.moto_id)
+    cliente = Cliente.objects.get(id=servicio.cliente_id)
+    # dato_fijos = [
+    #         {
+    #             "detalle":moto.marca + " " + moto.modelo,
+    #             "cliente":cliente.nombre + " " + cliente.apellido,
+    #             "precio":int(servicio.precio),
+    #             "fecha":servicio.fecha_ingreso.strftime('%d-%m-%Y'),
+    #             "tipo_servicio":servicio.titulo
+    #         }
+    #     ]
+
+    datos_fijos = {
+                "detalle":moto.marca + " " + moto.modelo,
+                "cliente":cliente.nombre + " " + cliente.apellido,
+                "precio":int(servicio.precio),
+                "fecha":servicio.fecha_ingreso.strftime('%d-%m-%Y'),
+                "tipo_servicio":servicio.titulo
+            }
+    json_datos_fijos = json.dumps(datos_fijos)
+
+    tareas_realizadas = TareasServicios.objects.filter(servicio_id=id_s,realizado=1)
+    tareas_servicio = [
+                {   
+                    "tareas":tarea.tarea,
+                }
+                for tarea in tareas_realizadas
+            ]
+    json_tareas = json.dumps(tareas_servicio)
+
+    data = [
+        json_datos_fijos,
+        json_tareas
+    ]
+    return data

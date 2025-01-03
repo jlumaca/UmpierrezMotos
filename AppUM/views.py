@@ -1394,11 +1394,22 @@ def ficha_cliente(req,id_cliente):
 def fondos_cliente(req,id_cliente):
     try:
         cliente = Cliente.objects.get(id=id_cliente)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = dolar.precio_dolar_tienda
         if req.POST['moneda_fondos'] == "Pesos":
-            cliente.fondo_pesos = req.POST['monto_fondos']
+            fondo_pesos = int(cliente.fondo_pesos) + int(req.POST['monto_fondos'])
+            fondo_dolares = int(fondo_pesos / precio_dolar)
+            # cliente.fondo_pesos = int(cliente.fondo_pesos) + int(req.POST['monto_fondos'])
+
         else:
-            cliente.fondo_dolares = req.POST['monto_fondos']
+            fondo_dolares = int(cliente.fondo_dolares) + int(req.POST['monto_fondos'])
+            fondo_pesos = int(fondo_dolares * precio_dolar)
+            # cliente.fondo_dolares = int(cliente.fondo_dolares) + int(req.POST['monto_fondos'])
         
+        cliente.fondo_pesos = fondo_pesos
+        cliente.fondo_dolares = fondo_dolares
+        # print("FONDO PESOS ES: " +str(fondo_pesos))
+        # print("FONDO DOLARES ES: " +str(fondo_dolares))
         cliente.save()
         messages.success(req, "Fondos agregados correctamente.")
         return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
@@ -1624,6 +1635,42 @@ def form_venta_moto(req,id_moto):
                 else:
                     c_2 = None
                 moto = Moto.objects.get(id=id_moto)
+
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = dolar.precio_dolar_tienda
+
+                if moto.moneda_precio == "Pesos":
+                    fondos = int(cliente.fondo_pesos)
+                else:
+                    fondos = int(cliente.fondo_dolares)
+                
+                cv = ComprasVentas.objects.filter(cliente_id=cliente.id,moto_id=id_moto,tipo="R").first()
+                if cv:
+                    #SI EXISTE UNA RESERVA DE LA MOTO A NOMBRE DEL CLIENTE Y CON PAGOS REALIZADOS
+                    pagos = CuotasMoto.objects.filter(venta_id=cv.id)
+                    if pagos.exists():
+                        suma_total_pesos = 0
+                        suma_total_dolares = 0
+                        for pago in pagos:
+                            suma_total_pesos = suma_total_pesos + int(pago.valor_pago_pesos)
+                            suma_total_dolares = suma_total_dolares + int(pago.valor_pago_dolares)
+                        
+                        if moto.moneda_precio == "Pesos":
+                            suma_total_dolares = float(suma_total_dolares * precio_dolar)
+                            total = int(suma_total_dolares + suma_total_pesos)
+                        else:
+                            suma_total_pesos = float(suma_total_pesos / precio_dolar)
+                            total = int(suma_total_dolares + suma_total_pesos)
+                    else: 
+                        total = 0
+                else:
+                    total = 0
+                
+                precio_moto = int(moto.precio) - int(total) - int(fondos)
+                if precio_moto < 0:
+                    precio_moto = 0
+                
+
                 existe_matricula = Matriculas.objects.filter(moto_id=id_moto).first()
                 if existe_matricula:
                     matricula = existe_matricula.matricula 
@@ -1663,7 +1710,8 @@ def form_venta_moto(req,id_moto):
                                                                                 "fecha":fecha,
                                                                                 "logo_cv":logo_cv_url,
                                                                                 "vendedor_nombre":nom_ape_vend,
-                                                                                "vendedor_ci":doc_num})
+                                                                                "vendedor_ci":doc_num,
+                                                                                "fondos":precio_moto})
             else:
                 return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:
@@ -1694,6 +1742,34 @@ def venta_moto(req,id_moto,id_cliente):
         else:
             id_cv = insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
         cliente = Cliente.objects.get(id=id_cliente)
+        checkbox_incluir_fondos = 'incluir_fondos' in req.POST
+        if checkbox_incluir_fondos:
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = dolar.precio_dolar_tienda
+            total_fondos_pesos = int(cliente.fondo_pesos)
+            total_fondos_dolares = int(cliente.fondo_dolares)
+            precio_moto = int(moto.precio)
+
+            if (total_fondos_pesos < precio_moto) and (moto.precio == "Pesos"):
+                nuevo_fondo_pesos = 0
+                nuevo_fondo_dolares = 0 
+            elif (total_fondos_dolares < precio_moto) and (moto.precio == "Dolares" or moto.precio == "Dólares"):
+                nuevo_fondo_pesos = 0
+                nuevo_fondo_dolares = 0
+            else:
+                if moto.moneda_precio == "Pesos":
+                    nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio) 
+                    nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio / precio_dolar) 
+                    # nuevo_fondo_pesos = int(cliente.fondo_pesos) - int(moto.precio)
+                    # nuevo_fondo_dolares = int(cliente.fondo_dolares) - int(moto.precio / precio_dolar)
+                else:
+                    nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio * precio_dolar)
+                    nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio)
+            
+            cliente.fondo_pesos = nuevo_fondo_pesos
+            cliente.fondo_dolares = nuevo_fondo_dolares
+            cliente.save()
+            
         telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
         # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
         if moto.estado == "Nueva":

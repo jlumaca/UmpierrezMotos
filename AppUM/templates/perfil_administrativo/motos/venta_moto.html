@@ -164,8 +164,18 @@
             
 
             <div class="mb-3">
-                <label for="recargo" class="form-label">Precio de la moto sin recargo</label>
+                <label for="recargo" class="form-label">Precio</label>
                 <input value="{{ precio }}" type="number" class="form-control" name="precio_sin_recargo" id="precio_sin_recargo" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Precio restante con entregas y fondos incluidos</label>
+                <input value="{{ fondos }}" type="number" class="form-control" name="precio_sin_recargo" id="precio_sin_recargo" readonly>
+            </div>
+
+            <div class="mb-3">
+                <input type="checkbox" id="sin_num_motor" name="incluir_fondos" class="form-check-input" checked>
+                <label for="toggleMatr" class="form-check-label">Incluir los fondos en la compra de la moto</label>
             </div>
             
             <!-- <div class="mb-3">

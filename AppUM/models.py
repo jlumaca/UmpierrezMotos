@@ -219,9 +219,12 @@ class CuotasFinanciacion(models.Model):
     financiamiento = models.ForeignKey(Financiamientos, related_name='financiamiento_cuota', on_delete=models.CASCADE)
 
 class RepuestosPiezas(models.Model):
-    tipo_pieza = models.CharField(max_length=20)
     descripcion = models.CharField(max_length=100)
     activo = models.BooleanField(default=True)
+    stock = models.IntegerField(null=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    foto = models.ImageField(null=True, blank=True, upload_to="repuestos_piezas/")
+    
 
 class Pedidos(models.Model):
     detalle = models.CharField(max_length=200)

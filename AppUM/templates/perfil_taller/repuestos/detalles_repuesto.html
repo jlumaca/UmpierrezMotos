@@ -23,7 +23,7 @@
 <div class="table-container" id="motoDetails">
     <h4>Detalles del {{ accesorio.tipo }}</h4>
 
-    {% if accesorio.foto %}
+    {% if repuesto.foto %}
         <div class="text-center">
             <img src="{{ repuesto.foto.url }}" alt="Foto del accesorio" class="imagen-accesorio">
         </div>
@@ -38,12 +38,23 @@
     <table class="table table-bordered">
         <tbody>
             <tr>
-                <th scope="row">Tipo</th>
-                <td>{{ repuesto.tipo_pieza }}</td>
-            </tr>
-            <tr>
                 <th scope="row">Descripción</th>
                 <td>{{ repuesto.descripcion }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Stock</th>
+                <td>{{ repuesto.descripcion }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Precio por unidad</th>
+                <td>
+                    {% if repuesto.precio > 0 %}
+                    ${{ repuesto.precio }}
+                    {% else %}
+                    El articulo no tiene precio
+                    {% endif %}
+
+                </td>
             </tr>
         </tbody>
     </table>

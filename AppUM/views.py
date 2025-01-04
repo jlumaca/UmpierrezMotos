@@ -3199,14 +3199,24 @@ def repuestos(req):
 def alta_repuesto(req):
     try:
         if req.method == "POST":
-            nuevo_repuesto = RepuestosPiezas(
-                tipo_pieza = req.POST['tipo_repuesto'],
-                descripcion = req.POST['descripcion_repuesto'],
-                activo = 1
-            )
-            nuevo_repuesto.save()
-            messages.success(req, "Repuesto ingresado con éxito.")
-            return redirect('Repuestos')
+            stock = int(req.POST['stock_repuesto'])
+            precio_repuesto = int(req.POST['precio_repuesto'])
+            if stock <= 0:
+                return render(req,"perfil_taller/repuestos/alta_repuesto.html",{"error_message":"El stock ingresado es incorrecto"})
+            elif precio_repuesto < 0:
+                return render(req,"perfil_taller/repuestos/alta_repuesto.html",{"error_message":"El precio ingresado es incorrecto"})
+            else:
+                foto = req.FILES.get('foto_repuesto')
+                nuevo_repuesto = RepuestosPiezas(
+                    stock = stock,
+                    descripcion = req.POST['descripcion_repuesto'],
+                    activo = 1,
+                    precio = precio_repuesto,
+                    foto = foto
+                )
+                nuevo_repuesto.save()
+                messages.success(req, "Repuesto ingresado con éxito.")
+                return redirect('Repuestos')
         else:
             return render(req,"perfil_taller/repuestos/alta_repuesto.html",{})
     except Exception as e:
@@ -3226,18 +3236,38 @@ def baja_repuesto(req,id_rp):
         pass
 
 def modificacion_repuesto(req,id_rp):
-    try:
+    # try:
         repuesto = RepuestosPiezas.objects.get(id=id_rp)
+        stock = int(repuesto.stock)
+        precio = int(repuesto.precio)
         if req.method == "POST":
-            repuesto.tipo_pieza = req.POST['tipo_repuesto']
-            repuesto.descripcion = req.POST['descripcion_repuesto']
-            repuesto.save()
-            messages.success(req, "Repuesto modificado con éxito.")
-            return redirect('Repuestos')
+            stock_txt = int(req.POST['stock_repuesto'])
+            precio_txt = int(req.POST['precio_repuesto'])
+            if stock_txt <= 0:
+                return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
+                                                                                        "stock":stock,
+                                                                                        "precio":precio,
+                                                                                        "error_message":"El stock ingresado es incorrecto"})
+            elif precio_txt < 0:
+                return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
+                                                                                        "stock":stock,
+                                                                                        "precio":precio,
+                                                                                        "error_message":"El precio ingresado es incorrecto"})
+            else:
+                foto = req.FILES.get('foto_repuesto')
+                if foto:
+                    repuesto.foto = foto
+                repuesto.stock = stock_txt
+                repuesto.descripcion = req.POST['descripcion_repuesto']
+                repuesto.precio = precio_txt
+                repuesto.save()
+                messages.success(req, "Repuesto modificado con éxito.")
+                return redirect('Repuestos')
         else:
-            return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto})
-    except Exception as e:
-        pass
+            
+            return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,"stock":stock,"precio":precio})
+    # except Exception as e:
+    #     pass
 
 def detalles_repuesto(req,id_rp):
     try:

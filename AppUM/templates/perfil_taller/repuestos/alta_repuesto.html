@@ -11,14 +11,24 @@
             </div>
         {% endif %}
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
-            
-            <div class="mb-3">
-                <label for="marca" class="form-label">Tipo</label>
-                <input type="text" class="form-control" name="tipo_repuesto" id="marca" placeholder="Ingrese la marca" maxlength="20">
-            </div>
             <div class="mb-3">
                 <label for="modelo" class="form-label">Descripcion</label>
-                <input type="text" class="form-control" name="descripcion_repuesto" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
+                <input type="text" class="form-control" name="descripcion_repuesto" id="modelo" placeholder="Ingrese el modelo" maxlength="20" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="marca" class="form-label">Stock</label>
+                <input type="text" class="form-control" name="stock_repuesto" id="marca" placeholder="Ingrese el stock" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="marca" class="form-label">Precio (ingrese 0 si no desea ingresar el precio)</label>
+                <input type="text" class="form-control" name="precio_repuesto" id="marca" placeholder="Ingrese el precio" required>
+            </div>
+
+            <div class="mb-3" id="foto_prueba">
+                <label for="foto" class="form-label">Foto</label>
+                <input type="file" class="form-control" name="foto_repuesto" id="foto">
             </div>
             
             <button type="submit" class="btn btn-success">Guardar</button>

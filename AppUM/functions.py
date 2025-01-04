@@ -408,7 +408,7 @@ def obtener_compras_accesorios(req,id_venta):
                 .values(
                     'id',
                     'fecha_pago', 
-                    'fecha_prox_pago',  
+                     
                     'cant_restante_dolares', 
                     'cant_restante_pesos', 
                     'moneda', 

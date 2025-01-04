@@ -169,10 +169,9 @@ def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moned
     
     return comprobante_url
 
-def alta_cuota_accesorio(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo):
+def alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo):
     nueva_cuota = CuotasAccesorios(
                     fecha_pago = datetime.now(),
-                    fecha_prox_pago = fecha_prox_pago,
                     venta_id = id_cv,
                     cant_restante_dolares = resto_dolares,
                     cant_restante_pesos = resto_pesos,

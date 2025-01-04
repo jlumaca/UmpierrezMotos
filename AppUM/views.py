@@ -986,7 +986,7 @@ def alta_paga_accesorio(req,id_venta):
         moneda = req.POST['moneda_entrega']
         caja = Caja.objects.filter(estado="Abierto").first()
         forma_pago = req.POST['forma_pago']
-        fecha_proximo_pago = req.POST['f_prox_pago']
+        # fecha_proximo_pago = req.POST['f_prox_pago']
         observaciones_pago = req.POST['observaciones_pago']
         cv = ClienteAccesorio.objects.get(id=id_venta)
         dolar = PrecioDolar.objects.get(id=1)
@@ -996,17 +996,17 @@ def alta_paga_accesorio(req,id_venta):
         existe_cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).exists()
         accesorio = Accesorio.objects.get(id=cv.accesorio_id)
         validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],accesorio,precio_dolar,"Accesorio",existe_cuota,id_venta)
-        validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
+        # validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
         valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_venta,accesorio,"Accesorio",precio_dolar)
         if validar_precio:
             return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":validar_precio,"id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
-        elif validar_fecha_proximo_pago.date() < fecha_actual:
-            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        # elif validar_fecha_proximo_pago.date() < fecha_actual:
+        #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         else:
             if forma_pago == "Efectivo" and caja:
                 movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda)
-            alta = alta_cuota_accesorio(req,fecha_proximo_pago,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
+            alta = alta_cuota_accesorio(req,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
             if alta:
                 comprobante_url = alta
             else:

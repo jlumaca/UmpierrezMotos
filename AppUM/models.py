@@ -153,7 +153,6 @@ class Movimientos(models.Model):
 
 class CuotasAccesorios(models.Model):
     fecha_pago = models.DateField()
-    fecha_prox_pago = models.DateField()
     moneda = models.CharField(max_length=10,default=True,null=True)
     valor_pago_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     valor_pago_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)

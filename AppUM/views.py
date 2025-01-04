@@ -842,7 +842,8 @@ def alta_accesorio(req):
                 foto = foto,
                 precio = precio,
                 fecha_ingreso = datetime.now(),
-                moneda_precio = moneda
+                moneda_precio = moneda,
+                talle = req.POST['talle_accesorio']
             )
 
             nuevo_accesorio.save()
@@ -871,6 +872,7 @@ def modificacion_accesorio(req,id_accesorio):
             accesorio_upd.precio = req.POST['precio_accesorio']
             accesorio_upd.foto = req.FILES.get('foto_accesorio')
             accesorio_upd.moneda_precio = req.POST['moneda_accesorio']
+            accesorio_upd.talle = req.POST['talle_accesorio']
             accesorio_upd.save()
             messages.success(req, "El accesorio ha sido modificado con éxito.")
             return redirect('Accesorios')

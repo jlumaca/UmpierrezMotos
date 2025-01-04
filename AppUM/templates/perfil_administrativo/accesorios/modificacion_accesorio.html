@@ -29,6 +29,21 @@
             </div>
 
             <div class="mb-3">
+                <label for="estado" class="form-label">Talle</label>
+                <select class="form-control" name="talle_accesorio" id="tipo">
+                    <option value="XXS" {% if datos_accesorio.talle == "XXS" %}selected{% endif %}>XXS</option>
+                    <option value="XS" {% if datos_accesorio.talle == "XS" %}selected{% endif %}>XS</option>
+                    <option value="S" {% if datos_accesorio.talle == "S" %}selected{% endif %}>S</option>
+                    <option value="M" {% if datos_accesorio.talle == "M" %}selected{% endif %}>M</option>
+                    <option value="L" {% if datos_accesorio.talle == "L" %}selected{% endif %}>L</option>
+                    <option value="XL" {% if datos_accesorio.talle == "XL" %}selected{% endif %}>XL</option>
+                    <option value="XXL" {% if datos_accesorio.talle == "XXL" %}selected{% endif %}>XXL</option>
+                    <option value="XXXL" {% if datos_accesorio.talle == "XXXL" %}selected{% endif %}>XXXL</option>
+                    <option value="Sin talle" {% if datos_accesorio.talle == "Sin talle" %}selected{% endif %}>Sin talle</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label for="estado" class="form-label">Moneda</label>
                 <select value="{{ datos_accesorio.moneda_precio }}" class="form-control" name="moneda_accesorio" id="tipo">
                     <option value="Pesos" {% if datos_accesorio.moneda_precio == "Pesos" %}selected{% endif %}>Pesos</option>

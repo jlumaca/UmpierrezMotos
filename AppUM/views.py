@@ -3382,7 +3382,7 @@ def modificacion_repuesto(req,id_rp):
         if req.method == "POST":
             stock_txt = int(req.POST['stock_repuesto'])
             precio_txt = int(req.POST['precio_repuesto'])
-            if stock_txt <= 0:
+            if stock_txt < 0:
                 return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
                                                                                         "stock":stock,
                                                                                         "precio":precio,

@@ -64,15 +64,22 @@
             {% if page_obj %}
                 {% for repuesto in page_obj %}
             <!-- Filas de ejemplo de accesorios -->
-            <tr>
+            <tr class="{% if repuesto.stock == 0 %}table-danger{% elif repuesto.stock > 0 %}table-success{% endif %}">
                 <td>{{ repuesto.descripcion }}</td>
                 <td>{{ repuesto.stock }}</td>
                 <td>
-                    <a href="{% url 'BajaRepuesto' repuesto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
-                    <a href="{% url 'ModificacionRepuesto' repuesto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
-                    <a href="{% url 'DetallesRepuesto' repuesto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    <a href="{% url 'BajaRepuesto' repuesto.id %}">
+                        <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </a>
+                    <a href="{% url 'ModificacionRepuesto' repuesto.id %}">
+                        <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    </a>
+                    <a href="{% url 'DetallesRepuesto' repuesto.id %}">
+                        <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button>
+                    </a>
                 </td>
             </tr>
+            
             {% endfor %}
             {% else %}
                 <tr>

@@ -143,6 +143,7 @@ urlpatterns = [
 
      path('repuestos', views.repuestos,name="Repuestos"),
      path('alta_repuesto', views.alta_repuesto,name="AltaRepuesto"),
+     path('buscar_repuesto_alta/', views.buscar_pieza,name="BuscarRepuestoAlta"),
      path('baja_repuesto/<int:id_rp>', views.baja_repuesto,name="BajaRepuesto"),
      path('modificacion_repuesto/<int:id_rp>', views.modificacion_repuesto,name="ModificacionRepuesto"),
      path('detalles_repuesto/<int:id_rp>', views.detalles_repuesto,name="DetallesRepuesto"),
@@ -163,6 +164,11 @@ urlpatterns = [
      path('agregar_mecanico_servicio/<int:id_s>', views.agregar_mecanico_servicio,name="AgregarMecanicoServicio"),
      path('borrar_mecanico_servicio/<int:id_s>/<int:id_mecanico>', views.borrar_mecanico_servicio,name="BorrarMecanicoServicio"),
      path('modificar_servicio/<int:id_s>', views.modificar_datos_servicio,name="ModificarServicio"),
+     path('agregar_repuesto_pieza_servicio/<int:id_s>', views.agregar_repuesto_pieza_servicio,name="AgregarRepPiezaServ"),
+     
+     path('borrar_repuesto_pieza_servicio/<int:id_rp>', views.borrar_repuesto_pieza_servicio,name="BorrarRepPiezaServ"),
+     
+     
      path('detalles_servicio/<int:id_s>', views.detalles_servicios,name="DetallesServicio"),
      path('detalles_servicio_cerrado/<int:id_s>', views.detalles_servicios_cerrados,name="DetallesServicioCerrado"),
 

@@ -109,11 +109,11 @@ form label input[type="number"] {
                     </tr>
                     <tr>
                         <th scope="row">Contacto</th>
-                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                        <td>{{ telefono }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Correo</th>
-                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                        <td>{{ correo }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Domicilio</th>
@@ -241,7 +241,15 @@ form label input[type="number"] {
             
                 <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
             </div>
+
+
             <br>
+            <h4>Repuestos y/o piezas</h4>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="buscar_pieza" placeholder="Buscar por el nombre o descripción">
+            </div>
+            <div id="piezas_seleccionadas"></div>
+            <ul id="resultados_piezas" class="list-group"></ul>
             {% if div_mecanicos %}
                 <h4>Mecánicos a asignar</h4>
                 <div id="serviciosLista" class="mb-4">
@@ -347,6 +355,147 @@ function buscar_moto() {
     // Añadir el nuevo servicio al formulario
     serviciosLista.appendChild(nuevoServicio);
 }
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     const inputBusqueda = document.getElementById('buscar_pieza');
+//     const listaResultados = document.getElementById('resultados_piezas');
+
+//     inputBusqueda.addEventListener('input', function () {
+//         const query = inputBusqueda.value.trim();
+
+//         if (query.length > 0) {
+//             fetch(`/buscar_repuesto_alta/?query=${query}`)
+//                 .then(response => response.json())
+//                 .then(data => {
+//                     listaResultados.innerHTML = ''; // Limpiar resultados previos
+//                     data.forEach(item => {
+//                         const li = document.createElement('li');
+//                         li.classList.add('list-group-item');
+//                         li.textContent = `${item.nombre} - ${item.descripcion}`;
+//                         listaResultados.appendChild(li);
+//                     });
+//                 })
+//                 .catch(error => console.error('Error en la búsqueda:', error));
+//         } else {
+//             listaResultados.innerHTML = ''; // Limpiar si el input está vacío
+//         }
+//     });
+// });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBusqueda = document.getElementById('buscar_pieza');
+    const listaResultados = document.getElementById('resultados_piezas');
+    const listaSeleccionadas = document.getElementById('piezas_seleccionadas');
+    let piezasSeleccionadas = new Map(); // Almacena piezas seleccionadas (id → objeto pieza)
+
+    // Actualizar las seleccionadas en la parte superior
+    function actualizarSeleccionados() {
+    listaSeleccionadas.innerHTML = ''; // Limpiar lista seleccionada
+    piezasSeleccionadas.forEach((item, id) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="d-flex align-items-center mb-2">
+                <input type="checkbox" name="piezas_seleccionadas[]" value="${id}" class="me-2" checked>
+                <span class="flex-grow-1">${item.nombre} - ${item.descripcion}</span>
+                <input type="number" name="cantidad_piezas[]" class="form-control w-auto ms-2" placeholder="Cantidad" min="0" step="0.01" value="1">
+            </label>
+        `;
+        listaSeleccionadas.appendChild(div);
+    });
+}
+
+    // Evento para escuchar cambios en los checkboxes
+    listaResultados.addEventListener('change', function (event) {
+        if (event.target.type === 'checkbox') {
+            const piezaId = event.target.value;
+            const nombre = event.target.dataset.nombre;
+            const descripcion = event.target.dataset.descripcion;
+
+            if (event.target.checked) {
+                piezasSeleccionadas.set(piezaId, { nombre, descripcion });
+            } else {
+                piezasSeleccionadas.delete(piezaId);
+            }
+            actualizarSeleccionados();
+        }
+    });
+
+    // Evento para la búsqueda
+    inputBusqueda.addEventListener('input', function () {
+        const query = inputBusqueda.value.trim();
+
+        if (query.length > 0) {
+            fetch(`/buscar_repuesto_alta/?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    listaResultados.innerHTML = ''; // Limpiar resultados previos
+
+                    data.forEach(item => {
+                        const isChecked = piezasSeleccionadas.has(item.id.toString());
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label class="d-flex align-items-center mb-2">
+                                <input type="checkbox" name="piezas[]" value="${item.id}" class="me-2"
+                                    data-nombre="${item.nombre}" data-descripcion="${item.stock}"
+                                    ${isChecked ? 'checked' : ''}>
+                                <span class="flex-grow-1">${item.nombre} - ${item.stock}</span>
+                                
+                            </label>
+                        `;
+                        listaResultados.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error en la búsqueda:', error));
+        } else {
+            listaResultados.innerHTML = ''; // Limpiar si el input está vacío
+        }
+    });
+
+    // Mantener el estado de los checkboxes en cada búsqueda
+    listaResultados.addEventListener('DOMNodeInserted', function () {
+        listaResultados.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            if (piezasSeleccionadas.has(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    });
+});
+
+document.getElementById('piezas_seleccionadas').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const piezasSeleccionadas = [];
+    document.querySelectorAll('#piezas_seleccionadas label').forEach(label => {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        const cantidadInput = label.querySelector('input[type="number"]');
+        
+        if (checkbox.checked) {
+            piezasSeleccionadas.push({
+                id: checkbox.value,
+                cantidad: cantidadInput.value
+            });
+        }
+    });
+
+    fetch('/buscar_repuesto_alta/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ piezas: piezasSeleccionadas })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+
 
 
 </script>

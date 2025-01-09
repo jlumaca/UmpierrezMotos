@@ -2831,22 +2831,29 @@ def cliente_moto_servicio(req):
             else:
                 div_mecanicos = False
                 mecanicos = False
+            
+            correo = ClienteCorreo.objects.filter(cliente=cliente,principal=1).first()
+            telefono = ClienteTelefono.objects.filter(cliente=cliente,principal=1).first()
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"datos_moto":True,
                                                                             "moto":moto,
                                                                             "cliente":cliente,
                                                                             "matricula":matricula if matricula else "Sin matrícula",
                                                                             "buscar_moto_cliente":False,
                                                                             "mecanicos":mecanicos if mecanicos else None,
-                                                                            "div_mecanicos":div_mecanicos})
+                                                                            "div_mecanicos":div_mecanicos,
+                                                                            "correo":correo.correo if correo else "El cliente no tiene correo",
+                                                                            "telefono":telefono.telefono})
     # except Exception as e:
     #     return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":"La moto no se encuentra registrada en el sistema, debe ingresar la misma completando todos los datos requeridos"})
 
 def alta_servicio(req,id_moto,id_cliente):
     # try:
         # print(id_moto)
-        # print(id_cliente)
+        # print(id_cliente)piezas[]
         servicios_seleccionados = req.POST.getlist('servicios[]')
         mecanicos_seleccionados = req.POST.getlist('mecanicos[]')
+        piezas_seleccionadas = req.POST.getlist('piezas_seleccionadas[]')
+        cantidades = req.POST.getlist('cantidad_piezas[]')
         mecanicos = (Mecanico.objects
                        .filter(activo=True)
                        .values('id', 'nombre', 'apellido')
@@ -2854,10 +2861,32 @@ def alta_servicio(req,id_moto,id_cliente):
         usuario = req.user
         usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
         mecanico_actual = Mecanico.objects.get(id=usuario_actual.id)
+        i = 0
+        for pieza in piezas_seleccionadas:
+            rp = RepuestosPiezas.objects.get(id=int(pieza))
+            if int(cantidades[i]) > int(rp.stock):
+                error_pieza = True
+                break
+        moto = Moto.objects.get(id=id_moto)
+        cliente = Cliente.objects.get(id=id_cliente)
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        mecanico_actual = Mecanico.objects.get(id=usuario_actual.id)
+        if mecanico_actual.jefe:
+            div_mecanicos = True
+            mecanicos = (Mecanico.objects
+                    .filter(activo=True)
+                    .values('id', 'nombre', 'apellido')
+                    .order_by('nombre'))
+        else:
+            div_mecanicos = False
+            mecanicos = False
         if not servicios_seleccionados:
-            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
         elif not mecanicos_seleccionados and mecanico_actual.jefe:   
-            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún mecánico","datos_moto":True,"mecanicos":mecanicos if mecanicos else None})
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún mecánico","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
+        elif error_pieza:
+            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"Algunos de los repuestos o piezas exceden el stock","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
         else:
             nuevo_servicio = Servicios(
                 fecha_ingreso = datetime.now(),
@@ -2871,6 +2900,24 @@ def alta_servicio(req,id_moto,id_cliente):
             )
             nuevo_servicio.save()
            #inputPrecio.name = `precio_${textoServicio}`;
+
+            if piezas_seleccionadas:
+                i = 0
+                for pieza in piezas_seleccionadas:
+                    rp = RepuestosPiezas.objects.get(id=int(pieza))
+                    nueva_pieza = RepuestosPiezasServicios(
+                        repuestopieza_id = pieza,
+                        servicio_id = nuevo_servicio.id,
+                        cantidad = cantidades[i]
+                    )
+                    nueva_pieza.save()
+                    nuevo_stock = int(rp.stock) - int(cantidades[i])
+                    rp.stock = nuevo_stock
+                    rp.save()
+                    i = i + 1
+
+
+
             for servicio in servicios_seleccionados:
                 # prueba = servicio.replace(" ","_")
                 # print(prueba)
@@ -2983,6 +3030,16 @@ def contexto_modificar_servicio(id_s,mensaje):
         })
 
     f_cierre_formateada = servicio.fecha_estimada_cierre.strftime('%Y-%m-%d') if servicio.fecha_estimada_cierre else None
+
+    piezas = RepuestosPiezasServicios.objects.filter(servicio_id=id_s)
+    data_piezas = []
+    for pieza in piezas:
+        rp = RepuestosPiezas.objects.filter(id=pieza.repuestopieza_id).first()
+        data_piezas.append({
+            "piezas":rp,
+            "cantidad":pieza.cantidad,
+            "ide":pieza.id
+        })
     data = [
         moto,
         cliente,
@@ -2997,7 +3054,8 @@ def contexto_modificar_servicio(id_s,mensaje):
         data_anotaciones,
         data_mecanicos_no_servicio,
         servicio,
-        f_cierre_formateada
+        f_cierre_formateada,
+        data_piezas
     ]
 
     return data
@@ -3020,7 +3078,8 @@ def form_modificar_servicio(req,id_s):
                                                                             "resto_mecanicos":contexto[11],
                                                                             "info_servicio":contexto[12],
                                                                             "fecha_cierre":contexto[13],
-                                                                            "mostrar_boton":True if mecanico_usuario.jefe else False
+                                                                            "mostrar_boton":True if mecanico_usuario.jefe else False,
+                                                                            "piezas":contexto[14]
                                                                             })
 
 
@@ -3123,6 +3182,77 @@ def modificar_datos_servicio(req,id_s):
     except Exception as e:
         pass
 
+def agregar_repuesto_pieza_servicio(req,id_s):
+    # try:
+        piezas_seleccionadas = req.POST.getlist('piezas_seleccionadas[]')
+        cantidades = req.POST.getlist('cantidad_piezas[]')
+        if piezas_seleccionadas:
+            i = 0
+            for pieza in piezas_seleccionadas:
+                rp = RepuestosPiezas.objects.get(id=int(pieza))
+                if int(cantidades[i]) > int(rp.stock):
+                    messages.error(req, "Algunos elementos no pudieron asignarse al servicio dado que exceden su stock.")
+                    return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+                else:
+                    existe_rp = RepuestosPiezasServicios.objects.filter(repuestopieza_id=pieza,servicio_id=id_s).first()
+                    if existe_rp:
+                        nueva_cantidad = int(existe_rp.cantidad) + int(cantidades[i])
+                        existe_rp.cantidad = nueva_cantidad
+                        existe_rp.save()
+                    else:
+                        nueva_pieza = RepuestosPiezasServicios(
+                            repuestopieza_id = pieza,
+                            servicio_id = id_s,
+                            cantidad = cantidades[i]
+                        )
+                        nueva_pieza.save()
+                    nuevo_stock = int(rp.stock) - int(cantidades[i])
+                    rp.stock = nuevo_stock
+                    rp.save()
+                    
+                # print("CANTIDAD DE " + str(pieza) + " ES " + str(cantidades[i]))
+                i = i + 1
+            messages.success(req, "Datos del servicio modificados correctamente.")
+        else:
+            messages.error(req, "Debe seleccionar alguna pieza o repuesto.")
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+        
+    # except Exception as e:
+    #     pass
+
+def borrar_repuesto_pieza_servicio(req,id_rp):
+        rp = RepuestosPiezasServicios.objects.get(id=id_rp)
+        id_s = rp.servicio_id
+    # try:
+        repuesto_pieza = RepuestosPiezas.objects.get(id=rp.repuestopieza_id)
+        repuesto_pieza.stock = int(repuesto_pieza.stock) + int(rp.cantidad)
+        repuesto_pieza.save()
+        rp.delete()
+        messages.success(req, "Datos del servicio modificados correctamente.")
+        return redirect(reverse('FormModificarServicio', kwargs={'id_s': id_s}))
+    # except Exception as e:
+    #     contexto = contexto_modificar_servicio(id_s,None)
+    #     usuario = req.user
+    #     usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+    #     mecanico_usuario = Mecanico.objects.get(id=usuario_actual.id)
+    #     return render(req,"perfil_taller/servicios/modificar_servicio.html",{ "moto":contexto[0],
+    #                                                                             "cliente":contexto[1],
+    #                                                                             "matricula":contexto[2],
+    #                                                                             "telefono":contexto[3],
+    #                                                                             "correo":contexto[4],
+    #                                                                             "tareas_realizadas":contexto[5],
+    #                                                                             "tareas_pendientes":contexto[6],
+    #                                                                             "mecanicos":contexto[7],
+    #                                                                             "id_servicio":contexto[9],
+    #                                                                             "anotaciones":contexto[10],
+    #                                                                             "resto_mecanicos":contexto[11],
+    #                                                                             "info_servicio":contexto[12],
+    #                                                                             "fecha_cierre":contexto[13],
+    #                                                                             "mostrar_boton":True if mecanico_usuario.jefe else False,
+    #                                                                             "piezas":contexto[14],
+    #                                                                             "error_message":str(e)
+    #                                                                             })
+
 def detalles_servicios(req,id_s):
     contexto = contexto_modificar_servicio(id_s,None)
     return render(req,"perfil_taller/servicios/detalles_servicio.html",{ "moto":contexto[0],
@@ -3195,6 +3325,15 @@ def repuestos(req):
     #repuestos = RepuestosPiezas.objects.all()
     page_obj = funcion_paginas_varias(req,repuestos)
     return render(req,"perfil_taller/repuestos/repuestos.html",{'page_obj': page_obj})
+
+def buscar_pieza(request):
+    query = request.GET.get('query', '')
+    if query:
+        piezas = RepuestosPiezas.objects.filter(descripcion__icontains=query)[:10]  # Ajusta el campo a filtrar
+        data = [{'id': pieza.id, 'nombre': pieza.descripcion, 'stock': pieza.stock} for pieza in piezas]
+    else:
+        data = []
+    return JsonResponse(data, safe=False)
 
 def alta_repuesto(req):
     try:

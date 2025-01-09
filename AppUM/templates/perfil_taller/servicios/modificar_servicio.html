@@ -21,21 +21,24 @@ form label input[type="number"] {
 <div class="table-container" id="inventarios">
     <div class="form-container" id="motoForm">
         <h2>Modificación de servicio</h4>
-            {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
-            {% endfor %}
-         {% endif %}
         {% if error_message_cliente %}
         <div class="alert alert-danger" role="alert">
             {{ error_message_cliente }} <a href="{% url 'ClienteAlta' %}">aquí</a>
         </div>
         {% endif %}
-        {% if error_message %}
-        <div class="alert alert-danger" role="alert">
-            {{ error_message }}
-        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-3">
+                    {% if message.tags == "error" %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == "success" %}
+                        <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
         {% endif %}
+
 
         <!-- Formulario de búsqueda de cliente -->
        
@@ -192,7 +195,7 @@ form label input[type="number"] {
                     
                 </div>
                 
-                
+            
             {% if mostrar_boton %}
             <form action="{% url 'AgregarMecanicoServicio' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
                 <h4>Asignar más mecánicos al servicio</h4>
@@ -219,6 +222,54 @@ form label input[type="number"] {
             </form>
             <br>
             {% endif %}
+
+            <h4>Repuestos y/o piezas</h4>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="buscar_pieza" placeholder="Buscar por el nombre o descripción">
+            </div>
+            <form action="{% url 'AgregarRepPiezaServ' id_servicio %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                <div id="piezas_seleccionadas"></div>
+                <ul id="resultados_piezas" class="list-group"></ul>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </form>
+            <div id="piezas_seleccionadas">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>DETALLE</th>
+                            <th>CANTIDAD</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if piezas %}
+                            {% for pieza in piezas %}
+                                <tr id="row-{{ pieza.piezas.id }}">
+                                    <td>{{ pieza.piezas.descripcion }}</td>
+                                    <td>{{ pieza.cantidad }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-danger ms-2" onclick="mostrarConfirmacion('{{ pieza.ide }}')">❌</button>
+                                    </td>
+                                </tr>
+                                <tr id="confirmacion-row-{{ pieza.ide }}" class="d-none">
+                                    <td colspan="3" class="text-center text-danger">
+                                        <p>¿Estás seguro de que deseas desvincular este mecánico de este servicio?</p>
+                                        <a href="{% url 'BorrarRepPiezaServ' pieza.ide %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                                        <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacion('{{ pieza.ide }}')">Cancelar</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                Aún no hay anotaciones
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
 
             <h4>Actuaciones y/o anotaciones</h4>
             <div id="serviciosLista" class="mb-4">
@@ -402,6 +453,135 @@ function cancelarEliminacionMecanico(mecanicoId) {
     const confirmacion = document.getElementById(`confirmacionEliminarMecanico-${mecanicoId}`);
     confirmacion.classList.add('d-none');
 }
+
+function mostrarConfirmacion(piezaId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-${piezaId}`);
+    confirmacionRow.classList.remove("d-none");
+}
+
+function cancelarEliminacion(piezaId) {
+    // Ocultar el formulario de confirmación
+    const confirmacionRow = document.getElementById(`confirmacion-row-${piezaId}`);
+    confirmacionRow.classList.add("d-none");
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBusqueda = document.getElementById('buscar_pieza');
+    const listaResultados = document.getElementById('resultados_piezas');
+    const listaSeleccionadas = document.getElementById('piezas_seleccionadas');
+    let piezasSeleccionadas = new Map(); // Almacena piezas seleccionadas (id → objeto pieza)
+
+    // Actualizar las seleccionadas en la parte superior
+    function actualizarSeleccionados() {
+    listaSeleccionadas.innerHTML = ''; // Limpiar lista seleccionada
+    piezasSeleccionadas.forEach((item, id) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="d-flex align-items-center mb-2">
+                <input type="checkbox" name="piezas_seleccionadas[]" value="${id}" class="me-2" checked>
+                <span class="flex-grow-1">${item.nombre} - ${item.descripcion}</span>
+                <input type="number" name="cantidad_piezas[]" class="form-control w-auto ms-2" placeholder="Cantidad" min="0" step="0.01" value="1">
+            </label>
+        `;
+        listaSeleccionadas.appendChild(div);
+    });
+}
+
+    // Evento para escuchar cambios en los checkboxes
+    listaResultados.addEventListener('change', function (event) {
+        if (event.target.type === 'checkbox') {
+            const piezaId = event.target.value;
+            const nombre = event.target.dataset.nombre;
+            const descripcion = event.target.dataset.descripcion;
+
+            if (event.target.checked) {
+                piezasSeleccionadas.set(piezaId, { nombre, descripcion });
+            } else {
+                piezasSeleccionadas.delete(piezaId);
+            }
+            actualizarSeleccionados();
+        }
+    });
+
+    // Evento para la búsqueda
+    inputBusqueda.addEventListener('input', function () {
+        const query = inputBusqueda.value.trim();
+
+        if (query.length > 0) {
+            fetch(`/buscar_repuesto_alta/?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    listaResultados.innerHTML = ''; // Limpiar resultados previos
+
+                    data.forEach(item => {
+                        const isChecked = piezasSeleccionadas.has(item.id.toString());
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label class="d-flex align-items-center mb-2">
+                                <input type="checkbox" name="piezas[]" value="${item.id}" class="me-2"
+                                    data-nombre="${item.nombre}" data-descripcion="${item.stock}"
+                                    ${isChecked ? 'checked' : ''}>
+                                <span class="flex-grow-1">${item.nombre} - ${item.stock}</span>
+                                
+                            </label>
+                        `;
+                        listaResultados.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error en la búsqueda:', error));
+        } else {
+            listaResultados.innerHTML = ''; // Limpiar si el input está vacío
+        }
+    });
+
+    // Mantener el estado de los checkboxes en cada búsqueda
+    listaResultados.addEventListener('DOMNodeInserted', function () {
+        listaResultados.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            if (piezasSeleccionadas.has(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    });
+});
+
+document.getElementById('piezas_seleccionadas').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const piezasSeleccionadas = [];
+    document.querySelectorAll('#piezas_seleccionadas label').forEach(label => {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        const cantidadInput = label.querySelector('input[type="number"]');
+        
+        if (checkbox.checked) {
+            piezasSeleccionadas.push({
+                id: checkbox.value,
+                cantidad: cantidadInput.value
+            });
+        }
+    });
+
+    fetch('/buscar_repuesto_alta/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ piezas: piezasSeleccionadas })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
 
 
 

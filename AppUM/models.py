@@ -237,6 +237,12 @@ class AnotacionesServicio(models.Model):
     mecanico = models.ForeignKey(Mecanico, related_name='anotacion_mecanicos', on_delete=models.CASCADE)
     servicio = models.ForeignKey(Servicios, related_name='anotacion_servicio', on_delete=models.CASCADE)
 
+class RepuestosPiezasServicios(models.Model):
+    servicio = models.ForeignKey(Servicios, related_name='servicio_rp', on_delete=models.CASCADE)
+    repuestopieza = models.ForeignKey(RepuestosPiezas, related_name='rp_servicios', on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
+
+
 
 
     

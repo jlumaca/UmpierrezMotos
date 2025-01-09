@@ -99,11 +99,11 @@
             <img src="{{ logo_cv }}" alt="Logo de la tienda" style="display: none; width: 200%; max-width: 150px; height: auto;">
             {% endif %}
             <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
-            <textarea id="previewText" rows="20" class="form-control" style="width: 62%;">
+            <textarea id="previewText" rows="20" class="form-control" style="width: 70%;">
                 En la ciudad de Libertad, el día {{ fecha }}
                 Por una parte {{ vendedor_nombre }} CI: {{ vendedor_ci }}
                 Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} {{ cliente.documento }} 
-                Con domicilio {{ cliente.calle }} {{ cliente.numero }}, {{ cliente.ciudad }}
+                Con domicilio {{ cliente.domicilio }}
                 Celular {{ tel1 }}
                 Han convenido celebrar el siguiente compromiso de compraventa:
                 PRIMERO: Se obliga a vender libre de multas prendas, embargos y demás gravámenes a {{ cliente.nombre }} {{ cliente.apellido }}

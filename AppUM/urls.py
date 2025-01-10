@@ -130,6 +130,9 @@ urlpatterns = [
      path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#SOLO RENDERIZA FORM Y DATOS
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
+     path('generar_compromiso_compra_venta/<int:id_moto>/<int:id_cliente>', views.generar_compromiso_compra_venta,name="GCCV"),
+
+     
      path('pago_por_ref/', views.buscar_pagos_por_refinanciamiento,name="PagoPorRef"),
      path('reservas', views.reservas,name="Reservas"),
      path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),

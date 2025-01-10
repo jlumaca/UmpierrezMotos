@@ -41,7 +41,7 @@
         </form>
 
         {% if datos_moto %}
-        <form action="{% url 'MotoVenta' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>
@@ -98,54 +98,19 @@
             {% if logo_cv %}
             <img src="{{ logo_cv }}" alt="Logo de la tienda" style="display: none; width: 200%; max-width: 150px; height: auto;">
             {% endif %}
-            <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2>
-            <textarea id="previewText" rows="20" class="form-control" style="width: 70%;">
-                En la ciudad de Libertad, el día {{ fecha }}
-                Por una parte {{ vendedor_nombre }} CI: {{ vendedor_ci }}
-                Por otra parte {{ cliente.nombre }} {{ cliente.apellido }} {{ cliente.documento }} 
-                Con domicilio {{ cliente.domicilio }}
-                Celular {{ tel1 }}
-                Han convenido celebrar el siguiente compromiso de compraventa:
-                PRIMERO: Se obliga a vender libre de multas prendas, embargos y demás gravámenes a {{ cliente.nombre }} {{ cliente.apellido }}
-                (de existir algo de lo anteriormente expresado se notificará al promitente comprador, quien al firmar este
-                compromiso se dará por enterado, acepta y se hará cargo de todo lo notificado de la manera que se haya hecho,
-                tanto verbal como escrita).
-                Quién en tal concepto se obliga a comprar la propiedad y posesión del vehículo tipo MOTO
-                marca {{ moto.marca }} Modelo {{ moto.modelo }} año {{ moto.anio }} matricula {% if matricula %} {{ matricula }} {% else %} _______________ {% endif %}del
-                departamento de{% if departamento %} {{ departamento }} {% else %} _______________ {% endif %} padrón {% if padron %} {{ padron }} {% else %} _______________ {% endif %} Motor Nº {{ moto.num_motor }},
-                chasis Nº {{ moto.num_chasis }}
-                SEGUNDO: el precio de la compraventa se fija en U$s. $ {{ moto.precio }} En letra {{ num_letra }}
-                Pagaderos de la siguiente forma: _________________________________________________
-                TERCERO: el promitente comprador toma posesión del vehículo referido en la cláusula primera en el
-                día _______________ recibiendo del vendedor las llaves correspondientes. En consecuencia, serán de
-                cuenta desde este momento todas las responsabilidades civiles y/o penales que con el mismo se cometan, el
-                vehículo corre de su exclusiva cuenta y riesgo, siendo de su cargo toda responsabilidad por multas, infracciones,
-                accidentes de cualquier naturaleza, deterioros y desperfectos, incluso contra terceros u otros bienes.
-                CUARTO: Se declara que motor instalado en el vehículo referido en el presente contrato y número de chasis
-                coinciden con los que surgen de la documentación referida, además se encuentra en las condiciones constatadas
-                el día de la fecha, sin garantía, que son de total conformidad del promitente comprador.
-                QUINTO: la parte promitente comprador/a se hace cargo de los honorarios, impuestos, deudas de existir y fueron
-                debidamente notificadas y demás gastos originados por la transferencia municipal y título de propiedad de 
-                vehículo.
-                SEXTO: En caso de incumplimiento de pago por parte del comprador, el vendedor se reserva de derecho de retirar
-                y recuperar la motocicleta sin previo aviso, quedando anulada la presente transacción y sin que ello implique la
-                devolución de los pagos parciales realizados hasta la fecha.
-                SÉPTIMO: El comprador declada haber inspeccionado la motocicleta y aceptando su condición actual.
-                OCTAVO: Como señal de otorgamiento se firma el presente, previa ratificación y lectura, en el lugar y fecha
-                indicados.
-
-
-
-                        _____________________________                   ______________________________
-                        Firma del promitente vendedor             Firma del promitente comprador
-             
-                        CI. {{ vendedor_ci }}                                           CI. {{ cliente.documento }}
-            </textarea>
-            
-            <div class="button-container">
+            <!-- <h2 class="text-center">COMPROMISO DE COMPRAVENTA</h2> -->
+            <h4>Compromiso compra venta</h4>
+            <form action="{% url 'GCCV' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="precio" class="form-label">"Pagaderos de la siguiente forma:..."</label>
+                <textarea class="form-control" name="texto_pagaderos" id="texto_pagaderos" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
+            </div> 
+            <button type="submit" class="btn btn-success">Generar CCV</button>
+            <!-- <div class="button-container">
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
-            </div>
-
+            </div> -->
+            </form>
+            <form action="{% url 'MotoVenta' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Forma de pago</h4>
             <div class="mb-3">
                 <label for="precio" class="form-label">Forma de pago</label>
@@ -318,7 +283,33 @@ document.addEventListener('DOMContentLoaded', () => {
     cant_cuotas.addEventListener('input', calcularRecargo);
 });
 
+document.getElementById('download-btn').addEventListener('click', async () => {
+    const url = 'generar_compromiso_compra_venta'; // Cambia por la URL de tu endpoint en Django
+    try {
+        const response = await fetch(url, { method: 'GET' });
+        if (!response.ok) throw new Error('Error al generar el documento');
 
+        // Crear un objeto Blob con los datos recibidos
+        const blob = await response.blob();
+
+        // Crear un enlace para descargar el archivo
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'documento.docx'; // Nombre del archivo que se descargará
+        link.click();
+
+        // Liberar el objeto URL
+        window.URL.revokeObjectURL(link.href);
+
+        
+        
+        
+    } catch (error) {
+        console.error('Error al descargar el documento:', error);
+    }
+
+    // document.getElementById("texto_pagaderos").value = "";
+});
 
 </script>
 

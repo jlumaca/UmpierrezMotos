@@ -148,31 +148,32 @@ def matricula_valid(matricula,padron,id_moto):
         if existe_padron.moto_id != id_moto:
             return "padron_existe"
 
-def valid_cliente(documento,tel1,tel2,correo1,correo2):
+# def valid_cliente(documento,tel1,tel2,correo1,correo2):
+def valid_cliente(documento):
     existe_cliente = Cliente.objects.filter(documento=documento).first()
     if existe_cliente:
         return "existe_cliente"
     
-    existe_tel_1 = ClienteTelefono.objects.filter(telefono=tel1).first()
+    # existe_tel_1 = ClienteTelefono.objects.filter(telefono=tel1).first()
 
-    if existe_tel_1:
-        return "existe_telefono_1"
+    # if existe_tel_1:
+    #     return "existe_telefono_1"
     
-    if tel2:
-        existe_tel_2 = ClienteTelefono.objects.filter(telefono=tel2).first()
-        if existe_tel_2:
-            return "existe_telefono_2"
+    # if tel2:
+    #     existe_tel_2 = ClienteTelefono.objects.filter(telefono=tel2).first()
+    #     if existe_tel_2:
+    #         return "existe_telefono_2"
     
 
-    if correo1:
-        existe_correo_1 = ClienteCorreo.objects.filter(correo=correo1).first()
-        if existe_correo_1:
-            return "existe_correo_1"
+    # if correo1:
+    #     existe_correo_1 = ClienteCorreo.objects.filter(correo=correo1).first()
+    #     if existe_correo_1:
+    #         return "existe_correo_1"
         
-    if correo2:
-        existe_correo_2 = ClienteCorreo.objects.filter(correo=correo2).first()
-        if existe_correo_2:
-            return "existe_correo_2"
+    # if correo2:
+    #     existe_correo_2 = ClienteCorreo.objects.filter(correo=correo2).first()
+    #     if existe_correo_2:
+    #         return "existe_correo_2"
 
 def contexto_para_cliente(id_cliente,mensaje_error):
             cliente = Cliente.objects.get(id=id_cliente)
@@ -263,7 +264,8 @@ def contexto_para_cliente(id_cliente,mensaje_error):
                         "error_message":mensaje_error}
             return contexto
 
-def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
+# def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
+def valid_cliente_mod(id_cliente,documento):
     cliente_id = Cliente.objects.get(id=id_cliente)
     cliente_doc = Cliente.objects.filter(documento=documento).first()
 
@@ -271,25 +273,25 @@ def valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2):
         if id_cliente != cliente_doc.id:
             return "existe_cliente"
     
-    tel_principal = ClienteTelefono.objects.filter(telefono=tel1).first()
-    if tel_principal:
-        if tel_principal.cliente_id != id_cliente:
-            return "existe_tel_principal"
+    # tel_principal = ClienteTelefono.objects.filter(telefono=tel1).first()
+    # if tel_principal:
+    #     if tel_principal.cliente_id != id_cliente:
+    #         return "existe_tel_principal"
     
-    tel_secundario = ClienteTelefono.objects.filter(telefono=tel2).first()
-    if tel_secundario:
-        if tel_secundario.cliente_id != id_cliente:
-            return "existe_tel_secundario"
+    # tel_secundario = ClienteTelefono.objects.filter(telefono=tel2).first()
+    # if tel_secundario:
+    #     if tel_secundario.cliente_id != id_cliente:
+    #         return "existe_tel_secundario"
         
-    correo_princ = ClienteCorreo.objects.filter(correo=correo1).first()
-    if correo_princ:
-        if correo_princ.cliente_id != id_cliente:
-            return "existe_correo_principal"
+    # correo_princ = ClienteCorreo.objects.filter(correo=correo1).first()
+    # if correo_princ:
+    #     if correo_princ.cliente_id != id_cliente:
+    #         return "existe_correo_principal"
 
-    correo_sec = ClienteCorreo.objects.filter(correo=correo2).first()
-    if correo_sec:
-        if correo_sec.cliente_id != id_cliente:
-            return "existe_correo_secundario"
+    # correo_sec = ClienteCorreo.objects.filter(correo=correo2).first()
+    # if correo_sec:
+    #     if correo_sec.cliente_id != id_cliente:
+    #         return "existe_correo_secundario"
 
 def validar_personal(documento,telefono,correo):
     personal = Personal.objects.filter(documento=documento).first()

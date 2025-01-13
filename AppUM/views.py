@@ -1123,17 +1123,18 @@ def alta_cliente(req):
                 correo_secundario = None
             
             doc_compuesto = tipo_doc + str(doc)
-            existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
+            # existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
+            existe_cliente = valid_cliente(doc_compuesto)
             if existe_cliente == "existe_cliente":
                 return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El cliente ya existe"})
-            elif existe_cliente == "existe_telefono_1":
-                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
-            elif existe_cliente == "existe_telefono_2":
-                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
-            elif existe_cliente == "existe_correo_1":
-                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
-            elif existe_cliente == "existe_correo_2":
-                return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
+            # elif existe_cliente == "existe_telefono_1":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
+            # elif existe_cliente == "existe_telefono_2":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
+            # elif existe_cliente == "existe_correo_1":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
+            # elif existe_cliente == "existe_correo_2":
+                # return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
             elif telefono_principal == telefono_secundario:
                 return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"Los numeros de teléfono no pueden ser iguales"})
             elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
@@ -1191,23 +1192,24 @@ def modificacion_cliente(req,id_cliente):
 
             correo1 = correo1.lower()
             correo2 = correo2.lower()
-            valid_cliente = valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2)
+            # valid_cliente = valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2)
+            valid_cliente = valid_cliente_mod(id_cliente,documento)
             if valid_cliente == "existe_cliente":
                 contexto = contexto_para_cliente(id_cliente,"El documento ingresado ya existe")
                 return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
             
-            elif valid_cliente == "existe_tel_principal":
-                contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
-                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_tel_secundario":
-                contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
-                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_correo_principal":
-                contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
-                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_correo_secundario":
-                contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
-                return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_tel_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_tel_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
             elif tel1 == tel2:
                 contexto = contexto_para_cliente(id_cliente,"Los telefonos no pueden ser iguales")
                 return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
@@ -1225,9 +1227,12 @@ def modificacion_cliente(req,id_cliente):
                 if tel2:
                     tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
                     checkbox = 'convert_to_tel1' in req.POST    
-                    if tel2_actual.telefono != tel2:
-                        #SI EL TEL2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL2
-                        tel2_actual.delete()
+                    if tel2_actual:
+                        if tel2_actual.telefono != tel2:
+                            #SI EL TEL2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL2
+                            tel2_actual.delete()
+                            insert_cliente_telefono(tel2,0,id_cliente)
+                    else:
                         insert_cliente_telefono(tel2,0,id_cliente)
                     if checkbox:
                         tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
@@ -1235,22 +1240,37 @@ def modificacion_cliente(req,id_cliente):
                         tel1_actual.principal = 0
                         tel2_actual.save()
                         tel1_actual.save()
+                else:
+                    tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    if tel2_actual:
+                        tel2_actual.delete()
+
 
                 if req.POST['correo_1']:
                     correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
-                    if correo1_actual.correo != correo1:
-                        #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
-                        correo1_actual.delete()
+                    if correo1_actual:
                         correo1 = correo1.lower()
-                        insert_cliente_correo(correo1,1,id_cliente)
+                        if correo1_actual.correo != correo1:
+                            #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
+                            correo1_actual.delete()
+                            insert_cliente_correo(correo1,1,id_cliente)
+                        else:
+                            insert_cliente_correo(correo1,1,id_cliente)
+                else:
+                    correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
+                    if correo1_actual:
+                        correo1_actual.delete()
                 
                 if req.POST['correo_2']:
                     correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
                     checkbox_correo = 'convert_to_correo1' in req.POST
-                    if correo2_actual.correo != correo2:
-                        #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
-                        correo2_actual.delete()
+                    if correo2_actual:
                         correo2 = correo2.lower()
+                        if correo2_actual.correo != correo2:
+                            #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
+                            correo2_actual.delete()
+                            insert_cliente_correo(correo2,0,id_cliente)
+                    else:
                         insert_cliente_correo(correo2,0,id_cliente)
                     
                     if checkbox_correo:
@@ -1259,6 +1279,10 @@ def modificacion_cliente(req,id_cliente):
                         correo1_actual.principal = 0 
                         correo1_actual.save()
                         correo2_actual.save()
+                else:
+                    correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    if correo2_actual:
+                        correo2_actual.delete()
                 
                 f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
                 f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
@@ -3541,14 +3565,14 @@ def alta_cliente_taller(req):
             existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
             if existe_cliente == "existe_cliente":
                 return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El cliente ya existe"})
-            elif existe_cliente == "existe_telefono_1":
-                return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
-            elif existe_cliente == "existe_telefono_2":
-                return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
-            elif existe_cliente == "existe_correo_1":
-                return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
-            elif existe_cliente == "existe_correo_2":
-                return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
+            # elif existe_cliente == "existe_telefono_1":
+            #     return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
+            # elif existe_cliente == "existe_telefono_2":
+            #     return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
+            # elif existe_cliente == "existe_correo_1":
+            #     return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
+            # elif existe_cliente == "existe_correo_2":
+            #     return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
             elif telefono_principal == telefono_secundario:
                 return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"Los numeros de teléfono no pueden ser iguales"})
             elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
@@ -3610,18 +3634,18 @@ def modificacion_cliente_taller(req,id_cliente):
                 contexto = contexto_para_cliente(id_cliente,"El documento ingresado ya existe")
                 return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
             
-            elif valid_cliente == "existe_tel_principal":
-                contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
-                return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_tel_secundario":
-                contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
-                return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_correo_principal":
-                contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
-                return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
-            elif valid_cliente == "existe_correo_secundario":
-                contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
-                return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_tel_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
+            #     return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_tel_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
+            #     return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
+            #     return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
+            #     return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
             elif tel1 == tel2:
                 contexto = contexto_para_cliente(id_cliente,"Los telefonos no pueden ser iguales")
                 return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)

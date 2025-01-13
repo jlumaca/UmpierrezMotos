@@ -81,13 +81,13 @@ class Cliente(models.Model):
 
 class ClienteCorreo(models.Model):
     cliente = models.ForeignKey(Cliente, related_name='cliente_correo', on_delete=models.CASCADE, null=True)
-    correo = models.CharField(max_length=100, unique=True)
+    correo = models.CharField(max_length=100)
     principal = models.BooleanField(default=True)
     
 
 class ClienteTelefono(models.Model):
     cliente = models.ForeignKey(Cliente, related_name='cliente_telefono', on_delete=models.CASCADE, null=True)
-    telefono = models.CharField(max_length=10,unique=True)
+    telefono = models.CharField(max_length=10)
     principal = models.BooleanField(default=True)
    
 

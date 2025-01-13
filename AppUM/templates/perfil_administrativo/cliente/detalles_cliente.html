@@ -137,73 +137,101 @@
                         <td>
                             {% if item.libreta or item.compra_venta or item.certificado_venta or item.facturas %}
                                 {% if item.libreta %}
-                                    <a href="{{ item.libreta }}" target="_blank">
-                                        <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
-                                            <i class="fas fa-file-alt"></i> Libreta
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.libreta }}" target="_blank">
+                                            <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
+                                                <i class="fas fa-file-alt"></i> Libreta
+                                            </button>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" title="Eliminar Libreta" onclick="mostrarConfirmacionLibreta('{{ item.moto.id }}')">
+                                            <i class="fas fa-times"></i>
                                         </button>
-                                    </a>
+                                    </div>
                                 {% endif %}
                                 {% if item.compra_venta %}
-                                    <a href="{{ item.compra_venta }}" target="_blank">
-                                        <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
-                                            <i class="fas fa-file-contract"></i> Compra-Venta
-                                        </button>
-                                    </a>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.compra_venta }}" target="_blank">
+                                            <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
+                                                <i class="fas fa-file-contract"></i> Compra-Venta
+                                            </button>
+                                        </a>
+                                    </div>
                                 {% endif %}
                                 {% if item.certificado_venta %}
-                                    <a href="{{ item.certificado_venta }}" target="_blank">
-                                        <button class="btn btn-sm btn-secondary" title="Ver Certificado de Venta">
-                                            <i class="fas fa-certificate"></i> Certificado
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.certificado_venta }}" target="_blank">
+                                            <button class="btn btn-sm btn-secondary" title="Ver Certificado de Venta">
+                                                <i class="fas fa-certificate"></i> Certificado
+                                            </button>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" title="Eliminar Certificado" onclick="mostrarConfirmacionCertificado('{{ item.moto.id }}')">
+                                            <i class="fas fa-times"></i>
                                         </button>
-                                    </a>
+                                    </div>
                                 {% endif %}
-
                                 {% if item.facturas %}
-                                    <a href="{{ item.facturas }}" target="_blank">
-                                        <button class="btn btn-sm btn-dark" title="Ver Factura">
-                                            <i class="fas fa-receipt"></i> Factura
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.facturas }}" target="_blank">
+                                            <button class="btn btn-sm btn-dark" title="Ver Factura">
+                                                <i class="fas fa-receipt"></i> Factura
+                                            </button>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" title="Eliminar Factura" onclick="mostrarConfirmacionFactura('{{ item.moto.id }}')">
+                                            <i class="fas fa-times"></i>
                                         </button>
-                                    </a>
+                                    </div>
                                 {% endif %}
-
                             {% else %}
-                                <p>SIN DOCUMENTACION</p>
+                                <p>SIN DOCUMENTACIÓN</p>
                             {% endif %}
-                            
                         </td>
+                        
+                        
                         <td>
-                        <a href="{% url 'DetallesCuotas' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                        {% if item.tipo == "R" %}
-                        <a href=""><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
-                        {% endif %}
-                        {% if not item.certificado_venta %}
-                        <button class="btn btn-sm btn-warning" onclick="toggleFormulario('{{ forloop.counter }}')"><i class="fas fa-upload"></i> Certificado</button>
-                        {% endif %}
-                        {% if not item.libreta %}
-                        <button class="btn btn-sm btn-warning" onclick="toggleLibreta('{{ forloop.counter }}')">
-                            <i class="fas fa-book"></i> Libreta
-                        </button>
-                        {% endif %}
-                        {% if not item.facturas %}
-                            <button class="btn btn-sm btn-warning" onclick="toggleFactura('{{ forloop.counter }}')">
-                                <i class="fas fa-book"></i> Factura
+                            <a href="{% url 'DetallesCuotas' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                            {% if not item.libreta %}
+                                <button class="btn btn-sm btn-warning" onclick="toggleLibreta('{{ forloop.counter }}')">
+                                    <i class="fas fa-book"></i> Libreta
+                                </button>
+                            {% endif %}
+                            {% if not item.facturas %}
+                                <button class="btn btn-sm btn-warning" onclick="toggleFactura('{{ forloop.counter }}')">
+                                    <i class="fas fa-book"></i> Factura
+                                </button>
+                            {% endif %}
+                            <button class="btn btn-sm btn-warning" onclick="toggleCCV('{{ forloop.counter }}')">
+                                <i class="fas fa-book"></i> Generar CCV
                             </button>
-                        {% endif %}
+                            {% if item.moto.moto__estado == "Nueva" %}
+                                <a href="{% url 'CargarCertificado' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i>Generar CV</button></a>
+                            {% endif %}
+                    </td>
+                    </tr>
+
+                    <tr id="confirmacion-row-libreta-{{ item.moto.id }}" class="d-none">
+                        <td colspan="3" class="text-center text-danger">
+                            <p>¿Estás seguro de que deseas borrar la libreta de propiedad asociada a esta venta?</p>
+                            <a href="{% url 'BorrarDocumentacion' item.moto.id 'Libreta' %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionLibreta('{{ item.moto.id }}')">Cancelar</button>
                         </td>
                     </tr>
-                    <tr id="formulario-certificado-{{ forloop.counter }}" style="display: none;"  class="formulario-certificado">
-                        <td colspan="4">
-                            <form method="post" enctype="multipart/form-data" action="{% url 'CargarCertificado' item.moto.id %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="certificado" class="form-label">Subir certificado:</label>
-                                    <input type="file" class="form-control" id="certificado" name="certificado_venta" required>
-                                </div>
-                                <button type="submit" class="btn btn-success">Guardar</button>
-                                <button type="button" class="btn btn-secondary" onclick="toggleFormulario('{{ forloop.counter }}')">Cancelar</button>
-                            </form>
+
+                    <tr id="confirmacion-row-factura-{{ item.moto.id }}" class="d-none">
+                        <td colspan="3" class="text-center text-danger">
+                            <p>¿Estás seguro de que deseas borrar la factura BikeUp asociada a esta venta?</p>
+                            <a href="{% url 'BorrarDocumentacion' item.moto.id 'Factura' %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionFactura('{{ item.moto.id }}')">Cancelar</button>
                         </td>
                     </tr>
+
+                    <tr id="confirmacion-row-certificado-{{ item.moto.id }}" class="d-none">
+                        <td colspan="3" class="text-center text-danger">
+                            <p>¿Estás seguro de que deseas borrar el certificado de venta BikeUp asociado a esta venta?</p>
+                            <a href="{% url 'BorrarDocumentacion' item.moto.id 'Certificado' %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionCertificado('{{ item.moto.id }}')">Cancelar</button>
+                        </td>
+                    </tr>
+                    
                     <tr id="formulario-libreta-{{ forloop.counter }}" style="display: none;"  class="formulario-libreta">
                         <td colspan="4">
                             <form method="post" enctype="multipart/form-data" action="{% url 'CargarLibreta' item.moto.id %}">
@@ -227,6 +255,27 @@
                                 </div>
                                 <button type="submit" class="btn btn-success">Guardar</button>
                                 <button type="button" class="btn btn-secondary" onclick="toggleFactura('{{ forloop.counter }}')">Cancelar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr id="formulario-ccv-{{ forloop.counter }}" style="display: none;"  class="formulario-ccv">
+                        <td colspan="4">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'GenerarCCV' item.moto.moto__id item.moto.cliente__id  %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="precio" class="form-label">"Pagaderos de la siguiente forma:..."</label>
+                                    <textarea class="form-control" name="texto_pagaderos" id="texto_pagaderos" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">Guardar</button>
+                            </form>
+                            <form method="post" enctype="multipart/form-data" action="{% url 'CargarCCV' item.moto.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="certificado" class="form-label">Subir CCV:</label>
+                                    <input type="file" class="form-control" id="libreta" name="ccv_venta" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">Guardar</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleCCV('{{ forloop.counter }}')">Cancelar</button>
                             </form>
                         </td>
                     </tr>
@@ -317,6 +366,15 @@ function toggleFormulario(id) {
         }
     }
 
+    function toggleCCV(id) {
+        const formulario = document.getElementById(`formulario-ccv-${id}`);
+        if (formulario.style.display === "none" || formulario.style.display === "") {
+            formulario.style.display = "table-row";
+        } else {
+            formulario.style.display = "none";
+        }
+    }
+
     function mostrar_div_fondos(){
         var fondos_cliente = document.getElementById("fondos_cliente");
 
@@ -327,6 +385,57 @@ function toggleFormulario(id) {
         var fondos_cliente = document.getElementById("fondos_cliente");
 
         fondos_cliente.style.display = "none";
+    }
+
+    function mostrarConfirmacionLibreta(cvId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-libreta-${cvId}`);
+    confirmacionRow.classList.remove("d-none");
+    }
+
+    function cancelarEliminacionLibreta(cvId) {
+        // Ocultar el mensaje de confirmación
+        const confirmacion = document.getElementById(`confirmacion-row-libreta-${cvId}`);
+        confirmacion.classList.add('d-none');
+    }
+
+    function mostrarConfirmacionFactura(cvId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-factura-${cvId}`);
+    confirmacionRow.classList.remove("d-none");
+    }
+
+    function cancelarEliminacionFactura(cvId) {
+        // Ocultar el mensaje de confirmación
+        const confirmacion = document.getElementById(`confirmacion-row-factura-${cvId}`);
+        confirmacion.classList.add('d-none');
+    }
+
+    function mostrarConfirmacionCertificado(cvId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-certificado-${cvId}`);
+    confirmacionRow.classList.remove("d-none");
+    }
+
+    function cancelarEliminacionCertificado(cvId) {
+        // Ocultar el mensaje de confirmación
+        const confirmacion = document.getElementById(`confirmacion-row-certificado-${cvId}`);
+        confirmacion.classList.add('d-none');
     }
 </script>
 {% endblock %}

@@ -66,6 +66,12 @@ urlpatterns = [
      path('cargar_certificado/<int:id_cv>', views.cargar_certificado,name="CargarCertificado"),
      path('cargar_libreta/<int:id_cv>', views.cargar_libreta,name="CargarLibreta"),
      path('cargar_factura/<int:id_cv>', views.cargar_factura,name="CargarFactura"),
+     path('generar_ccv/<int:id_moto>/<int:id_cliente>', views.generar_compromiso_compra_venta,name="GenerarCCV"),
+     path('cargar_ccv/<int:id_cv>', views.cargar_ccv,name="CargarCCV"),
+
+     path('borrar_documentacion/<int:id_cv>/<str:tipo>', views.borrar_documentacion,name="BorrarDocumentacion"),
+
+     #generar_compromiso_compra_venta(req,id_moto,id_cliente)
 
 
      path('personal', views.vista_personal,name="Personal"),

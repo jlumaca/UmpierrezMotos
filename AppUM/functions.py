@@ -16,6 +16,13 @@ import os
 from django.core.files import File
 import json
 from django.core.mail import send_mail
+from docx.shared import Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+import io
+from django.http import HttpResponse
+from num2words import num2words
+
 
 def departamento_matricula(matricula):
     primer_letra = matricula[0:1:1]
@@ -1065,3 +1072,177 @@ def json_para_servicio(id_s):
         json_tareas
     ]
     return data
+
+def generar_compromiso_compra_venta(req,id_moto,id_cliente):
+    # try:
+        cliente = Cliente.objects.get(id=id_cliente)
+        moto = Moto.objects.get(id=id_moto)
+        telefono_cliente = ClienteTelefono.objects.filter(cliente=cliente,principal=1).first()
+        telefono = telefono_cliente.telefono
+        numero_letra = num2words(moto.precio, lang='es')
+        matricula_padron_moto = Matriculas.objects.filter(moto_id=id_moto).first()
+        matricula = matricula_padron_moto.matricula if matricula_padron_moto else ".............................."
+        padron = matricula_padron_moto.padron if matricula_padron_moto else ".............................."
+        departamento = departamento_matricula(matricula) if matricula_padron_moto else ".............................."
+
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        nombre_apellido_personal = usuario_actual.nombre + " " + usuario_actual.apellido
+        longitud_doc_personal = len(usuario_actual.documento)
+        doc_num_personal = ""
+        # print("MATRICULA ES: " + matricula)
+        for i in range(2,longitud_doc_personal):
+            doc_num_personal = doc_num_personal + cliente.documento[i]
+        
+        if not req.POST['texto_pagaderos']:
+            pagaderos = "........................................................................................................................"
+        else:
+            pagaderos = req.POST['texto_pagaderos']
+        # tercero = req.POST['texto_tercero']
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'documentacion/compra_venta')
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+   
+        plantilla_path = os.path.join(settings.BASE_DIR, 'media', 'COMPROMISO_COMPRA_VENTA.docx')
+        
+        # Crear el documento Word a partir del archivo de plantilla
+        doc = Document(plantilla_path)
+
+        locale.setlocale(locale.LC_TIME, 'spanish')
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime("%d de %B de %Y")
+        longitud_doc = len(cliente.documento)
+        doc_num = ""
+        # print("MATRICULA ES: " + matricula)
+        for i in range(2,longitud_doc):
+            doc_num = doc_num + cliente.documento[i]
+        
+        # domicilio = cliente.domicilio.upper()
+        if moto.contiene_num_motor:
+            numero_motor = moto.num_motor
+        else:
+            numero_motor = "SIN NUMERO DE MOTOR"
+
+        if moto.contiene_num_chasis:
+            numero_chasis = moto.num_chasis
+        else:
+            numero_chasis = "SIN NUMERO DE CHASIS"
+        for p in doc.paragraphs:
+            for run in p.runs:
+                reemplazado = False  # Variable para rastrear si hubo reemplazo en este run
+                if 'personal_nombre_apellido' in run.text:
+                    run.text = run.text.replace('personal_nombre_apellido', nombre_apellido_personal)
+                    reemplazado = True
+                if 'personal_documento' in run.text:
+                    run.text = run.text.replace('personal_documento', doc_num_personal)
+                    reemplazado = True
+                if 'OTRO_NOMBRE' in run.text:
+                    run.text = run.text.replace('OTRO_NOMBRE', matricula)
+                    reemplazado = True
+                if 'MATRICULA_DPTO' in run.text:
+                    # print("ENTRA")
+                    run.text = run.text.replace('MATRICULA_DPTO', departamento)
+                    reemplazado = True
+                if 'padron_numero' in run.text:
+                    print("ENTRA")
+                    run.text = run.text.replace('padron_numero', str(padron))
+                    reemplazado = True
+                if 'FECHA_ACTUAL' in run.text:
+                    run.text = run.text.replace('FECHA_ACTUAL', fecha_formateada)
+                    reemplazado = True
+                if 'NOMBRE_CLIENTE' in run.text:
+                    run.text = run.text.replace('NOMBRE_CLIENTE', cliente.nombre + " " + cliente.apellido)
+                    reemplazado = True
+                if 'DOCUMENTO_CLIENTE' in run.text:
+                    run.text = run.text.replace('DOCUMENTO_CLIENTE', doc_num)
+                    reemplazado = True
+                if 'DOMICILIO_CLIENTE' in run.text:
+                    run.text = run.text.replace('DOMICILIO_CLIENTE', cliente.domicilio)
+                    reemplazado = True
+                if 'TELEFONO_CLIENTE' in run.text:
+                    run.text = run.text.replace('TELEFONO_CLIENTE', telefono)
+                    reemplazado = True
+                if 'MOTO_TIPO' in run.text:
+                    run.text = run.text.replace('MOTO_TIPO', moto.tipo)
+                    reemplazado = True
+                if 'MOTO_MARCA' in run.text:
+                    run.text = run.text.replace('MOTO_MARCA', moto.marca)
+                    reemplazado = True
+                if 'MOTO_MODELO' in run.text:
+                    run.text = run.text.replace('MOTO_MODELO', moto.modelo)
+                    reemplazado = True
+                if 'MOTO_MOTOR' in run.text:
+                    run.text = run.text.replace('MOTO_MOTOR', str(moto.motor))
+                    reemplazado = True
+                if 'MOTO_ANIO' in run.text:
+                    run.text = run.text.replace('MOTO_ANIO', str(moto.anio))
+                    reemplazado = True
+                if 'MOTO_NUM_MOTOR' in run.text:
+                    run.text = run.text.replace('MOTO_NUM_MOTOR', numero_motor)
+                    reemplazado = True
+                if 'MOTO_NUM_CHASIS' in run.text:
+                    run.text = run.text.replace('MOTO_NUM_CHASIS', numero_chasis)
+                    reemplazado = True
+                if 'PRECIO_MOTO' in run.text:
+                    run.text = run.text.replace('PRECIO_MOTO', str(moto.precio))
+                    reemplazado = True
+                if 'PRECIO_LETRAS' in run.text:
+                    run.text = run.text.replace('PRECIO_LETRAS', numero_letra)
+                    reemplazado = True
+                if 'PAGADEROS' in run.text:
+                    run.text = run.text.replace('PAGADEROS', pagaderos)
+                    reemplazado = True
+                
+                # if 'DEPARTAMENTO_SUS' in run.text:
+                #     if matricula_padron_moto:
+                #         run.text = run.text.replace('DEPARTAMENTO_SUS', departamento)
+                #         reemplazado = True
+                #     else:
+                #         run.text = run.text.replace('DEPARTAMENTO_SUS', "….......................................")
+                #         reemplazado = True
+                # if 'PADRON_SUS' in run.text:
+                #     if matricula_padron_moto:
+                #         run.text = run.text.replace('PADRON_SUS', padron)
+                #         reemplazado = True
+                #     else:
+                #         run.text = run.text.replace('PADRON_SUS', "................................")
+                #         reemplazado = True
+
+
+                # Solo aplica formato si hubo reemplazo en este run
+                if reemplazado:
+                    run.font.name = "Calibri"
+                    run.font.size = Pt(11)
+
+                    # Configuración adicional para compatibilidad con Word
+                    r = run._element
+                    rPr = r.get_or_add_rPr()
+                    rFonts = OxmlElement("w:rFonts")
+                    rFonts.set(qn("w:ascii"), "Calibri")
+                    rFonts.set(qn("w:hAnsi"), "Calibri")
+                    rFonts.set(qn("w:eastAsia"), "Calibri")
+                    rFonts.set(qn("w:cs"), "Calibri")
+                    rPr.append(rFonts)     
+
+        nombre_archivo = f"{moto.id}_{moto.marca}_{moto.modelo}_{cliente.nombre}_{cliente.apellido}_COMPRA_VENTA"
+        docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
+        doc.save(docx_file_path)
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        # Configurar la respuesta
+        response = HttpResponse(
+            buffer,
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{moto.id}_{cliente.nombre}_compra_venta.docx"'
+        return response
+
+        # ruta_archivo = convertir_docx_a_pdf(docx_file_path,nombre_archivo,id_cv)
+        # if os.path.exists(docx_file_path):
+        #     os.remove(docx_file_path)
+    # except Exception as e:
+    #     pass

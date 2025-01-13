@@ -203,7 +203,7 @@
                                 <i class="fas fa-book"></i> Generar CCV
                             </button>
                             {% if item.moto.moto__estado == "Nueva" %}
-                                <a href="{% url 'CargarCertificado' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i>Generar CV</button></a>
+                                <a href="{% url 'CargarCertificado' item.moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-book"></i>Generar CV</button></a>                         
                             {% endif %}
                     </td>
                     </tr>

@@ -242,6 +242,17 @@ class RepuestosPiezasServicios(models.Model):
     repuestopieza = models.ForeignKey(RepuestosPiezas, related_name='rp_servicios', on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=0)
 
+class ClienteFondos(models.Model):
+    cliente = models.ForeignKey(Cliente, related_name='cliente_fondos', on_delete=models.CASCADE, null=True)
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    ingreso_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    total_pesos = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    fecha = models.DateField()
+    ingreso_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    total_dolares = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    tipo = models.CharField(max_length=10,default=True,null=True)
+    metodo = models.CharField(max_length=20, blank=True)
+    comprobante = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
 
 
 

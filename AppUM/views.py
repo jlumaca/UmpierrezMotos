@@ -1416,6 +1416,7 @@ def ficha_cliente(req,id_cliente):
             'factura_documento': ca.factura_documento.url if ca.factura_documento else None
         })
     page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
+    fondos = ClienteFondos.objects.filter(cliente=cliente)
     return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,
                                                                              "tel1":tel_1,
                                                                              "tel2":tel_2,
@@ -1423,34 +1424,65 @@ def ficha_cliente(req,id_cliente):
                                                                              "correo2":c_2,
                                                                              "page_obj":page_obj,
                                                                              "page_obj_accesorio":page_obj_accesorio,
+                                                                             "fondos":fondos
                                                                             #  "show_acciones": show_acciones
                                                                              })
 
 def fondos_cliente(req,id_cliente):
-    try:
-        cliente = Cliente.objects.get(id=id_cliente)
+    # try:
+        tipo = req.POST['accion_fondo']
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = dolar.precio_dolar_tienda
-        if req.POST['moneda_fondos'] == "Pesos":
-            fondo_pesos = int(cliente.fondo_pesos) + int(req.POST['monto_fondos'])
-            fondo_dolares = int(fondo_pesos / precio_dolar)
-            # cliente.fondo_pesos = int(cliente.fondo_pesos) + int(req.POST['monto_fondos'])
-
-        else:
-            fondo_dolares = int(cliente.fondo_dolares) + int(req.POST['monto_fondos'])
-            fondo_pesos = int(fondo_dolares * precio_dolar)
-            # cliente.fondo_dolares = int(cliente.fondo_dolares) + int(req.POST['monto_fondos'])
         
-        cliente.fondo_pesos = fondo_pesos
-        cliente.fondo_dolares = fondo_dolares
-        # print("FONDO PESOS ES: " +str(fondo_pesos))
-        # print("FONDO DOLARES ES: " +str(fondo_dolares))
-        cliente.save()
-        messages.success(req, "Fondos agregados correctamente.")
+        if req.POST['moneda_fondos'] == "Pesos":
+            ingreso_pesos = int(req.POST['monto_fondos'])
+            ingreso_dolares = int(ingreso_pesos) / float(precio_dolar)
+        else:
+            ingreso_dolares = int(req.POST['monto_fondos'])
+            ingreso_pesos = int(ingreso_dolares) * float(precio_dolar)
+        ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).first()
+        if ult_fondo:
+            ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
+            total_pesos = int(ult_fondo.total_pesos)
+            total_dolares = int(ult_fondo.total_dolares)
+            monto = int(req.POST['monto_fondos'])
+            if (tipo == "Retiro" and req.POST['moneda_fondos'] == "Pesos" and monto > total_pesos) or (tipo == "Retiro" and req.POST['moneda_fondos'] == "Dolares" and monto > total_dolares):
+                messages.error(req, "El retiro no puede exceder el total acumulado en precio o dolares.")
+                return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+        else:
+            total_pesos = 0
+            total_dolares = 0
+        
+        if tipo == "Ingreso":
+            total_pesos = total_pesos + int(ingreso_pesos)
+            total_dolares = total_dolares + int(ingreso_dolares)
+        else:
+            total_pesos = total_pesos - int(ingreso_pesos)
+            total_dolares = total_dolares - int(ingreso_dolares)
+            ingreso_pesos = 0 - int(ingreso_pesos)
+            ingreso_dolares = 0 - int(ingreso_dolares)
+        
+        comprobante = req.FILES.get('comprobante_fondo') if req.FILES.get('comprobante_fondo') else None
+        
+        nuevo_fondo = ClienteFondos(
+            cliente_id = id_cliente,
+            moneda = req.POST['moneda_fondos'],
+            ingreso_pesos = int(ingreso_pesos),
+            ingreso_dolares = int(ingreso_dolares),
+            fecha = datetime.now(),
+            total_pesos = total_pesos,
+            total_dolares = total_dolares,
+            tipo = tipo,
+            metodo = req.POST['metodo_elegido'] if tipo == "Ingreso" else "----------",
+            comprobante = comprobante 
+        )
+        #metodo_elegido
+        nuevo_fondo.save()
+        messages.success(req, "Fondos actualizados correctamente.")
         return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
 
-    except Exception as e:
-        pass
+    # except Exception as e:
+    #     pass
 
 @admin_required
 def cargar_certificado(req,id_cv):

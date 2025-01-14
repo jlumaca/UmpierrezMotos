@@ -43,7 +43,14 @@
 </style>
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-{{ message.tags }} mt-3">
+            {% if message.tags == "error" %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == "success" %}
+                <i class="fas fa-check-circle"></i>
+            {% endif %}
+            {{ message }}
+        </div>
     {% endfor %}
 {% endif %}
 <div class="table-container" id="clienteDetails">
@@ -92,6 +99,23 @@
         <form method="post" enctype="multipart/form-data" action="{% url 'FondosCliente' cliente.id %}">
             {% csrf_token %}
             <div class="mb-3">
+                <label for="certificado" class="form-label">Tipo:</label>
+                <select class="form-control" name="accion_fondo" id="tipo_mov" onchange="ocultar_en_form_fondos()">
+                    <option value="Ingreso">Ingreso</option>
+                    <option value="Retiro">Retiro</option>
+                </select>
+            </div>
+            <div class="mb-3" id="forma_pago">
+                <label for="documento" class="form-label">Metodo elegido</label>
+                <div class="input-group">
+                    <select class="form-control" name="metodo_elegido">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Débito">Débito</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
                 <label for="certificado" class="form-label">Moneda:</label>
                 <select class="form-control" name="moneda_fondos" id="tipo_busqueda">
                     <option value="Pesos">Pesos</option>
@@ -102,9 +126,90 @@
                 <label for="certificado" class="form-label">Monto:</label>
                 <input type="number" name="monto_fondos" class="form-control" placeholder="Monto" required>
             </div>
+            <div class="mb-3" id="comprobante_pago">
+                <label for="libreta_propiedad" class="form-label">Comprobante</label>
+                <input type="file" class="form-control" name="comprobante_fondo">
+            </div>
             <button type="submit" class="btn btn-success">Guardar</button>
             <a onclick="ocultar_div_fondos()"><button type="button" class="btn btn-secondary">Cancelar</button></a>
         </form>
+        <br>
+        <h4>Historial de depósitos</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="row">Fecha</th>
+                    <th scope="row">Tipo</th>
+                    <th scope="row">Moneda</th>
+                    <th scope="row">Metodo</th>
+                    <th scope="row">Comprobante</th>
+                    <th scope="row">Entrega/Retiro</th>
+                    <th scope="row">Total pesos</th>
+                    <th scope="row">Total dólares</th> 
+                </tr>
+            </thead>
+            <tbody>
+                {% if fondos %}
+                    {% for fondo in fondos %}
+                        <tr>
+                            <td>
+                                {{ fondo.fecha }}
+                            </td>
+                            <td>
+                                {% if fondo.tipo == "Ingreso" %}
+                                    <span class="badge bg-success">{{ fondo.tipo }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ fondo.tipo }}</span>
+                                {% endif %}
+                                
+                            </td>
+                            <td>
+                                {{ fondo.moneda }}
+                            </td>
+                            <td>
+                                {% if fondo.tipo == "Ingreso" %}
+                                {{ fondo.metodo }}
+                                {% else %}
+                                -------------
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if fondo.tipo == "Ingreso" %}
+                                    {% if fondo.comprobante %}
+                                        <a href="{{ fondo.comprobante.url }}" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-file-alt"></i>
+                                        </a>
+                                    {% else %}
+                                        <p>SIN COMPROBANTE</p>
+                                    {% endif %}
+                                {% else %}
+                                -------------
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if fondo.moneda == "Pesos" %}
+                                    {{ fondo.ingreso_pesos }}
+                                {% else %}
+                                    {{ fondo.ingreso_dolares }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ fondo.total_pesos }}
+                            </td>
+                            <td>
+                                {{ fondo.total_dolares }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">
+                            No hay registros de fondos.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
     <h4>Motos</h4>
     <table class="table">
@@ -436,6 +541,20 @@ function toggleFormulario(id) {
         // Ocultar el mensaje de confirmación
         const confirmacion = document.getElementById(`confirmacion-row-certificado-${cvId}`);
         confirmacion.classList.add('d-none');
+    }
+
+    function ocultar_en_form_fondos(){
+        var forma_pago = document.getElementById("forma_pago")
+        var comprobante_pago = document.getElementById("comprobante_pago")
+        var tipo_mov = document.getElementById("tipo_mov").value;
+
+        if (tipo_mov === "Ingreso"){
+            forma_pago.style.display = "block";
+            comprobante_pago.style.display = "block";
+        }else{
+            forma_pago.style.display = "none";
+            comprobante_pago.style.display = "none";
+        }
     }
 </script>
 {% endblock %}

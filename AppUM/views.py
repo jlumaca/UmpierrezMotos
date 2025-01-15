@@ -1417,6 +1417,16 @@ def ficha_cliente(req,id_cliente):
         })
     page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
     fondos = ClienteFondos.objects.filter(cliente=cliente)
+    existen_fondos = ClienteFondos.objects.filter(cliente=cliente).first()
+    if existen_fondos:
+        ultimo_fondo = ClienteFondos.objects.filter(cliente=cliente).latest('id')
+        total_pesos = ultimo_fondo.total_pesos
+        total_dolares = ultimo_fondo.total_dolares
+    else:
+        total_pesos = 0
+        total_dolares = 0
+
+
     return render(req,"perfil_administrativo/cliente/detalles_cliente.html",{"cliente":cliente,
                                                                              "tel1":tel_1,
                                                                              "tel2":tel_2,
@@ -1424,8 +1434,9 @@ def ficha_cliente(req,id_cliente):
                                                                              "correo2":c_2,
                                                                              "page_obj":page_obj,
                                                                              "page_obj_accesorio":page_obj_accesorio,
-                                                                             "fondos":fondos
-                                                                            #  "show_acciones": show_acciones
+                                                                             "fondos":fondos,
+                                                                             "total_pesos":float(total_pesos),
+                                                                             "total_dolares":float(total_dolares)
                                                                              })
 
 def fondos_cliente(req,id_cliente):

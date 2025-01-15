@@ -127,6 +127,7 @@ class Notificaciones(models.Model):
 class NotificacionPersonal(models.Model):
     personal = models.ForeignKey(Personal, related_name='personal_notificacion', on_delete=models.CASCADE)
     notificacion = models.ForeignKey(Notificaciones, related_name='notificacion_personal', on_delete=models.CASCADE)
+    leido = models.BooleanField(default=0)
 
 class Caja(models.Model):
     apertura = models.DateTimeField()

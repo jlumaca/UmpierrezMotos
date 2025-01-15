@@ -248,3 +248,22 @@ def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual
         precio_moto_actual = valor_precio_en_financiamiento
     )
     financiamiento.save()
+
+def insert_notificaciones(descripcion,tipo):
+    nueva_notificacion = Notificaciones(
+        descripcion = descripcion,
+        fecha = datetime.now(),
+        tipo = tipo
+    )
+
+    nueva_notificacion.save()
+
+    personal = Personal.objects.all()
+
+    for p in personal:
+        notificar_personal = NotificacionPersonal(
+            notificacion_id = nueva_notificacion.id,
+            personal_id = p.id,
+            leido = 0
+        )
+        notificar_personal.save()

@@ -1420,3 +1420,27 @@ def contexto_venta_moto(req,id_moto,mensaje_error,documento):
                         "error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "}
     
         return contexto
+
+def mi_funcion_diaria():
+    clientes = Cliente.objects.all()
+    hoy = date.today()  # Obtiene la fecha actual
+    dia_hoy = hoy.day
+    mes_hoy = hoy.month
+    for cliente in clientes:
+        if cliente.fecha_nacimiento and (cliente.fecha_nacimiento.day, cliente.fecha_nacimiento.month) == (hoy.day, hoy.month):
+            tipo = "Cumpleaños"
+            descripcion = f"¡Hoy es el cumpleaños de {cliente.nombre} {cliente.apellido}!"
+            # insert_notificaciones(descripcion,tipo)
+    
+    pagos_atrasados = CuotasMoto.objects.all()
+
+    for pagos in pagos_atrasados:
+        venta = ComprasVentas.objects.get(id=pagos.venta_id)
+        ult_pago = CuotasMoto.objects.filter(venta=venta).latest('id')
+        if pagos.fecha_prox_pago and (pagos.fecha_prox_pago.day, pagos.fecha_prox_pago.month) == (hoy.day, hoy.month) and pagos.id == ult_pago.id:
+            cliente = Cliente.objects.get(id=venta.cliente_id)
+            moto = Moto.objects.get(id=venta.moto_id)
+            tipo = "Atraso en cuota"
+            descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo}"
+            print(descripcion)
+            

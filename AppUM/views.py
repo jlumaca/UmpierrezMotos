@@ -2431,8 +2431,8 @@ def reservar_moto(req,id_moto,id_cliente):
                 else:
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
                     resto_pesos = resto_dolares * precio_dolar
-        fecha_prox_pago = datetime.now() + relativedelta(months=1)
-        insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña")
+        # fecha_prox_pago = datetime.now() + relativedelta(months=1)
+        insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña")
         moto.pertenece_tienda = 0
         moto.save()
         messages.success(req, "Moto reservada con éxito.")

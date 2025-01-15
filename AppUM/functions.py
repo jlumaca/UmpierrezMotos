@@ -427,7 +427,7 @@ def obtener_compras_accesorios(req,id_venta):
                     'comprobante_pago'
                 )
             )
-            
+            #
         res_pagos = []
         i = 1
         for resultado in resultados_cuotas:
@@ -438,9 +438,57 @@ def obtener_compras_accesorios(req,id_venta):
                     'mostrar_boton': i == len(resultados_cuotas)           
                     })
                     i = i + 1
+        venta = ClienteAccesorio.objects.get(id=id_venta)
+        cliente = Cliente.objects.get(id=venta.cliente_id)
+        telefono = ClienteTelefono.objects.filter(cliente=cliente,principal=1).first()
+        cliente_data = {
+        "cliente": cliente.nombre + " " + cliente.apellido,
+        "telefono": telefono.telefono,
+        "direccion": cliente.domicilio,
+        }
+        cliente_json = json.dumps(cliente_data)
+
+        accesorio = Accesorio.objects.get(id=venta.accesorio_id)
+        talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
+        moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
+
+        if accesorio.talle == "Sin talle":
+            detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo
+        else:
+            detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo + " Talle " + accesorio.talle
+        
+        accesorio_data = {
+            "detalle":detalle,
+            "precio": moneda + str(accesorio.precio)
+        }
+
+        accesorio_json = json.dumps(accesorio_data)
+        
+        pagos = CuotasAccesorios.objects.filter(venta_id=id_venta).order_by('-id')
+        if pagos:
+            p_pagos_data = [
+                    {   
+                        "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
+                        "moneda":cuota.moneda,
+                        "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
+                        "metodo":cuota.metodo_pago
+                    }
+                    for cuota in pagos
+                ]
+            pagos_accesorios_json = json.dumps(p_pagos_data)
+        else:
+            pagos_accesorios_json = None
+
         page_obj = funcion_paginas_varias(req,res_pagos)
 
-        return page_obj
+        data = [
+            page_obj,
+            cliente_json,
+            accesorio_json,
+            pagos_accesorios_json
+        ]
+
+        return data
 
 def obtener_compras_motos(req,id_cv):
         resultados_cuotas = (
@@ -791,6 +839,7 @@ def json_para_resumen_pagos(moto,id_cv):
                 # "financiacion":f"{primer_financiacion.cantidad_cuotas} x {primer_financiacion.moneda_cuota} {primer_financiacion.valor_cuota}"
             }
         ]
+    #
     # if financiaciones:
     #     fin_data = [
     #         {
@@ -881,7 +930,7 @@ def json_para_resumen_pagos(moto,id_cv):
 
 def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
     datos = obtener_detalles_cuotas_comunes(id_cv)
-    
+    #
     
     refinanciaciones = Financiamientos.objects.filter(venta_id=id_cv,inicial = 0).first()
     existen_refinanciaciones = True if refinanciaciones else False #SIRVE PARA MOSTRAR LOS DATOS DE LAS REFINANCIACIONES EN CASO DE QUE EXISTAN

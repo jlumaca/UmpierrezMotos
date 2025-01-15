@@ -49,6 +49,10 @@
     <a href="#" class="btn btn-primary mb-3" onclick="mostrar_form_pago_accesorio()">
         <i class="fas fa-money-check-alt"></i> Pagar
     </a>
+
+    <a id="imprimir-resumen" class="btn btn-primary mb-3" onclick="prueba()" data-id-cv="{{ id_cv }}">
+        <i class="fas fa-print"></i> Imprimir Resumen
+    </a>
     
 
     <div id="div_form_pago" style="display: none;">
@@ -231,5 +235,143 @@
     valorInput.addEventListener('input', calcularRecargo);
     porcentajeInput.addEventListener('input', calcularRecargo);
 });
+
+
+    const cliente = JSON.parse('{{ cliente_json|escapejs }}');
+    const detalle = JSON.parse('{{ accesorio_json|escapejs }}');
+    const pagos_json = JSON.parse('{{pagos_json|default:"{}"|escapejs }}');
+
+    console.log(cliente);
+    console.log(detalle);    
+    console.log(pagos_json);
+
+    function prueba(){
+    generarResumen(cliente,detalle,pagos_json);
+}
+
+
+function generarResumen(cliente, detalle, p_pagos) {
+    // Construir el encabezado de la tabla con estilos en línea para impresión
+    let resumenHTML = `
+        <html>
+        <head>
+            <title>Resumen de Compra</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    color: #000;
+                    background-color: #fff;
+                    margin: 20px;
+                }
+                h5 {
+                    text-align: left;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 5px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    border: 1px solid #000;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f0f0f0;
+                    font-weight: bold;
+                }
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+            </style>
+        </head>
+        <body>
+            <div style="display: flex; align-items: center; justify-content: center; background-color: #f7ca4d; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+    <div style="text-align: center;">
+        <img src="http://localhost:8000/media/logos/LOGO_CATALOGO.png" 
+             style="width: auto; max-width: 100%; max-height: 100px;" 
+             alt="Logo de la tienda">
+    </div>
+</div>
+
+
+           
+                
+            
+            
+            <div class="cliente-info">
+                <p><strong>CLIENTE:</strong> ${cliente.cliente || "N/A"}</p>
+                <p><strong>CONTACTO:</strong> ${cliente.telefono || "N/A"}</p>
+                <p><strong>DIRECCION:</strong> ${cliente.direccion || "N/A"}</p>
+            </div>
+            <h5>DATOS DE LA COMPRA</h5>
+            <table>
+                <thead>
+                    
+                    <tr>
+                        <th>DETALLE</th>
+                        <th>PRECIO</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+          
+                <tr>
+                        <td>${detalle.detalle || "N/A"}</td>
+                        <td>${detalle.precio}</td>
+                
+                </tr>
+                </tbody>
+            </table>
+            <h5>PAGOS</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>METODO DE PAGO</th>
+                        <th>MONEDA</th>
+                        <th>MONTO</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+
+       `;             
+       if (p_pagos && p_pagos.length > 0) {
+        p_pagos.forEach(p_p => {
+            resumenHTML += `
+                <tr>
+                    <td>${p_p.fecha || "N/A"}</td>
+                    <td>${p_p.metodo || "N/A"}</td>
+                    <td>${p_p.moneda || "N/A"}</td>
+                    <td>${p_p.monto ? p_p.monto.toFixed(0) : "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        // Mostrar mensaje si no hay cuotas
+        resumenHTML += `
+            <tr>
+                <td colspan="5" style="text-align: center;">No se encontraron pagos.</td>
+            </tr>
+        `;
+    }
+
+    // Cerrar tabla y añadir pie de página
+    resumenHTML += `
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `;
+
+    // Crear una ventana nueva para imprimir
+    const ventana = window.open("", "_blank");
+    ventana.document.write(resumenHTML);
+    ventana.document.close();
+    ventana.print();
+}
 </script>
 {% endblock %}

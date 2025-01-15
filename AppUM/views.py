@@ -978,12 +978,17 @@ def cliente_venta_accesorio(req,id_accesorio):
         pass
 
 def pagos_accesorio(req,id_venta):
-    try: 
-        page_obj = obtener_compras_accesorios(req,id_venta)
+    # try: 
+        data = obtener_compras_accesorios(req,id_venta)
         c_v = ClienteAccesorio.objects.get(id=id_venta)
-        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"page_obj":page_obj,"id_venta":id_venta,"id_cliente":c_v.cliente_id})
-    except Exception as e:
-        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"page_obj":data[0],
+                                                                                    "id_venta":id_venta,
+                                                                                    "id_cliente":c_v.cliente_id,
+                                                                                    "cliente_json":data[1],
+                                                                                    "accesorio_json":data[2],
+                                                                                    "pagos_json":data[3]})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
 
 def alta_paga_accesorio(req,id_venta):
     page_obj = obtener_compras_accesorios(req,id_venta)

@@ -1267,17 +1267,23 @@ def modificacion_cliente(req,id_cliente):
                         correo1_actual.delete()
                 
                 if req.POST['correo_2']:
-                    correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
-                    checkbox_correo = 'convert_to_correo1' in req.POST
-                    if correo2_actual:
-                        correo2 = correo2.lower()
-                        if correo2_actual.correo != correo2:
-                            #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
-                            correo2_actual.delete()
-                            insert_cliente_correo(correo2,0,id_cliente)
+                    tiene_correo = ClienteCorreo.objects.filter(cliente_id=id_cliente).first()
+                    if not tiene_correo:
+                        insert_cliente_correo(correo2,1,id_cliente)
                     else:
-                        insert_cliente_correo(correo2,0,id_cliente)
+                        correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        if correo2_actual:
+                            correo2 = correo2.lower()
+                            if correo2_actual.correo != correo2:
+                                #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
+                                correo2_actual.delete()
+                                insert_cliente_correo(correo2,0,id_cliente)
+                        else:
+                            insert_cliente_correo(correo2,0,id_cliente)
                     
+                    
+                    
+                    checkbox_correo = 'convert_to_correo1' in req.POST
                     if checkbox_correo:
                         correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
                         correo2_actual.principal = 1

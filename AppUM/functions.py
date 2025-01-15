@@ -1248,3 +1248,126 @@ def generar_compromiso_compra_venta(req,id_moto,id_cliente):
         #     os.remove(docx_file_path)
     # except Exception as e:
     #     pass
+
+def contexto_venta_moto(req,id_moto,mensaje_error,documento):
+        documento = documento
+        cliente = Cliente.objects.filter(documento=documento).first()
+        if cliente:
+            existe_reserva_moto = ComprasVentas.objects.filter(moto_id=id_moto,tipo="R").first()
+            if (existe_reserva_moto) and (existe_reserva_moto.cliente_id != cliente.id):
+                contexto = {"datos_moto":False,
+                        "error_message":"La moto se encuentra reservada a nombre de otro cliente"}
+            else:
+                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+                tel_1 = tel1.telefono
+                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+                if tel2:
+                    tel_2 = tel2.telefono
+                else:
+                    tel_2 = None
+
+                if correo1:
+                    c_1 = correo1.correo
+                else:
+                    c_1 = None
+                
+                if correo2:
+                    c_2 = correo1.correo
+                else:
+                    c_2 = None
+                moto = Moto.objects.get(id=id_moto)
+
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = dolar.precio_dolar_tienda
+
+                existen_fondos = ClienteFondos.objects.filter(cliente=cliente).first()
+                if existen_fondos:
+                    existen_fondos = ClienteFondos.objects.filter(cliente=cliente).latest('id')
+                    if moto.moneda_precio == "Pesos":
+                        fondos = int(existen_fondos.total_pesos)
+                    else:
+                        fondos = int(existen_fondos.total_dolares)
+                else:
+                    fondos = 0
+                
+                cv = ComprasVentas.objects.filter(cliente_id=cliente.id,moto_id=id_moto,tipo="R").first()
+                if cv:
+                    #SI EXISTE UNA RESERVA DE LA MOTO A NOMBRE DEL CLIENTE Y CON PAGOS REALIZADOS
+                    pagos = CuotasMoto.objects.filter(venta_id=cv.id)
+                    if pagos.exists():
+                        suma_total_pesos = 0
+                        suma_total_dolares = 0
+                        for pago in pagos:
+                            suma_total_pesos = suma_total_pesos + int(pago.valor_pago_pesos)
+                            suma_total_dolares = suma_total_dolares + int(pago.valor_pago_dolares)
+                        
+                        if moto.moneda_precio == "Pesos":
+                            #SI EL PAGO FUE EN PESOS, EL CAMPO DOLARES ES 0
+                            #SI EL PAGO FUE EN DOLARES, EL CAMPO PESOS ES 0
+                            suma_total_dolares = float(suma_total_dolares * precio_dolar)
+                            total = int(suma_total_dolares + suma_total_pesos)
+                        else:
+                            suma_total_pesos = float(suma_total_pesos / precio_dolar)
+                            total = int(suma_total_dolares + suma_total_pesos)
+                    else: 
+                        total = 0
+                else:
+                    total = 0
+                
+                precio_moto = int(moto.precio) - int(total) - int(fondos)
+                if precio_moto < 0:
+                    precio_moto = 0
+                
+
+                existe_matricula = Matriculas.objects.filter(moto_id=id_moto).first()
+                if existe_matricula:
+                    matricula = existe_matricula.matricula 
+                    padron = existe_matricula.padron
+                    departamento = departamento_matricula(matricula)
+                else:
+                    matricula = None
+                    departamento = None
+                    padron = None
+
+                #RENDERIZAR PAPEL COMPRA-VENTA
+                numero_letra = num2words(moto.precio, lang='es').upper()
+                fecha = date.today()
+                logo_cv = Logos.objects.get(id=2)
+                logo_cv_url = req.build_absolute_uri(logo_cv.logo_UM.url) if logo_cv.logo_UM else None
+                precio = int(moto.precio) if moto.precio else 0
+                usuario = req.user
+                vendedor = Personal.objects.filter(usuario=usuario.username).first()
+                nom_ape_vend = vendedor.nombre + " " + vendedor.apellido
+                longitud_doc = len(vendedor.documento)
+                doc_num = ""
+                for i in range(2,longitud_doc):
+                    doc_num = doc_num + vendedor.documento[i]
+                # print(numero_letra)
+                contexto = {"datos_moto":True,
+                            "cliente":cliente,
+                            "moto":moto,
+                            "tel1":tel_1,
+                            "tel2":tel_2,
+                            "correo1":c_1,
+                            "correo2":c_2,
+                            "num_letra":numero_letra,
+                            "matricula":matricula,
+                            "padron":padron,
+                            "precio":precio,
+                            "departamento":departamento if departamento else None,
+                            "fecha":fecha,
+                            "logo_cv":logo_cv_url,
+                            "vendedor_nombre":nom_ape_vend,
+                            "vendedor_ci":doc_num,
+                            "fondos":precio_moto,
+                            "total_fondos":fondos,
+                            "error_message":mensaje_error if mensaje_error else None}
+            # return render(req,"perfil_administrativo/motos/venta_moto.html",{})
+        else:
+            contexto = {"datos_moto":False,
+                        "error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "}
+    
+        return contexto

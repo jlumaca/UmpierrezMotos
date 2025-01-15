@@ -139,9 +139,16 @@
             </div>
 
             <div class="mb-3">
+                <label for="recargo" class="form-label">Cantidad destinada de los fondos</label>
+                <input value="{{ total_fondos }}" type="number" class="form-control" name="cantidad_destinada" id="precio_sin_recargo" required>
+            </div>
+            
+
+            <div class="mb-3">
                 <input type="checkbox" id="sin_num_motor" name="incluir_fondos" class="form-check-input" checked>
                 <label for="toggleMatr" class="form-check-label">Incluir los fondos en la compra de la moto</label>
             </div>
+            
             
             <!-- <div class="mb-3">
                 <label for="recargo" class="form-label">Recargo</label>

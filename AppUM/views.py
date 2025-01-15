@@ -1715,108 +1715,8 @@ def form_venta_moto(req,id_moto):
             tipo_doc = req.POST['tipo_documento']
             doc = req.POST['documento']
             documento = tipo_doc + str(doc)
-            cliente = Cliente.objects.filter(documento=documento).first()
-            if cliente:
-                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
-                tel_1 = tel1.telefono
-                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
-
-                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
-                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
-                if tel2:
-                    tel_2 = tel2.telefono
-                else:
-                    tel_2 = None
-
-                if correo1:
-                    c_1 = correo1.correo
-                else:
-                    c_1 = None
-                
-                if correo2:
-                    c_2 = correo1.correo
-                else:
-                    c_2 = None
-                moto = Moto.objects.get(id=id_moto)
-
-                dolar = PrecioDolar.objects.get(id=1)
-                precio_dolar = dolar.precio_dolar_tienda
-
-                if moto.moneda_precio == "Pesos":
-                    fondos = int(cliente.fondo_pesos)
-                else:
-                    fondos = int(cliente.fondo_dolares)
-                
-                cv = ComprasVentas.objects.filter(cliente_id=cliente.id,moto_id=id_moto,tipo="R").first()
-                if cv:
-                    #SI EXISTE UNA RESERVA DE LA MOTO A NOMBRE DEL CLIENTE Y CON PAGOS REALIZADOS
-                    pagos = CuotasMoto.objects.filter(venta_id=cv.id)
-                    if pagos.exists():
-                        suma_total_pesos = 0
-                        suma_total_dolares = 0
-                        for pago in pagos:
-                            suma_total_pesos = suma_total_pesos + int(pago.valor_pago_pesos)
-                            suma_total_dolares = suma_total_dolares + int(pago.valor_pago_dolares)
-                        
-                        if moto.moneda_precio == "Pesos":
-                            suma_total_dolares = float(suma_total_dolares * precio_dolar)
-                            total = int(suma_total_dolares + suma_total_pesos)
-                        else:
-                            suma_total_pesos = float(suma_total_pesos / precio_dolar)
-                            total = int(suma_total_dolares + suma_total_pesos)
-                    else: 
-                        total = 0
-                else:
-                    total = 0
-                
-                precio_moto = int(moto.precio) - int(total) - int(fondos)
-                if precio_moto < 0:
-                    precio_moto = 0
-                
-
-                existe_matricula = Matriculas.objects.filter(moto_id=id_moto).first()
-                if existe_matricula:
-                    matricula = existe_matricula.matricula 
-                    padron = existe_matricula.padron
-                    departamento = departamento_matricula(matricula)
-                else:
-                    matricula = None
-                    departamento = None
-                    padron = None
-
-                #RENDERIZAR PAPEL COMPRA-VENTA
-                numero_letra = num2words(moto.precio, lang='es').upper()
-                fecha = date.today()
-                logo_cv = Logos.objects.get(id=2)
-                logo_cv_url = req.build_absolute_uri(logo_cv.logo_UM.url) if logo_cv.logo_UM else None
-                precio = int(moto.precio) if moto.precio else 0
-                usuario = req.user
-                vendedor = Personal.objects.filter(usuario=usuario.username).first()
-                nom_ape_vend = vendedor.nombre + " " + vendedor.apellido
-                longitud_doc = len(vendedor.documento)
-                doc_num = ""
-                for i in range(2,longitud_doc):
-                    doc_num = doc_num + vendedor.documento[i]
-                # print(numero_letra)
-                return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":True,
-                                                                                "cliente":cliente,
-                                                                                "moto":moto,
-                                                                                "tel1":tel_1,
-                                                                                "tel2":tel_2,
-                                                                                "correo1":c_1,
-                                                                                "correo2":c_2,
-                                                                                "num_letra":numero_letra,
-                                                                                "matricula":matricula,
-                                                                                "padron":padron,
-                                                                                "precio":precio,
-                                                                                "departamento":departamento if departamento else None,
-                                                                                "fecha":fecha,
-                                                                                "logo_cv":logo_cv_url,
-                                                                                "vendedor_nombre":nom_ape_vend,
-                                                                                "vendedor_ci":doc_num,
-                                                                                "fondos":precio_moto})
-            else:
-                return render(req,"perfil_administrativo/motos/venta_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+            contexto = contexto_venta_moto(req,id_moto,None,documento)
+            return render(req,"perfil_administrativo/motos/venta_moto.html",contexto)
         else:
             return render(req,"perfil_administrativo/motos/venta_moto.html",{})
     except Exception as e:
@@ -1828,82 +1728,150 @@ def form_venta_moto(req,id_moto):
 
 @admin_required
 def venta_moto(req,id_moto,id_cliente):
-    # try:
-        moto = Moto.objects.get(id=id_moto)
-        moto.pertenece_tienda = 0
-        # moto.precio_final = req.POST['precio_recargo']
-        moto.save()
-        compra_venta = req.FILES.get('compra_venta_moto')
-        
-        existe_reserva = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
-        if existe_reserva:
-            # existe_reserva.delete() NO BORRAR YA QUE EN CASO DE HABER UN PAGO EN CUOTASMOTOS (SEÑA) SE BORRARIA TAMBIEN
-            # ADEMAS LA RESERVA NO ES UN DATO QUE SE NECESITE CONSERVAR UNA VEZ VENDIDA LA MOTO
-            existe_reserva.tipo = "V"
-            existe_reserva.fecha_compra = datetime.now()
-            existe_reserva.compra_venta = compra_venta
-            existe_reserva.forma_de_pago = req.POST['forma_pago']
-            existe_reserva.save()
-            id_cv = existe_reserva.id
-        else:
-            id_cv = insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
+    try:
         cliente = Cliente.objects.get(id=id_cliente)
-        checkbox_incluir_fondos = 'incluir_fondos' in req.POST
-        if checkbox_incluir_fondos:
-            dolar = PrecioDolar.objects.get(id=1)
-            precio_dolar = dolar.precio_dolar_tienda
-            total_fondos_pesos = int(cliente.fondo_pesos)
-            total_fondos_dolares = int(cliente.fondo_dolares)
-            precio_moto = int(moto.precio)
+        fondos = int(req.POST['cantidad_destinada'])
+        moto = Moto.objects.get(id=id_moto)
+        fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).first()
+        precio_moto = int(moto.precio)
+        cv = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
 
-            if (total_fondos_pesos < precio_moto) and (moto.moneda_precio == "Pesos"):
-                nuevo_fondo_pesos = 0
-                nuevo_fondo_dolares = 0 
-                resto_pesos = precio_moto - total_fondos_pesos
-                resto_dolares = int(precio_moto / precio_dolar) - total_fondos_dolares
-                
-            elif (total_fondos_dolares < precio_moto) and (moto.moneda_precio == "Dolares" or moto.moneda_precio == "Dólares"):
-                nuevo_fondo_pesos = 0
-                nuevo_fondo_dolares = 0
-                resto_dolares = precio_moto - total_fondos_dolares
-                resto_pesos = int(precio_moto * precio_dolar) - total_fondos_pesos
+        if fondos_cliente:
+            fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).latest('id')
+            #PERMITE QUE NO SE INGRESEN MAS FONDOS DE LOS DISPONIBLES
+            if moto.moneda_precio == "Pesos":
+                mostrar_error = fondos > fondos_cliente.total_pesos
+                mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad de fondos totales del cliente" if mostrar_error else None
             else:
+                mostrar_error = fondos > fondos_cliente.total_dolares
+                mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad de fondos totales del cliente" if mostrar_error else None
+        elif (fondos > precio_moto and moto.moneda_precio == "Pesos") or (fondos > precio_moto and moto.moneda_precio == "Dolares"):
+            #PERMITE QUE NO SE SUPERE EL PRECIO DE LA MOTO
+            mostrar_error = True
+            mensaje = "La cantidad de fondos destinada a la compra de la moto supera el precio de la moto"
+        elif not fondos_cliente and fondos > 0:
+            #PERMITE QUE NO SE INGRESEN FONDOS SI NO EXISTEN FONDOS A NOMBRE DEL CLIENTE
+            mostrar_error = True
+            mensaje = "El cliente no cuenta con fondos"
+        elif fondos < 0:
+            mostrar_error = True
+            mensaje = "La cantidad de fondos destinada a la compra de la moto es menor a 0"
+        elif cv:
+            existen_pagos = CuotasMoto.objects.filter(venta=cv).first()
+            if existen_pagos:
+                ultimo_pago = CuotasMoto.objects.filter(venta=cv).latest('id')
                 if moto.moneda_precio == "Pesos":
-                    nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio) 
-                    nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio / precio_dolar) 
-                    
-                    # nuevo_fondo_pesos = int(cliente.fondo_pesos) - int(moto.precio)
-                    # nuevo_fondo_dolares = int(cliente.fondo_dolares) - int(moto.precio / precio_dolar)
+                    mostrar_error = fondos > ultimo_pago.cant_restante_pesos
+                    mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad restante con los pagos realizados" if mostrar_error else None
                 else:
-                    nuevo_fondo_pesos = total_fondos_pesos - int(moto.precio * precio_dolar)
-                    nuevo_fondo_dolares = total_fondos_dolares - int(moto.precio)
-                resto_pesos = nuevo_fondo_pesos
-                resto_dolares = nuevo_fondo_dolares
+                    mostrar_error = fondos > ultimo_pago.cant_restante_dolares
+                    mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad restante con los pagos realizados" if mostrar_error else None
+        else:
+            mostrar_error = False
+
+        if mostrar_error:
+            contexto = contexto_venta_moto(req,id_moto,mensaje,cliente.documento)
+            return render(req,"perfil_administrativo/motos/venta_moto.html",contexto)
+        else:
             
-            #alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
-            ult_cuota_moto = CuotasMoto.objects.filter(venta_id=id_cv).first()
-            if ult_cuota_moto:
-                ult_cuota_moto = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
-                # ult_cuota_moto.cant_restante_pesos = int(ult_cuota_moto.cant_restante_pesos) - total_fondos_pesos
-                # ult_cuota_moto.cant_restante_dolares = int(ult_cuota_moto.cant_restante_dolares) - total_fondos_pesos
-                # ult_cuota_moto.save()
-                resto_pesos = int(ult_cuota_moto.cant_restante_pesos) - total_fondos_pesos
-                resto_dolares = int(ult_cuota_moto.cant_restante_dolares) - total_fondos_dolares
+            moto.pertenece_tienda = 0
+            # moto.precio_final = req.POST['precio_recargo']
+            moto.save()
+            compra_venta = req.FILES.get('compra_venta_moto')
             
-            alta_cuota_funcion(req,None,id_cv,resto_dolares,resto_pesos,moto.moneda_precio,None,precio_dolar,total_fondos_dolares,total_fondos_pesos,None,"Fondos",False,"Entrega")
-            cliente.fondo_pesos = nuevo_fondo_pesos
-            cliente.fondo_dolares = nuevo_fondo_dolares
-            cliente.save()
-        
-        telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
-        # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
-        if moto.estado == "Nueva":
-            crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
-        #REDIRIGIR A LA FICHA DEL CLIENTE
-        messages.success(req, "Venta generada con éxito")
-        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-    # except Exception as e:
-    #     return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
+            existe_reserva = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente,tipo="R").first()
+            if existe_reserva:
+                # existe_reserva.delete() NO BORRAR YA QUE EN CASO DE HABER UN PAGO EN CUOTASMOTOS (SEÑA) SE BORRARIA TAMBIEN
+                # ADEMAS LA RESERVA NO ES UN DATO QUE SE NECESITE CONSERVAR UNA VEZ VENDIDA LA MOTO
+                existe_reserva.tipo = "V"
+                existe_reserva.fecha_compra = datetime.now()
+                existe_reserva.compra_venta = compra_venta
+                existe_reserva.forma_de_pago = req.POST['forma_pago']
+                existe_reserva.save()
+                id_cv = existe_reserva.id
+            else:
+                id_cv = insert_compras_ventas("V",None,id_cliente,id_moto,compra_venta,None,req.POST['forma_pago'])
+            
+            checkbox_incluir_fondos = 'incluir_fondos' in req.POST
+            if checkbox_incluir_fondos:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = dolar.precio_dolar_tienda
+                
+
+                #INSERT EN ClienteFondos COMO tipo = 'Retiro'
+                #TOMAR ULTIMO VALOR DE CUOTASMOTO
+                #CANTIDAD RESTANTE - FONDOS
+                #SI NO EXISTE CUOTASMOTO, RESTAR PRECIO MOTO - FONDOS
+                #INSERT EN CuotasMoto
+                fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).first()
+                if fondos_cliente and fondos > 0:
+                    if moto.moneda_precio == "Pesos":
+                        ingreso_pesos = fondos
+                        ingreso_dolares = fondos / float(precio_dolar)
+                        ingreso_pesos = 0 - ingreso_pesos
+                        ingreso_dolares = 0 - ingreso_dolares
+
+                        fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).latest('id')
+                        total_pesos = int(fondos_cliente.total_pesos) - fondos
+                        total_dolares = total_pesos / float(precio_dolar)
+                    else:
+                        ingreso_dolares = fondos
+                        ingreso_pesos = fondos * float(precio_dolar)
+                        ingreso_pesos = 0 - ingreso_pesos
+                        ingreso_dolares = 0 - ingreso_dolares
+                        
+                        fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).latest('id')
+                        total_dolares = int(fondos_cliente.total_dolares) - fondos
+                        total_pesos = total_dolares * float(precio_dolar)
+
+                
+
+                    nuevo_fondo = ClienteFondos(
+                                cliente_id = id_cliente,
+                                moneda = moto.moneda_precio,
+                                ingreso_pesos = int(ingreso_pesos),
+                                ingreso_dolares = int(ingreso_dolares),
+                                fecha = datetime.now(),
+                                total_pesos = int(total_pesos),
+                                total_dolares = int(total_dolares),
+                                tipo = "Retiro",
+                                metodo = "----------",
+                                comprobante = None 
+                            )
+                    nuevo_fondo.save()
+
+                    ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).first()
+                    if ult_cuota:
+                        #SI EXISTE UN PAGO, SE LE RESTAN LOS FONDOS DEL CLIENTE A LA CANTIDAD RESTANTE
+                        ult_cuota = CuotasMoto.objects.filter(venta_id=id_cv).latest('id')
+                        if moto.moneda_precio == "Pesos":
+                            resto_pesos = int(ult_cuota.cant_restante_pesos) - fondos
+                            resto_dolares = float(resto_pesos) / float(precio_dolar)
+                        else:
+                            resto_dolares = int(ult_cuota.cant_restante_dolares) - fondos
+                            resto_pesos = resto_dolares * float(precio_dolar)
+                        # alta_cuota_funcion(req,None,id_cv,int(resto_dolares),int(resto_pesos),moto.moneda_precio,None,float(precio_dolar),abs(ingreso_dolares),abs(ingreso_pesos),None,"Fondos",False,"Entrega")
+
+                    else:
+                        #SI NO EXISTEN PAGOS, SE LE RESTAN LOS FONDOS AL PRECIO DE LA MOTO Y SE INGRESA COMO PAGO DE LA MOTO EN CUOTASMOTO
+                        if moto.moneda_precio == "Pesos":
+                            resto_pesos = int(moto.precio) - fondos
+                            resto_dolares = float(resto_pesos) / float(precio_dolar)
+                        else:
+                            resto_dolares = int(moto.precio) - fondos
+                            resto_pesos = resto_dolares * float(precio_dolar)
+                    
+                    alta_cuota_funcion(req,None,id_cv,int(resto_dolares),int(resto_pesos),moto.moneda_precio,"Fondos",float(precio_dolar),abs(ingreso_dolares),abs(ingreso_pesos),None,"Fondos",False,"Entrega")
+
+            telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
+            # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
+            if moto.estado == "Nueva":
+                crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
+            #REDIRIGIR A LA FICHA DEL CLIENTE
+            messages.success(req, "Venta generada con éxito")
+            return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+    except Exception as e:
+        return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 @admin_required
 def vista_ventas(req):

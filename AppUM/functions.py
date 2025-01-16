@@ -449,7 +449,7 @@ def obtener_compras_accesorios(req,id_venta):
         cliente_json = json.dumps(cliente_data)
 
         accesorio = Accesorio.objects.get(id=venta.accesorio_id)
-        talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
+        # talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
         moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
 
         if accesorio.talle == "Sin talle":
@@ -1430,7 +1430,7 @@ def mi_funcion_diaria():
         if cliente.fecha_nacimiento and (cliente.fecha_nacimiento.day, cliente.fecha_nacimiento.month) == (hoy.day, hoy.month):
             tipo = "Cumpleaños"
             descripcion = f"¡Hoy es el cumpleaños de {cliente.nombre} {cliente.apellido}!"
-            # insert_notificaciones(descripcion,tipo)
+            insert_notificaciones(descripcion,tipo)
     
     pagos_atrasados = CuotasMoto.objects.all()
 
@@ -1441,6 +1441,16 @@ def mi_funcion_diaria():
             cliente = Cliente.objects.get(id=venta.cliente_id)
             moto = Moto.objects.get(id=venta.moto_id)
             tipo = "Atraso en cuota"
-            descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo}"
-            print(descripcion)
-            
+            descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo} Codigo {pagos.id}"
+            insert_notificaciones(descripcion,tipo)
+
+def cantidad_solicitudes_no_leidas(req):
+    if req.user.is_authenticated:
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        notificaciones = NotificacionPersonal.objects.filter(personal=usuario_actual,leido=0).count()
+    else:
+        notificaciones = 0
+    
+    return {'notificaciones': notificaciones}
+                

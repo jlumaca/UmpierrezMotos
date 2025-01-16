@@ -1261,6 +1261,8 @@ def modificacion_cliente(req,id_cliente):
                             insert_cliente_correo(correo1,1,id_cliente)
                         else:
                             insert_cliente_correo(correo1,1,id_cliente)
+                    else:
+                        insert_cliente_correo(correo1,1,id_cliente)
                 else:
                     correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
                     if correo1_actual:
@@ -2614,7 +2616,14 @@ def notificaciones_administrativo(req):
                 "acciones":acciones
             })
         
-        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"notificaciones":data}) 
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        notif_no_leidas = NotificacionPersonal.objects.filter(leido=0,personal=usuario_actual)
+        for notificacion in notif_no_leidas:
+            notificacion.leido = 1
+            notificacion.save()
+        
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"data":data}) 
     except Exception as e:
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
 

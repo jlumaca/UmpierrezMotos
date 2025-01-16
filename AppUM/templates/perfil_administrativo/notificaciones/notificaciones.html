@@ -66,8 +66,8 @@
     {% endif %}
 
     <div class="notificaciones-container">
-        {% if notificaciones %}
-            {% for notificacion in notificaciones %}
+        {% if data %}
+            {% for notificacion in data %}
             <div class="notificacion-card">
                 <div class="notificacion-titulo">
                     <i class="fas fa-bell"></i> {{ notificacion.notificacion.tipo }}

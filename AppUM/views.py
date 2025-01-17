@@ -1509,6 +1509,20 @@ def fondos_cliente(req,id_cliente):
             )
             #metodo_elegido
             nuevo_fondo.save()
+            caja = Caja.objects.filter(estado="Abierto").first()
+            
+            if req.POST['metodo_elegido'] == "Efectivo" and caja and req.POST['moneda_fondos'] == "Pesos":
+                cliente = Cliente.objects.get(id=id_cliente)
+                usuario = req.user
+                personal = Personal.objects.filter(usuario=usuario.username).first()
+                if tipo == "Ingreso":
+                    movimiento = "Ingreso"
+                    descripcion = f"Ingreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
+                else:
+                    movimiento = "Egreso"
+                    descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
+                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id)
+            #
             messages.success(req, "Fondos actualizados correctamente.")
             return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
 

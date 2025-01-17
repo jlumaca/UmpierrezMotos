@@ -2585,7 +2585,7 @@ def notificaciones_pagos_atrasados():
     pass
 
 def notificaciones_administrativo(req):
-    try:
+    # try:
         #notificaciones_cumples()
         # notificaciones = [
         # {
@@ -2604,12 +2604,41 @@ def notificaciones_administrativo(req):
         # "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
         #     }
         #     ]
-        notificaciones = Notificaciones.objects.all()
+
+        filter_option = req.GET.get('filter', 'all')
+        if filter_option == 'leidas':
+            # notificaciones = Notificaciones.objects.filter(leido=True).order_by('-id')  # Filtrar solo las leídas
+            notificaciones = (
+                NotificacionPersonal.objects
+                .filter(leido=True)
+                .values(
+                    'id',
+                    'notificacion__tipo', 
+                    'notificacion__fecha', 
+                    'notificacion__descripcion', 
+                     
+                )
+            ).order_by('-id')
+        else:
+            # notificaciones = Notificaciones.objects.all().order_by('-id')  # Mostrar todas las notificaciones
+            notificaciones = (
+                NotificacionPersonal.objects
+                .filter(leido=False)
+                .values(
+                    'id',
+                    'notificacion__tipo', 
+                    'notificacion__fecha', 
+                    'notificacion__descripcion', 
+                     
+                )
+            ).order_by('-id')
+        
+        #notificaciones = Notificaciones.objects.all().order_by('-id')
         data = []
         for notificacion in notificaciones:
-            if notificacion.tipo == "Atraso en pago":
+            if notificacion['notificacion__tipo'] == "Atraso en pago":
                 acciones = {"nombre": "Enviar correo", "url": ""}
-            elif notificacion.tipo == "Cumpleaños":
+            elif notificacion['notificacion__tipo'] == "Cumpleaños":
                 acciones = [{"nombre": "Ver detalle", "url": ""},]
             data.append({
                 "notificacion":notificacion,
@@ -2624,8 +2653,8 @@ def notificaciones_administrativo(req):
             notificacion.save()
         
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"data":data}) 
-    except Exception as e:
-        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
 
 @admin_required
 def arqueos(req):

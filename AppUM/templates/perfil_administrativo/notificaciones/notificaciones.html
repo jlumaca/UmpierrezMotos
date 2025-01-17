@@ -53,6 +53,16 @@
 <title>Notificaciones</title>
 <div class="container mt-4">
     <h3 class="mb-4">Notificaciones</h3>
+
+    <div class="d-flex justify-content-start mb-3">
+        <a href="?filter=all" class="btn btn-outline-primary {% if request.GET.filter == 'all' or not request.GET.filter %}active{% endif %}">
+            Nuevas
+        </a>
+        <a href="?filter=leidas" class="btn btn-outline-secondary {% if request.GET.filter == 'leidas' %}active{% endif %}">
+            Leídas
+        </a>
+    </div>
+
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-success">{{ message }}</div>
@@ -68,31 +78,30 @@
     <div class="notificaciones-container">
         {% if data %}
             {% for notificacion in data %}
-            <div class="notificacion-card">
-                <div class="notificacion-titulo">
-                    <i class="fas fa-bell"></i> {{ notificacion.notificacion.tipo }}
+                <div class="notificacion-card">
+                    <div class="notificacion-titulo">
+                        <i class="fas fa-bell"></i> {{ notificacion.notificacion.notificacion__tipo }}
+                    </div>
+                    <div class="notificacion-fecha">
+                        <i class="far fa-calendar-alt"></i> {{ notificacion.notificacion.notificacion__fecha }}
+                    </div>
+                    <div class="notificacion-descripcion">
+                        {{ notificacion.notificacion.notificacion__descripcion }}
+                    </div>
+                    <div class="acciones-notificacion">
+                        {% if notificacion.acciones %}
+                            {% for accion in notificacion.acciones %}
+                                <a href="{{ accion.url }}" class="btn btn-primary">
+                                    <i class="fas fa-link"></i> {{ accion.nombre }}
+                                </a>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="notificacion-fecha">
-                    <i class="far fa-calendar-alt"></i> {{ notificacion.notificacion.fecha }}
-                </div>
-                <div class="notificacion-descripcion">
-                    {{ notificacion.notificacion.descripcion }}
-                </div>
-                <div class="acciones-notificacion">
-                    {% if notificacion.acciones %}
-                        {% for accion in notificacion.acciones %}
-                            <a href="{{ accion.url }}" class="btn btn-primary">
-                                <i class="fas fa-link"></i> {{ accion.nombre }}
-                            </a>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
             {% endfor %}
         {% else %}
             <p class="text-center text-muted">No hay notificaciones en este momento.</p>
         {% endif %}
     </div>
-
 </div>
 {% endblock %}

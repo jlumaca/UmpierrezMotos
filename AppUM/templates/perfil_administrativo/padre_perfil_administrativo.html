@@ -54,7 +54,9 @@
                     <div class="notification-bell me-3">
                         <a href="{% url 'NotificacionesAdministrativo' %}" class="text-decoration-none">
                             <i class="fas fa-bell"></i>
+                            {% if notificaciones > 0 %}
                             <span class="notification-count" id="notificationCount">{{ notificaciones }}</span>
+                            {% endif %}
                         </a>
                     </div>
                 

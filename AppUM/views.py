@@ -696,11 +696,13 @@ def modificacion_moto(req,id_moto):
 
                     if req.POST['estado_moto'] == "nueva":
                         estado = "Nueva"
+                        moto_upd.kilometros = 0
                     else:
                         estado = "Usada"
+                        moto_upd.kilometros = req.POST['km_moto']
                         
                     moto_upd.estado = estado
-                    moto_upd.kilometros = req.POST['km_moto']
+                    
                     
                     # moto_upd.num_chasis = num_chasis
                     moto_upd.num_cilindros = req.POST['num_cilindros']

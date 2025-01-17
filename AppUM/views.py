@@ -694,7 +694,7 @@ def modificacion_moto(req,id_moto):
                     moto_upd.anio = req.POST['anio_moto']
                     moto_upd.tipo = req.POST['tipo_moto']
 
-                    if req.POST['estado_moto'] == "nueva":
+                    if req.POST['estado_moto'] == "Nueva":
                         estado = "Nueva"
                         moto_upd.kilometros = 0
                     else:

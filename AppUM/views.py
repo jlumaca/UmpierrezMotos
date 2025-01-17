@@ -1894,7 +1894,8 @@ def venta_moto(req,id_moto,id_cliente):
 
             telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
             # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
-            if moto.estado == "Nueva":
+            checkbox_generar_comprobante_venta = 'comprobante_venta' in req.POST
+            if checkbox_generar_comprobante_venta:
                 crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
             #REDIRIGIR A LA FICHA DEL CLIENTE
             messages.success(req, "Venta generada con éxito")

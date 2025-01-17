@@ -307,7 +307,7 @@
                             <button class="btn btn-sm btn-warning" onclick="toggleCCV('{{ forloop.counter }}')">
                                 <i class="fas fa-book"></i> Generar CCV
                             </button>
-                            {% if item.moto.moto__estado == "Nueva" and not item.certificado_venta %}
+                            {% if not item.certificado_venta %}
                                 <a href="{% url 'CargarCertificado' item.moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-book"></i>Generar CV</button></a>                         
                             {% endif %}
                     </td>

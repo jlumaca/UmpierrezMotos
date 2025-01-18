@@ -2621,13 +2621,14 @@ def notificaciones_administrativo(req):
         # "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
         #     }
         #     ]
-
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
         filter_option = req.GET.get('filter', 'all')
         if filter_option == 'leidas':
             # notificaciones = Notificaciones.objects.filter(leido=True).order_by('-id')  # Filtrar solo las leídas
             notificaciones = (
                 NotificacionPersonal.objects
-                .filter(leido=True)
+                .filter(leido=True,personal=usuario_actual)
                 .values(
                     'id',
                     'notificacion__tipo', 
@@ -2640,7 +2641,7 @@ def notificaciones_administrativo(req):
             # notificaciones = Notificaciones.objects.all().order_by('-id')  # Mostrar todas las notificaciones
             notificaciones = (
                 NotificacionPersonal.objects
-                .filter(leido=False)
+                .filter(leido=False,personal=usuario_actual)
                 .values(
                     'id',
                     'notificacion__tipo', 
@@ -2657,13 +2658,14 @@ def notificaciones_administrativo(req):
                 acciones = {"nombre": "Enviar correo", "url": ""}
             elif notificacion['notificacion__tipo'] == "Cumpleaños":
                 acciones = [{"nombre": "Ver detalle", "url": ""},]
+            else:
+                acciones = [{"nombre": "Ver detalle", "url": ""},]
             data.append({
                 "notificacion":notificacion,
                 "acciones":acciones
             })
         
-        usuario = req.user
-        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        
         notif_no_leidas = NotificacionPersonal.objects.filter(leido=0,personal=usuario_actual)
         for notificacion in notif_no_leidas:
             notificacion.leido = 1
@@ -3015,12 +3017,19 @@ def alta_servicio(req,id_moto,id_cliente):
         usuario = req.user
         usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
         mecanico_actual = Mecanico.objects.get(id=usuario_actual.id)
-        i = 0
-        for pieza in piezas_seleccionadas:
-            rp = RepuestosPiezas.objects.get(id=int(pieza))
-            if int(cantidades[i]) > int(rp.stock):
-                error_pieza = True
-                break
+        if piezas_seleccionadas:
+            i = 0
+            for pieza in piezas_seleccionadas:
+                rp = RepuestosPiezas.objects.get(id=int(pieza))
+                if int(cantidades[i]) > int(rp.stock):
+                    error_pieza = True
+                    break
+                else:
+                    error_pieza = False
+                    break
+        else:
+            error_pieza = False
+
         moto = Moto.objects.get(id=id_moto)
         cliente = Cliente.objects.get(id=id_cliente)
         usuario = req.user
@@ -3035,9 +3044,10 @@ def alta_servicio(req,id_moto,id_cliente):
         else:
             div_mecanicos = False
             mecanicos = False
-        if not servicios_seleccionados:
-            return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
-        elif not mecanicos_seleccionados and mecanico_actual.jefe:   
+        # if not servicios_seleccionados:
+        #     return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún servicio","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
+        # el
+        if not mecanicos_seleccionados and mecanico_actual.jefe:   
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"No has seleccionado ningún mecánico","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
         elif error_pieza:
             return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message_alta":"Algunos de los repuestos o piezas exceden el stock","datos_moto":True,"mecanicos":mecanicos if mecanicos else None,"moto":moto,"cliente":cliente,"div_mecanicos":div_mecanicos})
@@ -3068,21 +3078,24 @@ def alta_servicio(req,id_moto,id_cliente):
                     nuevo_stock = int(rp.stock) - int(cantidades[i])
                     rp.stock = nuevo_stock
                     rp.save()
+                    if rp.stock_critico >= rp.stock:
+                        insert_notificaciones(f"Hay poco stock de {rp.descripcion}","Bajo stock de pieza")
                     i = i + 1
 
 
 
-            for servicio in servicios_seleccionados:
-                # prueba = servicio.replace(" ","_")
-                # print(prueba)
-                # precio = req.POST[f'precio_{prueba}']
-                # print("PRUEBA: " + str(precio))
-                tareas_servicios = TareasServicios(
-                    tarea = servicio,
-                    servicio_id = nuevo_servicio.id,
-                    # precio = precio
-                )
-                tareas_servicios.save()
+            if servicios_seleccionados:
+                for servicio in servicios_seleccionados:
+                    # prueba = servicio.replace(" ","_")
+                    # print(prueba)
+                    # precio = req.POST[f'precio_{prueba}']
+                    # print("PRUEBA: " + str(precio))
+                    tareas_servicios = TareasServicios(
+                        tarea = servicio,
+                        servicio_id = nuevo_servicio.id,
+                        # precio = precio
+                    )
+                    tareas_servicios.save()
             
             if not mecanico_actual.jefe:
                 mecanicos_servicio = MecanicosServicios(
@@ -3363,6 +3376,8 @@ def agregar_repuesto_pieza_servicio(req,id_s):
                     nuevo_stock = int(rp.stock) - int(cantidades[i])
                     rp.stock = nuevo_stock
                     rp.save()
+                    if int(rp.stock_critico) >= int(rp.stock):
+                        insert_notificaciones(f"Hay poco stock de {rp.descripcion}","Bajo stock de pieza")
                     
                 # print("CANTIDAD DE " + str(pieza) + " ES " + str(cantidades[i]))
                 i = i + 1
@@ -3493,11 +3508,14 @@ def alta_repuesto(req):
     try:
         if req.method == "POST":
             stock = int(req.POST['stock_repuesto'])
+            stock_critico = int(req.POST['stock_critico'])
             precio_repuesto = int(req.POST['precio_repuesto'])
             if stock <= 0:
                 return render(req,"perfil_taller/repuestos/alta_repuesto.html",{"error_message":"El stock ingresado es incorrecto"})
             elif precio_repuesto < 0:
                 return render(req,"perfil_taller/repuestos/alta_repuesto.html",{"error_message":"El precio ingresado es incorrecto"})
+            elif stock_critico < 0:
+                return render(req,"perfil_taller/repuestos/alta_repuesto.html",{"error_message":"El stock crítico ingresado es incorrecto"})
             else:
                 foto = req.FILES.get('foto_repuesto')
                 nuevo_repuesto = RepuestosPiezas(
@@ -3505,7 +3523,8 @@ def alta_repuesto(req):
                     descripcion = req.POST['descripcion_repuesto'],
                     activo = 1,
                     precio = precio_repuesto,
-                    foto = foto
+                    foto = foto,
+                    stock_critico = stock_critico
                 )
                 nuevo_repuesto.save()
                 messages.success(req, "Repuesto ingresado con éxito.")
@@ -3532,25 +3551,36 @@ def modificacion_repuesto(req,id_rp):
     # try:
         repuesto = RepuestosPiezas.objects.get(id=id_rp)
         stock = int(repuesto.stock)
+        stock_critico = int(repuesto.stock_critico)
         precio = int(repuesto.precio)
         if req.method == "POST":
             stock_txt = int(req.POST['stock_repuesto'])
             precio_txt = int(req.POST['precio_repuesto'])
+            stock_critico_txt = int(req.POST['stock_critico_repuesto'])
             if stock_txt < 0:
                 return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
                                                                                         "stock":stock,
+                                                                                        "stock_critico":stock_critico,
                                                                                         "precio":precio,
                                                                                         "error_message":"El stock ingresado es incorrecto"})
             elif precio_txt < 0:
                 return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
                                                                                         "stock":stock,
+                                                                                        "stock_critico":stock_critico,
                                                                                         "precio":precio,
                                                                                         "error_message":"El precio ingresado es incorrecto"})
+            elif stock_critico_txt < 0:
+                return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,
+                                                                                        "stock":stock,
+                                                                                        "stock_critico":stock_critico,
+                                                                                        "precio":precio,
+                                                                                        "error_message":"El stock crítico ingresado es incorrecto"})
             else:
                 foto = req.FILES.get('foto_repuesto')
                 if foto:
                     repuesto.foto = foto
                 repuesto.stock = stock_txt
+                repuesto.stock_critico = stock_critico_txt
                 repuesto.descripcion = req.POST['descripcion_repuesto']
                 repuesto.precio = precio_txt
                 repuesto.save()
@@ -3558,7 +3588,7 @@ def modificacion_repuesto(req,id_rp):
                 return redirect('Repuestos')
         else:
             
-            return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,"stock":stock,"precio":precio})
+            return render(req,"perfil_taller/repuestos/modificacion_repuesto.html",{"data":repuesto,"stock":stock,"precio":precio,"stock_critico":stock_critico,})
     # except Exception as e:
     #     pass
 
@@ -3566,6 +3596,20 @@ def detalles_repuesto(req,id_rp):
     try:
         repuesto = RepuestosPiezas.objects.get(id=id_rp)
         return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto})
+    except Exception as e:
+        pass
+
+def stock_critico(req):
+    try:
+        repuestos = RepuestosPiezas.objects.filter(activo=1).order_by('-id')
+        data = []
+        for repuesto in repuestos:
+            if int(repuesto.stock) <= int(repuesto.stock_critico):
+                data.append({
+                    "repuesto":repuesto
+                })
+        page_obj = funcion_paginas_varias(req,data)
+        return render(req,"perfil_taller/stock_critico/stock_critico.html",{'page_obj': page_obj})
     except Exception as e:
         pass
 

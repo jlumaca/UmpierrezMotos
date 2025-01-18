@@ -223,6 +223,7 @@ class RepuestosPiezas(models.Model):
     stock = models.IntegerField(null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     foto = models.ImageField(null=True, blank=True, upload_to="repuestos_piezas/")
+    stock_critico = models.IntegerField(null=True)
     
 
 class Pedidos(models.Model):

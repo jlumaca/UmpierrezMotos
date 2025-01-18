@@ -156,6 +156,7 @@ urlpatterns = [
      path('baja_repuesto/<int:id_rp>', views.baja_repuesto,name="BajaRepuesto"),
      path('modificacion_repuesto/<int:id_rp>', views.modificacion_repuesto,name="ModificacionRepuesto"),
      path('detalles_repuesto/<int:id_rp>', views.detalles_repuesto,name="DetallesRepuesto"),
+     path('stock_critico', views.stock_critico,name="StockCritico"),
      path('estadisticas_taller', views.estadisticas_taller,name="EstadisticasTaller"),
      path('clientes_taller', views.clientes_taller,name="ClientesTaller"),
      path('busqueda_documento_taller', views.buscar_por_doc_taller,name="BusquedaDocumentoTaller"),

@@ -18,7 +18,12 @@
 
             <div class="mb-3">
                 <label for="marca" class="form-label">Stock</label>
-                <input value="{{ stock }}" type="text" class="form-control" name="stock_repuesto" id="marca" placeholder="Ingrese la marca" maxlength="20">
+                <input value="{{ stock }}" type="number" class="form-control" name="stock_repuesto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="marca" class="form-label">Stock critico</label>
+                <input value="{{ stock_critico }}" type="number" class="form-control" name="stock_critico_repuesto" id="marca" placeholder="Ingrese el stock critico" required>
             </div>
 
             <div class="mb-3">

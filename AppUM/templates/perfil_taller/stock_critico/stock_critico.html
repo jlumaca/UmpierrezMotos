@@ -1,0 +1,90 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert alert-success">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Stock crítico de repuestos y piezas</h3>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th>Stock</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for repuesto in page_obj %}
+            <!-- Filas de ejemplo de accesorios -->
+            <tr>
+                <td>{{ repuesto.repuesto.descripcion }}</td>
+                <td>{{ repuesto.repuesto.stock }}</td>
+            </tr>
+            
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de repuestos ni piezas disponibles.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="Primera">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+<script>
+//     function tipo_busqueda() {
+//         var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+
+//         var busqueda_tipo_inp = document.getElementById("busqueda_tipo");
+//         var busqueda_marca_modelo = document.getElementById("busqueda_marca_modelo");
+//         var busqueda_codigo = document.getElementById("busqueda_codigo");
+//         busqueda_tipo_inp.style.display = busqueda_tipo === "tipo" ? "block" : "none";
+//         busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
+//         busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
+//     }
+// </script>
+{% endblock %}

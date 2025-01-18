@@ -1143,7 +1143,7 @@ def generar_compromiso_compra_venta(req,id_moto,id_cliente):
         doc_num_personal = ""
         # print("MATRICULA ES: " + matricula)
         for i in range(2,longitud_doc_personal):
-            doc_num_personal = doc_num_personal + cliente.documento[i]
+            doc_num_personal = doc_num_personal + usuario_actual.documento[i]
         
         if not req.POST['texto_pagaderos']:
             pagaderos = "........................................................................................................................"

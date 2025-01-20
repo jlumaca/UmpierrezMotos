@@ -3613,8 +3613,15 @@ def detalles_repuesto(req,id_rp):
                 repuestopieza_id=id_rp
             ).aggregate(total_cantidad=Sum('cantidad'))
 
+            cantidad_ventas = ClienteRepuestosPiezas.objects.filter(
+                 repuestospiezas_id=id_rp,
+                 fecha_compra__year=anio,
+                 fecha_compra__month=mes,
+            ).aggregate(total_cantidad=Sum('cantidad'))
+
             cantidad = cantidad_piezas['total_cantidad'] or 0  # Si es None, usar 0
-            total += cantidad
+            cantidad_ventas = cantidad_ventas['total_cantidad'] or 0
+            total += cantidad + cantidad_ventas
             datos_repuestos.append(cantidad)
 
         # Renderizar la plantilla
@@ -3931,7 +3938,7 @@ def detalles_cliente_taller(req,id_cliente):
         ClienteRepuestosPiezas.objects
         .filter(cliente_id=id_cliente)
         .select_related('repuestospiezas', 'cliente')
-        .values('id','cantidad','repuestospiezas__descripcion')
+        .values('id','cantidad','fecha_compra','repuestospiezas__descripcion')
         .order_by('-id')
     )
 
@@ -4382,7 +4389,8 @@ def venta_repuesto(req,id_rp,id_cliente):
             nueva_venta_rp = ClienteRepuestosPiezas(
                 cliente_id = id_cliente,
                 repuestospiezas_id = id_rp,
-                cantidad = req.POST['cantidad_rp']
+                cantidad = req.POST['cantidad_rp'],
+                fecha_compra = datetime.now()
             )
             nueva_venta_rp.save()
             rp.stock = stock - cantidad

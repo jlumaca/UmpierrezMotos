@@ -258,6 +258,7 @@ class ClienteRepuestosPiezas(models.Model):
     cliente = models.ForeignKey(Cliente, related_name='cliente_rp', on_delete=models.CASCADE, null=True)
     repuestospiezas = models.ForeignKey(RepuestosPiezas, related_name='rp_cliente', on_delete=models.CASCADE, null=True)
     cantidad = models.IntegerField(default=0)
+    fecha_compra = models.DateField(null=True) 
 
 
 

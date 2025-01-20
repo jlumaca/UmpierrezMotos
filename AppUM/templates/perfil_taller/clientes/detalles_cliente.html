@@ -92,6 +92,7 @@
         <thead>
             <tr>
                 <th scope="row">Detalle</th>
+                <th scope="row">Fecha</th>
                 <th scope="row">Cantidad</th>
             </tr>
         </thead>
@@ -100,6 +101,7 @@
                 {% for item in page_obj_rp %}
                     <tr>
                         <td>{{ item.repuestospiezas__descripcion }}</td>
+                        <td>{{ item.fecha_compra|date:"d/m/Y" }}</td>
                         <td>{{ item.cantidad }}</td>
                     </tr>
                 {% endfor %}

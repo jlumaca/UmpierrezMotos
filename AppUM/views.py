@@ -3593,11 +3593,24 @@ def modificacion_repuesto(req,id_rp):
     #     pass
 
 def detalles_repuesto(req,id_rp):
-    try:
+    # try:
         repuesto = RepuestosPiezas.objects.get(id=id_rp)
-        return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto})
-    except Exception as e:
-        pass
+        anio = datetime.now().year
+        mes_actual = datetime.now().month
+        datos_repuestos = []
+        # for n in range(1,mes_actual + 1):
+        total = 0
+        for n in range(1,13):
+            cantidad_piezas = RepuestosPiezasServicios.objects.filter(servicio__fecha_ingreso__year=anio,servicio__fecha_ingreso__month=n,repuestopieza_id=id_rp)
+            cantidad = 0
+            for cant in cantidad_piezas:
+                cantidad = cantidad + int(cant.cantidad)
+            total = total + cantidad
+            datos_repuestos.append(int(cantidad))
+            
+        return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto,"cantidad":datos_repuestos,"total":total})
+    # except Exception as e:
+    #     pass
 
 def stock_critico(req):
     try:

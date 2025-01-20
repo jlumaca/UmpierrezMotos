@@ -2,6 +2,12 @@
 {% load static %}
 
 {% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 <style>
     .descripcion-celda {
         max-width: 300px;
@@ -21,8 +27,8 @@
 </style>
 
 <div class="table-container" id="motoDetails">
-    <h4>Detalles del {{ accesorio.tipo }}</h4>
-
+    <h4>Detalles</h4>
+    
     {% if repuesto.foto %}
         <div class="text-center">
             <img src="{{ repuesto.foto.url }}" alt="Foto del accesorio" class="imagen-accesorio">
@@ -58,8 +64,67 @@
             </tr>
         </tbody>
     </table>
+    <div class="table-container">
+        <h5 class="text-center mt-3">Cantidad usada hasta ahora: {{ total }}</h5>
+    <figure class="highcharts-figure">
+        <div id="container_ventasxmes"></div>
+       
+    
+        <table id="datatable" style="display: none;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Ventas</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in cantidad %}
+                    <tr>
+                        <th></th>
+                        <td>{{ venta }}</td>
+                        
+                    </tr>
 
-    <a href="{% url 'Repuestos' %}" class="btn btn-secondary">Volver</a>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
+</div>
+<a href="{% url 'Repuestos' %}" class="btn btn-secondary">Volver</a>
 </div>
 
+<script>
+    Highcharts.chart('container_ventasxmes', {
+    data: {
+        table: 'datatable'
+    },
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Repuestos y/o piezas usados por mes'
+    },
+    xAxis: {
+        categories: ['Repuestos','Marcas'],
+        title: {
+            text: 'Mes'
+        },
+        // Ejemplo para ajustar los valores de x si fuera necesario
+        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
+        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
+    },
+    yAxis: {
+        min: 0, // Valor mínimo en el eje y
+        
+        tickInterval: 10, // Intervalo entre marcas en el eje y
+        allowDecimals: false,
+        title: {
+            text: 'Cantidad'
+        }
+    }
+});
+
+</script>
 {% endblock %}

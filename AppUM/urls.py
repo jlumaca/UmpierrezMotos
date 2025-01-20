@@ -199,6 +199,8 @@ urlpatterns = [
      path('personal_taller_detalle/<int:id_personal>', views.detalles_personal_taller,name="PersonalTallerDetalle"),
      path('resetear_usuario_taller/<int:id_u>', views.resetear_usuario_taller,name="ResetearUsuarioTaller"),
 
+     path('notificaciones_taller/', views.notificaciones_taller,name="NotificacionesTaller"),
+
 
 
 

@@ -4244,3 +4244,81 @@ def resetear_usuario_taller(req,id_u):
             return render(req,"perfil_taller/personal/resetear_usuario.html",{"message":"Usuario reseteado con éxito"})
         else:
             return render(req,"perfil_taller/personal/resetear_usuario.html",{})
+
+def notificaciones_pagos_atrasados():
+    #EJECUTAR ESTA FUNCION TODOS LOS DIAS A LAS 6AM
+    pass
+
+def notificaciones_taller(req):
+    # try:
+        #notificaciones_cumples()
+        # notificaciones = [
+        # {
+        # "titulo": "Pago pendiente",
+        # "fecha": "2024-11-28",
+        # "descripcion": "El cliente Juan Pérez tiene un pago atrasado desde hace 7 días.",
+        # "acciones": [
+        #     {"nombre": "Ver detalle", "url": "/detalle_pago/123/"},
+        #     {"nombre": "Contactar cliente", "url": "/contacto_cliente/123/"}
+        # ]
+        # },
+        # {
+        # "titulo": "Cumpleaños del cliente",
+        # "fecha": "2024-11-29",
+        # "descripcion": "Hoy es el cumpleaños de María López. Envíale un saludo especial.",
+        # "acciones": [{"nombre": "Enviar saludo", "url": "/enviar_saludo/456/"}]
+        #     }
+        #     ]
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        filter_option = req.GET.get('filter', 'all')
+        if filter_option == 'leidas':
+            # notificaciones = Notificaciones.objects.filter(leido=True).order_by('-id')  # Filtrar solo las leídas
+            notificaciones = (
+                NotificacionPersonal.objects
+                .filter(leido=True,personal=usuario_actual)
+                .values(
+                    'id',
+                    'notificacion__tipo', 
+                    'notificacion__fecha', 
+                    'notificacion__descripcion', 
+                     
+                )
+            ).order_by('-id')
+        else:
+            # notificaciones = Notificaciones.objects.all().order_by('-id')  # Mostrar todas las notificaciones
+            notificaciones = (
+                NotificacionPersonal.objects
+                .filter(leido=False,personal=usuario_actual)
+                .values(
+                    'id',
+                    'notificacion__tipo', 
+                    'notificacion__fecha', 
+                    'notificacion__descripcion', 
+                     
+                )
+            ).order_by('-id')
+        
+        #notificaciones = Notificaciones.objects.all().order_by('-id')
+        data = []
+        for notificacion in notificaciones:
+            if notificacion['notificacion__tipo'] == "Atraso en pago":
+                acciones = {"nombre": "Enviar correo", "url": ""}
+            elif notificacion['notificacion__tipo'] == "Cumpleaños":
+                acciones = [{"nombre": "Ver detalle", "url": ""},]
+            else:
+                acciones = [{"nombre": "Ver detalle", "url": ""},]
+            data.append({
+                "notificacion":notificacion,
+                "acciones":acciones
+            })
+        
+        
+        notif_no_leidas = NotificacionPersonal.objects.filter(leido=0,personal=usuario_actual)
+        for notificacion in notif_no_leidas:
+            notificacion.leido = 1
+            notificacion.save()
+        
+        return render(req,"perfil_taller/notificaciones/notificaciones.html",{"data":data}) 
+    # except Exception as e:
+    #     return render(req,"perfil_taller/notificaciones/notificaciones.html",{"error_message":e})

@@ -48,9 +48,11 @@
                 <div class="d-flex align-items-center">
                     <!-- Notificaciones -->
                     <div class="notification-bell me-3">
-                        <a href="" class="text-decoration-none">
+                        <a href="{% url 'NotificacionesTaller' %}" class="text-decoration-none">
                             <i class="fas fa-bell"></i>
-                            <span class="notification-count" id="notificationCount">3</span>
+                            {% if notificaciones > 0 %}
+                                <span class="notification-count" id="notificationCount">{{ notificaciones }}</span>
+                            {% endif %}
                         </a>
                     </div>
                 

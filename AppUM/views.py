@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import *
 from datetime import datetime
 from django.shortcuts import render
@@ -25,6 +25,7 @@ from docx.oxml import OxmlElement
 import io
 from django.http import HttpResponse
 from docx import Document
+from django.db.models import Sum
 # import json
 # from docx import Document
 
@@ -3594,21 +3595,36 @@ def modificacion_repuesto(req,id_rp):
 
 def detalles_repuesto(req,id_rp):
     # try:
-        repuesto = RepuestosPiezas.objects.get(id=id_rp)
-        anio = datetime.now().year
-        mes_actual = datetime.now().month
+        repuesto = get_object_or_404(RepuestosPiezas, id=id_rp)
+
+        # Obtener el año del parámetro GET, si no, usar el año actual
+        anio = req.GET.get('year', datetime.now().year)
+        anio = int(anio)  # Convertir a entero
+
+        # Inicializar datos
         datos_repuestos = []
-        # for n in range(1,mes_actual + 1):
         total = 0
-        for n in range(1,13):
-            cantidad_piezas = RepuestosPiezasServicios.objects.filter(servicio__fecha_ingreso__year=anio,servicio__fecha_ingreso__month=n,repuestopieza_id=id_rp)
-            cantidad = 0
-            for cant in cantidad_piezas:
-                cantidad = cantidad + int(cant.cantidad)
-            total = total + cantidad
-            datos_repuestos.append(int(cantidad))
-            
-        return render(req,"perfil_taller/repuestos/detalles_repuesto.html",{"repuesto":repuesto,"cantidad":datos_repuestos,"total":total})
+
+        # Obtener las cantidades por mes
+        for mes in range(1, 13):
+            cantidad_piezas = RepuestosPiezasServicios.objects.filter(
+                servicio__fecha_ingreso__year=anio,
+                servicio__fecha_ingreso__month=mes,
+                repuestopieza_id=id_rp
+            ).aggregate(total_cantidad=Sum('cantidad'))
+
+            cantidad = cantidad_piezas['total_cantidad'] or 0  # Si es None, usar 0
+            total += cantidad
+            datos_repuestos.append(cantidad)
+
+        # Renderizar la plantilla
+        return render(req, "perfil_taller/repuestos/detalles_repuesto.html", {
+            "repuesto": repuesto,
+            "cantidad": datos_repuestos,
+            "total": total,
+            "current_year": anio,
+            "years": range(datetime.now().year - 10, datetime.now().year + 1),  # Últimos 10 años
+        })
     # except Exception as e:
     #     pass
 

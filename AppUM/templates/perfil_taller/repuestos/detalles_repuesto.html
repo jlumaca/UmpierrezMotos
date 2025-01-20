@@ -67,6 +67,23 @@
     <div class="table-container">
         <h5 class="text-center mt-3">Cantidad usada hasta ahora: {{ total }}</h5>
     <figure class="highcharts-figure">
+        <div class="d-flex justify-content-center my-3">
+            <label for="yearSelect" class="mr-2">Seleccionar año:</label>
+            <select id="yearSelect" class="form-control w-auto">
+                {% for year in years %}
+                <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <script>
+            document.getElementById('yearSelect').addEventListener('change', function() {
+                const year = this.value;
+                const url = new URL(window.location.href);
+                url.searchParams.set('year', year);
+                window.location.href = url;  // Redirige con el nuevo año seleccionado
+            });
+        </script>
         <div id="container_ventasxmes"></div>
        
     

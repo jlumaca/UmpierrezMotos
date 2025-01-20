@@ -1453,4 +1453,44 @@ def cantidad_solicitudes_no_leidas(req):
         notificaciones = 0
     
     return {'notificaciones': notificaciones}
+
+def contexto_venta_repuesto(req,id_rp,mensaje_error,documento):
+        cliente = Cliente.objects.filter(documento=documento).first()
+        if cliente:
+                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+                tel_1 = tel1.telefono
+                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+                if tel2:
+                    tel_2 = tel2.telefono
+                else:
+                    tel_2 = None
+
+                if correo1:
+                    c_1 = correo1.correo
+                else:
+                    c_1 = None
                 
+                if correo2:
+                    c_2 = correo1.correo
+                else:
+                    c_2 = None
+                rp = RepuestosPiezas.objects.get(id=id_rp)
+                
+                # print(numero_letra)
+                contexto = {"datos":True,
+                            "rp":rp,
+                            "cliente":cliente, 
+                            "tel1":tel_1,
+                            "tel2":tel_2,
+                            "correo1":c_1,
+                            "correo2":c_2,
+                            "error_message":mensaje_error if mensaje_error else None}
+            # return render(req,"perfil_administrativo/motos/venta_moto.html",{})
+        else:
+            contexto = {"datos":False,
+                        "error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "}
+    
+        return contexto                

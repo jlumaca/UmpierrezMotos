@@ -254,6 +254,11 @@ class ClienteFondos(models.Model):
     metodo = models.CharField(max_length=20, blank=True)
     comprobante = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
 
+class ClienteRepuestosPiezas(models.Model):
+    cliente = models.ForeignKey(Cliente, related_name='cliente_rp', on_delete=models.CASCADE, null=True)
+    repuestospiezas = models.ForeignKey(RepuestosPiezas, related_name='rp_cliente', on_delete=models.CASCADE, null=True)
+    cantidad = models.IntegerField(default=0)
+
 
 
     

@@ -86,6 +86,32 @@
             {% endif %}
         </tbody>
     </table>
+
+    <h4>Compras de repuestos y/o piezas</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="row">Detalle</th>
+                <th scope="row">Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj_rp %}
+                {% for item in page_obj_rp %}
+                    <tr>
+                        <td>{{ item.repuestospiezas__descripcion }}</td>
+                        <td>{{ item.cantidad }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de compras de repuestos y/o piezas.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
     <a href="{% url 'ClientesTaller' %}" class="btn btn-secondary">Volver</a>
 </div>
 {% endblock %}

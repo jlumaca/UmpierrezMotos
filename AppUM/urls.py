@@ -201,6 +201,9 @@ urlpatterns = [
 
      path('notificaciones_taller/', views.notificaciones_taller,name="NotificacionesTaller"),
 
+     path('venta_repuesto_form/<int:id_rp>', views.venta_repuesto_form,name="VentaRepuestoPiezaForm"),
+     path('venta_repuesto/<int:id_rp>/<int:id_cliente>', views.venta_repuesto,name="VentaRepuestoPieza"),
+
 
 
 

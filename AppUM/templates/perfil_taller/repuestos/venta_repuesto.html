@@ -1,0 +1,102 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Venta</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }} <a href="{% url 'AltaClienteTaller' %}">aquí</a>
+        </div>
+        {% endif %}
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de búsqueda de cliente -->
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_documento" id="tipo_documento">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="documento" placeholder="Documento">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if datos %}
+        
+            <h4>Datos del cliente</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Cliente</th>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Documento</th>
+                        <td>{{ cliente.documento }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contacto</th>
+                        <td>{{ tel1 }}{% if tel2 %}, {{ tel2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Correo</th>
+                        <td>{{ correo1 }}{% if correo2 %}, {{ correo2 }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Domicilio</th>
+                        <td>{{ cliente.domicilio }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Datos del producto</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th scope="row">Descripción</th>
+                        <td>{{ rp.descripcion }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Stock</th>
+                        <td>{{ rp.stock }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- COMPROMISO COMPRA VENTA -->
+        
+            <form action="{% url 'VentaRepuestoPieza' rp.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            
+                <div class="mb-3">
+                    <label for="recargo" class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" name="cantidad_rp" id="precio_sin_recargo" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Generar venta</button>
+                    <a href="" class="btn btn-secondary">Cancelar</a>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+{% endblock %}

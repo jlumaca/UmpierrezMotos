@@ -3926,9 +3926,21 @@ def detalles_cliente_taller(req,id_cliente):
             'moto': resultado,
             "matricula":matricula.matricula if matricula else "Sin matrícula"
         })
+    
+    compras_rp = (
+        ClienteRepuestosPiezas.objects
+        .filter(cliente_id=id_cliente)
+        .select_related('repuestospiezas', 'cliente')
+        .values('id','cantidad','repuestospiezas__descripcion')
+        .order_by('-id')
+    )
+
+
+
 
 
     page_obj = funcion_paginas_varias(req,res_data)
+    page_obj_rp = funcion_paginas_varias(req,compras_rp)
 
     return render(req,"perfil_taller/clientes/detalles_cliente.html",{
                                                                     "page_obj":page_obj,
@@ -3937,6 +3949,7 @@ def detalles_cliente_taller(req,id_cliente):
                                                                     "tel2":tel_2,
                                                                     "correo1":c_1,
                                                                     "correo2":c_2, 
+                                                                    "page_obj_rp":page_obj_rp,
                                                                     })
 
 def servicios_por_moto_de_cliente(req,id_moto,id_cliente):
@@ -4338,3 +4351,45 @@ def notificaciones_taller(req):
         return render(req,"perfil_taller/notificaciones/notificaciones.html",{"data":data}) 
     # except Exception as e:
     #     return render(req,"perfil_taller/notificaciones/notificaciones.html",{"error_message":e})
+
+
+def venta_repuesto_form(req,id_rp):
+    # try:
+        if req.method == "POST":
+            tipo_doc = req.POST['tipo_documento']
+            doc = req.POST['documento']
+            documento = tipo_doc + str(doc)
+            contexto = contexto_venta_repuesto(req,id_rp,None,documento)
+            return render(req,"perfil_taller/repuestos/venta_repuesto.html",contexto)
+        else:
+            return render(req,"perfil_taller/repuestos/venta_repuesto.html",{})
+    # except Exception as e:
+    #     pass
+
+def venta_repuesto(req,id_rp,id_cliente):
+    try:
+        rp = RepuestosPiezas.objects.get(id=id_rp)
+        cliente = Cliente.objects.get(id=id_cliente)
+        stock = int(rp.stock)
+        cantidad = int(req.POST['cantidad_rp'])
+        if cantidad > stock:
+            contexto = contexto_venta_repuesto(req,id_rp,"La cantidad ingresada no puede exceder el stock del producto",cliente.documento)
+            return render(req,"perfil_taller/repuestos/venta_repuesto.html",contexto)
+        elif cantidad <= 0:
+            contexto = contexto_venta_repuesto(req,id_rp,"La cantidad ingresada es incorrecta",cliente.documento)
+            return render(req,"perfil_taller/repuestos/venta_repuesto.html",contexto)
+        else:
+            nueva_venta_rp = ClienteRepuestosPiezas(
+                cliente_id = id_cliente,
+                repuestospiezas_id = id_rp,
+                cantidad = req.POST['cantidad_rp']
+            )
+            nueva_venta_rp.save()
+            rp.stock = stock - cantidad
+            rp.save()
+            if int(rp.stock) <= int(rp.stock_critico):
+                insert_notificaciones(f"Hay poco stock de {rp.descripcion}","Bajo stock de pieza")
+            messages.success(req, "Venta generada con éxito")
+            return redirect(f"{reverse('DetallesClienteTaller',kwargs={'id_cliente':id_cliente})}")
+    except Exception as e:
+        pass

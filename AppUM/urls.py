@@ -102,6 +102,8 @@ urlpatterns = [
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),
+     path('modificar_moto_vendida/<int:id_moto>/<int:id_cliente>', views.modificar_moto_vendida,name="ModificarMotoVendida"),
+
 
 
 

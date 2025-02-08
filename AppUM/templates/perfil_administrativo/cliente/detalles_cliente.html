@@ -229,7 +229,10 @@
             {% if page_obj %}
                 {% for item in page_obj %}
                     <tr>
-                        <td>{{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}</td>
+                        <td>
+                            {{ item.moto.moto__marca }} {{ item.moto.moto__modelo }}
+                            <a href="{% url 'ModificarMotoVendida' item.moto.moto__id cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        </td>
                         <td>{{ item.moto.fecha_compra }}</td>
                         <td>
                             {% if item.tipo == "R" %}

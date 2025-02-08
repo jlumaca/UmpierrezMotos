@@ -1455,6 +1455,166 @@ def ficha_cliente(req,id_cliente):
                                                                              "total_dolares":float(total_dolares)
                                                                              })
 
+def modificar_moto_vendida(req,id_moto,id_cliente):
+    try:
+        if req.method == "POST":
+                
+                moto_upd = Moto.objects.get(id=id_moto)
+                checkbox_num_motor = 'con_num_motor' in req.POST
+                if moto_upd.contiene_num_motor:
+                    num_motor = req.POST['num_motor_moto'].upper()
+                else:
+                    if checkbox_num_motor:
+                        num_motor = req.POST['num_motor_moto_agregado'].upper()
+                    else:
+                        num_motor = None
+                
+                checkbox_num_chasis = 'con_num_chasis' in req.POST
+                if moto_upd.contiene_num_chasis:
+                    num_chasis = req.POST['num_chasis_moto'].upper()
+                else:
+                    if checkbox_num_chasis:
+                        num_chasis = req.POST['num_chasis_moto_agregado'].upper()
+                    else:
+                        num_chasis = None
+                # num_chasis = req.POST['num_chasis_moto'].upper()
+                matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
+                if req.POST['matricula_letras'] and req.POST['matricula_numeros']:
+                    letras_matricula = req.POST['matricula_letras']
+                    num_matricula = req.POST['matricula_numeros']
+                    validar_letra_matricula = departamento_matricula(matricula)
+                else:
+                    letras_matricula = None
+                    num_matricula = None
+                    validar_letra_matricula = "No Ingresada"
+                padron = req.POST['num_padron']
+                if not padron:
+                    padron = None
+                validar_matricula = matricula_valid(matricula,padron,id_moto)
+                validacion_datos_moto = validacion_moto(id_moto,num_motor,num_chasis)
+                precio = int(moto_upd.precio) if moto_upd.precio else 0
+
+                if validacion_datos_moto == "existe_num_motor":
+                    return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{"error_message":"El número de motor ya se encuentra asignado a otra moto",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio
+                                                                                            ,"id_cliente":id_cliente}) 
+                elif validacion_datos_moto == "existe_num_chasis":
+                    return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{"error_message":"El número de chasis ya se encuentra asignado a otra moto",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio
+                                                                                            ,"id_cliente":id_cliente}) 
+                elif (req.POST['matricula_letras'] and req.POST['matricula_numeros']) and (validar_matricula == "matricula_existe"): #EXISTE UNA MATRICULA REGISTRADA Y ADEMAS ES DIFERENTE
+                    return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{"error_message":"La matricula ingresada ya existe",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio
+                                                                                            
+                                                                                            ,"id_cliente":id_cliente}) 
+                elif (req.POST['num_padron']) and (validar_matricula == "padron_existe"):
+                    return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{"error_message":"El número de padrón ya existe",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio
+                                                                                            
+                                                                                            ,"id_cliente":id_cliente})
+                elif not validar_letra_matricula:
+                    return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{"error_message":"La matrícula es incorrecta",
+                                                                                            'datos_moto': moto_upd,
+                                                                                            "letras_matricula":letras_matricula,
+                                                                                            "num_matricula":num_matricula,
+                                                                                            "precio":precio
+                                                                                            
+                                                                                            ,"id_cliente":id_cliente})
+                else:
+                            
+                    marca = req.POST['marca_moto'].upper()
+                    modelo = req.POST['modelo_moto'].upper()
+                    color = req.POST['color_moto'].upper()
+
+                    foto = req.FILES.get('foto_moto')
+                    
+                    moto_upd = Moto.objects.get(id=id_moto)
+                    moto_upd.marca = marca
+                    moto_upd.modelo = modelo
+                    moto_upd.motor = req.POST['motor_moto']
+                    
+                    
+                    if moto_upd.contiene_num_motor or checkbox_num_motor:
+                        moto_upd.num_motor = num_motor
+                        moto_upd.contiene_num_motor = 1
+                    
+                    if moto_upd.contiene_num_chasis or checkbox_num_chasis:
+                        moto_upd.num_chasis = num_chasis
+                        moto_upd.contiene_num_chasis = 1
+                
+                    moto_upd.anio = req.POST['anio_moto']
+                    moto_upd.tipo = req.POST['tipo_moto']
+
+                    if req.POST['estado_moto'] == "Nueva":
+                        estado = "Nueva"
+                        moto_upd.kilometros = 0
+                    else:
+                        estado = "Usada"
+                        moto_upd.kilometros = req.POST['km_moto']
+                        
+                    moto_upd.estado = estado
+                    
+                    
+                    # moto_upd.num_chasis = num_chasis
+                    moto_upd.num_cilindros = req.POST['num_cilindros']
+                    moto_upd.cantidad_pasajeros = req.POST['num_pasajeros']
+                    moto_upd.color = color
+                    moto_upd.moneda_precio = req.POST['moneda_precio']
+                    moto_upd.precio = req.POST['precio_moto']
+                    moto_upd.observaciones = req.POST['descripcion_moto']
+                    moto_upd.foto = foto
+                    moto_upd.save()
+
+                    matricula_actual = Matriculas.objects.filter(moto_id=id_moto).first()
+                    if req.POST['matricula_letras'] and req.POST['matricula_numeros'] and req.POST['num_padron']:
+                        if matricula_actual:
+                            if matricula_actual.matricula != matricula: #EN CASO DE QUE LA MATRICULA INGRESADA EN EL TEMPLATE SEA DIFERENTE A LA EXISTENTE EN LA BASE DE DATOS, ENTONCES ACCEDE
+                                matricula_actual.delete()
+                                insert_matriculas(matricula,padron,moto_upd.id)
+                        else:
+                                insert_matriculas(matricula,padron,moto_upd.id)
+
+                    messages.success(req, "La moto ha sido modificada con éxito.")
+                    return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+        else:
+            moto_upd = Moto.objects.get(id=id_moto)
+            matricula_upd = Matriculas.objects.filter(moto_id=moto_upd.id).first()
+
+            if matricula_upd:
+                letras_matricula = matricula_upd.matricula[0:3:1]
+                num_matricula = matricula_upd.matricula[3:7:1]
+                padron = matricula_upd.padron
+            else:
+                letras_matricula = None
+                num_matricula = None
+                padron = None
+
+            if moto_upd.observaciones == None:
+                moto_upd.observaciones = "Sin descripción"
+            precio = int(moto_upd.precio) if moto_upd.precio else 0
+            return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{'datos_moto': moto_upd,
+            "letras_matricula":letras_matricula,
+            "num_matricula":num_matricula,
+            "padron":padron,
+            "precio":precio,
+            "id_cliente":id_cliente}) 
+    except Exception as e:
+        return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{'datos_moto': moto_upd,
+            "letras_matricula":letras_matricula,
+            "num_matricula":num_matricula,"id_cliente":id_cliente,"error_message":str(e)})
+
 def fondos_cliente(req,id_cliente):
     # try:
         tipo = req.POST['accion_fondo']

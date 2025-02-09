@@ -835,39 +835,43 @@ def vista_inventario_accesorios(req):
 def alta_accesorio(req):
     try:
         if req.method == "POST":
-            tipo = req.POST['tipo_accesorio'].upper()     
-            marca = req.POST['marca_accesorio'].upper()
-            modelo = req.POST['modelo_accesorio'].upper()
-            precio = req.POST['precio_accesorio']
-            moneda = req.POST['moneda_precio']
-
-            foto = req.FILES.get('foto_accesorio')
             cantidad = int(req.POST['cantidad_accesorios'])
-            if req.POST['tipo_accesorio'] == "Otro":
-                tipo = "Accesorio"
+            if cantidad <= 0:
+                return render(req,"perfil_administrativo/accesorios/alta_accesorio.html",{"error_message":"La cantidad ingresada es incorrecta"})
             else:
-                tipo = req.POST['tipo_accesorio']
 
-            for i in range(1,cantidad + 1):
-                nuevo_accesorio = Accesorio(
-                    tipo = tipo,
-                    marca = marca,
-                    modelo = modelo,
-                    activo = 1,
-                    foto = foto,
-                    precio = precio,
-                    fecha_ingreso = datetime.now(),
-                    moneda_precio = moneda,
-                    talle = req.POST['talle_accesorio']
-                )
+                tipo = req.POST['tipo_accesorio'].upper()     
+                marca = req.POST['marca_accesorio'].upper()
+                modelo = req.POST['modelo_accesorio'].upper()
+                precio = req.POST['precio_accesorio']
+                moneda = req.POST['moneda_precio']
 
-                nuevo_accesorio.save()
-                # print("ACCESORIO: " + str(i))
+                foto = req.FILES.get('foto_accesorio')
+                if req.POST['tipo_accesorio'] == "Otro":
+                    tipo = "Accesorio"
+                else:
+                    tipo = req.POST['tipo_accesorio']
 
-            
-            # return render(req,"perfil_administrativo/accesorios/accesorios.html",{"message":"Accesorio ingresado con éxito"})
-            messages.success(req, f"{tipo} ingresado con éxito.")
-            return redirect('Accesorios')
+                for i in range(1,cantidad + 1):
+                    nuevo_accesorio = Accesorio(
+                        tipo = tipo,
+                        marca = marca,
+                        modelo = modelo,
+                        activo = 1,
+                        foto = foto,
+                        precio = precio,
+                        fecha_ingreso = datetime.now(),
+                        moneda_precio = moneda,
+                        talle = req.POST['talle_accesorio']
+                    )
+
+                    nuevo_accesorio.save()
+                    # print("ACCESORIO: " + str(i))
+
+                
+                # return render(req,"perfil_administrativo/accesorios/accesorios.html",{"message":"Accesorio ingresado con éxito"})
+                messages.success(req, f"{tipo} ingresado con éxito.")
+                return redirect('Accesorios')
         else:
             return render(req,"perfil_administrativo/accesorios/alta_accesorio.html",{})
     except Exception as e:

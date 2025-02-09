@@ -883,7 +883,7 @@ def modificacion_accesorio(req,id_accesorio):
         
         if req.method == "POST": 
             accesorio_upd = Accesorio.objects.get(id=id_accesorio)
-            accesorio_upd.tipo = req.POST['tipo_accesorio'].upper()
+            accesorio_upd.tipo = req.POST['tipo_accesorio']
             accesorio_upd.marca = req.POST['marca_accesorio'].upper()
             accesorio_upd.modelo = req.POST['modelo_accesorio'].upper()
             accesorio_upd.precio = req.POST['precio_accesorio']

@@ -14,9 +14,19 @@
             <div class="mb-3">
                 <label for="estado" class="form-label">Tipo</label>
                 <select value="{{ datos_accesorio.tipo }}" class="form-control" name="tipo_accesorio" id="tipo" onchange="toggleFields()">
-                    <option value="Casco">Casco</option>
-                    <option value="Prueba">Prueba</option>
-                    <option value="Otro">Otro</option>
+                    <option value="Aceite" {% if datos_accesorio.tipo == "Aceite" %}selected{% endif %}>Aceite</option>
+                    <option value="Casco" {% if datos_accesorio.tipo == "Casco" %}selected{% endif %}>Casco</option>
+                    <option value="Cubremoto" {% if datos_accesorio.tipo == "Cubremoto" %}selected{% endif %}>Cubremoto</option>
+                    <option value="Grasa de cadena" {% if datos_accesorio.tipo == "Grasa de cadena" %}selected{% endif %}>Grasa de cadena</option>
+                    <option value="Guantes" {% if datos_accesorio.tipo == "Guantes" %}selected{% endif %}>Guantes</option>
+                    <option value="Mecanismo" {% if datos_accesorio.tipo == "Mecanismo" %}selected{% endif %}>Mecanismo de casco</option>
+                    <option value="Micas" {% if datos_accesorio.tipo == "Micas" %}selected{% endif %}>Micas</option>
+                    <option value="Pasamontaña" {% if datos_accesorio.tipo == "Pasamontaña" %}selected{% endif %}>Pasamontaña</option>
+                    <option value="Ropa" {% if datos_accesorio.tipo == "Ropa" %}selected{% endif %}>Ropa</option>
+                    <option value="Slime" {% if datos_accesorio.tipo == "Slime" %}selected{% endif %}>Slime</option>
+                    <option value="Trancas" {% if datos_accesorio.tipo == "Trancas" %}selected{% endif %}>Trancas</option>
+                    <option value="Valijas" {% if datos_accesorio.tipo == "Valijas" %}selected{% endif %}>Valijas</option>
+                    <option value="Otro" {% if datos_accesorio.tipo == "Otro" %}selected{% endif %}>Otro</option>
                 </select>
             </div>
             <div class="mb-3">

@@ -842,25 +842,29 @@ def alta_accesorio(req):
             moneda = req.POST['moneda_precio']
 
             foto = req.FILES.get('foto_accesorio')
-
-            nuevo_accesorio = Accesorio(
-                tipo = tipo,
-                marca = marca,
-                modelo = modelo,
-                activo = 1,
-                foto = foto,
-                precio = precio,
-                fecha_ingreso = datetime.now(),
-                moneda_precio = moneda,
-                talle = req.POST['talle_accesorio']
-            )
-
-            nuevo_accesorio.save()
-
+            cantidad = int(req.POST['cantidad_accesorios'])
             if req.POST['tipo_accesorio'] == "Otro":
                 tipo = "Accesorio"
             else:
                 tipo = req.POST['tipo_accesorio']
+
+            for i in range(1,cantidad + 1):
+                nuevo_accesorio = Accesorio(
+                    tipo = tipo,
+                    marca = marca,
+                    modelo = modelo,
+                    activo = 1,
+                    foto = foto,
+                    precio = precio,
+                    fecha_ingreso = datetime.now(),
+                    moneda_precio = moneda,
+                    talle = req.POST['talle_accesorio']
+                )
+
+                nuevo_accesorio.save()
+                # print("ACCESORIO: " + str(i))
+
+            
             # return render(req,"perfil_administrativo/accesorios/accesorios.html",{"message":"Accesorio ingresado con éxito"})
             messages.success(req, f"{tipo} ingresado con éxito.")
             return redirect('Accesorios')

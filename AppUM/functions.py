@@ -836,6 +836,7 @@ def json_para_resumen_pagos(moto,id_cv):
                 "precio_inicial":int(moto.precio) ,
                 "precio_final":int(moto.precio_final),
                 "moneda":moto.moneda_precio,
+                "fecha_compra":cv.fecha_compra.strftime('%d-%m-%Y')
                 # "financiacion":f"{primer_financiacion.cantidad_cuotas} x {primer_financiacion.moneda_cuota} {primer_financiacion.valor_cuota}"
             }
         ]

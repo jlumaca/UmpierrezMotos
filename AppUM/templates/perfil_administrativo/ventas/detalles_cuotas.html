@@ -764,6 +764,7 @@ function generarResumen(cuotas, cliente, detalle, p_pagos, fin_pagos_json) {
                     
                     <tr>
                         <th>DETALLE</th>
+                        <th>FECHA</th>
                         <th>PRECIO</th>
                         
                     </tr>
@@ -776,6 +777,7 @@ function generarResumen(cuotas, cliente, detalle, p_pagos, fin_pagos_json) {
             resumenHTML += `
                 <tr>
                         <td>${fins.detalle || "N/A"}</td>
+                        <td>${fins.fecha_compra || "N/A"}</td>
                         <td>${fins.precio_inicial ? fins.precio_inicial.toFixed(0) : "N/A"}</td>
                 
                 </tr>

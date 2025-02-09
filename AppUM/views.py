@@ -1922,6 +1922,24 @@ def detalles_personal(req,id_personal):
     except Exception as e:
          pass
 
+def baja_personal(req,donde,id_personal):
+    # try:
+        personal = Personal.objects.get(id=id_personal)
+        if req.method == "POST":
+            if donde == "tienda":
+                admin = Administrativo.objects.get(id=id_personal)
+                admin.activo = 0
+                admin.save()
+            else:
+                mec = Mecanico.objects.get(id=id_personal)
+                mec.activo = 0
+                mec.save()
+            return render(req,"perfil_administrativo/personal/baja_personal.html",{"message":"Personal dado de baja con éxito"})
+        else:
+            return render(req,"perfil_administrativo/personal/baja_personal.html",{"personal":personal})
+    # except Exception as e:
+    #     pass
+
 @admin_required
 def form_venta_moto(req,id_moto):
     try:

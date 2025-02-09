@@ -77,6 +77,7 @@ urlpatterns = [
      path('personal', views.vista_personal,name="Personal"),
      path('personal_alta', views.alta_personal,name="PersonalAlta"),
      path('personal_detalle/<int:id_personal>', views.detalles_personal,name="PersonalDetalle"),
+     path('personal_baja/<str:donde>/<int:id_personal>', views.baja_personal,name="PersonalBaja"),
 
      path('reingresar_tienda/<int:id_personal>', views.ingresar_tienda,name="ReingresarTienda"),
      

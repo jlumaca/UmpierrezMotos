@@ -43,6 +43,8 @@ urlpatterns = [
      path('busqueda_precio', views.busqueda_precio,name="BusquedaPrecio"),
      path('busqueda_matricula', views.busqueda_matricula,name="BusquedaMatricula"),
      path('busqueda_tipo', views.busqueda_tipo_moto,name="BusquedaTipoMoto"),
+     path('busqueda_num_motor', views.busqueda_num_motor,name="BusquedaNumMotor"),
+     path('busqueda_num_chasis', views.busqueda_num_chasis,name="BusquedaNumChasis"),
 
      
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),

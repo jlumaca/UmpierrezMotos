@@ -21,6 +21,8 @@
         <label for="estado" class="form-label">Buscar por:</label>
         <select class="form-control" name="estado_moto" id="tipo_busqueda" onchange="tipo_busqueda()">
             <option value="codigo">Código</option>
+            <option value="num_motor">Número de motor</option>
+            <option value="num_chasis">Número de chasis</option>
             <option value="marca">Marca</option>
             <option value="modelo">Modelo</option>
             <option value="marca_modelo">Marca y modelo</option>
@@ -55,6 +57,34 @@
     <form action="{% url 'BusquedaCodigo' %}" enctype="multipart/form-data" method="get" id="busqueda_codigo">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="number" name="codigo" class="form-control" placeholder="Buscar por código" required>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+    
+    <form action="{% url 'BusquedaNumMotor' %}" enctype="multipart/form-data" method="get" id="busqueda_num_motor" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="num_motor" class="form-control" placeholder="Buscar por número de motor" required>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+    
+    <form action="{% url 'BusquedaNumChasis' %}" enctype="multipart/form-data" method="get" id="busqueda_num_chasis" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="num_chasis" class="form-control" placeholder="Buscar por número de chasis" required>
             <button class="btn btn-outline-primary" type="submit">
                 <i class="fas fa-search"></i>
             </button>
@@ -271,6 +301,8 @@
         var busqueda_precio = document.getElementById("busqueda_precio");
         var busqueda_matricula = document.getElementById("busqueda_matricula");
         var busqueda_tipo_moto = document.getElementById("busqueda_tipo");
+        var busqueda_num_motor = document.getElementById("busqueda_num_motor");
+        var busqueda_num_chasis = document.getElementById("busqueda_num_chasis");
 
         busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
         busqueda_marca.style.display = busqueda_tipo === "marca" ? "block" : "none";
@@ -281,6 +313,8 @@
         busqueda_precio.style.display = busqueda_tipo === "precio" ? "block" : "none";
         busqueda_matricula.style.display = busqueda_tipo === "matricula" ? "block" : "none";
         busqueda_tipo_moto.style.display = busqueda_tipo === "tipo" ? "block" : "none";
+        busqueda_num_motor.style.display = busqueda_tipo === "num_motor" ? "block" : "none";
+        busqueda_num_chasis.style.display = busqueda_tipo === "num_chasis" ? "block" : "none";
     
     }
 </script>

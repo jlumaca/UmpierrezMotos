@@ -592,6 +592,22 @@ def busqueda_tipo_moto(req):
     contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
     return render(req,"perfil_administrativo/motos/motos.html",contexto)
 
+@admin_required
+def busqueda_num_motor(req):
+    num_motor = req.GET.get('num_motor').upper()
+    moto = Moto.objects.filter(num_motor=num_motor)
+    page_obj = funcion_paginas_varias(req,moto) 
+    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
+    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+
+@admin_required
+def busqueda_num_chasis(req):
+    num_chasis = req.GET.get('num_chasis').upper()
+    moto = Moto.objects.filter(num_chasis=num_chasis)
+    page_obj = funcion_paginas_varias(req,moto) 
+    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
+    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+
 
 
     

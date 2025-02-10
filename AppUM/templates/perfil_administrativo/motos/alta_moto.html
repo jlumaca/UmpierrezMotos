@@ -45,17 +45,149 @@
                         <!-- Cambiar el botón a tipo submit -->
                     </div>
                 </div>
-            
+
                 <div class="mb-3">
-                    <label for="num_motor" class="form-label">Número de motor</label>
-                    <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40" required>
+                    <input type="checkbox" id="cb_moto_usada_sin_dueno" name="sin_num_chasis" class="form-check-input" onchange="moto_usada_sin_dueno()">
+                    <label for="toggleMatr" class="form-check-label">No cuento con este dato</label>
                 </div>
-            
-                <button type="submit" class="btn btn-success">Aceptar</button>
+                <div id="div_boton_num_motor">
+                    <div class="mb-3">
+                        <label for="num_motor" class="form-label">Número de motor</label>
+                        <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40" required>
+                    </div>
                 
-                <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Aceptar</button>
+                    
+                    <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
             </form>
             {% endif %}
+            <div id="div_moto_usada_sin_dueno" style="display: none;">
+                <form action="{% url 'AltaMotoUsadaSinDueno' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                    <div class="mb-3">
+                        <label for="marca" class="form-label">Tipo</label>
+                        <select class="form-control" name="tipo_moto" id="tipo_moto">
+                            <option value="Moto">Moto</option>
+                            <option value="Cuatriciclo">Cuatriciclo</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="marca" class="form-label">Marca</label>
+                        <input type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modelo" class="form-label">Modelo</label>
+                        <input type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="motor" class="form-label">Motor(cc)</label>
+                        <input type="number" class="form-control" name="motor_moto" id="motor" placeholder="Ingrese la cilindrada" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="anio" class="form-label">Año</label>
+                        <input type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año" required>
+                    </div>
+                    
+                    <div class="mb-3" id="kms">
+                        <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
+                        <input type="number" class="form-control" name="km_moto" id="kilometros" placeholder="Ingrese los kilómetros" required>
+                    </div> 
+                    
+                    <div class="mb-3" id="div_num_motor">
+                        <label for="num_motor" class="form-label">Número de motor</label>
+                        <input type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="checkbox" id="sin_num_motor" name="sin_num_motor" class="form-check-input">
+                        <label for="toggleMatr" class="form-check-label">Sin número de motor</label>
+                    </div>
+                    
+                    <div class="mb-3" id="div_num_chasis">
+                        <label for="num_chasis" class="form-label">Número de chasis</label>
+                        <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="checkbox" id="sin_num_chasis" class="form-check-input" name="sin_num_chasis">
+                        <label for="toggleMatr" class="form-check-label">Sin número de chasis</label>
+                    </div>
+                    
+                    
+                    <div class="mb-3" id="num_cilindros">
+                        <label for="num_chasis" class="form-label">Cantidad de cilindros</label>
+                        <input type="number" class="form-control" name="num_cilindros" placeholder="Ingrese la cantidad de cilindros" required>
+                    </div>
+                    
+                    <div class="mb-3" id="num_pasajeros">
+                        <label for="num_chasis" class="form-label">Cantidad de pasajeros</label>
+                        <input type="number" class="form-control" name="num_pasajeros" placeholder="Ingrese la cantidad de pasajeros" required>
+                    </div>
+                    
+                    <div class="mb-3" id="matr">
+                        <label for="matricula" class="form-label">Matricula</label>
+                        <div class="d-flex">
+                            <input type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3" required>
+                            <span class="mx-1">-</span>
+                            <input type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="num_padron_sn">
+                        <label for="num_chasis" class="form-label">Número de padrón</label>
+                        <input type="number" class="form-control" name="num_padron" id="txt_num_padron_sn" placeholder="Ingrese el número de padron" maxlength="40" required>
+                    </div> 
+
+                    <div class="mb-3">
+                        <input type="checkbox" id="cb_sin_padron_sn" name="cb_sin_padron_sn" class="form-check-input" onchange="sin_padron()">
+                        <label for="toggleMatr" class="form-check-label">No cuento con el número de padrón</label>
+                    </div>
+                    
+                    
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Color</label>
+                        <input type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20" required>
+                    </div>
+                    
+                    <div class="mb-3" id="documento_cliente">
+                        <label for="documento" class="form-label">Moneda</label>
+                        <div class="input-group">
+                            <select class="form-control" name="moneda_precio" id="moneda_precio">
+                                <option value="Pesos">Pesos</option>
+                                <option value="Dolares">Dólares</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio" class="form-label">Precio</label>
+                        <input type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3" id="foto_prueba">
+                        <label for="foto" class="form-label">Foto</label>
+                        <input type="file" class="form-control" name="foto_moto" id="foto">
+                    </div>
+                    <div class="mb-3" id="libreta_propiedad_div">
+                        <label for="libreta_propiedad" class="form-label">Libreta de propiedad</label>
+                        <input type="file" class="form-control" name="libreta_propiedad_moto" id="libreta_propiedad">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
+                        <label for="toggleMatr" class="form-check-label">Generar PDF</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    
+                    <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+            
+
             {% if form_moto_usada %}
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
@@ -493,6 +625,41 @@
         } else {
             agregar_num_chasisDiv.style.display = "block";
             agregar_num_chasisTxt.setAttribute("required", "required");
+        }
+    }
+    
+    function moto_usada_sin_dueno(){
+        const cbox = document.getElementById("cb_moto_usada_sin_dueno");
+        const DivMotoUsadaSinDueno = document.getElementById("div_moto_usada_sin_dueno");
+        const div_boton_num_motor = document.getElementById("div_boton_num_motor");
+        
+        if (cbox.checked) {
+            DivMotoUsadaSinDueno.style.display = "block";
+            div_boton_num_motor.style.display = "none";
+        } else {
+            DivMotoUsadaSinDueno.style.display = "none";
+            div_boton_num_motor.style.display = "block";
+        }
+    }
+
+
+    function sin_padron(){
+        const cbox = document.getElementById("cb_sin_padron_sn");
+        const num_padron = document.getElementById("num_padron_sn");
+        const txt_num_padron = document.getElementById("txt_num_padron_sn");
+        // const moneda_precio = document.getElementById("moneda_precio");
+
+        
+        if (cbox.checked) {
+            num_padron.style.display = "none";
+            txt_num_padron.removeAttribute("required");
+            txt_num_padron.value = ""; // Limpia el campo si no es necesario
+            // moneda_precio.removeAttribute("required");
+            // moneda_precio.value = "";
+        } else {
+            num_padron.style.display = "block";
+            txt_num_padron.setAttribute("required", "required");
+            // moneda_precio.setAttribute("required", "required");
         }
     }
 

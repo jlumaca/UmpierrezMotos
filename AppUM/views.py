@@ -497,7 +497,101 @@ def alta_moto_nueva(req):
                                                                             "form_moto_usada":True,
                                                                             "form_moto_ingresada":False,
                                                                             "consultar_moto_cliente":False,
-                                                                            "error_message":e})                                                                            
+                                                                            "error_message":e})    
+
+def alta_moto_usada_sin_dueno(req):                
+    # try:
+    #INSERT EN MOTO
+        
+        num_chasis = req.POST['num_chasis_moto'].upper()
+        num_motor = req.POST['num_motor_moto'].upper()
+        existe_num_motor = Moto.objects.filter(num_motor=num_motor).first()
+        existe_num_chasis = Moto.objects.filter(num_chasis=num_chasis).first()
+        matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'].upper())
+        checkbox_padron = 'cb_sin_padron_sn' in req.POST
+        if checkbox_padron:
+            padron = None
+            existe_padron = None
+        else:
+            padron = req.POST['num_padron']
+            existe_padron = Matriculas.objects.filter(padron=padron).first()
+        existe_matricula = Matriculas.objects.filter(matricula=matricula).first()
+        departamento = departamento_matricula(matricula)
+        if existe_num_motor:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                    
+                                                                            "error_message":"Ya existe el número de motor ingresado"})
+        elif existe_num_chasis:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            
+                                                                            "error_message":"Ya existe el número de chasis ingresado"})
+        elif existe_matricula:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            
+                                                                            "error_message":"Ya existe la matricula ingresada"})
+        elif existe_padron:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            
+                                                                            "error_message":"Ya existe el número de padrón ingresado"})
+        elif not departamento:
+            return render(req,"perfil_administrativo/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            
+                                                                            "error_message":"La matrícula es incorrecta"})
+        else:
+            marca = req.POST['marca_moto'].upper()
+            modelo = req.POST['modelo_moto'].upper()
+            color = req.POST['color_moto'].upper()
+
+            foto = req.FILES.get('foto_moto')
+
+            checkbox_num_motor = 'sin_num_motor' in req.POST
+            if checkbox_num_motor:
+                numero_de_motor = crear_num_motor()
+                tiene_numero_motor = 0
+            else:
+                numero_de_motor = num_motor
+                tiene_numero_motor = 1
+
+
+            checkbox_num_chasis = 'sin_num_chasis' in req.POST
+            if checkbox_num_chasis:
+                numero_de_chasis = crear_num_chasis()
+                tiene_numero_chasis = 0
+            else:
+                numero_de_chasis = num_chasis
+                tiene_numero_chasis = 1
+            
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],tiene_numero_motor,tiene_numero_chasis)
+            #libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
+           
+            # insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)
+
+
+            insert_matriculas(matricula,padron,nueva_moto.id)
+            checkbox = 'crear_pdf' in req.POST
+            if checkbox:
+                
+                pdf = checkbox_pdf(req,nueva_moto)
+                return pdf
+            else:
+                messages.success(req, "Moto ingresada con éxito.")
+                return redirect('Motos')
+
+            
+    # except Exception as e:
+    #          return render(req,"perfil_administrativo/motos/alta_moto.html",{"cliente":cliente,
+    #                                                                          "active_page": 'Motos',
+    #                                                                          "form_moto_usada":True,
+    #                                                                          "form_moto_ingresada":False,
+    #                                                                          "consultar_moto_cliente":False,
+    #                                                                          "error_message":e})
+
+
 
 @admin_required
 def form_alta_moto(req):

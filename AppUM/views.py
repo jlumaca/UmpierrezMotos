@@ -2330,11 +2330,11 @@ def refinanciar_pagos(req,id_cv):
             valor_cuota = req.POST['valor_cuota_pesos']
         else:
             valor_cuota = req.POST['valor_cuota_dolares']
-        alta_financiamientos(req.POST['recargo_porcentaje'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0)
+        alta_financiamientos(req.POST['recargo_porcentaje_coma'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0)
         messages.success(req, "Financiamiento ingresado con éxito")
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
     except Exception as e:
-        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{})
+        return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{'id_cv':id_cv})
 
 def baja_financiamiento(req,id_f,id_cv):
     # try:

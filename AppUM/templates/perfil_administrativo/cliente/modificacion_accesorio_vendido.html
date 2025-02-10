@@ -1,0 +1,99 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de accesorio</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="{% url 'ModificarAccesorioVendido' datos_accesorio.id id_cliente %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3">
+                <label for="estado" class="form-label">Tipo</label>
+                <select value="{{ datos_accesorio.tipo }}" class="form-control" name="tipo_accesorio" id="tipo" onchange="toggleFields()">
+                    <option value="Aceite" {% if datos_accesorio.tipo == "Aceite" %}selected{% endif %}>Aceite</option>
+                    <option value="Casco" {% if datos_accesorio.tipo == "Casco" %}selected{% endif %}>Casco</option>
+                    <option value="Cubremoto" {% if datos_accesorio.tipo == "Cubremoto" %}selected{% endif %}>Cubremoto</option>
+                    <option value="Grasa de cadena" {% if datos_accesorio.tipo == "Grasa de cadena" %}selected{% endif %}>Grasa de cadena</option>
+                    <option value="Guantes" {% if datos_accesorio.tipo == "Guantes" %}selected{% endif %}>Guantes</option>
+                    <option value="Mecanismo" {% if datos_accesorio.tipo == "Mecanismo" %}selected{% endif %}>Mecanismo de casco</option>
+                    <option value="Micas" {% if datos_accesorio.tipo == "Micas" %}selected{% endif %}>Micas</option>
+                    <option value="Pasamontaña" {% if datos_accesorio.tipo == "Pasamontaña" %}selected{% endif %}>Pasamontaña</option>
+                    <option value="Ropa" {% if datos_accesorio.tipo == "Ropa" %}selected{% endif %}>Ropa</option>
+                    <option value="Slime" {% if datos_accesorio.tipo == "Slime" %}selected{% endif %}>Slime</option>
+                    <option value="Trancas" {% if datos_accesorio.tipo == "Trancas" %}selected{% endif %}>Trancas</option>
+                    <option value="Valijas" {% if datos_accesorio.tipo == "Valijas" %}selected{% endif %}>Valijas</option>
+                    <option value="Otro" {% if datos_accesorio.tipo == "Otro" %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input value="{{ datos_accesorio.marca }}" type="text" class="form-control" name="marca_accesorio" id="marca" placeholder="Ingrese la marca" maxlength="20">
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input value="{{ datos_accesorio.modelo }}" type="text" class="form-control" name="modelo_accesorio" id="modelo" placeholder="Ingrese el modelo" maxlength="20">
+            </div>
+
+            <div class="mb-3">
+                <label for="estado" class="form-label">Talle</label>
+                <select class="form-control" name="talle_accesorio" id="tipo">
+                    <option value="XXS" {% if datos_accesorio.talle == "XXS" %}selected{% endif %}>XXS</option>
+                    <option value="XS" {% if datos_accesorio.talle == "XS" %}selected{% endif %}>XS</option>
+                    <option value="S" {% if datos_accesorio.talle == "S" %}selected{% endif %}>S</option>
+                    <option value="M" {% if datos_accesorio.talle == "M" %}selected{% endif %}>M</option>
+                    <option value="L" {% if datos_accesorio.talle == "L" %}selected{% endif %}>L</option>
+                    <option value="XL" {% if datos_accesorio.talle == "XL" %}selected{% endif %}>XL</option>
+                    <option value="XXL" {% if datos_accesorio.talle == "XXL" %}selected{% endif %}>XXL</option>
+                    <option value="XXXL" {% if datos_accesorio.talle == "XXXL" %}selected{% endif %}>XXXL</option>
+                    <option value="Sin talle" {% if datos_accesorio.talle == "Sin talle" %}selected{% endif %}>Sin talle</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="estado" class="form-label">Moneda</label>
+                <select value="{{ datos_accesorio.moneda_precio }}" class="form-control" name="moneda_accesorio" id="tipo">
+                    <option value="Pesos" {% if datos_accesorio.moneda_precio == "Pesos" %}selected{% endif %}>Pesos</option>
+                    <option value="Dolares" {% if datos_accesorio.moneda_precio == "Dolares" %}selected{% endif %}>Dolares</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio</label>
+                <input value="{{ precio_accesorio }}" type="number" class="form-control" name="precio_accesorio" id="precio" placeholder="Ingrese el precio">
+            </div>
+            
+            <div class="mb-3">
+                <label for="foto" class="form-label">Foto</label>
+                <input type="file" class="form-control" name="foto_accesorio" id="foto">
+            </div>
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+
+<script>
+    function toggleFields() {
+        var tipo = document.getElementById("tipo").value;
+        var tipo_otro = document.getElementById("div_tipo_otro");
+        
+   
+       
+
+        if (tipo === "Otro") {
+            tipo_otro.style.display = "block";
+            
+        }else{
+            tipo_otro.style.display = "none";
+        }
+    }
+</script>
+
+{% endblock %}

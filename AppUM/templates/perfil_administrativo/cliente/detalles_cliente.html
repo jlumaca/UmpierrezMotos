@@ -416,7 +416,10 @@
             {% if page_obj_accesorio %}
                 {% for item in page_obj_accesorio %}
                 <tr>
-                    <td>{{ item.accesorio.accesorio__tipo }} {{ item.accesorio.accesorio__marca }} {{ item.accesorio.accesorio__modelo }}</td>
+                    <td>
+                        {{ item.accesorio.accesorio__tipo }} {{ item.accesorio.accesorio__marca }} {{ item.accesorio.accesorio__modelo }}
+                        <a href="{% url 'ModificarAccesorioVendido' item.accesorio.accesorio__id cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                    </td>
                     <td>{{ item.accesorio.fecha_compra }}</td>
                    
                     <td>

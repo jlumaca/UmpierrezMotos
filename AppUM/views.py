@@ -1441,6 +1441,7 @@ def ficha_cliente(req,id_cliente):
         .select_related('accesorio', 'cliente')
         .values(
             'id',
+            'accesorio__id',
             'accesorio__tipo',
             'accesorio__marca',
             'accesorio__modelo',
@@ -1638,6 +1639,27 @@ def modificar_moto_vendida(req,id_moto,id_cliente):
         return render(req,"perfil_administrativo/cliente/modificacion_moto_vendida.html",{'datos_moto': moto_upd,
             "letras_matricula":letras_matricula,
             "num_matricula":num_matricula,"id_cliente":id_cliente,"error_message":str(e)})
+
+def modificar_accesorio_vendido(req,id_accesorio,id_cliente):
+    # try:
+        if req.method == "POST": 
+            accesorio_upd = Accesorio.objects.get(id=id_accesorio)
+            accesorio_upd.tipo = req.POST['tipo_accesorio']
+            accesorio_upd.marca = req.POST['marca_accesorio'].upper()
+            accesorio_upd.modelo = req.POST['modelo_accesorio'].upper()
+            accesorio_upd.precio = req.POST['precio_accesorio']
+            accesorio_upd.foto = req.FILES.get('foto_accesorio')
+            accesorio_upd.moneda_precio = req.POST['moneda_accesorio']
+            accesorio_upd.talle = req.POST['talle_accesorio']
+            accesorio_upd.save()
+            messages.success(req, "El accesorio ha sido modificado con éxito.")
+            return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+        else:
+            accesorio = Accesorio.objects.get(id=id_accesorio)
+            precio = int(accesorio.precio) if accesorio.precio else 0
+            return render(req,"perfil_administrativo/cliente/modificacion_accesorio_vendido.html",{"datos_accesorio":accesorio,"precio_accesorio":precio,"id_cliente":id_cliente})
+    # except Exception as e:
+    #     pass
 
 def fondos_cliente(req,id_cliente):
     # try:

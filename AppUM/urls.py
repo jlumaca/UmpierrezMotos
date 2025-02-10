@@ -86,6 +86,8 @@ urlpatterns = [
 
 
      path('ventas', views.vista_ventas,name="Ventas"),
+     path('venta_cliente', views.buscar_venta_cliente,name="VentasCliente"),
+     path('venta_fecha', views.buscar_venta_fecha,name="VentasFecha"),
      # path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),
      
      

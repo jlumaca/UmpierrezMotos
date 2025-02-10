@@ -1489,6 +1489,41 @@ def ficha_cliente(req,id_cliente):
         c_2 = correo2.correo
     else:
         c_2 = None
+
+
+    resultados_motos_anteriores = (
+        ComprasVentas.objects
+        .filter(cliente__id=id_cliente, tipo="CV")
+        .select_related('moto', 'cliente')
+        .values(
+            'id',
+            'moto__marca', 
+            'moto__modelo', 
+            'moto__estado',
+            'moto__id',
+            'cliente__id',
+            'fecha_compra', 
+            # 'cantidad_cuotas', 
+            # 'cuotas_pagas', 
+            'moto__precio', 
+            'fotocopia_libreta', 
+            'compra_venta', 
+            'certificado_venta',
+            'facturas'
+            # 'valor_cuota'
+        ).order_by('-id')
+    )
+
+    res_documentacion_ma = []
+    for resultado in resultados_motos_anteriores:
+            cv = ComprasVentas.objects.get(id=resultado['id'])
+            res_documentacion_ma.append({
+            'moto': resultado,
+            'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
+        })
+
+
+    page_obj_ma = funcion_paginas_varias(req,res_documentacion_ma)
     
     resultados_motos = (
         ComprasVentas.objects
@@ -1571,7 +1606,8 @@ def ficha_cliente(req,id_cliente):
                                                                              "page_obj_accesorio":page_obj_accesorio,
                                                                              "fondos":fondos,
                                                                              "total_pesos":float(total_pesos),
-                                                                             "total_dolares":float(total_dolares)
+                                                                             "total_dolares":float(total_dolares),
+                                                                             "page_obj_ma":page_obj_ma
                                                                              })
 
 def modificar_moto_vendida(req,id_moto,id_cliente):

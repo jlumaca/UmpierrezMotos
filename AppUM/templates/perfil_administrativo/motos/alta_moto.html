@@ -45,11 +45,12 @@
                         <!-- Cambiar el botón a tipo submit -->
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <input type="checkbox" id="cb_moto_usada_sin_dueno" name="sin_num_chasis" class="form-check-input" onchange="moto_usada_sin_dueno()">
-                    <label for="toggleMatr" class="form-check-label">No cuento con este dato</label>
-                </div>
+                {% if request.user.is_superuser %}
+                    <div class="mb-3">
+                        <input type="checkbox" id="cb_moto_usada_sin_dueno" name="sin_num_chasis" class="form-check-input" onchange="moto_usada_sin_dueno()">
+                        <label for="toggleMatr" class="form-check-label">No cuento con este dato</label>
+                    </div>
+                {% endif %}
                 <div id="div_boton_num_motor">
                     <div class="mb-3">
                         <label for="num_motor" class="form-label">Número de motor</label>

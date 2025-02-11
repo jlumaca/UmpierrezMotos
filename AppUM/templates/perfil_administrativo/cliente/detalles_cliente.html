@@ -237,7 +237,7 @@
                                             <i class="fas fa-file-alt"></i> Libreta
                                         </button>
                                     </a>
-                                    <button class="btn btn-sm btn-danger" title="Eliminar Libreta" onclick="mostrarConfirmacionLibreta('{{ item.moto.id }}')">
+                                    <button class="btn btn-sm btn-danger" title="Eliminar Libreta" onclick="mostrarConfirmacionLibretaCV('{{ item.moto.id }}')">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div> 
@@ -257,8 +257,15 @@
                                     <input type="file" class="form-control" id="libreta" name="libreta_venta" required>
                                 </div>
                                 <button type="submit" class="btn btn-success">Guardar</button>
-                                <button type="button" class="btn btn-secondary" onclick="toggleLibreta('{{ forloop.counter }}')">Cancelar</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleLibretaCV('{{ forloop.counter }}')">Cancelar</button>
                             </form>
+                        </td>
+                    </tr>
+                    <tr id="confirmacion-row-libreta-CV-{{ item.moto.id }}" class="d-none">
+                        <td colspan="3" class="text-center text-danger">
+                            <p>¿Estás seguro de que deseas borrar la libreta de propiedad asociada a esta venta?</p>
+                            <a href="{% url 'BorrarDocumentacion' item.moto.id 'Libreta' %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionLibretaCV('{{ item.moto.id }}')">Cancelar</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -274,7 +281,7 @@
     </table>
 
 
-    <h4>Motos</h4>
+    <h4>Motos vendidas</h4>
     <table class="table">
         <thead>
             <tr>
@@ -581,6 +588,24 @@ function toggleFormulario(id) {
     confirmacionRow.classList.remove("d-none");
     }
 
+    function mostrarConfirmacionLibretaCV(cvId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-libreta-CV-${cvId}`);
+    confirmacionRow.classList.remove("d-none");
+    }
+
+    
+    function cancelarEliminacionLibretaCV(cvId) {
+        // Ocultar el mensaje de confirmación
+        const confirmacion = document.getElementById(`confirmacion-row-libreta-CV-${cvId}`);
+        confirmacion.classList.add('d-none');
+    }
+    
     function cancelarEliminacionLibreta(cvId) {
         // Ocultar el mensaje de confirmación
         const confirmacion = document.getElementById(`confirmacion-row-libreta-${cvId}`);

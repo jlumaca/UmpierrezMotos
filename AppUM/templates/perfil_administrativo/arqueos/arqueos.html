@@ -48,9 +48,9 @@
                 <tr>
                     <td>{{ arqueo.arqueo.apertura }}</td>
                     <td>{% if arqueo.cierre %}{{ arqueo.cierre }}{% endif %}</td>
-                    <td>{{ arqueo.arqueo.monto_inicial }}</td>
-                    <td>{{ arqueo.depositos }}</td>
-                    <td>{{ arqueo.egresos }}</td>
+                    <td>${{ arqueo.arqueo.monto_inicial }}/U$s{{ arqueo.monto_inicial_dol }}</td>
+                    <td>{{ arqueo.depositos }}/U$s{{ arqueo.depositos_dolares }}</td>
+                    <td>{{ arqueo.egresos }}/U$s{{ arqueo.egresos_dolares }}</td>
                     <td>
                         {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
                         {{ arqueo.saldo_caja }}

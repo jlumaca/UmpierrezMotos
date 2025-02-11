@@ -3163,13 +3163,18 @@ def arqueos(req):
 
         arqueos = Caja.objects.all().order_by('-apertura')
         data = []
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
         for arqueo in arqueos:
             usuario = Personal.objects.get(id=arqueo.usuario_id)
             data.append({
                 "arqueo": arqueo,
+                "monto_inicial_dol":round(float(arqueo.monto_inicial) / precio_dolar, 2),
                 "cierre": arqueo.cierre,  # Permite que sea None si no está definido
                 "depositos": arqueo.depositos if arqueo.depositos is not None else 0,
+                "depositos_dolares":round(float(arqueo.depositos) / precio_dolar, 2) if arqueo.depositos is not None else 0,
                 "egresos": arqueo.egresos if arqueo.egresos is not None else 0,
+                "egresos_dolares": round(float(arqueo.egresos) / precio_dolar, 2) if arqueo.egresos is not None else 0,
                 "saldo_caja": arqueo.saldo_caja if arqueo.saldo_caja is not None else 0,
                 "saldo_sistema": arqueo.saldo_sistema if arqueo.saldo_sistema is not None else 0,
                 "diferencia": arqueo.diferencia if arqueo.diferencia is not None else 0,

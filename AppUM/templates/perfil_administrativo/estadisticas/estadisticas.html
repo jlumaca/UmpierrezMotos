@@ -17,14 +17,31 @@
         {% endif %}
 
         <div class="mb-3">
-            <label for="estado" class="form-label">Graficos</label>
+            <form method="GET">
+                <label for="anio">Seleccione un año:</label>
+                <select name="anio" id="anio" onchange="this.form.submit()">
+                    {% for year in years_available %}
+                    <option value="{{ year }}" {% if year == anio %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <!-- <label for="estado" class="form-label">Graficos</label> -->
             <select class="form-control" name="mostrarxgrafico" id="mostrarxgrafico" onchange="toggleFields()">
                 <option value="ventasxmes">Ventas de motos por mes</option>
                 <option value="moto_mas_vendida">Motos más vendidas</option>
                 <option value="marca_mas_vendida">Marcas de motos más vendidas</option>
                 <option value="accesorios_ventas">Ventas de accesorios por mes</option>
+                
             </select>
         </div>
+
+
+        
+
+
+            
+
     <figure class="highcharts-figure">
         <div id="container_ventasxmes"></div>
        
@@ -38,14 +55,26 @@
                 </tr>
             </thead>
             <tbody style="display: none;">
-                {% for venta in datos %}
-                    <tr>
-                        <th></th>
-                        <td>{{ venta }}</td>
-                        
-                    </tr>
+                {% if ventas_anio %}
+                    {% for venta in ventas_anio %}
+                        <tr>
+                            <th></th>
+                            <td>{{ venta }}</td>
+                            
+                        </tr>
 
-                {% endfor %}
+                    {% endfor %}
+
+                {% else %}
+                    {% for venta in datos %}
+                        <tr>
+                            <th></th>
+                            <td>{{ venta }}</td>
+                            
+                        </tr>
+
+                    {% endfor %}
+                {% endif %}
             </tbody>
         </table>
     </figure>
@@ -133,27 +162,33 @@
         var container_marcamasvendida = document.getElementById("container_marcamasvendida");
         var container_motomasvendida = document.getElementById("container_motomasvendida");
         var container_ventas_accesoriosxmes = document.getElementById("container_ventas_accesoriosxmes");
+        var anio_estadistica_venta_moto = document.getElementById("anio_estadistica_venta_moto");
         
         if (mostrarxgrafico === "ventasxmes") {
             container_ventasxmes.style.display = "block";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "none";
+            anio_estadistica_venta_moto.style.display = "block";
         }else if (mostrarxgrafico === "moto_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "block";
             container_ventas_accesoriosxmes.style.display = "none";
+            anio_estadistica_venta_moto.style.display = "none";
         }else if (mostrarxgrafico === "marca_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "block";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "none";
+            anio_estadistica_venta_moto.style.display = "none";
         }else{
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "block";
+            anio_estadistica_venta_moto.style.display = "none";
+            anio_estadistica_venta_moto.style.display = "none";
         }
 
     }

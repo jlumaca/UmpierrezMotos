@@ -26,6 +26,7 @@ import io
 from django.http import HttpResponse
 from docx import Document
 from django.db.models import Sum
+from django.utils.timezone import now
 # import json
 # from docx import Document
 
@@ -2944,56 +2945,81 @@ def reservar_moto(req,id_moto,id_cliente):
 @admin_required
 def estadisticas(req):
     try:
-        #VENTAS X MES
-        anio = datetime.now().year
-        mes_actual = datetime.now().month
-        datos_ventas = []
-        for n in range(1,mes_actual + 1):
-            cant_ventas = ComprasVentas.objects.filter(fecha_compra__year=anio,fecha_compra__month=n,tipo="V").count()
-            datos_ventas.append(int(cant_ventas))
+        anio = req.GET.get("anio", now().year)  
+        anio = int(anio)  # Asegurar que sea un entero
+        mes_actual = now().month if anio == now().year else 12  # Si es el año actual, hasta el mes actual
 
-        #5 MARCAS MAS VENDIDAS
+        # Ventas de motos por mes
+        ventas_mensuales = (
+            ComprasVentas.objects
+            .filter(fecha_compra__year=anio, tipo="V")
+            .values('fecha_compra__month')
+            .annotate(total=Count('id'))
+            .order_by('fecha_compra__month')
+        )
+
+        datos_ventas = [0] * mes_actual  
+        for venta in ventas_mensuales:
+            datos_ventas[venta['fecha_compra__month'] - 1] = venta['total']
+
+        # 5 Marcas más vendidas
         marcas_mas_vendidas = (
             ComprasVentas.objects
-            .filter(tipo='V')  # Filtra solo las ventas
-            .values('moto__marca')  # Agrupa por marca de moto
-            .annotate(total_vendidas=Count('id'))  # Cuenta las ventas por marca
-            .order_by('-total_vendidas')[:5]  # Ordena de mayor a menor y toma las primeras 5
+            .filter(tipo='V', fecha_compra__year=anio)
+            .values('moto__marca')
+            .annotate(total_vendidas=Count('id'))
+            .order_by('-total_vendidas')[:5]
         )
-        
+
         datos_marcas = [
-        {'marca': resultado['moto__marca'], 'total_vendidas': resultado['total_vendidas']}
-        for resultado in marcas_mas_vendidas
+            {'marca': resultado['moto__marca'], 'total_vendidas': resultado['total_vendidas']}
+            for resultado in marcas_mas_vendidas
         ]
 
-        #5 MOTOS MAS VENDIDAS
-
+        # 5 Motos más vendidas
         motos_mas_vendidas = (
             ComprasVentas.objects
-            .filter(tipo='V')  # Filtra solo las ventas
-            .values('moto__marca','moto__modelo')  # Agrupa por marca de moto
-            .annotate(total_motos_vendidas=Count('id'))  # Cuenta las ventas por marca
-            .order_by('-total_motos_vendidas')[:5]  # Ordena de mayor a menor y toma las primeras 5
+            .filter(tipo='V', fecha_compra__year=anio)
+            .values('moto__marca', 'moto__modelo')
+            .annotate(total_motos_vendidas=Count('id'))
+            .order_by('-total_motos_vendidas')[:5]
         )
-        
+
         datos_motos = [
-        {'marca': resultado_moto['moto__marca'],'modelo':resultado_moto['moto__modelo'], 'total_motos_vendidas': resultado_moto['total_motos_vendidas']}
-        for resultado_moto in motos_mas_vendidas
+            {'marca': resultado['moto__marca'], 'modelo': resultado['moto__modelo'], 'total_motos_vendidas': resultado['total_motos_vendidas']}
+            for resultado in motos_mas_vendidas
         ]
+
+        # Ventas de accesorios por mes
+        accesorios_mensuales = (
+            ClienteAccesorio.objects
+            .filter(fecha_compra__year=anio)
+            .values('fecha_compra__month')
+            .annotate(total=Count('id'))
+            .order_by('fecha_compra__month')
+        )
+
+        datos_accesorios_ventas = [0] * mes_actual
+        for accesorio in accesorios_mensuales:
+            datos_accesorios_ventas[accesorio['fecha_compra__month'] - 1] = accesorio['total']
         
-        datos_accesorios_ventas = []
-        for n in range(1,mes_actual + 1):
-            cant_accesorios = ClienteAccesorio.objects.filter(fecha_compra__year=anio,fecha_compra__month=n).count()
-            datos_accesorios_ventas.append(int(cant_accesorios))
-                      
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"datos":datos_ventas,
-                                                                                  "marcas":datos_marcas,
-                                                                                  "motos":datos_motos,
-                                                                                  "active_page":"Estadisticas",
-                                                                                  "prueba":datos_marcas,
-                                                                                  "accesorios":datos_accesorios_ventas})
+        years_available = range(now().year - 2, now().year + 1)
+
+        return render(req, "perfil_administrativo/estadisticas/estadisticas.html", {
+            "anio": anio,  # Enviar el año seleccionado
+            "datos": datos_ventas,
+            "marcas": datos_marcas,
+            "motos": datos_motos,
+            "accesorios": datos_accesorios_ventas,
+            "active_page": "Estadisticas",
+            "years_available":years_available
+        })
+
     except Exception as e:
-        return render(req,"perfil_administrativo/estadisticas/estadisticas.html",{"error_message":e,"active_page":"Estadisticas"})
+        return render(req, "perfil_administrativo/estadisticas/estadisticas.html", {
+            "error_message": str(e),
+            "active_page": "Estadisticas"
+        })
 
 @admin_required
 def datos_tienda(req):

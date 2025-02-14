@@ -17,14 +17,14 @@
         {% endif %}
 
         <div class="mb-3">
-            <form method="GET">
+            <!-- <form method="GET">
                 <label for="anio">Seleccione un año:</label>
                 <select name="anio" id="anio" onchange="this.form.submit()">
                     {% for year in years_available %}
                     <option value="{{ year }}" {% if year == anio %}selected{% endif %}>{{ year }}</option>
                     {% endfor %}
                 </select>
-            </form>
+            </form> -->
 
             <!-- <label for="estado" class="form-label">Graficos</label> -->
             <select class="form-control" name="mostrarxgrafico" id="mostrarxgrafico" onchange="toggleFields()">
@@ -42,42 +42,31 @@
 
             
 
-    <figure class="highcharts-figure">
-        <div id="container_ventasxmes"></div>
-       
-    
-        <table id="datatable">
-            <thead style="display: none;">
-                <tr>
-                    <th></th>
-                    <th>Ventas</th>
-                    
-                </tr>
-            </thead>
-            <tbody style="display: none;">
-                {% if ventas_anio %}
-                    {% for venta in ventas_anio %}
+        <figure class="highcharts-figure">
+            <div id="container_ventasxmes"></div>
+        
+            <table id="datatable">
+                <thead style="display: none;">
+                    <tr>
+                        <th>Mes</th>
+                        {% for anio in years_available %}
+                            <th>{{ anio }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody style="display: none;">
+                    {% for mes in meses_disponibles %}
                         <tr>
-                            <th></th>
-                            <td>{{ venta }}</td>
-                            
+                            <th>{{ mes }}</th>
+                            {% for anio in years_available %}
+                                <td>{{ ventas_anuales.anio|default_if_none:"0"|slice:mes|default_if_none:"0" }}</td>
+                            {% endfor %}
                         </tr>
-
                     {% endfor %}
-
-                {% else %}
-                    {% for venta in datos %}
-                        <tr>
-                            <th></th>
-                            <td>{{ venta }}</td>
-                            
-                        </tr>
-
-                    {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-    </figure>
+                </tbody>
+            </table>
+        </figure>
+        
 
     <div id="container_marcamasvendida" style="display: none;"></div>
        
@@ -151,7 +140,13 @@
             </tbody>
         </table>
     </figure>
-
+    <pre id="debug" style="display: none;"></pre>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var rawData = '{{ ventas_anuales_json|escapejs }}';
+            document.getElementById("debug").innerText = rawData; // Esto muestra el JSON en la página para verificar
+        });
+    </script>
 
 </div>
 
@@ -192,35 +187,60 @@
         }
 
     }
-Highcharts.chart('container_ventasxmes', {
-    data: {
-        table: 'datatable'
-    },
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Ventas de motos por mes'
-    },
-    xAxis: {
-        categories: ['Ventas','Marcas'],
-        title: {
-            text: 'Mes'
-        },
-        // Ejemplo para ajustar los valores de x si fuera necesario
-        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
-        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
-    },
-    yAxis: {
-        min: 0, // Valor mínimo en el eje y
-        
-        tickInterval: 10, // Intervalo entre marcas en el eje y
-        allowDecimals: false,
-        title: {
-            text: 'Ventas'
+    document.addEventListener("DOMContentLoaded", function () {
+        try {
+            var ventasAnuales = JSON.parse('{{ ventas_anuales_json|safe }}'); // Convertimos JSON de Django a JS
+            console.log("Ventas Anuales:", ventasAnuales); // Depuración en la consola
+
+            var seriesData = [];
+            var yearsAvailable = JSON.parse('{{ years_available|safe }}'); // Convertimos la lista de años
+
+            yearsAvailable.forEach(function (year) {
+                if (ventasAnuales[year]) {
+                    seriesData.push({
+                        name: year.toString(),
+                        data: ventasAnuales[year]
+                    });
+                }
+            });
+
+            Highcharts.chart('container_ventasxmes', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Ventas de motos por mes'
+                },
+                xAxis: {
+                    categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    title: {
+                        text: 'Mes'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    tickInterval: 10,
+                    allowDecimals: false,
+                    title: {
+                        text: 'Ventas'
+                    }
+                },
+                tooltip: {
+                    shared: true
+                },
+                plotOptions: {
+                    column: {
+                        grouping: true,
+                        shadow: false,
+                        borderWidth: 0
+                    }
+                },
+                series: seriesData
+            });
+        } catch (error) {
+            console.error("Error al procesar JSON:", error);
         }
-    }
-});
+    });
 
 Highcharts.chart('container_marcamasvendida', {
     data: {

@@ -2945,27 +2945,52 @@ def reservar_moto(req,id_moto,id_cliente):
 @admin_required
 def estadisticas(req):
     try:
-        anio = req.GET.get("anio", now().year)  
-        anio = int(anio)  # Asegurar que sea un entero
-        mes_actual = now().month if anio == now().year else 12  # Si es el año actual, hasta el mes actual
+        anio_actual = req.GET.get("anio", now().year)  
+        anio_actual = int(anio_actual)  # Asegurar que sea un entero
+        # years_available = range(2023,2026)
+        
+        # prueba_anio = []
+        # # Ventas de motos por mes
+        # for anio in years_available:
+        #     mes_actual = 12  # Si es el año actual, hasta el mes actual
+        #     print(anio)
+        #     ventas_mensuales = (
+        #         ComprasVentas.objects
+        #         .filter(fecha_compra__year=anio, tipo="V")
+        #         .values('fecha_compra__month','fecha_compra__year')
+        #         .annotate(total=Count('id'))
+        #         .order_by('fecha_compra__month')
+        #     )
+        #     prueba_anio.append({
+        #         "prueba":ventas_mensuales
+        #     })
+        #     datos_ventas = [0] * mes_actual  
+        #     for venta in ventas_mensuales:
+        #         datos_ventas[venta['fecha_compra__month'] - 1] = venta['total']
+        years_available = range(2023, now().year + 1)  # Rango de años a comparar
+        meses_disponibles = range(1, 13)  # Meses del 1 al 12
 
-        # Ventas de motos por mes
-        ventas_mensuales = (
-            ComprasVentas.objects
-            .filter(fecha_compra__year=anio, tipo="V")
-            .values('fecha_compra__month')
-            .annotate(total=Count('id'))
-            .order_by('fecha_compra__month')
-        )
+        ventas_anuales = {anio: [0] * 12 for anio in years_available}  # Diccionario para almacenar ventas por año y mes
 
-        datos_ventas = [0] * mes_actual  
-        for venta in ventas_mensuales:
-            datos_ventas[venta['fecha_compra__month'] - 1] = venta['total']
+        # Obtener ventas por mes y año
+        for anio in years_available:
+            ventas_mensuales = (
+                ComprasVentas.objects
+                .filter(fecha_compra__year=anio, tipo="V")
+                .values('fecha_compra__month')
+                .annotate(total=Count('id'))
+            )
+            
+            # Llenar la lista con los datos obtenidos
+            for venta in ventas_mensuales:
+                ventas_anuales[anio][venta['fecha_compra__month'] - 1] = venta['total']
+
+
 
         # 5 Marcas más vendidas
         marcas_mas_vendidas = (
             ComprasVentas.objects
-            .filter(tipo='V', fecha_compra__year=anio)
+            .filter(tipo='V', fecha_compra__year=anio_actual)
             .values('moto__marca')
             .annotate(total_vendidas=Count('id'))
             .order_by('-total_vendidas')[:5]
@@ -2979,7 +3004,7 @@ def estadisticas(req):
         # 5 Motos más vendidas
         motos_mas_vendidas = (
             ComprasVentas.objects
-            .filter(tipo='V', fecha_compra__year=anio)
+            .filter(tipo='V', fecha_compra__year=anio_actual)
             .values('moto__marca', 'moto__modelo')
             .annotate(total_motos_vendidas=Count('id'))
             .order_by('-total_motos_vendidas')[:5]
@@ -2993,26 +3018,32 @@ def estadisticas(req):
         # Ventas de accesorios por mes
         accesorios_mensuales = (
             ClienteAccesorio.objects
-            .filter(fecha_compra__year=anio)
+            .filter(fecha_compra__year=anio_actual)
             .values('fecha_compra__month')
             .annotate(total=Count('id'))
             .order_by('fecha_compra__month')
         )
-
-        datos_accesorios_ventas = [0] * mes_actual
+        mes_actual_accesorios = now().month if anio_actual == now().year else 12
+        datos_accesorios_ventas = [0] * mes_actual_accesorios
         for accesorio in accesorios_mensuales:
             datos_accesorios_ventas[accesorio['fecha_compra__month'] - 1] = accesorio['total']
         
-        years_available = range(now().year - 2, now().year + 1)
-
+        
         return render(req, "perfil_administrativo/estadisticas/estadisticas.html", {
             "anio": anio,  # Enviar el año seleccionado
-            "datos": datos_ventas,
+            
             "marcas": datos_marcas,
             "motos": datos_motos,
             "accesorios": datos_accesorios_ventas,
             "active_page": "Estadisticas",
-            "years_available":years_available
+            "years_available":years_available,
+            "years_available": years_available,  # Lista de años
+            "meses_disponibles": meses_disponibles,  # Lista de meses
+            "ventas_anuales": ventas_anuales,
+            "years_available": list(years_available),  # Convertimos a lista para evitar problemas en el template
+        "ventas_anuales_json": json.dumps(ventas_anuales)
+            
+            
         })
 
     except Exception as e:

@@ -25,6 +25,41 @@
     <a href="{% url 'AbrirCaja' %}" class="btn btn-primary mb-3">
         <i class="fas fa-cash-register"></i> Abrir caja
     </a>
+
+    <div class="mb-3">
+        <label for="estado" class="form-label">Buscar por:</label>
+        <select class="form-control" name="tipo_busqueda" id="tipo_busqueda" onchange="tipo_busqueda()">
+            <option value="apertura">Fecha de apertura</option>
+            <option value="cierre">Fecha de clausura</option>
+        </select>
+    </div>
+
+    <form action="{% url 'ArqueosFechaApertura' %}" enctype="multipart/form-data" method="get" id="busqueda_fecha_apertura">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="date" class="form-control" name="f_apertura" placeholder="Ingrese la fecha de apertura de la caja">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Arqueos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+
+    <form action="{% url 'ArqueosFechaCierre' %}" enctype="multipart/form-data" method="get" id="busqueda_fecha_cierre" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="date" class="form-control" name="fecha_de_cierre" placeholder="Ingrese la fecha de cierre de la caja">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Arqueos' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>        
+        </div>
+    </form>
+
     
     <table class="table">
         <thead>
@@ -193,6 +228,17 @@ function toggleIngresos(id) {
         } else {
             formulario.style.display = "none";
         }
+    }
+
+    function tipo_busqueda() {
+        var busqueda_tipo = document.getElementById("tipo_busqueda").value;
+        var busqueda_fecha_apertura = document.getElementById("busqueda_fecha_apertura");
+        var busqueda_fecha_cierre = document.getElementById("busqueda_fecha_cierre");
+
+
+        busqueda_fecha_apertura.style.display = busqueda_tipo === "apertura" ? "block" : "none";
+        busqueda_fecha_cierre.style.display = busqueda_tipo === "cierre" ? "block" : "none";
+
     }
 </script>
 {% endblock %}

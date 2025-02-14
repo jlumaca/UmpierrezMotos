@@ -99,6 +99,8 @@ urlpatterns = [
      path('modificar_logo_cv', views.modificar_logo_cv,name="ModificarLogoCV"),
 
      path('arqueos', views.arqueos,name="Arqueos"),
+     path('apertura', views.buscar_x_fecha_apertura,name="ArqueosFechaApertura"),
+     path('cierre', views.buscar_x_fecha_cierre,name="ArqueosFechaCierre"),
      path('abrir_caja', views.abrir_caja,name="AbrirCaja"),
      path('ingresos_caja/<int:id_caja>', views.ingresos_caja,name="IngresosCaja"),
      path('egresos_caja/<int:id_caja>', views.egresos_caja,name="EgresosCaja"),

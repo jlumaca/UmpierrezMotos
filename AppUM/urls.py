@@ -17,6 +17,7 @@ urlpatterns = [
      path('motos', views.vista_inventario_motos,name="Motos"),#
 
      path('moto_alta', views.form_alta_moto,name="MotoAlta"),#
+     # path('generar_compromiso_compra_venta_moto_ingreso/<int:id_cliente>', views.generar_compromiso_compra_venta_moto_ingreso,name="GCCVMI"),
      path('cliente_moto', views.cliente_moto,name="BuscarClienteMoto"),#
      path('alta_moto_usada/<int:id_cliente>', views.alta_moto_usada,name="AltaMotoUsada"),#
      path('reingresar_moto_usada/<int:id_moto>/<int:id_cliente>', views.reingresar_moto_usada,name="ReingresarMotoUsada"),#

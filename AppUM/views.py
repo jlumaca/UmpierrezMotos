@@ -379,6 +379,8 @@ def alta_moto_usada(req,id_cliente):
            
             insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)
 
+            generar_compromiso_compra_venta_moto_ingreso(req,nueva_moto.id,id_cliente)
+
 
             insert_matriculas(matricula,padron,nueva_moto.id)
             checkbox = 'crear_pdf' in req.POST

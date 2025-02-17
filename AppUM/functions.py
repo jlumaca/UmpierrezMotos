@@ -1582,7 +1582,7 @@ def generar_compromiso_compra_venta_moto_ingreso(req,id_moto,id_cliente):
                     run.text = run.text.replace('DOCUMENTO_CLIENTE', doc_num_personal)
                     reemplazado = True
                 if 'DOMICILIO_CLIENTE' in run.text:
-                    run.text = run.text.replace('DOMICILIO_CLIENTE', "Reina Martínez...")
+                    run.text = run.text.replace('DOMICILIO_CLIENTE', "Reina Martínez 1113")
                     reemplazado = True
                 if 'TELEFONO_CLIENTE' in run.text:
                     run.text = run.text.replace('TELEFONO_CLIENTE', "096 117 550")

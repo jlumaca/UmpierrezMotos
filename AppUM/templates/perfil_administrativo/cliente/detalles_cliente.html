@@ -219,6 +219,7 @@
                 <th scope="row">Detalles</th>
                 <th scope="row">Fecha</th>          
                 <th scope="row">Documentacion</th>
+                <th scope="row">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -230,24 +231,43 @@
                         </td>
                         <td>{{ item.moto.fecha_compra }}</td>
                         <td>
-                            {% if item.libreta %}
-                                <div class="btn-group" role="group">
-                                    <a href="{{ item.libreta }}" target="_blank">
-                                        <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
-                                            <i class="fas fa-file-alt"></i> Libreta
+                            {% if item.libreta or item.compra_venta %}
+                                {% if item.libreta %}
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.libreta }}" target="_blank">
+                                            <button class="btn btn-sm btn-primary" title="Ver Fotocopia de Libreta">
+                                                <i class="fas fa-file-alt"></i> Libreta
+                                            </button>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" title="Eliminar Libreta" onclick="mostrarConfirmacionLibretaCV('{{ item.moto.id }}')">
+                                            <i class="fas fa-times"></i>
                                         </button>
-                                    </a>
-                                    <button class="btn btn-sm btn-danger" title="Eliminar Libreta" onclick="mostrarConfirmacionLibretaCV('{{ item.moto.id }}')">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div> 
+                                    </div> 
+                                {% endif %}
+                                {% if item.compra_venta %}
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ item.compra_venta }}" target="_blank">
+                                            <button class="btn btn-sm btn-success" title="Ver Documento de Compra-Venta">
+                                                <i class="fas fa-file-contract"></i> Compra-Venta
+                                            </button>
+                                        </a>
+                                    </div> 
+                                {% endif %}
                             {% else %}
-                                <button class="btn btn-sm btn-warning" onclick="toggleLibretaCV('{{ forloop.counter }}')">
-                                    <i class="fas fa-book"></i> Libreta
-                                </button>
+                                    <p>SIN DOCUMENTACIÓN</p>
                             {% endif %}
+                            
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="toggleCCVMA('{{ forloop.counter }}')">
+                                <i class="fas fa-book"></i> Generar CCV
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="toggleLibretaCV('{{ forloop.counter }}')">
+                                <i class="fas fa-book"></i> Libreta
+                            </button>
                         </td>
                     </tr>
+
                     <tr id="formulario-libreta-CV-{{ forloop.counter }}" style="display: none;"  class="formulario-libreta">
                         <td colspan="4">
                             <form method="post" enctype="multipart/form-data" action="{% url 'CargarLibreta' item.moto.id %}">
@@ -266,6 +286,28 @@
                             <p>¿Estás seguro de que deseas borrar la libreta de propiedad asociada a esta venta?</p>
                             <a href="{% url 'BorrarDocumentacion' item.moto.id 'Libreta' %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
                             <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionLibretaCV('{{ item.moto.id }}')">Cancelar</button>
+                        </td>
+                    </tr>
+
+                    <tr id="formulario-ccv-ma-{{ forloop.counter }}" style="display: none;"  class="formulario-ccv">
+                        <td colspan="4">
+                            <form method="post" enctype="multipart/form-data" action="{% url 'GenerarCCVMA' item.moto.moto__id item.moto.cliente__id  %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="precio" class="form-label">"Pagaderos de la siguiente forma:..."</label>
+                                    <textarea class="form-control" name="texto_pagaderos" id="texto_pagaderos" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">Guardar</button>
+                            </form>
+                            <form method="post" enctype="multipart/form-data" action="{% url 'CargarCCVMA' item.moto.id item.moto.moto__id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="certificado" class="form-label">Subir CCV:</label>
+                                    <input type="file" class="form-control" id="libreta" name="ccv_venta" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">Guardar</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleCCVMA('{{ forloop.counter }}')">Cancelar</button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -558,6 +600,15 @@ function toggleFormulario(id) {
 
     function toggleCCV(id) {
         const formulario = document.getElementById(`formulario-ccv-${id}`);
+        if (formulario.style.display === "none" || formulario.style.display === "") {
+            formulario.style.display = "table-row";
+        } else {
+            formulario.style.display = "none";
+        }
+    }
+
+    function toggleCCVMA(id) {
+        const formulario = document.getElementById(`formulario-ccv-ma-${id}`);
         if (formulario.style.display === "none" || formulario.style.display === "") {
             formulario.style.display = "table-row";
         } else {

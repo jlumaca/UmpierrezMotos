@@ -1518,10 +1518,7 @@ def generar_compromiso_compra_venta_moto_ingreso(req,id_moto,id_cliente):
         for i in range(2,longitud_doc_personal):
             doc_num_personal = doc_num_personal + usuario_actual.documento[i]
         
-        if not req.POST['texto_pagaderos']:
-            pagaderos = "........................................................................................................................"
-        else:
-            pagaderos = req.POST['texto_pagaderos']
+        
         # tercero = req.POST['texto_tercero']
         output_dir = os.path.join(settings.MEDIA_ROOT, 'documentacion/compra_venta')
 

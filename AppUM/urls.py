@@ -71,7 +71,9 @@ urlpatterns = [
      path('cargar_libreta/<int:id_cv>', views.cargar_libreta,name="CargarLibreta"),
      path('cargar_factura/<int:id_cv>', views.cargar_factura,name="CargarFactura"),
      path('generar_ccv/<int:id_moto>/<int:id_cliente>', views.generar_compromiso_compra_venta,name="GenerarCCV"),
+     path('generar_ccv_ma/<int:id_moto>/<int:id_cliente>', views.generar_compromiso_compra_venta_moto_ingreso,name="GenerarCCVMA"),
      path('cargar_ccv/<int:id_cv>', views.cargar_ccv,name="CargarCCV"),
+     path('cargar_ccv_ma/<int:id_cv>/<int:id_moto>', views.cargar_ccv_ma,name="CargarCCVMA"),
 
      path('borrar_documentacion/<int:id_cv>/<str:tipo>', views.borrar_documentacion,name="BorrarDocumentacion"),
 

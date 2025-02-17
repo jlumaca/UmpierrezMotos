@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación de Ventas de Motos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 40px;
+        }
+        canvas {
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Comparación de Ventas de Motos por Año</h2>
+    <canvas id="ventasMotosChart"></canvas>
+
+    <script>
+        const ctx = document.getElementById('ventasMotosChart').getContext('2d');
+
+        const ventasData = {
+            labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+            datasets: [
+                {
+                    label: "2023",
+                    data: [10, 15, 20, 25, 30, 28, 35, 40, 45, 50, 55, 60], // Datos ficticios
+                    borderColor: "red",
+                    backgroundColor: "rgba(255, 0, 0, 0.1)",
+                    borderWidth: 2,
+                    fill: true
+                },
+                {
+                    label: "2024",
+                    data: [12, 18, 25, 22, 35, 30, 40, 48, 50, 58, 65, 70],
+                    borderColor: "blue",
+                    backgroundColor: "rgba(0, 0, 255, 0.1)",
+                    borderWidth: 2,
+                    fill: true
+                },
+                {
+                    label: "2025",
+                    data: [15, 20, 30, 35, 40, 38, 45, 50, 55, 60, 70, 75],
+                    borderColor: "green",
+                    backgroundColor: "rgba(0, 128, 0, 0.1)",
+                    borderWidth: 2,
+                    fill: true
+                }
+            ]
+        };
+
+        new Chart(ctx, {
+            type: "line",
+            data: ventasData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "top" },
+                    title: { display: true, text: "Ventas de Motos Comparadas por Año" }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

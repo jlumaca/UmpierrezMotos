@@ -374,12 +374,12 @@ def alta_moto_usada(req,id_cliente):
                 numero_de_chasis = num_chasis
                 tiene_numero_chasis = 1
             
-            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],1,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],tiene_numero_motor,tiene_numero_chasis)
+            nueva_moto = insert_moto(marca,modelo,req.POST['anio_moto'],"Usada",req.POST['motor_moto'],req.POST['km_moto'],req.POST['moneda_precio'],req.POST['precio_moto'],color,numero_de_motor,numero_de_chasis,req.POST['num_cilindros'],req.POST['num_pasajeros'],0,0,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],tiene_numero_motor,tiene_numero_chasis)
             libreta_propiedad = req.FILES.get('libreta_propiedad_moto')
            
             insert_compras_ventas("CV",libreta_propiedad,id_cliente,nueva_moto.id,None,None,None)
 
-            generar_compromiso_compra_venta_moto_ingreso(req,nueva_moto.id,id_cliente)
+            # generar_compromiso_compra_venta_moto_ingreso(req,nueva_moto.id,id_cliente)
 
 
             insert_matriculas(matricula,padron,nueva_moto.id)
@@ -389,8 +389,10 @@ def alta_moto_usada(req,id_cliente):
                 pdf = checkbox_pdf(req,nueva_moto)
                 return pdf
             else:
-                messages.success(req, "Moto ingresada con éxito.")
-                return redirect('Motos')
+                # messages.success(req, "Moto ingresada con éxito.")
+                # return redirect('Motos')
+                messages.success(req, "Moto ingresada con éxito, debe registrar el compromiso compraventa para que la misma se ingrese en el inventario.")
+                return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
 
             
     # except Exception as e:
@@ -1523,6 +1525,7 @@ def ficha_cliente(req,id_cliente):
             res_documentacion_ma.append({
             'moto': resultado,
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
+            'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
         })
 
 
@@ -1920,6 +1923,22 @@ def cargar_ccv(req,id_cv):
         cv.compra_venta = ccv
         cv.save()
         messages.success(req, "Compromiso compraventa actualizado con éxito")
+        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+    except Exception as e:
+        pass
+
+def cargar_ccv_ma(req,id_cv,id_moto):
+    #generar_compromiso_compra_venta(req,id_moto,id_cliente)
+    try:
+        cv = ComprasVentas.objects.get(id=id_cv)
+        id_cliente = cv.cliente_id
+        ccv = req.FILES.get('ccv_venta')
+        cv.compra_venta = ccv
+        cv.save()
+        moto = Moto.objects.get(id=id_moto)
+        moto.pertenece_tienda = 1
+        moto.save()
+        messages.success(req, "Compromiso compraventa actualizado con éxito. La moto ya se puede visualizar en el inventario.")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         pass

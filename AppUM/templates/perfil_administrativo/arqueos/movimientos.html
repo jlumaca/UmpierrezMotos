@@ -12,6 +12,38 @@
     {% endfor %}
 {% endif %}
 <div class="table-container" id="inventarios">
+    <h3>Datos sobre la caja</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Monto inicial</th>
+                <th>+Efectivo</th>
+                <th>+Transferencia</th>
+                <th>+Debito</th>
+                <th>-Efectivo</th>
+                <th>-Transferencia</th>
+                <th>-Debito</th>
+                <th>Saldo caja</th>
+                <th>Saldo sistema</th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>$4500/U$s100</td>
+                    <td>$1000/U$s22,2</td>
+                    <td>$5000/U$s111,1</td>
+                    <td>
+                        +500/U$s11,1
+                    </td>
+                    <td>-$1000/U$s22,2</td>
+                    <td>-$2000/U$s44,4</td>
+                    <td>-$0/U$s0,0</td>
+                    <td>Aparece al cerrar</td>
+                    <td>Aparece al cerrar</td>
+                </tr>
+        </tbody>
+    </table>
+
     <h3>Movimientos</h3>
     <table class="table">
         <thead>
@@ -19,6 +51,7 @@
                 <th>Fecha</th>
                 <th>Movimiento</th>
                 <th>Tipo</th>
+                <th>Método</th>
                 <th>Monto</th>
                 <th>Usuario</th>
             </tr>
@@ -37,6 +70,7 @@
                         <span class="badge bg-success">+{{ movimiento.movimiento.monto }}</span>
                         {% endif %}
                     </td>
+                    <td>Debito</td>
                     <td>{{ movimiento.usuario }}</td>
                 </tr>
                 {% endfor %}

@@ -66,12 +66,12 @@
             <tr>
                 <th>Fecha apertura</th>
                 <th>Fecha cierre</th>
-                <th>Monto inicial</th>
+                <!-- <th>Monto inicial</th>
                 <th>Depositos</th>
                 <th>Egresos</th>
                 <th>Saldo caja</th>
-                <th>Saldo sistema</th>
-                <th>Diferencia</th>
+                <th>Saldo sistema</th>-->
+                <th>Diferencia</th> 
                 <th>Estado</th>
                 <th>Usuario</th>
                 <th>Acciones</th>
@@ -81,32 +81,32 @@
             {% if page_obj %}
                 {% for arqueo in page_obj %}
                 <tr>
-                    <td>{{ arqueo.arqueo.apertura }}</td>
-                    <td>{% if arqueo.cierre %}{{ arqueo.cierre }}{% endif %}</td>
-                    <td>${{ arqueo.arqueo.monto_inicial }}/U$s{{ arqueo.monto_inicial_dol }}</td>
+                    <td>{{ arqueo.arqueo.apertura|date:"d/m/Y H:i" }}</td>
+                    <td>{% if arqueo.cierre %}{{ arqueo.cierre|date:"d/m/Y H:i" }}{% endif %}</td>
+                    <!-- <td>${{ arqueo.arqueo.monto_inicial }}/U$s{{ arqueo.monto_inicial_dol }}</td>
                     <td>{{ arqueo.depositos }}/U$s{{ arqueo.depositos_dolares }}</td>
                     <td>{{ arqueo.egresos }}/U$s{{ arqueo.egresos_dolares }}</td>
                     <td>
                         {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
-                        {{ arqueo.saldo_caja }}
+                        {{ arqueo.saldo_caja }}/U$s0,0
                         {% endif %}
                     </td>
                     <td>
                         {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
-                        {{ arqueo.saldo_sistema }}
+                        {{ arqueo.saldo_sistema }}/U$s102,1
                         {% endif %}
-                    </td>
+                    </td>-->
                     <td>
                         {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
                         {% if arqueo.diferencia > 0 %}
                         <span class="badge bg-success">+{{ arqueo.diferencia }}</span>
                         {% elif arqueo.diferencia < 0 %}
-                        <span class="badge bg-danger">{{ arqueo.diferencia }}</span>
+                        <span class="badge bg-danger">{{ arqueo.diferencia }}/U$s-102,1</span>
                         {% else %}
                         <span class="badge bg-secondary">{{ arqueo.diferencia }}</span>
                         {% endif %}
                         {% endif %}
-                    </td>
+                    </td> 
                     <td>
                         {% if arqueo.arqueo.estado == "Abierto" %}
                             <span class="badge bg-success">{{ arqueo.arqueo.estado }}</span>

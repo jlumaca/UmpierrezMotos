@@ -1438,7 +1438,7 @@ def mi_funcion_diaria():
     for pagos in pagos_atrasados:
         venta = ComprasVentas.objects.get(id=pagos.venta_id)
         ult_pago = CuotasMoto.objects.filter(venta=venta).latest('id')
-        if pagos.fecha_prox_pago and (pagos.fecha_prox_pago.day, pagos.fecha_prox_pago.month) == (hoy.day, hoy.month) and pagos.id == ult_pago.id:
+        if pagos.fecha_prox_pago and (pagos.fecha_prox_pago.day + 1, pagos.fecha_prox_pago.month) == (hoy.day, hoy.month) and pagos.id == ult_pago.id:
             cliente = Cliente.objects.get(id=venta.cliente_id)
             moto = Moto.objects.get(id=venta.moto_id)
             tipo = "Atraso en cuota"

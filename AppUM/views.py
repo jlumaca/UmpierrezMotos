@@ -5022,3 +5022,6 @@ def venta_repuesto(req,id_rp,id_cliente):
             return redirect(f"{reverse('DetallesClienteTaller',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         pass
+    
+def calculadora_pagos(req):
+    return render(req, "perfil_administrativo/calculadora/calculadora.html", {})

@@ -1,0 +1,150 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<title>Motos</title>
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == "success" %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == "error" %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+<div class="table-container" id="inventarios">
+        <h3>Calculadora de pagos</h3>
+        <div class="mb-3">
+            <label for="documento" class="form-label">Moneda</label>
+            <div class="input-group">
+                <select class="form-control" id="moneda_calculadora" onchange="moneda_calculadora_fun_calc()">
+                    <option value="pesos">Pesos</option>
+                    <option value="dolares">Dolares</option>
+                </select>
+            </div>
+        </div>
+        <!-- <div class="mb-3" id="div_entregas_pesos">
+            <label for="recargo" class="form-label">Entregas en Pesos</label>
+            <input type="number" class="form-control" id="entregas_pesos" required>
+        </div>
+        <div class="mb-3" style="display: none;" id="div_entregas_dolares">
+            <label for="recargo" class="form-label">Entregas en Dolares</label>
+            <input type="number" class="form-control" id="entregas_dolares" required>
+        </div> -->
+        <div class="mb-3" id="div_precio_pesos">
+            <label for="recargo" class="form-label">Precio Pesos</label>
+            <input type="number" class="form-control" id="precio_en_pesos" required>
+        </div>
+
+        <div class="mb-3" id="div_precio_dolares" style="display: none;">
+            <label for="recargo" class="form-label">Precio Dolares</label>
+            <input type="number" class="form-control" id="precio_en_dolares" required>
+        </div>
+
+        <div class="mb-3" id="div_total_entrega_pesos">
+            <label for="recargo" class="form-label">Entregas Pesos</label>
+            <input type="number" class="form-control" id="total_entrega_pesos" required>
+        </div>
+        <div class="mb-3" style="display: none;" id="div_total_entrega_dolares">
+            <label for="recargo" class="form-label">Entregas en Dolares</label>
+            <input type="number" class="form-control" id="total_entrega_dolares" required>
+        </div>
+        <div class="mb-3">
+            <label for="recargo" class="form-label">Recargo</label>
+            <input type="number" class="form-control" id="recargo" required>
+        </div>
+        <div class="mb-3">
+            <label for="recargo" class="form-label">Cantidad de cuotas</label>
+            <input type="number" class="form-control" id="cantidad_cuotas" required>
+        </div>
+        <div class="mb-3" id="div_valor_pago_pesos">
+            <label for="recargo" class="form-label">Valor de las cuotas en Pesos</label>
+            <input value="0" type="number" class="form-control" id="valor_pago_pesos" readonly>
+        </div>
+        <div class="mb-3" style="display: none;" id="div_valor_pago_dolares">
+            <label for="recargo" class="form-label">Valor de las cuotas en Dolares</label>
+            <input value="0" type="number" class="form-control" id="valor_pago_dolares" readonly>
+        </div>
+        <button type="button" onclick="calcularCuotas()" class="btn btn-success">Calcular</button>
+</div>
+
+<script>
+function calcularCuotas() {
+    const recargo = document.getElementById('recargo');
+    const cant_cuotas = document.getElementById('cantidad_cuotas');
+    // const precio_con_recargo = document.getElementById('precio_con_recargo');
+    
+    const precio_en_pesos = document.getElementById('precio_en_pesos');
+    // const entregas_pesos = document.getElementById("entregas_pesos");
+    const total_entrega_pesos = document.getElementById("total_entrega_pesos");
+    const valor_cuota_pesos = document.getElementById('valor_pago_pesos');
+
+    const precio_en_dolares = document.getElementById('precio_en_dolares');
+    // const entregas_dolares = document.getElementById("entregas_dolares");
+    const total_entrega_dolares = document.getElementById("total_entrega_dolares");
+    const valor_cuota_dolares = document.getElementById('valor_pago_dolares');
+    
+    
+    const porcentaje = parseInt(recargo.value) || 0;
+    const cuotas = parseInt(cant_cuotas.value) || 0;
+
+    const valor_pesos = parseInt(precio_en_pesos.value) || 0;
+    // const ent_pesos = parseInt(entregas_pesos.value) || 0;
+    const t_ent_pesos = parseInt(total_entrega_pesos.value) || 0;
+    const restar_entregas_pesos = valor_pesos - t_ent_pesos
+    const sumar_recargo_pesos = (restar_entregas_pesos * porcentaje * cuotas) / 100;
+    const total_pesos = restar_entregas_pesos + sumar_recargo_pesos;
+    const total_valor_cuota_pesos = total_pesos / cuotas
+
+    valor_cuota_pesos.value = total_valor_cuota_pesos.toFixed(0);
+
+
+
+    const valor_dolares = parseInt(precio_en_dolares.value) || 0;
+    // const ent_dolares = parseInt(entregas_dolares.value) || 0;
+    const t_ent_dolares = parseInt(total_entrega_dolares.value) || 0;
+    const restar_entregas_dolares = valor_dolares - t_ent_dolares
+    const sumar_recargo_dolares = (restar_entregas_dolares * porcentaje * cuotas) / 100;
+    const total_dolares = restar_entregas_dolares + sumar_recargo_dolares;
+    const total_valor_cuota_dolares = total_dolares / cuotas
+
+    valor_cuota_dolares.value = total_valor_cuota_dolares.toFixed(0);
+}
+
+
+function moneda_calculadora_fun_calc(){
+    var moneda_calculadora = document.getElementById("moneda_calculadora").value;
+    var precio_pesos = document.getElementById("div_precio_pesos");
+    var precio_dolares = document.getElementById("div_precio_dolares");
+    var total_entrega_pesos = document.getElementById("div_total_entrega_pesos");
+    var total_entrega_dolares = document.getElementById("div_total_entrega_dolares");
+    var valor_pago_pesos = document.getElementById("div_valor_pago_pesos");
+    var valor_pago_dolares = document.getElementById("div_valor_pago_dolares");
+
+    if (moneda_calculadora === "pesos") {
+        precio_pesos.style.display = "block";
+        precio_dolares.style.display = "none";
+        total_entrega_pesos.style.display = "block";
+        total_entrega_dolares.style.display = "none";
+        valor_pago_pesos.style.display = "block";
+        valor_pago_dolares.style.display = "none";
+    }else{
+        precio_pesos.style.display = "none";
+        precio_dolares.style.display = "block";
+        total_entrega_pesos.style.display = "none";
+        total_entrega_dolares.style.display = "block";
+        valor_pago_pesos.style.display = "none";
+        valor_pago_dolares.style.display = "block";
+    }
+     
+}
+</script>
+{% endblock %}

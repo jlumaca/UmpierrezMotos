@@ -117,7 +117,7 @@ urlpatterns = [
      path('modificar_accesorio_vendido/<int:id_accesorio>/<int:id_cliente>', views.modificar_accesorio_vendido,name="ModificarAccesorioVendido"),
 
 
-
+      path('calculadora', views.calculadora_pagos,name="Calculadora"),
 
      path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),

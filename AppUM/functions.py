@@ -1396,6 +1396,13 @@ def contexto_venta_moto(req,id_moto,mensaje_error,documento):
                 for i in range(2,longitud_doc):
                     doc_num = doc_num + vendedor.documento[i]
                 # print(numero_letra)
+
+                if moto.moneda_precio == "Pesos":
+                    precio_en_pesos = int(moto.precio)
+                    precio_en_dolares = precio_en_pesos / float(precio_dolar)
+                else:
+                    precio_en_dolares = int(moto.precio)
+                    precio_en_pesos = precio_en_dolares * float(precio_dolar)
                 contexto = {"datos_moto":True,
                             "cliente":cliente,
                             "moto":moto,
@@ -1414,7 +1421,9 @@ def contexto_venta_moto(req,id_moto,mensaje_error,documento):
                             "vendedor_ci":doc_num,
                             "fondos":precio_moto,
                             "total_fondos":fondos,
-                            "error_message":mensaje_error if mensaje_error else None}
+                            "error_message":mensaje_error if mensaje_error else None,
+                            "precio_en_dolares":int(precio_en_dolares),
+                            "precio_en_pesos":int(precio_en_pesos)}
             # return render(req,"perfil_administrativo/motos/venta_moto.html",{})
         else:
             contexto = {"datos_moto":False,

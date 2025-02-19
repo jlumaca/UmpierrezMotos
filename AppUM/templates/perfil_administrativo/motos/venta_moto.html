@@ -110,7 +110,7 @@
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
             </div> -->
             </form>
-            <form action="{% url 'MotoVenta' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Forma de pago</h4>
             <div class="mb-3">
                 <label for="precio" class="form-label">Forma de pago</label>
@@ -135,12 +135,12 @@
 
             <div class="mb-3">
                 <label for="recargo" class="form-label">Precio restante con entregas y fondos incluidos</label>
-                <input value="{{ fondos }}" type="number" class="form-control" name="precio_sin_recargo" id="precio_sin_recargo" readonly>
+                <input value="{{ fondos }}" type="number" class="form-control" name="precio_sin_recargo" readonly>
             </div>
 
             <div class="mb-3">
                 <label for="recargo" class="form-label">Cantidad destinada de los fondos</label>
-                <input value="{{ total_fondos }}" type="number" class="form-control" name="cantidad_destinada" id="precio_sin_recargo" required>
+                <input value="{{ total_fondos }}" type="number" class="form-control" name="cantidad_destinada" required>
             </div>
             
 
@@ -175,6 +175,58 @@
                 <input type="checkbox" id="sin_num_motor" name="comprobante_venta" class="form-check-input">
                 <label for="toggleMatr" class="form-check-label">Generar comprobante de venta</label>
             </div>
+
+            <h4>Calculadora de pagos</h4>
+            
+            <input value="{{ precio_en_pesos }}" type="number" class="form-control" id="precio_en_pesos" style="display: none;">
+            
+                
+            <input value="{{ precio_en_dolares }}" type="number" class="form-control" id="precio_en_dolares" style="display: none;">
+          
+            <div class="mb-3">
+                <label for="documento" class="form-label">Moneda</label>
+                <div class="input-group">
+                    <select class="form-control" id="moneda_calculadora" onchange="moneda_calculadora_fun()">
+                        <option value="pesos">Pesos</option>
+                        <option value="dolares">Dolares</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3" id="div_entregas_pesos">
+                <label for="recargo" class="form-label">Entregas en Pesos</label>
+                <input type="number" class="form-control" id="entregas_pesos" required>
+            </div>
+            <div class="mb-3" style="display: none;" id="div_entregas_dolares">
+                <label for="recargo" class="form-label">Entregas en Dolares</label>
+                <input type="number" class="form-control" id="entregas_dolares" required>
+            </div>
+            <div class="mb-3" id="div_total_entrega_pesos">
+                <label for="recargo" class="form-label">Total Entregas (señas, fondos) en Pesos</label>
+                <input type="number" class="form-control" id="total_entrega_pesos" required>
+            </div>
+            <div class="mb-3" style="display: none;" id="div_total_entrega_dolares">
+                <label for="recargo" class="form-label">Total Entregas (señas, fondos) en Dolares</label>
+                <input type="number" class="form-control" id="total_entrega_dolares" required>
+            </div>
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Recargo</label>
+                <input type="number" class="form-control" id="recargo" required>
+            </div>
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Cantidad de cuotas</label>
+                <input type="number" class="form-control" id="cantidad_cuotas" required>
+            </div>
+            <div class="mb-3" id="div_valor_pago_pesos">
+                <label for="recargo" class="form-label">Valor de las cuotas en Pesos</label>
+                <input value="0" type="number" class="form-control" id="valor_pago_pesos" readonly>
+            </div>
+            <div class="mb-3" style="display: none;" id="div_valor_pago_dolares">
+                <label for="recargo" class="form-label">Valor de las cuotas en Dolares</label>
+                <input value="0" type="number" class="form-control" id="valor_pago_dolares" readonly>
+            </div>
+            <button type="button" onclick="calcularCuotas()" class="btn btn-success">Calcular</button>
+
+            
             <h4>Documentación</h4>
             <div class="mb-3" id="libreta_propiedad_div">
                 <label for="libreta_propiedad" class="form-label">Papel compraventa</label>
@@ -243,57 +295,69 @@ function generatePDF() {
 }
 
 
+// function calcularCuotas() {
+//     // Obtener los valores de los campos
+//     const entregas_pesos = parseFloat(document.getElementById("entregas_pesos").value);
+//     const total_entrega_pesos = parseFloat(document.getElementById("total_entrega_pesos").value);
+//     const cantidadCuotas = parseInt(document.getElementById("cantidad_cuotas").value);
+//     const precio = document.getElementById("precio_sin_recargo").innerText
+
+//     // Validar que todos los campos contengan valores numéricos y sean mayores que 0
+//     if (isNaN(entregas_pesos) || isNaN(total_entrega_pesos) || isNaN(cantidadCuotas) || cantidadCuotas <= 0) {
+//         alert("Por favor, ingrese valores válidos para todos los campos.");
+//         return;
+//     }
+
+//     // Calcular el valor de cada cuota
+//     const total = precio - entregas_pesos - total_entrega_pesos;
+//     const valorCuota = total / cantidadCuotas;
+
+//     // Mostrar el valor de cada cuota en el label correspondiente
+//     document.getElementById("valor_cuota").innerText = `$/U$S${valorCuota.toFixed(2)}`;
+// }
+
+
 function calcularCuotas() {
-    // Obtener los valores de los campos
-    const seña = parseFloat(document.getElementById("seña").value);
-    const entregaInicial = parseFloat(document.getElementById("entrega_inicial").value);
-    const cantidadCuotas = parseInt(document.getElementById("cant_cuotas").value);
-    const precio = document.getElementById("precio_moto_label").innerText
-
-    // Validar que todos los campos contengan valores numéricos y sean mayores que 0
-    if (isNaN(seña) || isNaN(entregaInicial) || isNaN(cantidadCuotas) || cantidadCuotas <= 0) {
-        alert("Por favor, ingrese valores válidos para todos los campos.");
-        return;
-    }
-
-    // Calcular el valor de cada cuota
-    const total = precio - seña - entregaInicial;
-    const valorCuota = total / cantidadCuotas;
-
-    // Mostrar el valor de cada cuota en el label correspondiente
-    document.getElementById("valor_cuota").innerText = `$/U$S${valorCuota.toFixed(2)}`;
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const precio_sin_recargo = document.getElementById('precio_sin_recargo');
     const recargo = document.getElementById('recargo');
-    const cant_cuotas = document.getElementById('cant_cuotas');
-    const precio_con_recargo = document.getElementById('precio_con_recargo');
-    const valor_cuota = document.getElementById('valor_cuota');
+    const cant_cuotas = document.getElementById('cantidad_cuotas');
+    // const precio_con_recargo = document.getElementById('precio_con_recargo');
+    
+    const precio_en_pesos = document.getElementById('precio_en_pesos');
+    const entregas_pesos = document.getElementById("entregas_pesos");
+    const total_entrega_pesos = document.getElementById("total_entrega_pesos");
+    const valor_cuota_pesos = document.getElementById('valor_pago_pesos');
+
+    const precio_en_dolares = document.getElementById('precio_en_dolares');
+    const entregas_dolares = document.getElementById("entregas_dolares");
+    const total_entrega_dolares = document.getElementById("total_entrega_dolares");
+    const valor_cuota_dolares = document.getElementById('valor_pago_dolares');
     
     
+    const porcentaje = parseInt(recargo.value) || 0;
+    const cuotas = parseInt(cant_cuotas.value) || 0;
 
-    function calcularRecargo() {
-        const valor = parseInt(precio_sin_recargo.value) || 0;
-        const porcentaje = parseInt(recargo.value) || 0;
-        const cuotas = parseInt(cant_cuotas.value) || 0;
-        const calc_valor_cuota = parseInt(valor_cuota.value) || 0;
+    const valor_pesos = parseInt(precio_en_pesos.value) || 0;
+    const ent_pesos = parseInt(entregas_pesos.value) || 0;
+    const t_ent_pesos = parseInt(total_entrega_pesos.value) || 0;
+    const restar_entregas_pesos = valor_pesos - ent_pesos - t_ent_pesos
+    const sumar_recargo_pesos = (restar_entregas_pesos * porcentaje * cuotas) / 100;
+    const total_pesos = restar_entregas_pesos + sumar_recargo_pesos;
+    const total_valor_cuota_pesos = total_pesos / cuotas
 
-        // Calcular el recargo basado en el porcentaje ingresado
-        const sumar_recargo = (valor * porcentaje * cuotas) / 100;
-        const total = valor + sumar_recargo;
-        const total_valor_cuota = total / cuotas
+    valor_cuota_pesos.value = total_valor_cuota_pesos.toFixed(0);
 
-        // Actualizar los campos
-        precio_con_recargo.value = total.toFixed(0);
-        valor_cuota.value = total_valor_cuota.toFixed(0);
-    }
 
-    precio_sin_recargo.addEventListener('input', calcularRecargo);
-    recargo.addEventListener('input', calcularRecargo);
-    cant_cuotas.addEventListener('input', calcularRecargo);
-});
+
+    const valor_dolares = parseInt(precio_en_dolares.value) || 0;
+    const ent_dolares = parseInt(entregas_dolares.value) || 0;
+    const t_ent_dolares = parseInt(total_entrega_dolares.value) || 0;
+    const restar_entregas_dolares = valor_dolares - ent_dolares - t_ent_dolares
+    const sumar_recargo_dolares = (restar_entregas_dolares * porcentaje * cuotas) / 100;
+    const total_dolares = restar_entregas_dolares + sumar_recargo_dolares;
+    const total_valor_cuota_dolares = total_dolares / cuotas
+
+    valor_cuota_dolares.value = total_valor_cuota_dolares.toFixed(0);
+}
 
 document.getElementById('download-btn').addEventListener('click', async () => {
     const url = 'generar_compromiso_compra_venta'; // Cambia por la URL de tu endpoint en Django
@@ -322,6 +386,34 @@ document.getElementById('download-btn').addEventListener('click', async () => {
 
     // document.getElementById("texto_pagaderos").value = "";
 });
+
+
+function moneda_calculadora_fun(){
+    var moneda_calculadora = document.getElementById("moneda_calculadora").value;
+    var entregas_pesos = document.getElementById("div_entregas_pesos");
+    var entregas_dolares = document.getElementById("div_entregas_dolares");
+    var total_entrega_pesos = document.getElementById("div_total_entrega_pesos");
+    var total_entrega_dolares = document.getElementById("div_total_entrega_dolares");
+    var valor_pago_pesos = document.getElementById("div_valor_pago_pesos");
+    var valor_pago_dolares = document.getElementById("div_valor_pago_dolares");
+
+    if (moneda_calculadora === "pesos") {
+        entregas_pesos.style.display = "block";
+        entregas_dolares.style.display = "none";
+        total_entrega_pesos.style.display = "block";
+        total_entrega_dolares.style.display = "none";
+        valor_pago_pesos.style.display = "block";
+        valor_pago_dolares.style.display = "none";
+    }else{
+        entregas_pesos.style.display = "none";
+        entregas_dolares.style.display = "block";
+        total_entrega_pesos.style.display = "none";
+        total_entrega_dolares.style.display = "block";
+        valor_pago_pesos.style.display = "none";
+        valor_pago_dolares.style.display = "block";
+    }
+     
+}
 
 </script>
 

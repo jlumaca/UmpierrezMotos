@@ -485,7 +485,8 @@ def obtener_compras_accesorios(req,id_venta):
             page_obj,
             cliente_json,
             accesorio_json,
-            pagos_accesorios_json
+            pagos_accesorios_json,
+            accesorio_data
         ]
 
         return data

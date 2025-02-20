@@ -1112,7 +1112,8 @@ def pagos_accesorio(req,id_venta):
                                                                                     "id_cliente":c_v.cliente_id,
                                                                                     "cliente_json":data[1],
                                                                                     "accesorio_json":data[2],
-                                                                                    "pagos_json":data[3]})
+                                                                                    "pagos_json":data[3],
+                                                                                    "accesorio":data[4]})
     # except Exception as e:
     #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
 

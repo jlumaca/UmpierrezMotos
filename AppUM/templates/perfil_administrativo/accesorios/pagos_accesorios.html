@@ -120,16 +120,31 @@
     <p><strong>PAGO ACORDADO CON EL CLIENTE: </strong> {{ pago_acordado }}</p>
     {% endif %}
 <br>
+<h5>Datos de la compra</h5>
     <table class="table">
         <thead>
             <tr>
-                <th>Observaciones</th>
-                <th>Fecha</th>
-                <th>Moneda</th>
-                <th>Entrega</th> 
-                <th>Cantidad restante</th>
-                <th>Comprobante</th>
-                <th>Acciones</th>
+                <th>PRODUCTO</th>
+                <th>PRECIO</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            <td>{{ accesorio.detalle }}</td>
+            <td>{{ accesorio.precio }}</td>
+            
+        </tbody>
+    </table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>OBSERVACIONES</th>
+                <th>FECHA</th>
+                <th>MONEDA</th>
+                <th>ENTREGA</th> 
+                <th>CANTIDAD RESTANTE</th>
+                <th>COMPROBANTE</th>
+                <th>ACCIONES</th>
             </tr>
         </thead>
         <tbody>

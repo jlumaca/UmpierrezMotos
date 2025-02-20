@@ -1057,11 +1057,30 @@ def venta_accesorio(req,id_accesorio,id_cliente):
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
+    
+def prueba_varios_accesorios(req):
+    accesorios_json = req.POST.get("accesorios", "[]")  # Capturamos el JSON enviado
+    accesorios_seleccionados = json.loads(accesorios_json)  # Convertimos a lista Python
+
+        # Aquí puedes procesar la venta de los 
+    for accesorio in accesorios_seleccionados:
+        #TIPO str
+        print("Accesorios seleccionados:", accesorio)
+    
+    return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
 
 @admin_required
-def cliente_venta_accesorio(req,id_accesorio):
-    try:
-        if req.method == "POST":
+def cliente_venta_accesorio(req,mostrar):
+    # try:
+        accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
+        accesorios_seleccionados = json.loads(accesorios_json)
+
+    # Guardar en sesión para que no se pierdan
+        req.session["accesorios_json"] = accesorios_json
+
+        # Aquí puedes procesar la venta de los accesorios
+        # print("Accesorios seleccionados:", accesorios_seleccionados)
+        if mostrar == 1:
             documento = req.POST['tipo_documento'] + str(req.POST['documento'])
             cliente = Cliente.objects.filter(documento=documento).first()
             if cliente:
@@ -1085,23 +1104,33 @@ def cliente_venta_accesorio(req,id_accesorio):
                     c_2 = correo1.correo
                 else:
                     c_2 = None
-                accesorio = Accesorio.objects.get(id=id_accesorio)
+                data_accesorio = []
+                print(accesorios_seleccionados)
+                precio_total = 0
+                for accs in accesorios_seleccionados:
+                    accesorio = Accesorio.objects.get(id=int(accs))
+                    print(accesorio.tipo)
+                    data_accesorio.append({
+                        "accesorios":accesorio
+                    })
+                    precio_total = precio_total + int(accesorio.precio)
 
                 # print(numero_letra)
                 return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_accesorio":True,
                                                                                 "cliente":cliente,
-                                                                                "accesorio":accesorio,
+                                                                                "accesorios":data_accesorio,
                                                                                 "tel1":tel_1,
                                                                                 "tel2":tel_2,
                                                                                 "correo1":c_1,
                                                                                 "correo2":c_2,
+                                                                                "precio_total":int(precio_total)
                                                                             })
             else:
                 return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:
             return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
-    except Exception as e:
-        pass
+    # except Exception as e:
+    #     pass
 
 def pagos_accesorio(req,id_venta):
     # try: 

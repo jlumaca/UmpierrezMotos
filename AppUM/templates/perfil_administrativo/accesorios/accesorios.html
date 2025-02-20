@@ -81,10 +81,19 @@
             </a>
         </div>
     </form>
-
+    <div id="carrito" class="mt-4" style="display: none;">
+        <h4>Accesorios Seleccionados</h4>
+        <ul id="lista-carrito"></ul>
+        <form id="form-carrito" method="POST" action="{% url 'ClienteAccesorioVenta' 0 0 %}">
+            {% csrf_token %}
+            <input type="hidden" name="accesorios" id="input-accesorios">
+            <button type="submit" class="btn btn-success mt-2">Vender seleccionados</button>
+        </form>
+    </div>
     <table class="table">
         <thead>
             <tr>
+                <th></th>
                 <th>Código</th>
                 <th>Tipo</th>
                 <th>Marca</th>
@@ -100,6 +109,14 @@
                 {% for accesorios in page_obj %}
             <!-- Filas de ejemplo de accesorios -->
             <tr>
+                <td>
+                    <input type="checkbox" class="accesorio-checkbox" 
+                            value="{{ accesorios.id }}" 
+                            data-tipo="{{ accesorios.tipo }}" 
+                            data-marca="{{ accesorios.marca }}" 
+                            data-modelo="{{ accesorios.modelo }}">
+
+                </td>
                 <td>{{ accesorios.id }}</td>
                 <td>{{ accesorios.tipo }}</td>
                 <td>{{ accesorios.marca }}</td>
@@ -111,7 +128,7 @@
                     <a href="{% url 'AccesorioBaja' accesorios.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                     <a href="{% url 'AccesorioModificacion' accesorios.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                     <a href="{% url 'AccesorioDetalle' accesorios.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                    <a href="{% url 'ClienteAccesorioVenta' accesorios.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                    
                 </td>
             </tr>
             {% endfor %}
@@ -169,5 +186,102 @@
         busqueda_marca_modelo.style.display = busqueda_tipo === "marca_modelo" ? "block" : "none";
         busqueda_codigo.style.display = busqueda_tipo === "codigo" ? "block" : "none";
     }
+
+    // document.addEventListener("DOMContentLoaded", function () {
+    //     const selectAll = document.getElementById("select_all");
+    //     const checkboxes = document.querySelectorAll(".select-item");
+    //     const venderBtn = document.getElementById("vender_seleccionados");
+
+    //     function actualizarBoton() {
+    //         const seleccionados = [...checkboxes].filter(checkbox => checkbox.checked).length;
+    //         venderBtn.disabled = seleccionados === 0;
+    //     }
+
+    //     // selectAll.addEventListener("change", function () {
+    //     //     checkboxes.forEach(checkbox => {
+    //     //         checkbox.checked = selectAll.checked;
+    //     //     });
+    //     //     actualizarBoton();
+    //     // });
+
+    //     checkboxes.forEach(checkbox => {
+    //         checkbox.addEventListener("change", actualizarBoton);
+    //     });
+
+    //     venderBtn.addEventListener("click", function () {
+    //         const seleccionados = [...checkboxes]
+    //             .filter(checkbox => checkbox.checked)
+    //             .map(checkbox => checkbox.value);
+            
+    //         if (seleccionados.length > 0) {
+    //             window.location.href = ``;
+    //         }
+    //     });
+    // });
+    document.addEventListener("DOMContentLoaded", function () {
+    let accesoriosSeleccionados = JSON.parse(localStorage.getItem("carrito_accesorios")) || [];
+    let carritoDiv = document.getElementById("carrito");
+    let inputAccesorios = document.getElementById("input-accesorios");
+
+    function actualizarCarrito() {
+        let listaCarrito = document.getElementById("lista-carrito");
+        listaCarrito.innerHTML = "";
+
+        accesoriosSeleccionados.forEach((accesorio, index) => {
+            let li = document.createElement("li");
+            li.innerHTML = `
+                <strong>${accesorio.tipo}</strong> - ${accesorio.marca} ${accesorio.modelo} 
+                <button class="btn btn-danger btn-sm eliminar-accesorio" data-index="${index}">❌</button>
+            `;
+            listaCarrito.appendChild(li);
+        });
+
+        // Guardar en localStorage para persistencia
+        localStorage.setItem("carrito_accesorios", JSON.stringify(accesoriosSeleccionados));
+
+        // Actualizar el input hidden del form con solo los IDs
+        inputAccesorios.value = JSON.stringify(accesoriosSeleccionados.map(a => a.id));
+
+        // Mostrar u ocultar carrito según la cantidad de accesorios seleccionados
+        carritoDiv.style.display = accesoriosSeleccionados.length > 0 ? "block" : "none";
+
+        // Volver a marcar los checkboxes si están en el carrito
+        document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
+            checkbox.checked = accesoriosSeleccionados.some(a => a.id === checkbox.value);
+        });
+
+        // Agregar eventos a los botones de eliminar
+        document.querySelectorAll(".eliminar-accesorio").forEach(btn => {
+            btn.addEventListener("click", function () {
+                let index = this.getAttribute("data-index");
+                accesoriosSeleccionados.splice(index, 1);
+                actualizarCarrito();
+            });
+        });
+    }
+
+    document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
+        checkbox.addEventListener("change", function () {
+            let accesorioId = this.value;
+            let accesorioDatos = {
+                id: accesorioId,
+                tipo: this.dataset.tipo,
+                marca: this.dataset.marca,
+                modelo: this.dataset.modelo
+            };
+
+            if (this.checked) {
+                accesoriosSeleccionados.push(accesorioDatos);
+            } else {
+                accesoriosSeleccionados = accesoriosSeleccionados.filter(a => a.id !== accesorioId);
+            }
+
+            actualizarCarrito();
+        });
+    });
+
+    // Ocultar/mostrar carrito al cargar la página según si hay accesorios en localStorage
+    actualizarCarrito();
+});
 </script>
 {% endblock %}

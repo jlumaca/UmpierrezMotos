@@ -42,7 +42,7 @@
 
         {% if datos_accesorio %}
         
-        <form action="{% url 'ClienteAccesorioVenta' 1 1 %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'AccesorioVenta' cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Datos del cliente</h4>
             <table class="table table-bordered">
                 <tbody>

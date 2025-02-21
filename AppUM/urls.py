@@ -55,7 +55,7 @@ urlpatterns = [
      path('accesorio_modificacion/<int:id_accesorio>', views.modificacion_accesorio,name="AccesorioModificacion"),
      path('accesorio_baja/<int:id_accesorio>', views.baja_accesorio,name="AccesorioBaja"),
      path('accesorio_detalle/<int:id_accesorio>', views.detalles_accesorio,name="AccesorioDetalle"),
-     path('accesorio_venta/<int:id_accesorio>/<int:id_cliente>', views.venta_accesorio,name="AccesorioVenta"),
+     path('accesorio_venta/<int:id_cliente>', views.venta_accesorio,name="AccesorioVenta"),
      path('cliente_accesorio_venta/<int:mostrar>/<int:vender>', views.cliente_venta_accesorio,name="ClienteAccesorioVenta"),
      path('prueba_cliente_accesorio_venta', views.prueba_varios_accesorios,name="PruebaVariosAccesorios"),
 

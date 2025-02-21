@@ -1038,85 +1038,120 @@ def detalles_accesorio(req,id_accesorio):
 
 
 @admin_required
-def venta_accesorio(req,id_accesorio,id_cliente):
+def venta_accesorio(req,id_cliente):
     try:
         doc_factura = req.FILES.get('factura_accesorio')
-        if not doc_factura:
-            doc_factura = None
-        nueva_venta_accesorio = ClienteAccesorio(
-            fecha_compra = datetime.now(),
-            accesorio_id = id_accesorio,
-            cliente_id = id_cliente,
-            factura_documento = doc_factura
-        )
-        nueva_venta_accesorio.save()
-        accesorio = Accesorio.objects.get(id=id_accesorio)
-        accesorio.activo = 0
-        accesorio.save()
+        # if not doc_factura:
+        #     doc_factura = None
+        # nueva_venta_accesorio = ClienteAccesorio(
+        #     fecha_compra = datetime.now(),
+        #     accesorio_id = id_accesorio,
+        #     cliente_id = id_cliente,
+        #     factura_documento = doc_factura
+        # )
+        # nueva_venta_accesorio.save()
+        # accesorio = Accesorio.objects.get(id=id_accesorio)
+        # accesorio.activo = 0
+        # accesorio.save()
+        # messages.success(req, "Venta generada con éxito")
+        # return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+        ult_compra_accesorio = ClienteAccesorio.objects.last()
+        if ult_compra_accesorio:
+            ult_compra_accesorio = ClienteAccesorio.objects.latest('id')
+            codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
+        else:
+            codigo_compra = 0
+        accesorios = req.session["accesorios_json"]
+        for accesorio in accesorios:
+            # print("INSERT ACCESORIO ID: " + str(accesorio))
+            # print("ID CLIENTE: " + str(id_cliente))
+            # print(codigo_venta)
+            if not doc_factura:
+                doc_factura = None
+            nueva_venta_accesorio = ClienteAccesorio(
+                fecha_compra = datetime.now(),
+                accesorio_id = accesorio,
+                cliente_id = id_cliente,
+                factura_documento = doc_factura,
+                codigo_compra = codigo_compra
+            )
+            nueva_venta_accesorio.save()
+            nueva_venta_accesorio.save()
+            a = Accesorio.objects.get(id=accesorio)
+            a.activo = 0
+            a.save()
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
         return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
     
 def prueba_varios_accesorios(req):
-    accesorios_json = req.POST.get("accesorios", "[]")  # Capturamos el JSON enviado
-    accesorios_seleccionados = json.loads(accesorios_json)  # Convertimos a lista Python
+    # accesorios_json = req.POST.get("accesorios", "[]")  # Capturamos el JSON enviado
+    # accesorios_seleccionados = json.loads(accesorios_json)  # Convertimos a lista Python
+    accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
+    accesorios_seleccionados = json.loads(accesorios_json)
+
+    # Guardar en sesión para que no se pierdan
+    req.session["accesorios_json"] = accesorios_seleccionados
 
         # Aquí puedes procesar la venta de los 
-    for accesorio in accesorios_seleccionados:
+    for accesorio in req.session["accesorios_json"]:
         #TIPO str
         print("Accesorios seleccionados:", accesorio)
     
     return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
 
 @admin_required
-def cliente_venta_accesorio(req,mostrar):
+def cliente_venta_accesorio(req,mostrar,vender):
     # try:
-        accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
-        accesorios_seleccionados = json.loads(accesorios_json)
+    #     accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
+    #     accesorios_seleccionados = json.loads(accesorios_json)
 
-    # Guardar en sesión para que no se pierdan
-        req.session["accesorios_json"] = accesorios_json
+    # # Guardar en sesión para que no se pierdan
+    #     req.session["accesorios_json"] = accesorios_json
+        accesorios_seleccionados = req.session["accesorios_json"]
 
         # Aquí puedes procesar la venta de los accesorios
         # print("Accesorios seleccionados:", accesorios_seleccionados)
-        if mostrar == 1:
-            documento = req.POST['tipo_documento'] + str(req.POST['documento'])
-            cliente = Cliente.objects.filter(documento=documento).first()
-            if cliente:
-                tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
-                tel_1 = tel1.telefono
-                tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+        # if mostrar == 1:
+        # if req.method == "POST":
+        documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+        cliente = Cliente.objects.filter(documento=documento).first()
+        if cliente:
+            tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+            tel_1 = tel1.telefono
+            tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
 
-                correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
-                correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
-                if tel2:
-                    tel_2 = tel2.telefono
-                else:
-                    tel_2 = None
+            correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+            correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+            if tel2:
+                tel_2 = tel2.telefono
+            else:
+                tel_2 = None
 
-                if correo1:
-                    c_1 = correo1.correo
-                else:
-                    c_1 = None
-                
-                if correo2:
-                    c_2 = correo1.correo
-                else:
-                    c_2 = None
-                data_accesorio = []
-                print(accesorios_seleccionados)
-                precio_total = 0
-                for accs in accesorios_seleccionados:
-                    accesorio = Accesorio.objects.get(id=int(accs))
-                    print(accesorio.tipo)
-                    data_accesorio.append({
-                        "accesorios":accesorio
-                    })
-                    precio_total = precio_total + int(accesorio.precio)
+            if correo1:
+                c_1 = correo1.correo
+            else:
+                c_1 = None
+            
+            if correo2:
+                c_2 = correo1.correo
+            else:
+                c_2 = None
+            data_accesorio = []
+            print(accesorios_seleccionados)
+            precio_total = 0
+            for accs in accesorios_seleccionados:
+                accesorio = Accesorio.objects.get(id=int(accs))
+                print(accesorio.tipo)
+                data_accesorio.append({
+                    "accesorios":accesorio
+                })
+                precio_total = precio_total + int(accesorio.precio)
 
-                # print(numero_letra)
-                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_accesorio":True,
+            print("LLEGA LINEA 1118")
+            
+            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_accesorio":True,
                                                                                 "cliente":cliente,
                                                                                 "accesorios":data_accesorio,
                                                                                 "tel1":tel_1,
@@ -1125,10 +1160,9 @@ def cliente_venta_accesorio(req,mostrar):
                                                                                 "correo2":c_2,
                                                                                 "precio_total":int(precio_total)
                                                                             })
-            else:
-                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
         else:
-            return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
+            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+
     # except Exception as e:
     #     pass
 

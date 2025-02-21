@@ -529,10 +529,10 @@
                 {% for item in page_obj_accesorio %}
                 <tr>
                     <td>
-                        {{ item.accesorio.accesorio__tipo }} {{ item.accesorio.accesorio__marca }} {{ item.accesorio.accesorio__modelo }}
-                        <a href="{% url 'ModificarAccesorioVendido' item.accesorio.accesorio__id cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        {{ item.detalles }}
+                        <a href=""><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                     </td>
-                    <td>{{ item.accesorio.fecha_compra }}</td>
+                    <td>{{ item.fecha }}</td>
                    
                     <td>
                         {% if item.factura_documento %}
@@ -546,7 +546,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'DetallesCompraAccesorio' item.accesorio.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                        <a href=""><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

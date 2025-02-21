@@ -1645,16 +1645,35 @@ def ficha_cliente(req,id_cliente):
             'accesorio__marca',
             'accesorio__modelo',
             'fecha_compra',
-            'factura_documento'
+            'factura_documento',
+            'codigo_compra'
         ).order_by('-id')
     )
     res_facturas = []
+    i = 0
+    j = 0
     for resultado_accesorio in resultados_accesorios:
-            ca = ClienteAccesorio.objects.get(id=resultado_accesorio['id'])
+        ca = ClienteAccesorio.objects.filter(codigo_compra=resultado_accesorio['codigo_compra']).first()
+        cc = ClienteAccesorio.objects.filter(codigo_compra=resultado_accesorio['codigo_compra']).count()
+        if cc > 1: 
+            if i == 0 or j != int(ca.codigo_compra):
+                i = 1
+                j = int(ca.codigo_compra)
+                # cc = ClienteAccesorio.objects.filter(codigo_compra=resultado_accesorio['codigo_compra'])
+                detalles = "Varios"
+                res_facturas.append({
+                    "detalles":detalles,
+                    "fecha":ca.fecha_compra
+                })      
+        else:
+            i = 0
+            detalles = resultado_accesorio['accesorio__tipo'] + resultado_accesorio['accesorio__marca'] + resultado_accesorio['accesorio__modelo']
             res_facturas.append({
-            'accesorio': resultado_accesorio,
-            'factura_documento': ca.factura_documento.url if ca.factura_documento else None
-        })
+                    "detalles":detalles,
+                    "fecha":ca.fecha_compra
+                }) 
+        
+        
     page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
     fondos = ClienteFondos.objects.filter(cliente=cliente)
     existen_fondos = ClienteFondos.objects.filter(cliente=cliente).first()

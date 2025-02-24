@@ -57,7 +57,7 @@
 
     <div id="div_form_pago" style="display: none;">
         {% if id_venta %}
-        <form action="" enctype="multipart/form-data" method="POST">
+        <form action="{% url 'AltaPagoAccesorio' id_venta %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Forma de pago</label>
@@ -232,7 +232,7 @@
             {% endif %}
         </ul>
     </nav>
-    <a href="" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>
@@ -267,17 +267,19 @@
     const cliente = JSON.parse('{{ cliente_json|escapejs }}');
     const detalle = JSON.parse('{{ accesorio_json|escapejs }}');
     const pagos_json = JSON.parse('{{pagos_json|default:"{}"|escapejs }}');
+    const total_precios_json = JSON.parse('{{total_precios_json|default:"{}"|escapejs }}');
+    
 
     console.log(cliente);
     console.log(detalle);    
     console.log(pagos_json);
 
     function prueba(){
-    generarResumen(cliente,detalle,pagos_json);
+    generarResumen(cliente,detalle,pagos_json,total_precios_json);
 }
 
 
-function generarResumen(cliente, detalle, p_pagos) {
+function generarResumen(cliente, detalle, p_pagos,total_precios_json) {
     // Construir el encabezado de la tabla con estilos en línea para impresión
     let resumenHTML = `
         <html>
@@ -344,13 +346,28 @@ function generarResumen(cliente, detalle, p_pagos) {
                     </tr>
                 </thead>
                 <tbody>
-          
+          `;             
+       if (detalle && detalle.length > 0) {
+        detalle.forEach(d => {
+            resumenHTML += `
                 <tr>
-                        <td>${detalle.detalle || "N/A"}</td>
-                        <td>${detalle.precio}</td>
+                        <td>${d.detalle || "N/A"}</td>
+                        <td>${d.precio}</td>
                 
                 </tr>
+            `;
+        });
+     }
+        resumenHTML += `        
                 </tbody>
+                <tfoot>
+            <tr>
+                <th>Total</th>
+                <th>
+                    $${total_precios_json.total_pesos || "N/A"}/U$s${total_precios_json.total_dolares || "N/A"}
+                </th>
+            </tr>
+            </tfoot>
             </table>
             <h5>PAGOS</h5>
             <table>

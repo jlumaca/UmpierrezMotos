@@ -121,7 +121,7 @@ urlpatterns = [
 
       path('calculadora', views.calculadora_pagos,name="Calculadora"),
 
-     path('detalles_compra_accesorio/<int:id_venta>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
+     path('detalles_compra_accesorio/<int:codigo_compra>', views.pagos_accesorio,name="DetallesCompraAccesorio"),
      path('alta_paga_accesorio/<int:id_venta>', views.alta_paga_accesorio,name="AltaPagoAccesorio"),
      path('baja_paga_accesorio/<int:id_ca>', views.baja_paga_accesorio,name="BajaPagoAccesorio"),
 

@@ -57,7 +57,7 @@
 
     <div id="div_form_pago" style="display: none;">
         {% if id_venta %}
-        <form action="{% url 'AltaPagoAccesorio' id_venta %}" enctype="multipart/form-data" method="POST">
+        <form action="" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Forma de pago</label>
@@ -130,10 +130,22 @@
             </tr>
         </thead>
         <tbody>
-            <td>{{ accesorio.detalle }}</td>
-            <td>{{ accesorio.precio }}</td>
+            {% for a in accesorio %}
+                <tr>
+                    <td>{{ a.detalle }}</td>
+                    <td>{{ a.precio }}</td>
+                </tr>
+            {% endfor %}
             
         </tbody>
+        <tfoot>
+            <tr>
+                <th>Total</th>
+                <th>
+                    ${{ total_pesos|floatformat:2 }}/U$s{{ total_dolares|floatformat:2 }}
+                </th>
+            </tr>
+        </tfoot>
     </table>
     <table class="table">
         <thead>
@@ -220,7 +232,7 @@
             {% endif %}
         </ul>
     </nav>
-    <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Volver</a>
+    <a href="" class="btn btn-secondary">Volver</a>
 </div>
 
 <script>

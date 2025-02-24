@@ -1168,15 +1168,22 @@ def cliente_venta_accesorio(req,mostrar,vender):
 
 def pagos_accesorio(req,id_venta):
     # try: 
+    #
         data = obtener_compras_accesorios(req,id_venta)
-        c_v = ClienteAccesorio.objects.get(id=id_venta)
-        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"page_obj":data[0],
-                                                                                    "id_venta":id_venta,
-                                                                                    "id_cliente":c_v.cliente_id,
-                                                                                    "cliente_json":data[1],
-                                                                                    "accesorio_json":data[2],
-                                                                                    "pagos_json":data[3],
-                                                                                    "accesorio":data[4]})
+        # c_v = ClienteAccesorio.objects.get(id=id_venta)
+        return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{
+                                                                                    # "page_obj":data[0],
+                                                                                    "id_venta":True,
+                                                                                    # "id_venta":id_venta,
+                                                                                    # "id_cliente":c_v.cliente_id,
+                                                                                    # "cliente_json":data[1],
+                                                                                    # "accesorio_json":data[2],
+                                                                                    # "pagos_json":data[3],
+                                                                                    # "accesorio":data[4]}
+                                                                                    "accesorio":data[0],
+                                                                                    "total_pesos":data[1],
+                                                                                    "total_dolares":data[2]}
+                                                                                    )
     # except Exception as e:
     #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e})
 
@@ -1663,14 +1670,16 @@ def ficha_cliente(req,id_cliente):
                 detalles = "Varios"
                 res_facturas.append({
                     "detalles":detalles,
-                    "fecha":ca.fecha_compra
+                    "fecha":ca.fecha_compra,
+                    "codigo_venta":ca.codigo_compra
                 })      
         else:
             i = 0
             detalles = resultado_accesorio['accesorio__tipo'] + resultado_accesorio['accesorio__marca'] + resultado_accesorio['accesorio__modelo']
             res_facturas.append({
                     "detalles":detalles,
-                    "fecha":ca.fecha_compra
+                    "fecha":ca.fecha_compra,
+                    "codigo_venta":ca.codigo_compra
                 }) 
         
         

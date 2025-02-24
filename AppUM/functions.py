@@ -411,82 +411,104 @@ def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar,el
     return error
 
 def obtener_compras_accesorios(req,id_venta):
-        resultados_cuotas = (
-                CuotasAccesorios.objects
-                .filter(venta_id=id_venta)
-                .values(
-                    'id',
-                    'fecha_pago', 
+        # resultados_cuotas = (
+        #         CuotasAccesorios.objects
+        #         .filter(venta_id=id_venta)
+        #         .values(
+        #             'id',
+        #             'fecha_pago', 
                      
-                    'cant_restante_dolares', 
-                    'cant_restante_pesos', 
-                    'moneda', 
-                    'observaciones',
-                    'valor_pago_dolares',
-                    'valor_pago_pesos',
-                    'comprobante_pago'
-                )
-            )
-            #
-        res_pagos = []
-        i = 1
-        for resultado in resultados_cuotas:
-                    ca = CuotasAccesorios.objects.get(id=resultado['id'])
-                    res_pagos.append({
-                    'cuota': resultado,
-                    'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
-                    'mostrar_boton': i == len(resultados_cuotas)           
-                    })
-                    i = i + 1
-        venta = ClienteAccesorio.objects.get(id=id_venta)
-        cliente = Cliente.objects.get(id=venta.cliente_id)
-        telefono = ClienteTelefono.objects.filter(cliente=cliente,principal=1).first()
-        cliente_data = {
-        "cliente": cliente.nombre + " " + cliente.apellido,
-        "telefono": telefono.telefono,
-        "direccion": cliente.domicilio,
-        }
-        cliente_json = json.dumps(cliente_data)
+        #             'cant_restante_dolares', 
+        #             'cant_restante_pesos', 
+        #             'moneda', 
+        #             'observaciones',
+        #             'valor_pago_dolares',
+        #             'valor_pago_pesos',
+        #             'comprobante_pago'
+        #         )
+        #     )
+        #     #
+        # res_pagos = []
+        # i = 1
+        # for resultado in resultados_cuotas:
+        #             ca = CuotasAccesorios.objects.get(id=resultado['id'])
+        #             res_pagos.append({
+        #             'cuota': resultado,
+        #             'comprobante_pago': ca.comprobante_pago.url if ca.comprobante_pago else None,
+        #             'mostrar_boton': i == len(resultados_cuotas)           
+        #             })
+        #             i = i + 1
+        # venta = ClienteAccesorio.objects.get(id=id_venta)
+        # cliente = Cliente.objects.get(id=venta.cliente_id)
+        # telefono = ClienteTelefono.objects.filter(cliente=cliente,principal=1).first()
+        # cliente_data = {
+        # "cliente": cliente.nombre + " " + cliente.apellido,
+        # "telefono": telefono.telefono,
+        # "direccion": cliente.domicilio,
+        # }
+        # cliente_json = json.dumps(cliente_data)
 
-        accesorio = Accesorio.objects.get(id=venta.accesorio_id)
-        # talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
-        moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
+        venta_accesorios = ClienteAccesorio.objects.filter(codigo_compra=id_venta)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        accesorio_data = []
+        total_pesos = 0
+        total_dolares = 0
+        for a in venta_accesorios:
+            accesorio = Accesorio.objects.get(id=a.accesorio_id)
+            # talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
+            moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
+            if accesorio.moneda_precio == "Pesos":
+                precio_en_pesos = int(accesorio.precio)
+                precio_en_dolares = int(accesorio.precio) / precio_dolar
+            else:
+                precio_en_dolares = int(accesorio.precio)
+                precio_en_pesos = int(precio_en_dolares) * precio_dolar
+            total_pesos = total_pesos + precio_en_pesos
+            total_dolares = total_dolares + precio_en_dolares
 
-        if accesorio.talle == "Sin talle":
-            detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo
-        else:
-            detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo + " Talle " + accesorio.talle
+            if accesorio.talle == "Sin talle":
+                detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo
+            else:
+                detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo + " Talle " + accesorio.talle
+            
+            accesorio_data.append({
+                "detalle":detalle,
+                "precio": moneda + str(accesorio.precio)
+            })
+            
+            # accesorio_data = {
+            #     "detalle":detalle,
+            #     "precio": moneda + str(accesorio.precio)
+            # }
+
+        # accesorio_json = json.dumps(accesorio_data)
         
-        accesorio_data = {
-            "detalle":detalle,
-            "precio": moneda + str(accesorio.precio)
-        }
+        # pagos = CuotasAccesorios.objects.filter(venta_id=id_venta).order_by('-id')
+        # if pagos:
+        #     p_pagos_data = [
+        #             {   
+        #                 "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
+        #                 "moneda":cuota.moneda,
+        #                 "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
+        #                 "metodo":cuota.metodo_pago
+        #             }
+        #             for cuota in pagos
+        #         ]
+        #     pagos_accesorios_json = json.dumps(p_pagos_data)
+        # else:
+        #     pagos_accesorios_json = None
 
-        accesorio_json = json.dumps(accesorio_data)
-        
-        pagos = CuotasAccesorios.objects.filter(venta_id=id_venta).order_by('-id')
-        if pagos:
-            p_pagos_data = [
-                    {   
-                        "fecha":cuota.fecha_pago.strftime('%Y-%m-%d'),
-                        "moneda":cuota.moneda,
-                        "monto": float(cuota.valor_pago_pesos) if cuota.moneda == "Pesos" else float(cuota.valor_pago_dolares),
-                        "metodo":cuota.metodo_pago
-                    }
-                    for cuota in pagos
-                ]
-            pagos_accesorios_json = json.dumps(p_pagos_data)
-        else:
-            pagos_accesorios_json = None
-
-        page_obj = funcion_paginas_varias(req,res_pagos)
+        # page_obj = funcion_paginas_varias(req,res_pagos)
 
         data = [
-            page_obj,
-            cliente_json,
-            accesorio_json,
-            pagos_accesorios_json,
-            accesorio_data
+            # page_obj,
+            # cliente_json,
+            # accesorio_json,
+            # pagos_accesorios_json,
+            accesorio_data,
+            total_pesos,
+            total_dolares
         ]
 
         return data

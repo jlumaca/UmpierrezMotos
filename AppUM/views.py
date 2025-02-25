@@ -1716,7 +1716,7 @@ def ficha_cliente(req,id_cliente):
                 })      
         else:
             i = 0
-            detalles = resultado_accesorio['accesorio__tipo'] + resultado_accesorio['accesorio__marca'] + resultado_accesorio['accesorio__modelo']
+            detalles = resultado_accesorio['accesorio__tipo'] + " " + resultado_accesorio['accesorio__marca'] + " " + resultado_accesorio['accesorio__modelo']
             res_facturas.append({
                     "detalles":detalles,
                     "fecha":ca.fecha_compra,

@@ -1168,7 +1168,7 @@ def cliente_venta_accesorio(req,mostrar,vender):
 
 def pagos_accesorio(req,codigo_compra):
     # try: 
-    
+    #
         data = obtener_compras_accesorios(req,codigo_compra)
         # c_v = ClienteAccesorio.objects.get(id=id_venta)
         return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{
@@ -1911,22 +1911,67 @@ def modificar_moto_vendida(req,id_moto,id_cliente):
 
 def modificar_accesorio_vendido(req,id_accesorio,id_cliente):
     # try:
+        accesorio = Accesorio.objects.get(id=id_accesorio)
+        venta = ClienteAccesorio.objects.filter(accesorio=accesorio,cliente_id=id_cliente).first()
         if req.method == "POST": 
             accesorio_upd = Accesorio.objects.get(id=id_accesorio)
             accesorio_upd.tipo = req.POST['tipo_accesorio']
             accesorio_upd.marca = req.POST['marca_accesorio'].upper()
             accesorio_upd.modelo = req.POST['modelo_accesorio'].upper()
-            accesorio_upd.precio = req.POST['precio_accesorio']
+            
             accesorio_upd.foto = req.FILES.get('foto_accesorio')
             accesorio_upd.moneda_precio = req.POST['moneda_accesorio']
             accesorio_upd.talle = req.POST['talle_accesorio']
+            accesorio_upd.precio = req.POST['precio_accesorio']
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = float(dolar.precio_dolar_tienda)
+
+            if accesorio.moneda_precio == "Pesos":
+                precio_pesos_bd = float(accesorio.precio)
+                precio_dolares_bd = precio_pesos_bd / precio_dolar
+            else:
+                precio_dolares_bd = float(accesorio.precio)
+                precio_pesos_bd = precio_dolares_bd * precio_dolar
+            codigos_ventas = ClienteAccesorio.objects.filter(codigo_compra=venta.codigo_compra).latest('id')
+            existen_cuotas = CuotasAccesorios.objects.filter(venta_id=codigos_ventas.id).first()
+            if ((req.POST['moneda_accesorio'] == "Pesos" and precio_pesos_bd != float(req.POST['precio_accesorio'])) or (req.POST['moneda_accesorio'] == "Dolares" and precio_dolares_bd != float(req.POST['precio_accesorio']))):
+                if existen_cuotas:
+                    ult_cuota = CuotasAccesorios.objects.filter(venta=codigos_ventas.id).latest('id')
+                    print("ENTRA AL SEGUNDO IF")
+                    if req.POST['moneda_accesorio'] == "Pesos" and precio_pesos_bd < float(req.POST['precio_accesorio']):
+                        diferencia_pesos = float(req.POST['precio_accesorio']) - precio_pesos_bd
+                        diferencia_dolares = diferencia_pesos / precio_dolar
+                        # mensaje = diferencia_pesos
+                    elif req.POST['moneda_accesorio'] == "Pesos" and precio_pesos_bd > float(req.POST['precio_accesorio']):
+                        diferencia_pesos = float(req.POST['precio_accesorio']) - precio_pesos_bd
+                        diferencia_dolares = diferencia_pesos / precio_dolar
+                        # mensaje = diferencia_pesos
+                    elif req.POST['moneda_accesorio'] == "Dolares" and precio_dolares_bd < float(req.POST['precio_accesorio']):
+                        diferencia_dolares = float(req.POST['precio_accesorio']) - precio_dolares_bd
+                        diferencia_pesos = diferencia_dolares * precio_dolar
+                        # mensaje = diferencia_dolares
+                    else:
+                        diferencia_dolares = float(req.POST['precio_accesorio']) - precio_dolares_bd
+                        diferencia_pesos = diferencia_dolares * precio_dolar
+                        # mensaje = diferencia_dolares
+                    existen_cuotas.cant_restante_pesos = float(existen_cuotas.cant_restante_pesos) + diferencia_pesos
+                    existen_cuotas.cant_restante_dolares = float(existen_cuotas.cant_restante_dolares) + diferencia_dolares
+                    existen_cuotas.save()
+            # print("PRECIO PESOS BD: " + str(precio_pesos_bd))
+            # print("PRECIO PESOS FORM: " + str(float(req.POST['precio_accesorio'])))
+            # print("PRECIO DOLARES BD: " + str(precio_dolares_bd))
+            # print("PRECIO DOLARES FORM: " + str(float(req.POST['precio_accesorio'])))
+            # messages.success(req, mensaje)
+            # return redirect(reverse('ModificarAccesorioVendido', kwargs={'id_accesorio': id_accesorio,'id_cliente':id_cliente}))
             accesorio_upd.save()
             messages.success(req, "El accesorio ha sido modificado con éxito.")
-            return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+            return redirect(reverse('DetallesCompraAccesorio', kwargs={'codigo_compra': venta.codigo_compra}))
         else:
-            accesorio = Accesorio.objects.get(id=id_accesorio)
+            
             precio = int(accesorio.precio) if accesorio.precio else 0
-            return render(req,"perfil_administrativo/cliente/modificacion_accesorio_vendido.html",{"datos_accesorio":accesorio,"precio_accesorio":precio,"id_cliente":id_cliente})
+            
+            #
+            return render(req,"perfil_administrativo/cliente/modificacion_accesorio_vendido.html",{"datos_accesorio":accesorio,"precio_accesorio":precio,"id_cliente":id_cliente,"id_venta":venta.codigo_compra})
     # except Exception as e:
     #     pass
 

@@ -132,7 +132,10 @@
         <tbody>
             {% for a in accesorio %}
                 <tr>
-                    <td>{{ a.detalle }}</td>
+                    <td>
+                        {{ a.detalle }}
+                        <a href="{% url 'ModificarAccesorioVendido' a.id_accesorio id_cliente %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                    </td>
                     <td>{{ a.precio }}</td>
                 </tr>
             {% endfor %}

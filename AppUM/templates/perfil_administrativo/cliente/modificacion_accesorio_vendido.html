@@ -10,6 +10,11 @@
             {{ error_message }}
             </div>
         {% endif %}
+        {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
         <form action="{% url 'ModificarAccesorioVendido' datos_accesorio.id id_cliente %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="estado" class="form-label">Tipo</label>
@@ -73,7 +78,7 @@
             
             <button type="submit" class="btn btn-success">Guardar</button>
             
-            <a href="{% url 'ClienteFicha' id_cliente %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'DetallesCompraAccesorio' id_venta %}" class="btn btn-secondary">Cancelar</a>
         </form>
        
     </div>

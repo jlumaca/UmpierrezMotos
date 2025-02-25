@@ -477,7 +477,8 @@ def obtener_compras_accesorios(req,codigo_compra):
             
             accesorio_data.append({
                 "detalle":detalle,
-                "precio": moneda + str(accesorio.precio)
+                "precio": moneda + str(accesorio.precio),
+                "id_accesorio":accesorio.id
             })
             
             accesorios_para_json = [

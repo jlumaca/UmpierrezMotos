@@ -110,7 +110,7 @@
                 <button type="button" class="btn btn-primary" onclick="generatePDF()">Generar PDF</button>
             </div> -->
             </form>
-            <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <form action="{% url 'MotoVenta' moto.id cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <h4>Forma de pago</h4>
             <div class="mb-3">
                 <label for="precio" class="form-label">Forma de pago</label>
@@ -194,27 +194,27 @@
             </div>
             <div class="mb-3" id="div_entregas_pesos">
                 <label for="recargo" class="form-label">Entregas en Pesos</label>
-                <input type="number" class="form-control" id="entregas_pesos" required>
+                <input value="0" type="number" class="form-control" id="entregas_pesos">
             </div>
             <div class="mb-3" style="display: none;" id="div_entregas_dolares">
                 <label for="recargo" class="form-label">Entregas en Dolares</label>
-                <input type="number" class="form-control" id="entregas_dolares" required>
+                <input value="0" type="number" class="form-control" id="entregas_dolares">
             </div>
             <div class="mb-3" id="div_total_entrega_pesos">
                 <label for="recargo" class="form-label">Total Entregas (señas, fondos) en Pesos</label>
-                <input type="number" class="form-control" id="total_entrega_pesos" required>
+                <input value="0" type="number" class="form-control" id="total_entrega_pesos">
             </div>
             <div class="mb-3" style="display: none;" id="div_total_entrega_dolares">
                 <label for="recargo" class="form-label">Total Entregas (señas, fondos) en Dolares</label>
-                <input type="number" class="form-control" id="total_entrega_dolares" required>
+                <input value="0" type="number" class="form-control" id="total_entrega_dolares">
             </div>
             <div class="mb-3">
                 <label for="recargo" class="form-label">Recargo</label>
-                <input type="number" class="form-control" id="recargo" required>
+                <input value="0" type="number" class="form-control" id="recargo">
             </div>
             <div class="mb-3">
                 <label for="recargo" class="form-label">Cantidad de cuotas</label>
-                <input type="number" class="form-control" id="cantidad_cuotas" required>
+                <input value="0" type="number" class="form-control" id="cantidad_cuotas">
             </div>
             <div class="mb-3" id="div_valor_pago_pesos">
                 <label for="recargo" class="form-label">Valor de las cuotas en Pesos</label>

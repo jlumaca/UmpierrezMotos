@@ -3670,7 +3670,9 @@ def cerrar_caja(req,id_caja):
 @admin_required
 def movimientos_caja(req,id_caja):
     try:
+        print("ID CAJA ES: " + str(id_caja))
         movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
+        # print(mes_actual)
         data = []
         for movimiento in movimientos:
             usuario = Personal.objects.get(id=movimiento.usuario_id)
@@ -3679,9 +3681,72 @@ def movimientos_caja(req,id_caja):
                 "descripcion":movimiento.movimiento if movimiento.movimiento else "Sin descripción",
                 "usuario":usuario.nombre + " " + usuario.apellido
             })
+        
+        
+        mes_actual = datetime.now().month
+        movimientos_mes_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes_actual)
+        ganancias_mes = 0
+        egresos_mes = 0 
+        ganancias_netas_mes = 0
+        ingresos_extras_mes = 0
+        
+        for movimiento in movimientos_mes_actual:
+            if movimiento.tipo == "Ingreso":
+                ganancias_mes = ganancias_mes + int(movimiento.monto)
+            elif movimiento.tipo == "Egreso":
+                egresos_mes = egresos_mes + int(movimiento.monto)
+            elif movimiento.tipo == "Ingreso extra":
+                ingresos_extras_mes = ingresos_extras_mes + int(movimiento.monto)
+            else:
+                pass
+            
+
+        ganancias_netas_mes = ganancias_mes + ingresos_extras_mes - egresos_mes
+
+        # print("GANANCIAS DEL MES: " + str(ganancias_mes))
+        # print("EGRESOS DEL MES: -" + str(egresos_mes))
+        # print("INGRESOS EXTRAS DEL MES: " + str(ingresos_extras_mes))
+        # print("GANANCIAS NETAS DEL MES: " + str(ganancias_netas_mes))
+        
+        
+        
+        ganancias_dia = 0
+        egresos_dia = 0
+        ganancias_netas_dia = 0
+        ingresos_extras_dia = 0
+
+        fecha_actual = datetime.now().date()
+        movimientos_fecha_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha_actual)
+        for movimiento in movimientos_fecha_actual:
+            if movimiento.tipo == "Ingreso":
+                ganancias_dia = ganancias_dia + int(movimiento.monto)
+            elif movimiento.tipo == "Egreso":
+                egresos_dia = egresos_dia + int(movimiento.monto)
+            elif movimiento.tipo == "Ingreso extra":
+                ingresos_extras_dia = ingresos_extras_dia + int(movimiento.monto)
+            else:
+                pass
+            
+
+        ganancias_netas_dia = ganancias_dia + ingresos_extras_dia - egresos_dia
+        print("GANANCIAS DEL DIA: " + str(ganancias_dia))
+        print("EGRESOS DEL DIA: -" + str(egresos_dia))
+        print("INGRESOS EXTRAS DEL DIA: " + str(ingresos_extras_dia))
+        print("GANANCIAS NETAS DEL DIA: " + str(ganancias_netas_dia))
+
+        
+        
 
         page_obj = funcion_paginas_varias(req,data)
-        return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj})
+        return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj,
+                                                                              "ganancias_mes":ganancias_mes,
+                                                                              "ganancias_dia":ganancias_dia,
+                                                                              "egresos_dia":egresos_dia,
+                                                                              "egresos_mes":egresos_mes,
+                                                                              "ganancias_netas_mes":ganancias_netas_mes,
+                                                                              "ganancias_netas_dia":ganancias_netas_dia,
+                                                                              "ingresos_extra_dia":ingresos_extras_dia,
+                                                                              "ingresos_extra_mes":ingresos_extras_mes})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
 

@@ -12,6 +12,7 @@
     {% endfor %}
 {% endif %}
 <div class="table-container" id="inventarios">
+    
     <h3>Datos sobre la caja</h3>
     <table class="table">
         <thead>
@@ -43,7 +44,37 @@
                 </tr>
         </tbody>
     </table>
-
+    <h3>Resumen de caja</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ganancias del mes</th>
+                <th>Ganancias del día</th>
+                <th>Egresos del día</th>
+                <th>Egresos del mes</th>
+                <th>Ganancias netas del mes</th>
+                <th>Ganancias netas del día</th>
+                <th>Ingresos extras del día</th>
+                <th>Ingresos extras del mes</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>{{ ganancias_mes }}</td>
+                    <td>{{ ganancias_dia }}</td>
+                    <td>{{ egresos_dia }}</td>
+                    <td>
+                        {{ egresos_mes }}
+                    </td>
+                    <td>{{ ganancias_netas_mes }}</td>
+                    <td>{{ ganancias_netas_dia }}</td>
+                    <td>{{ ingresos_extra_dia }}</td>
+                    <td>{{ ingresos_extra_mes }}</td>
+                    
+                </tr>
+        </tbody>
+    </table>
     <h3>Movimientos</h3>
     <table class="table">
         <thead>

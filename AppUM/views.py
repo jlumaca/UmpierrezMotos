@@ -461,17 +461,19 @@ def alta_moto_nueva(req):
         if existe_num_motor:
             return render(req,"perfil_administrativo/motos/alta_moto.html",{
                                                                             "active_page": 'Motos',
-                                                                            "form_moto_usada":True,
+                                                                            "form_moto_usada":False,
                                                                             "form_moto_ingresada":False,
                                                                             "consultar_moto_cliente":False,
-                                                                            "error_message":"Ya existe el número de motor ingresado"})
+                                                                            "error_message":"Ya existe el número de motor ingresado",
+                                                                            "es_nueva":True})
         elif existe_num_chasis:
             return render(req,"perfil_administrativo/motos/alta_moto.html",{
                                                                             "active_page": 'Motos',
-                                                                            "form_moto_usada":True,
+                                                                            "form_moto_usada":False,
                                                                             "form_moto_ingresada":False,
                                                                             "consultar_moto_cliente":False,
-                                                                            "error_message":"Ya existe el número de chasis ingresado"})
+                                                                            "error_message":"Ya existe el número de chasis ingresado",
+                                                                            "es_nueva":True})
         else:
             marca = req.POST['marca_moto'].upper()
             modelo = req.POST['modelo_moto'].upper()
@@ -502,7 +504,8 @@ def alta_moto_nueva(req):
                                                                             "form_moto_usada":True,
                                                                             "form_moto_ingresada":False,
                                                                             "consultar_moto_cliente":False,
-                                                                            "error_message":e})    
+                                                                            "error_message":e,
+                                                                            "es_nueva":True})    
 
 def alta_moto_usada_sin_dueno(req):                
     # try:
@@ -2328,7 +2331,7 @@ def form_venta_moto(req,id_moto):
 
 @admin_required
 def venta_moto(req,id_moto,id_cliente):
-    try:
+    # try:
         cliente = Cliente.objects.get(id=id_cliente)
         fondos = int(req.POST['cantidad_destinada'])
         moto = Moto.objects.get(id=id_moto)
@@ -2471,8 +2474,8 @@ def venta_moto(req,id_moto,id_cliente):
             #REDIRIGIR A LA FICHA DEL CLIENTE
             messages.success(req, "Venta generada con éxito")
             return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-    except Exception as e:
-        return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
 @admin_required
 def vista_ventas(req):

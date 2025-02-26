@@ -25,7 +25,7 @@
             <label for="estado" class="form-label">Estado</label>
             <select class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
                 <option value="usada">Usada</option>
-                <option value="nueva">0KM</option>
+                <option value="nueva" {% if es_nueva %}selected{% endif %}>0KM</option>
             </select>
         </div>
 
@@ -449,7 +449,7 @@
         </div>
 
 
-        <div id="div_moto_nueva" style="display: none;">
+        <div id="div_moto_nueva" {% if es_nueva %} style="display: block;" {% else %} style="display: none;" {% endif %}>
         <form action="{% url 'AltaMotoNueva' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="marca" class="form-label">Tipo</label>

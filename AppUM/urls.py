@@ -112,6 +112,7 @@ urlpatterns = [
      path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
      path('cerrar_caja/<int:id_caja>', views.cerrar_caja,name="CerrarCaja"),
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
+     path('detalles_caja_x_fecha/', views.buscar_detalles_movimientos_x_fecha,name="DetallesCajaXFecha"),
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),

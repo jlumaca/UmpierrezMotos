@@ -3670,7 +3670,9 @@ def cerrar_caja(req,id_caja):
 @admin_required
 def movimientos_caja(req,id_caja):
     try:
+        print("ID CAJA ES: " + str(id_caja))
         movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
+        # print(mes_actual)
         data = []
         for movimiento in movimientos:
             usuario = Personal.objects.get(id=movimiento.usuario_id)
@@ -3679,11 +3681,129 @@ def movimientos_caja(req,id_caja):
                 "descripcion":movimiento.movimiento if movimiento.movimiento else "Sin descripción",
                 "usuario":usuario.nombre + " " + usuario.apellido
             })
+        
+        
+        mes_actual = datetime.now().month
+        movimientos_mes_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes_actual)
+        ganancias_mes = 0
+        egresos_mes = 0 
+        ganancias_netas_mes = 0
+        ingresos_extras_mes = 0
+        
+        for movimiento in movimientos_mes_actual:
+            if movimiento.tipo == "Ingreso":
+                ganancias_mes = ganancias_mes + int(movimiento.monto)
+            elif movimiento.tipo == "Egreso":
+                egresos_mes = egresos_mes + int(movimiento.monto)
+            elif movimiento.tipo == "Ingreso extra":
+                ingresos_extras_mes = ingresos_extras_mes + int(movimiento.monto)
+            else:
+                pass
+            
+
+        ganancias_netas_mes = ganancias_mes + ingresos_extras_mes - egresos_mes
+
+        # print("GANANCIAS DEL MES: " + str(ganancias_mes))
+        # print("EGRESOS DEL MES: -" + str(egresos_mes))
+        # print("INGRESOS EXTRAS DEL MES: " + str(ingresos_extras_mes))
+        # print("GANANCIAS NETAS DEL MES: " + str(ganancias_netas_mes))
+        
+        
+        
+        ganancias_dia = 0
+        egresos_dia = 0
+        ganancias_netas_dia = 0
+        ingresos_extras_dia = 0
+
+        fecha_actual = datetime.now().date()
+        movimientos_fecha_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha_actual)
+        for movimiento in movimientos_fecha_actual:
+            if movimiento.tipo == "Ingreso":
+                ganancias_dia = ganancias_dia + int(movimiento.monto)
+            elif movimiento.tipo == "Egreso":
+                egresos_dia = egresos_dia + int(movimiento.monto)
+            elif movimiento.tipo == "Ingreso extra":
+                ingresos_extras_dia = ingresos_extras_dia + int(movimiento.monto)
+            else:
+                pass
+            
+
+        ganancias_netas_dia = ganancias_dia + ingresos_extras_dia - egresos_dia
+        print("GANANCIAS DEL DIA: " + str(ganancias_dia))
+        print("EGRESOS DEL DIA: -" + str(egresos_dia))
+        print("INGRESOS EXTRAS DEL DIA: " + str(ingresos_extras_dia))
+        print("GANANCIAS NETAS DEL DIA: " + str(ganancias_netas_dia))
+
+        
+        
 
         page_obj = funcion_paginas_varias(req,data)
-        return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj})
+        return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj,
+                                                                              "ganancias_mes":ganancias_mes,
+                                                                              "ganancias_dia":ganancias_dia,
+                                                                              "egresos_dia":egresos_dia,
+                                                                              "egresos_mes":egresos_mes,
+                                                                              "ganancias_netas_mes":ganancias_netas_mes,
+                                                                              "ganancias_netas_dia":ganancias_netas_dia,
+                                                                              "ingresos_extra_dia":ingresos_extras_dia,
+                                                                              "ingresos_extra_mes":ingresos_extras_mes})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
+
+def buscar_detalles_movimientos_x_fecha(req):
+    # try:
+        # fecha = req.POST['']
+        print("Datos recibidos en GET:", req.GET)
+        f_detalle_str = req.GET.get('f_detalles')  # Cambiado a paréntesis
+        fecha = datetime.strptime(f_detalle_str, '%Y-%m-%d').date() if f_detalle_str else None
+        print(fecha)
+        print(f_detalle_str)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        motos_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V")
+        cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
+        total_moto_dia_pesos = 0
+        total_moto_dia_dolares = 0
+        for venta in motos_vendidas_dia:
+            moto = Moto.objects.get(id=venta.moto_id)
+            if moto.moneda_precio == "Pesos":
+                total_moto_dia_pesos = total_moto_dia_pesos + int(moto.precio)
+                total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+            else:
+                total_moto_dia_dolares = total_moto_dia_dolares + int(moto.precio)
+                total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+
+        # print("TOTAL MOTOS DEL DIA EN PESOS: $" + str(total_moto_dia_pesos))
+        # print("TOTAL MOTOS DEL DIA EN DOLARES: U$s" + str(total_moto_dia_dolares))
+        # print("CANTIDAD MOTOS DE MOTOS VENDIDAS: " + str(cantidad_vendidas_dia))
+
+        accesorios_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha)
+        cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
+        total_accesorio_dia_pesos = 0
+        total_accesorio_dia_dolares = 0
+        for venta in accesorios_vendidos_dia:
+            accesorio = Accesorio.objects.get(id=venta.accesorio_id)
+            if accesorio.moneda_precio == "Pesos":
+                total_accesorio_dia_pesos = total_accesorio_dia_pesos + int(accesorio.precio)
+                total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+            else:
+                total_accesorio_dia_dolares = total_accesorio_dia_dolares + int(accesorio.precio)
+                total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+        data = [
+        {"tipo": "Motos", "venta": cantidad_vendidas_dia, "total_pesos": total_moto_dia_pesos, "total_dolares": total_moto_dia_dolares},
+        {"tipo": "Accesorios", "venta": cantidad_vendidos_dia, "total_pesos": total_accesorio_dia_pesos, "total_dolares": total_accesorio_dia_dolares},
+        ]
+        print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
+        print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
+        print("CANTIDAD ACCESORIOS DE MOTOS VENDIDAS: " + str(cantidad_vendidos_dia))
+        return JsonResponse(data, safe=False)
+        
+        # motos_vendidas_mes = ComprasVentas.objects.filter(fecha_compra__month=mes_actual,tipo="V")
+        # cantidad_vendidas_mes = 0
+        # for venta in motos_vendidas_mes:
+        #     pass
+    # except Exception as e:
+    #     pass
 
 
 def servicios_en_gestion(req):

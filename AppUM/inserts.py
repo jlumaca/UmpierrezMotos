@@ -69,14 +69,18 @@ def insert_cliente_correo(correo,principal,id_cliente):
                     )
     correo_cliente.save()
 
-def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal):
+#
+def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo):
     movimiento = Movimientos(
         fecha = datetime.now(),
         movimiento = movimiento_descripcion,
         tipo = tipo,
         monto = monto,
         caja_id = id_caja,
-        usuario_id = id_personal
+        usuario_id = id_personal,
+        moneda = moneda,
+        rubro = rubro,
+        metodo = metodo
     )
     movimiento.save()
 
@@ -96,7 +100,8 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
             )
     nueva_cuota.save()
 
-def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
+#
+def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
     cv = ComprasVentas.objects.get(id=id_cv)
     caja = Caja.objects.filter(estado = "Abierto").first()
@@ -114,8 +119,11 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda):
     caja.depositos = nuevo_ingreso
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
-    movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
-    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
+    if tipo == "Ingreso":
+        movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido
+    else:
+        movimiento_descripcion = "Pago de cuota/deuda de moto, cliente: " + cliente_nombre_apellido
+    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo)
 
 def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
@@ -136,7 +144,7 @@ def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
     movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
-    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id)
+    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id,moneda,None,"metodo")
 
 def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
     nueva_cuota = CuotasMoto(

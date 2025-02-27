@@ -136,6 +136,7 @@
                 <th>Movimiento</th>
                 <th>Tipo</th>
                 <th>Método</th>
+                <th>Moneda</th>
                 <th>Monto</th>
                 <th>Usuario</th>
             </tr>
@@ -147,6 +148,11 @@
                     <td>{{ movimiento.movimiento.fecha }}</td>
                     <td>{{ movimiento.descripcion }}</td>
                     <td>{{ movimiento.movimiento.tipo }}</td>
+                    <td>{{ movimiento.movimiento.metodo }}</td>
+                    <td>
+                        {{ movimiento.movimiento.moneda }}
+                        
+                    </td>
                     <td>
                         {% if movimiento.movimiento.tipo == "Egreso" %}
                         <span class="badge bg-danger">-{{ movimiento.movimiento.monto }}</span>
@@ -154,7 +160,6 @@
                         <span class="badge bg-success">+{{ movimiento.movimiento.monto }}</span>
                         {% endif %}
                     </td>
-                    <td>Debito</td>
                     <td>{{ movimiento.usuario }}</td>
                 </tr>
                 {% endfor %}

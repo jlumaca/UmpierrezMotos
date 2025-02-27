@@ -151,6 +151,9 @@ class Movimientos(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     caja = models.ForeignKey(Caja, related_name='movimiento_caja', on_delete=models.CASCADE)
     usuario = models.ForeignKey(Personal, related_name='usuario_movimiento', on_delete=models.CASCADE)
+    moneda = models.CharField(max_length=10,null=True,blank=True)
+    rubro = models.TextField(null=True, blank=True)
+    metodo = models.CharField(max_length=30,null=True,blank=True)
 
 class CuotasAccesorios(models.Model):
     fecha_pago = models.DateField()
@@ -261,6 +264,12 @@ class ClienteRepuestosPiezas(models.Model):
     repuestospiezas = models.ForeignKey(RepuestosPiezas, related_name='rp_cliente', on_delete=models.CASCADE, null=True)
     cantidad = models.IntegerField(default=0)
     fecha_compra = models.DateField(null=True) 
+
+
+class Rubros(models.Model):
+    rubro = models.TextField(null=True, blank=True)
+    habilitado = models.BooleanField(default=True)
+
 
 
 

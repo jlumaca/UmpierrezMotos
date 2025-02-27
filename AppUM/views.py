@@ -2856,6 +2856,7 @@ def baja_financiamiento(req,id_f,id_cv):
 
 
 def alta_pago_cuota(req,id_cv):
+    #
     # page_obj = obtener_detalles_cuotas_financiamiento(req,id_cv)
     try:
         comprobante = req.FILES.get('comprobante_pago')
@@ -2890,8 +2891,8 @@ def alta_pago_cuota(req,id_cv):
         #     messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
         #     return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         else:
-            if forma_pago == "Efectivo" and caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda)
+            if caja:
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso extra")
             
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
@@ -2919,6 +2920,7 @@ def alta_pago_cuota(req,id_cv):
 
 @admin_required
 def alta_pago(req,id_cv):
+    #
     # page_obj = obtener_compras_motos(req,id_cv)
     try:
         comprobante = req.FILES.get('comprobante_pago')
@@ -2953,8 +2955,8 @@ def alta_pago(req,id_cv):
         #     return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         
         else:
-            if forma_pago == "Efectivo" and caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda)      
+            if caja:
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso")      
             alta = alta_cuota_funcion(req,None,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
             if alta:
                 comprobante_url = alta

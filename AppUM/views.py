@@ -3754,7 +3754,7 @@ def buscar_detalles_movimientos_x_fecha(req):
     # try:
         # fecha = req.POST['']
         print("Datos recibidos en GET:", req.GET)
-        f_detalle_str = req.GET.get('f_detalles')  # Cambiado a paréntesis
+        f_detalle_str = req.POST['f_detalles']  # Cambiado a paréntesis
         fecha = datetime.strptime(f_detalle_str, '%Y-%m-%d').date() if f_detalle_str else None
         print(fecha)
         print(f_detalle_str)
@@ -3789,13 +3789,55 @@ def buscar_detalles_movimientos_x_fecha(req):
             else:
                 total_accesorio_dia_dolares = total_accesorio_dia_dolares + int(accesorio.precio)
                 total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+
+
+        movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
+        ingresos_extra = 0
+        egresos = 0 
+        for mov in movimientos_dia:
+            if mov.tipo == "Ingreso extra":
+                ingresos_extra = ingresos_extra + float(mov.monto)
+            elif mov.tipo == "Egresos":
+                egresos = egresos + float(mov.monto)
+            
+        
+        total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
+        total_moto_dia_dolares = round(total_moto_dia_dolares, 2)
+        total_accesorio_dia_pesos = round(total_accesorio_dia_pesos, 2)
+        total_accesorio_dia_dolares = round(total_accesorio_dia_dolares, 2)
+        subtotal_pesos = total_moto_dia_pesos + total_accesorio_dia_pesos
+        subtotal_pesos = round(subtotal_pesos, 2)
+        subtotal_dolares = total_moto_dia_dolares + total_accesorio_dia_dolares
+        subtotal_dolares = round(subtotal_dolares, 2)
+        ingresos_extra = round(ingresos_extra, 2)
+        egresos = round(egresos, 2)
+        total_pesos = subtotal_pesos + ingresos_extra - egresos
+        total_pesos = int(total_pesos)
+        total_dolares = subtotal_dolares + ingresos_extra - egresos
+        total_dolares = int(total_dolares)
         data = [
-        {"tipo": "Motos", "venta": cantidad_vendidas_dia, "total_pesos": total_moto_dia_pesos, "total_dolares": total_moto_dia_dolares},
-        {"tipo": "Accesorios", "venta": cantidad_vendidos_dia, "total_pesos": total_accesorio_dia_pesos, "total_dolares": total_accesorio_dia_dolares},
+        {"tipo": "Motos", 
+         "venta": cantidad_vendidas_dia, 
+         "total_pesos": total_moto_dia_pesos, 
+         "total_dolares": total_moto_dia_dolares},
+        {"tipo": "Accesorios", 
+         "venta": cantidad_vendidos_dia, 
+         "total_pesos": total_accesorio_dia_pesos, 
+         "total_dolares": total_accesorio_dia_dolares},
+         {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
         ]
         print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
         print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
         print("CANTIDAD ACCESORIOS DE MOTOS VENDIDAS: " + str(cantidad_vendidos_dia))
+        print("TOTAL EN PESOS: " + str(total_pesos))
+        print("TOTAL EN DOLARES: " + str(total_dolares))
+        print("EGRESOS: " + str(egresos))
+        print("INGRESOS EXTRA: " + str(ingresos_extra))
         return JsonResponse(data, safe=False)
         
         # motos_vendidas_mes = ComprasVentas.objects.filter(fecha_compra__month=mes_actual,tipo="V")

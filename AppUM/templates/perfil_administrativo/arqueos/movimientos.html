@@ -88,7 +88,7 @@
         </select>
     </div>
     <div id="detalles_x_fecha">
-        <form action="{% url 'DetallesCajaXFecha' %}" method="GET" id="form-reporte">
+        <form action="{% url 'DetallesCajaXFecha' %}" method="post" id="form-reporte">{% csrf_token %}
             <div class="mb-3">
                 <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
             </div>
@@ -220,12 +220,14 @@
     doc.setTextColor(40, 40, 40);
     doc.text('Resumen de Caja', 70, 20);
 
+    const { subtotal_pesos, subtotal_dolares, total_pesos, total_dolares } = data;
+
     // Configuración de la tabla
-    let datosTabla = data.map(item => [
+    let datosTabla = data.slice(0, 2).map(item => [
         item.tipo, 
         item.venta, 
-        `${item.total_pesos} $`, 
-        `${item.total_dolares} U$S`
+        `$ ${item.total_pesos}`, 
+        `U$S${item.total_dolares}`
     ]);
 
     doc.autoTable({
@@ -258,6 +260,39 @@
         }, 
         alternateRowStyles: { fillColor: [240, 240, 255] } // Suave fondo alterno
     });
+    let finalY = doc.lastAutoTable.finalY + 10; // Posición después de la tabla
+
+    // Agregar subtotales y totales debajo de la tabla
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    const filaTres = data[2]; // Accedes al tercer elemento del array 'data'
+    
+    const ingresos_extra_pesos = filaTres.ingresos_extra ? filaTres.ingresos_extra.toFixed(2) : "0.00";
+    doc.text(`Ingresos extra: $ ${ingresos_extra_pesos}`, 20, finalY);
+
+    finalY += 8;
+    
+    const egresos_pesos = filaTres.egresos ? filaTres.egresos.toFixed(2) : "0.00";
+    doc.text(`Egresos: $ ${egresos_pesos}`, 20, finalY);
+
+    finalY += 8;
+
+    const subtotalPesos = filaTres.subtotal_pesos ? filaTres.subtotal_pesos.toFixed(2) : "0.00";
+    doc.text(`Subtotal Pesos: $ ${subtotalPesos}`, 20, finalY);
+
+    const subtotalDolares = filaTres.subtotal_dolares ? filaTres.subtotal_dolares.toFixed(2) : "0.00";
+    doc.text(`Subtotal Dólares: U$S ${subtotalDolares}`, 120, finalY);
+
+    finalY += 8;
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 204);
+
+    const totalPesos = filaTres.total_general_pesos ? filaTres.total_general_pesos.toFixed(2) : "0.00";
+    const totalDolares = filaTres.total_general_dolares ? filaTres.total_general_dolares.toFixed(2) : "0.00";
+
+
+    doc.text(`TOTAL PESOS: $ ${totalPesos}`, 20, finalY);
+    doc.text(`TOTAL DÓLARES: U$S ${totalDolares}`, 120, finalY);
 
     // Guardar el archivo PDF
     console.log("Datos recibidos:", data);
@@ -327,6 +362,7 @@ async function obtenerDetallesCaja(fecha) {
         // Generar el PDF con los datos obtenidos
         // console.log("Datos recibidos:", data);
         console.log("LLEGA...");
+        console.log(data)
         generarPDF(data);
         // window.location.reload();
 

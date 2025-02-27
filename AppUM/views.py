@@ -3794,11 +3794,22 @@ def buscar_detalles_movimientos_x_fecha(req):
         movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
         ingresos_extra = 0
         egresos = 0 
+        data_egresos = []
+        data_ingresos_extra = []
         for mov in movimientos_dia:
             if mov.tipo == "Ingreso extra":
                 ingresos_extra = ingresos_extra + float(mov.monto)
-            elif mov.tipo == "Egresos":
+                data_ingresos_extra.append({
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            elif mov.tipo == "Egreso":
                 egresos = egresos + float(mov.monto)
+                data_egresos.append({
+                    "rubro":"RUBRO",
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
             
         
         total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
@@ -3815,6 +3826,7 @@ def buscar_detalles_movimientos_x_fecha(req):
         total_pesos = int(total_pesos)
         total_dolares = subtotal_dolares + ingresos_extra - egresos
         total_dolares = int(total_dolares)
+        # fecha_json = datetime.strptime(f_detalle_str, '%d-%m-%Y').date() if f_detalle_str else None
         data = [
         {"tipo": "Motos", 
          "venta": cantidad_vendidas_dia, 
@@ -3826,10 +3838,16 @@ def buscar_detalles_movimientos_x_fecha(req):
          "total_dolares": total_accesorio_dia_dolares},
          {"egresos":egresos,
           "ingresos_extra":ingresos_extra,
+          "egresos_dolares":692.13,
+          "ingresos_extra_dolares":1133.37,
             "subtotal_pesos": subtotal_pesos,
           "subtotal_dolares":subtotal_dolares,
           "total_general_pesos":total_pesos,
           "total_general_dolares":total_dolares},
+          {"egresos_detalle": data_egresos},  # Pasamos la lista completa
+            {"ingresos_extra_detalle": data_ingresos_extra},
+            {"fecha":f_detalle_str}
+
         ]
         print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
         print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))

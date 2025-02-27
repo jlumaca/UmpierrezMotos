@@ -218,7 +218,12 @@
     // Título del documento
     doc.setFontSize(18);
     doc.setTextColor(40, 40, 40);
-    doc.text('Resumen de Caja', 70, 20);
+    doc.text('Reporte del Estado de caja', 70, 20);
+    
+    const fecha = data[5]
+    const f_desde_json = fecha.fecha.split("-").reverse().join("/");
+    doc.setFontSize(10);
+    doc.text(`Fecha: ${f_desde_json}`, 15, 25);
 
     const { subtotal_pesos, subtotal_dolares, total_pesos, total_dolares } = data;
 
@@ -270,10 +275,16 @@
     const ingresos_extra_pesos = filaTres.ingresos_extra ? filaTres.ingresos_extra.toFixed(2) : "0.00";
     doc.text(`Ingresos extra: $ ${ingresos_extra_pesos}`, 20, finalY);
 
+    const ingresos_extra_dolares = filaTres.ingresos_extra_dolares ? filaTres.ingresos_extra_dolares.toFixed(2) : "0.00";
+    doc.text(`Ingresos extra: U$s ${ingresos_extra_dolares}`, 120, finalY);
+
     finalY += 8;
     
     const egresos_pesos = filaTres.egresos ? filaTres.egresos.toFixed(2) : "0.00";
     doc.text(`Egresos: $ ${egresos_pesos}`, 20, finalY);
+
+    const egresos_dolares = filaTres.egresos_dolares ? filaTres.egresos_dolares.toFixed(2) : "0.00";
+    doc.text(`Egresos: U$s ${egresos_dolares}`, 120, finalY);
 
     finalY += 8;
 
@@ -293,6 +304,91 @@
 
     doc.text(`TOTAL PESOS: $ ${totalPesos}`, 20, finalY);
     doc.text(`TOTAL DÓLARES: U$S ${totalDolares}`, 120, finalY);
+
+    finalY += 15;
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Detalle de Egresos', 70, finalY);
+    finalY += 5;
+
+    const egresosDetalle = data[3].egresos_detalle.map(item => [item.rubro, `$ ${item.valor}`, item.motivo]);
+
+    if (egresosDetalle.length > 0) {
+        doc.autoTable({
+            startY: finalY,
+            head: [["Rubro", "Valor", "Motivo"]],
+            body: egresosDetalle,
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [204, 51, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'left' },
+                1: { halign: 'right' },
+                2: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [255, 240, 240] }
+        });
+
+        finalY = doc.lastAutoTable.finalY + 10;
+    }else{
+        doc.autoTable({
+            startY: finalY,
+            head: [["Rubro", "Valor", "Motivo"]],
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [204, 51, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'left' },
+                1: { halign: 'right' },
+                2: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [255, 240, 240] }
+        });
+
+        finalY = doc.lastAutoTable.finalY + 10;
+    }
+
+    // **TABLA DE INGRESOS EXTRA**
+    finalY += 5;
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Detalle de Ingresos Extra', 70, finalY);
+    finalY += 5;
+
+    const ingresosExtraDetalle = data[4].ingresos_extra_detalle.map(item => [`$ ${item.valor}`, item.motivo]);
+
+    if (ingresosExtraDetalle.length > 0) {
+        doc.autoTable({
+            startY: finalY,
+            head: [["Valor", "Motivo"]],
+            body: ingresosExtraDetalle,
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [51, 153, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'right' },
+                1: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [240, 255, 240] }
+        });
+    }else{
+        doc.autoTable({
+            startY: finalY,
+            head: [["Valor", "Motivo"]],
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [51, 153, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'right' },
+                1: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [240, 255, 240] }
+        });
+    }
 
     // Guardar el archivo PDF
     console.log("Datos recibidos:", data);

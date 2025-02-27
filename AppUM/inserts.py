@@ -70,7 +70,7 @@ def insert_cliente_correo(correo,principal,id_cliente):
     correo_cliente.save()
 
 #
-def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo):
+def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio):
     movimiento = Movimientos(
         fecha = datetime.now(),
         movimiento = movimiento_descripcion,
@@ -80,7 +80,9 @@ def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_persona
         usuario_id = id_personal,
         moneda = moneda,
         rubro = rubro,
-        metodo = metodo
+        metodo = metodo,
+        es_accesorio = es_accesorio,
+        es_moto = es_moto
     )
     movimiento.save()
 
@@ -123,7 +125,7 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo):
         movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido
     else:
         movimiento_descripcion = "Pago de cuota/deuda de moto, cliente: " + cliente_nombre_apellido
-    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo)
+    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo,1,0)
 
 def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
@@ -144,7 +146,7 @@ def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
     movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
-    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id,moneda,None,"metodo")
+    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id,moneda,None,"metodo",0,1)
 
 def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
     nueva_cuota = CuotasMoto(

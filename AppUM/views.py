@@ -1286,7 +1286,7 @@ def baja_paga_accesorio(req,id_ca):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id) 
+                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0) 
             cuota.delete()    
             return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:
@@ -2045,7 +2045,7 @@ def fondos_cliente(req,id_cliente):
                 else:
                     movimiento = "Egreso"
                     descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
-                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id)
+                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,0,0)
             #
             messages.success(req, "Fondos actualizados correctamente.")
             return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
@@ -2956,7 +2956,11 @@ def alta_pago(req,id_cv):
         
         else:
             if caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso")      
+                if cv.fecha_compra == fecha_actual:
+                    tipo = "Ingreso"
+                else:
+                    tipo = "Ingreso extra"
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo)      
             alta = alta_cuota_funcion(req,None,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
             if alta:
                 comprobante_url = alta
@@ -2995,7 +2999,7 @@ def baja_pago(req,id_cm):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id)
+                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0)
                 
             fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
             c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
@@ -3582,7 +3586,7 @@ def ingresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso",req.POST['ingresos'],id_caja,personal.id)
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,0,0)
             messages.success(req, "Depositos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:
@@ -3602,7 +3606,7 @@ def egresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id)
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,0,0)
             messages.success(req, "Egresos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:
@@ -3762,35 +3766,36 @@ def buscar_detalles_movimientos_x_fecha(req):
         print(f_detalle_str)
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = float(dolar.precio_dolar_tienda)
-        motos_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V")
+
+        #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_motos_vendidas_dia = Movimientos.objects.filter(fecha__date=fecha, es_moto=1)
         cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
         total_moto_dia_pesos = 0
         total_moto_dia_dolares = 0
-        for venta in motos_vendidas_dia:
-            moto = Moto.objects.get(id=venta.moto_id)
-            if moto.moneda_precio == "Pesos":
-                total_moto_dia_pesos = total_moto_dia_pesos + int(moto.precio)
-                total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
-            else:
-                total_moto_dia_dolares = total_moto_dia_dolares + int(moto.precio)
-                total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+        for movimiento in movs_motos_vendidas_dia:
+            # moto = Moto.objects.get(id=movimiento.moto_id)
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_moto_dia_pesos = total_moto_dia_pesos + float(movimiento.monto)
+                    total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_moto_dia_dolares = total_moto_dia_dolares + float(movimiento.monto)
+                    total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
 
-        # print("TOTAL MOTOS DEL DIA EN PESOS: $" + str(total_moto_dia_pesos))
-        # print("TOTAL MOTOS DEL DIA EN DOLARES: U$s" + str(total_moto_dia_dolares))
-        # print("CANTIDAD MOTOS DE MOTOS VENDIDAS: " + str(cantidad_vendidas_dia))
 
-        accesorios_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha)
+        #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(fecha__date=fecha, es_accesorio=1)
         cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
         total_accesorio_dia_pesos = 0
         total_accesorio_dia_dolares = 0
-        for venta in accesorios_vendidos_dia:
-            accesorio = Accesorio.objects.get(id=venta.accesorio_id)
-            if accesorio.moneda_precio == "Pesos":
-                total_accesorio_dia_pesos = total_accesorio_dia_pesos + int(accesorio.precio)
-                total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
-            else:
-                total_accesorio_dia_dolares = total_accesorio_dia_dolares + int(accesorio.precio)
-                total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+        for movimiento in movs_accesorios_vendidos_dia:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_accesorio_dia_pesos = total_accesorio_dia_pesos + float(movimiento.monto)
+                    total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_accesorio_dia_dolares = total_accesorio_dia_dolares + float(movimiento.monto)
+                    total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
 
 
         movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)

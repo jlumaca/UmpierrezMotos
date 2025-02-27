@@ -154,6 +154,8 @@ class Movimientos(models.Model):
     moneda = models.CharField(max_length=10,null=True,blank=True)
     rubro = models.TextField(null=True, blank=True)
     metodo = models.CharField(max_length=30,null=True,blank=True)
+    es_moto = models.BooleanField(default=0)
+    es_accesorio = models.BooleanField(default=0)
 
 class CuotasAccesorios(models.Model):
     fecha_pago = models.DateField()

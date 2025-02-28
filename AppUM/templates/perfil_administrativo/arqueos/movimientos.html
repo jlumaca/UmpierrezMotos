@@ -88,12 +88,28 @@
         </select>
     </div>
     <div id="detalles_x_fecha">
-        <form action="{% url 'DetallesCajaXFecha' %}" method="post" id="form-reporte">{% csrf_token %}
-            <div class="mb-3">
-                <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
-            </div>
-            <button type="submit" class="btn btn-success" id="btn_fecha">Guardar</button>
-        </form>
+        <div class="mb-3">
+            <input type="checkbox" id="cbox_descargar_excel" class="form-check-input" onchange="descargar_excel()">
+            <label for="toggleMatr" class="form-check-label">Descargar en Excel</label>
+        </div>
+
+        <div id="form_pdf">
+            <form action="{% url 'DetallesCajaXFecha' %}" method="post" id="form-reporte">{% csrf_token %}
+                <div class="mb-3">
+                    <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
+                </div>
+                <button type="submit" class="btn btn-success" id="btn_fecha">Guardar</button>
+            </form>
+        </div>
+
+        <div id="form_excel" style="display: none;">
+            <form action="{% url 'DetallesCajaXFechaExcel' %}" method="post" id="form-excel">{% csrf_token %}
+                <div class="mb-3">
+                    <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
+                </div>
+                <button type="submit" class="btn btn-success" id="btn_excel">Guardar</button>
+            </form>
+        </div>
 
     </div>
 
@@ -569,6 +585,21 @@ function getCookie(name) {
             detalles_x_fecha.style.display = "none";
             detalles_x_mes_anio.style.display = "block";
            
+        }
+    }
+
+    function descargar_excel(){
+        const cbox = document.getElementById("cbox_descargar_excel");
+        const form_pdf = document.getElementById("form_pdf");
+        const form_excel = document.getElementById("form_excel");
+
+        if (cbox.checked) {
+            form_pdf.style.display = "none";
+            form_excel.style.display = "block";
+            
+        } else {
+            form_pdf.style.display = "block";
+            form_excel.style.display = "none";
         }
     }
 </script>

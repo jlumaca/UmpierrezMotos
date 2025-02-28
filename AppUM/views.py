@@ -1085,11 +1085,11 @@ def venta_accesorio(req,id_cliente):
                 factura_documento = doc_factura,
                 codigo_compra = codigo_compra
             )
-            # nueva_venta_accesorio.save()
+            nueva_venta_accesorio.save()
             
             a = Accesorio.objects.get(id=accesorio)
             a.activo = 0
-            # a.save()
+            a.save()
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
@@ -1275,7 +1275,7 @@ def alta_paga_accesorio(req,id_venta):
                     tipo = "Ingreso"
                 else:
                     tipo = "Ingreso extra"
-                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda,forma_pago,tipo,alta.id,"accesorio")
+                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda,forma_pago,tipo,alta,"accesorio")
                 #,metodo,tipo,id_venta,producto
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'codigo_compra':cv.codigo_compra})}?comprobante_url={comprobante_url}")
@@ -2925,7 +2925,7 @@ def alta_pago_cuota(req,id_cv):
             else:
                 comprobante_url = None
             if caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso extra",alta.id,"moto")
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso extra",alta,"moto")
             messages.success(req, "Pago ingresado con éxito.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
@@ -2986,7 +2986,7 @@ def alta_pago(req,id_cv):
                     tipo = "Ingreso"
                 else:
                     tipo = "Ingreso extra"
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta.id,"moto") 
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto") 
             messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:

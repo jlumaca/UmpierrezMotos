@@ -90,13 +90,13 @@ def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_persona
         if producto == "moto":
             pago_mov = MovimientoPagoMoto(
                  pago = id_venta,
-                 movimiento = movimiento.id
+                 movimiento = movimiento
             )
             pago_mov.save()
         else:
             pago_mov = MovimientoPagoAccesorio(
                  pago = id_venta,
-                 movimiento = movimiento.id
+                 movimiento = movimiento
             )
             pago_mov.save()
 

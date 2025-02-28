@@ -1063,10 +1063,12 @@ def venta_accesorio(req,id_cliente):
         # accesorio.save()
         # messages.success(req, "Venta generada con éxito")
         # return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-        ult_compra_accesorio = ClienteAccesorio.objects.last()
+        ult_compra_accesorio = ClienteAccesorio.objects.exists()
         if ult_compra_accesorio:
             ult_compra_accesorio = ClienteAccesorio.objects.latest('id')
             codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
+            print("CODIGO: " + str(codigo_compra))
+            print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
         else:
             codigo_compra = 0
         accesorios = req.session["accesorios_json"]
@@ -1083,11 +1085,11 @@ def venta_accesorio(req,id_cliente):
                 factura_documento = doc_factura,
                 codigo_compra = codigo_compra
             )
-            nueva_venta_accesorio.save()
-            nueva_venta_accesorio.save()
+            # nueva_venta_accesorio.save()
+            
             a = Accesorio.objects.get(id=accesorio)
             a.activo = 0
-            a.save()
+            # a.save()
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     except Exception as e:
@@ -1258,16 +1260,23 @@ def alta_paga_accesorio(req,id_venta):
         # elif validar_fecha_proximo_pago.date() < fecha_actual:
         #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         else:
-            if forma_pago == "Efectivo" and caja:
-                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda)
+            
             # alta = alta_cuota_accesorio(req,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
             #alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
             #lista = [resto_dolares,resto_pesos,entrega_pesos,entrega_dolares]
             alta = alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
-            if alta:
+            if alta.comprobante_pago:
                 comprobante_url = alta
             else:
                 comprobante_url = None
+
+            if caja:
+                if cv.fecha_compra == fecha_actual:
+                    tipo = "Ingreso"
+                else:
+                    tipo = "Ingreso extra"
+                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda,forma_pago,tipo,alta.id,"accesorio")
+                #,metodo,tipo,id_venta,producto
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'codigo_compra':cv.codigo_compra})}?comprobante_url={comprobante_url}")
     # except Exception as e:
@@ -1291,7 +1300,7 @@ def baja_paga_accesorio(req,id_ca):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0) 
+                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
             cuota.delete()    
             return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:
@@ -2050,7 +2059,7 @@ def fondos_cliente(req,id_cliente):
                 else:
                     movimiento = "Egreso"
                     descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
-                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,0,0)
+                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,0,0,None,None)
             #
             messages.success(req, "Fondos actualizados correctamente.")
             return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
@@ -2896,8 +2905,7 @@ def alta_pago_cuota(req,id_cv):
         #     messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
         #     return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         else:
-            if caja:
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso extra")
+            
             
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
@@ -2912,10 +2920,12 @@ def alta_pago_cuota(req,id_cv):
                 alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
             else:
                 alta = alta_cuota_funcion(req,fecha_proximo_pago,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,True,cuota)
-            if alta:
+            if alta.comprobante_pago:
                 comprobante_url = alta
             else:
                 comprobante_url = None
+            if caja:
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,"Ingreso extra",alta.id,"moto")
             messages.success(req, "Pago ingresado con éxito.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
@@ -2960,14 +2970,9 @@ def alta_pago(req,id_cv):
         #     return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         
         else:
-            if caja:
-                if cv.fecha_compra == fecha_actual:
-                    tipo = "Ingreso"
-                else:
-                    tipo = "Ingreso extra"
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo)      
+                 
             alta = alta_cuota_funcion(req,None,id_cv,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,False,req.POST['pago_a_realizar'])
-            if alta:
+            if alta.comprobante_pago:
                 comprobante_url = alta
             else:
                 comprobante_url = None
@@ -2976,6 +2981,12 @@ def alta_pago(req,id_cv):
                 #LA ULTIMA REFINANCIACION LA DESACTIVA PARA QUE NO PUEDAN AGREGARSE MAS PAGOS EN LA MISMA
                 ult_financiamiento.actual = 0
                 ult_financiamiento.save()
+            if caja:
+                if cv.fecha_compra == fecha_actual:
+                    tipo = "Ingreso"
+                else:
+                    tipo = "Ingreso extra"
+                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta.id,"moto") 
             messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
@@ -3004,7 +3015,7 @@ def baja_pago(req,id_cm):
                 caja = Caja.objects.filter(estado="Abierto").first()
                 caja.depositos = caja.depositos - quitar_deposito
                 caja.save()
-                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0)
+                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
                 
             fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
             c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
@@ -3591,7 +3602,7 @@ def ingresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,0,0)
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,0,0,None,None)
             messages.success(req, "Depositos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:
@@ -3611,7 +3622,7 @@ def egresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,0,0)
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,0,0,None,None)
             messages.success(req, "Egresos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:

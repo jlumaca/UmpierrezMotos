@@ -272,6 +272,13 @@ class Rubros(models.Model):
     rubro = models.TextField(null=True, blank=True)
     habilitado = models.BooleanField(default=True)
 
+class MovimientoPagoMoto(models.Model):
+    pago = models.ForeignKey(CuotasMoto, related_name='pago_moto_movimiento', on_delete=models.CASCADE)
+    movimiento= models.ForeignKey(Movimientos, related_name='movimiento_pago_moto', on_delete=models.CASCADE)
+
+class MovimientoPagoAccesorio(models.Model):
+    pago = models.ForeignKey(CuotasAccesorios, related_name='pago_accesorio_movimiento', on_delete=models.CASCADE)
+    movimiento = models.ForeignKey(Movimientos, related_name='movimiento_pago_accesorio', on_delete=models.CASCADE)
 
 
 

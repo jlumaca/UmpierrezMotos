@@ -70,7 +70,7 @@ def insert_cliente_correo(correo,principal,id_cliente):
     correo_cliente.save()
 
 #
-def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio):
+def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto):
     movimiento = Movimientos(
         fecha = datetime.now(),
         movimiento = movimiento_descripcion,
@@ -85,6 +85,20 @@ def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_persona
         es_moto = es_moto
     )
     movimiento.save()
+
+    if id_venta:
+        if producto == "moto":
+            pago_mov = MovimientoPagoMoto(
+                 pago = id_venta,
+                 movimiento = movimiento.id
+            )
+            pago_mov.save()
+        else:
+            pago_mov = MovimientoPagoAccesorio(
+                 pago = id_venta,
+                 movimiento = movimiento.id
+            )
+            pago_mov.save()
 
 def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,observaciones,tipo_pago):
     nueva_cuota = CuotasMoto(
@@ -103,7 +117,7 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
     nueva_cuota.save()
 
 #
-def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo):
+def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo,id_venta,producto):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
     cv = ComprasVentas.objects.get(id=id_cv)
     caja = Caja.objects.filter(estado = "Abierto").first()
@@ -125,9 +139,9 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo):
         movimiento_descripcion = "Pago de moto, cliente: " + cliente_nombre_apellido
     else:
         movimiento_descripcion = "Pago de cuota/deuda de moto, cliente: " + cliente_nombre_apellido
-    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo,1,0)
+    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo,1,0,id_venta,producto)
 
-def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
+def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda,metodo,tipo,id_venta,producto):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
     cv = ClienteAccesorio.objects.get(id=id_ca)
     caja = Caja.objects.filter(estado = "Abierto").first()
@@ -146,7 +160,8 @@ def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda):
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
     movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
-    insert_movimientos_caja(movimiento_descripcion,"Ingreso",entrega,caja.id,personal.id,moneda,None,"metodo",0,1)
+    insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo,0,1,id_venta,producto)
+    #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
 
 def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago):
     nueva_cuota = CuotasMoto(
@@ -177,7 +192,7 @@ def alta_cuota_funcion(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moned
     else:
             comprobante_url = None
     
-    return comprobante_url
+    return nueva_cuota
 
 def alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo):
     nueva_cuota = CuotasAccesorios(
@@ -200,7 +215,7 @@ def alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observacione
     else:
             comprobante_url = None
     
-    return comprobante_url
+    return nueva_cuota
 
 
 def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial):

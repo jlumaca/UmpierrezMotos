@@ -3979,7 +3979,7 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         ws.title = "Movimientos del Día"
 
         # Estilo para los encabezados
-        header_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")  # Amarillo
+        header_fill = PatternFill(start_color="0066CC", end_color="0066CC", fill_type="solid")  # Amarillo
         header_font = Font(bold=True, color="000000")
 
         # Encabezados de la tabla de ventas
@@ -4019,12 +4019,16 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         # Detalles de los egresos
         ws.append([])  # Fila vacía para separar las secciones
         ws.append(["Egresos Detalle"])
+        ws.append([])
+        ws.append(["Monto","Motivo","Rubro"])
         for egreso in data_egresos:
-            ws.append([egreso['valor'], egreso['motivo']])
+            ws.append([egreso['valor'], egreso['motivo'],egreso['rubro']])
 
         # Detalles de los ingresos extra
         ws.append([])  # Fila vacía para separar las secciones
-        ws.append(["Ingresos Extra Detalle"])
+        ws.append(["Ingresos Extra Detalles"])
+        ws.append([])
+        ws.append(["Monto","Motivo"])
         for ingreso in data_ingresos_extra:
             ws.append([ingreso['valor'], ingreso['motivo']])
 

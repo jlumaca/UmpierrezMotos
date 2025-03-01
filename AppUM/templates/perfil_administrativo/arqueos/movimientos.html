@@ -35,16 +35,16 @@
         <tbody>
                 <tr>
                     <td>$4500/U$s100</td>
-                    <td>$1000/U$s22,2</td>
-                    <td>$5000/U$s111,1</td>
+                    <td>${{ total_ingresos_efectivo_pesos }}/U$s{{ total_ingresos_efectivo_dolares }}</td>
+                    <td>${{ total_ingresos_transferencia_pesos }}/U$s{{ total_ingresos_transferencia_dolares }}</td>
                     <td>
-                        +500/U$s11,1
+                        ${{ total_ingresos_debito_pesos }}/U$s{{ total_ingresos_debito_dolares }}
                     </td>
-                    <td>-$1000/U$s22,2</td>
-                    <td>-$2000/U$s44,4</td>
-                    <td>-$0/U$s0,0</td>
-                    <td>Aparece al cerrar</td>
-                    <td>Aparece al cerrar</td>
+                    <td>${{ total_egresos_efectivo_pesos }}/U$s{{ total_egresos_efectivo_dolares }}</td>
+                    <td>${{ total_egresos_transferencia_pesos }}/U$s{{ total_egresos_transferencia_dolares }}</td>
+                    <td>${{ total_egresos_debito_pesos }}/U$s{{ total_egresos_debito_dolares }}</td>
+                    <td>{{ saldo_caja }}</td>
+                    <td>{{ saldo_sistema }}</td>
                 </tr>
         </tbody>
     </table>
@@ -144,85 +144,96 @@
 
     </div>
     <h3>Ingresos</h3>
-    <form method="post" enctype="multipart/form-data" action="{% url 'IngresosCaja' id_caja %}">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="estado" class="form-label">Moneda Monto</label>
-            <select class="form-control" name="moneda_monto_ingreso">
-                <option value="Pesos">Pesos</option>
-                <option value="Dolares">Dolares</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="estado" class="form-label">Metodo Egreso</label>
-            <select class="form-control" name="metodo_monto_ingreso">
-                <option value="Efectivo">Efectivo</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Debito">Debito</option>
-                <option value="Credito">Credito</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="certificado" class="form-label">Monto Ingreso:</label>
-            <input type="number" class="form-control" id="ingresos" placeholder="Ingresos" name="ingresos" required>
-        </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Motivo</label>
-            <textarea class="form-control" name="descripcion_ingreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
-    </form>
+    <button type="button" id="abrir_form_ingresos" class="btn btn-success">
+        <i class="fas fa-cash-register"></i> Ingresos
+    </button>
+    <div id="div_ingresos" style="display: none;">
+        <form method="post" enctype="multipart/form-data" action="{% url 'IngresosCaja' id_caja %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="estado" class="form-label">Moneda Monto</label>
+                <select class="form-control" name="moneda_monto_ingreso">
+                    <option value="Pesos">Pesos</option>
+                    <option value="Dolares">Dolares</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Metodo Egreso</label>
+                <select class="form-control" name="metodo_monto_ingreso">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Debito">Debito</option>
+                    <option value="Credito">Credito</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="certificado" class="form-label">Monto Ingreso:</label>
+                <input type="number" class="form-control" id="ingresos" placeholder="Ingresos" name="ingresos" required>
+            </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Motivo</label>
+                <textarea class="form-control" name="descripcion_ingreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+            </div>
 
-    <h3>Ingresos</h3>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" id="cerrar_form_ingresos" class="btn btn-secondary">Cancelar</button>
+        </form>
+    </div>
 
-    <form method="post" enctype="multipart/form-data" action="{% url 'NuevoRubro' id_caja %}">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="certificado" class="form-label">Ingresar Rubro:</label>
-            <input type="text" class="form-control" placeholder="Rubro" name="nuevo_rubro" required>
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
-    </form>
-    <form method="post" enctype="multipart/form-data" action="{% url 'EgresosCaja' id_caja %}">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="estado" class="form-label">Moneda Monto</label>
-            <select class="form-control" name="moneda_monto_egreso">
-                <option value="Pesos">Pesos</option>
-                <option value="Dolares">Dolares</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="estado" class="form-label">Metodo Egreso</label>
-            <select class="form-control" name="metodo_monto_egreso">
-                <option value="Efectivo">Efectivo</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Debito">Debito</option>
-                <option value="Credito">Credito</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="certificado" class="form-label">Monto Egreso:</label>
-            <input type="number" class="form-control" placeholder="Egresos" name="egresos" required>
-        </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Motivo</label>
-            <textarea class="form-control" name="descripcion_egreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
-        </div>
+    <h3>Egresos</h3>
+    <button type="button" id="abrir_form_egresos" class="btn btn-danger">
+        <i class="fas fa-arrow-right-from-bracket"></i> Egresos
+    </button>
+    <div id="div_egresos" style="display: none;">
+        <form method="post" enctype="multipart/form-data" action="{% url 'NuevoRubro' id_caja %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="certificado" class="form-label">Ingresar Rubro:</label>
+                <input type="text" class="form-control" placeholder="Rubro" name="nuevo_rubro" required>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
+        </form>
+        <form method="post" enctype="multipart/form-data" action="{% url 'EgresosCaja' id_caja %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="estado" class="form-label">Moneda Monto</label>
+                <select class="form-control" name="moneda_monto_egreso">
+                    <option value="Pesos">Pesos</option>
+                    <option value="Dolares">Dolares</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Metodo Egreso</label>
+                <select class="form-control" name="metodo_monto_egreso">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Debito">Debito</option>
+                    <option value="Credito">Credito</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="certificado" class="form-label">Monto Egreso:</label>
+                <input type="number" class="form-control" placeholder="Egresos" name="egresos" required>
+            </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Motivo</label>
+                <textarea class="form-control" name="descripcion_egreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+            </div>
 
-        <div class="mb-3">
-            <label for="estado" class="form-label">Rubro</label>
-            <select class="form-control" name="rubro_egreso">
-                {% for rubro in rubros %}
-                    <option value="{{ rubro.id }}">{{ rubro.id }}-{{ rubro.rubro }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <!-- <button type="button" class="btn btn-secondary" onclick="toggleEgresos('{{ forloop.counter }}')">Cancelar</button> -->
-    </form>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Rubro</label>
+                <select class="form-control" name="rubro_egreso">
+                    {% for rubro in rubros %}
+                        <option value="{{ rubro.id }}">{{ rubro.id }}-{{ rubro.rubro }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" id="cerrar_form_egresos" class="btn btn-secondary">Cancelar</button>
+            <!-- <button type="button" class="btn btn-secondary" onclick="toggleEgresos('{{ forloop.counter }}')">Cancelar</button> -->
+        </form>
+    </div>
     <!-- <button class="btn btn-primary" onclick="generarPDF()">Ver detalles PDF</button> -->
     <h3>Movimientos</h3>
     <table class="table">
@@ -682,5 +693,41 @@ function getCookie(name) {
             form_excel.style.display = "none";
         }
     }
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const btnIngresos = document.getElementById("abrir_form_ingresos"); // Primer botón "Ingresos"
+    const btnCancelar = document.getElementById("cerrar_form_ingresos"); // Botón "Cancelar"
+    const divDetalles = document.getElementById("div_ingresos");
+
+    btnIngresos.addEventListener("click", function (event) {
+        event.preventDefault(); // Evita el envío del formulario
+        divDetalles.style.display = "block"; // Muestra el formulario
+        btnIngresos.style.display = "none"; // Oculta el botón "Ingresos"
+    });
+
+    btnCancelar.addEventListener("click", function () {
+        divDetalles.style.display = "none"; // Oculta el formulario
+        btnIngresos.style.display = "block"; // Vuelve a mostrar el botón "Ingresos"
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnEgresos = document.getElementById("abrir_form_egresos"); // Primer botón "Ingresos"
+    const btnCancelar = document.getElementById("cerrar_form_egresos"); // Botón "Cancelar"
+    const divDetalles = document.getElementById("div_egresos");
+
+    btnEgresos.addEventListener("click", function (event) {
+        event.preventDefault(); // Evita el envío del formulario
+        divDetalles.style.display = "block"; // Muestra el formulario
+        btnEgresos.style.display = "none"; // Oculta el botón "Ingresos"
+    });
+
+    btnCancelar.addEventListener("click", function () {
+        divDetalles.style.display = "none"; // Oculta el formulario
+        btnEgresos.style.display = "block"; // Vuelve a mostrar el botón "Ingresos"
+    });
+});
 </script>
 {% endblock %}

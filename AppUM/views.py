@@ -1178,7 +1178,7 @@ def cliente_venta_accesorio(req,mostrar,vender):
 
 def pagos_accesorio(req,codigo_compra):
     # try: 
-    #
+        print("CODIGO COMPRA: " + str(codigo_compra))
         data = obtener_compras_accesorios(req,codigo_compra)
         # c_v = ClienteAccesorio.objects.get(id=id_venta)
         return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{
@@ -1283,30 +1283,36 @@ def alta_paga_accesorio(req,id_venta):
     #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":e,"page_obj": page_obj})
 
 def baja_paga_accesorio(req,id_ca):
-    try:
+    # try:
         cuota = CuotasAccesorios.objects.get(id=id_ca)
         id_cv = cuota.venta_id
+        venta = ClienteAccesorio.objects.get(id=cuota.venta_id)
+        codigo_compra = venta.codigo_compra
         if req.method == "POST":
-            if cuota.metodo_pago == "Efectivo":
-                if cuota.moneda == "Pesos":
-                    quitar_deposito = cuota.valor_pago_pesos
-                else:
-                    dolar = PrecioDolar.objects.get(id=1)
-                    precio_dolar = dolar.precio_dolar_tienda
-                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
-                
-                usuario = req.user
-                personal = Personal.objects.filter(usuario=usuario.username).first()
-                caja = Caja.objects.filter(estado="Abierto").first()
-                caja.depositos = caja.depositos - quitar_deposito
-                caja.save()
-                insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
+            # if cuota.metodo_pago == "Efectivo":
+            if cuota.moneda == "Pesos":
+                quitar_deposito = cuota.valor_pago_pesos
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = dolar.precio_dolar_tienda
+                quitar_deposito = cuota.valor_pago_dolares * precio_dolar
+            
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            caja = Caja.objects.filter(estado="Abierto").first()
+            caja.depositos = caja.depositos - quitar_deposito
+            caja.save()
+                # insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
+            mov_pago = MovimientoPagoAccesorio.objects.filter(pago=cuota).first()
+            movimiento = Movimientos.objects.get(id=mov_pago.movimiento_id)
+            mov_pago.delete()
+            movimiento.delete()
             cuota.delete()    
-            return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+            return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv,"codigo_compra":codigo_compra})
         else:
-            return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"id_cv":id_cv})
-    except Exception as e:
-        return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"error_message":e})
+            return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"id_cv":id_cv,"codigo_compra":codigo_compra})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"error_message":e})
 
 
 @admin_required

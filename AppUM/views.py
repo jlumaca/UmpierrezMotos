@@ -2060,13 +2060,14 @@ def fondos_cliente(req,id_cliente):
                 usuario = req.user
                 personal = Personal.objects.filter(usuario=usuario.username).first()
                 if tipo == "Ingreso":
-                    movimiento = "Ingreso"
+                    movimiento = "Ingreso extra"
                     descripcion = f"Ingreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
                 else:
                     movimiento = "Egreso"
                     descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
-                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,0,0,None,None)
-            #
+                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,req.POST['moneda_fondos'],None,req.POST['metodo_elegido'],0,0,None,None)
+
+            #(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Fondos actualizados correctamente.")
             return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
 
@@ -3008,26 +3009,34 @@ def baja_pago(req,id_cm):
         id_cv = cuota.venta_id
         # print(id_cv)
         if req.method == "POST":
-            if cuota.metodo_pago == "Efectivo":
-                if cuota.moneda == "Pesos":
-                    quitar_deposito = cuota.valor_pago_pesos
-                else:
-                    dolar = PrecioDolar.objects.get(id=1)
-                    precio_dolar = dolar.precio_dolar_tienda
-                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
-                
-                usuario = req.user
-                personal = Personal.objects.filter(usuario=usuario.username).first()
-                caja = Caja.objects.filter(estado="Abierto").first()
-                caja.depositos = caja.depositos - quitar_deposito
-                caja.save()
-                insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
+            # if cuota.metodo_pago == "Efectivo":
+            if cuota.moneda == "Pesos":
+                quitar_deposito = cuota.valor_pago_pesos
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = dolar.precio_dolar_tienda
+                quitar_deposito = cuota.valor_pago_dolares * precio_dolar
+            
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            caja = Caja.objects.filter(estado="Abierto").first()
+            caja.depositos = caja.depositos - quitar_deposito
+            caja.save()
+                # insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
                 
             fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
             c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
             if c_f:
                 c_f.delete()
-            cuota.delete()    
+                
+            mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
+            mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
+            if mov_pago:
+                mov_pago.delete()
+                mov.delete()
+            cuota.delete()
+            print("ID: " +str(mov_pago.movimiento_id)) 
+                
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
             # messages.success(req, "Pago borrado con éxito")
             # return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
@@ -3041,6 +3050,11 @@ def baja_primeros_pagos(req,id_cm):
         cuota = CuotasMoto.objects.get(id=id_cm)
         id_cv = cuota.venta_id
         if req.method == "POST":
+            mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
+            if mov_pago:
+                mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
+                mov_pago.delete()
+                mov.delete()
             cuota.delete()    
             return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:
@@ -3608,7 +3622,8 @@ def ingresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,0,0,None,None)
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,"",None,"",0,0,None,None)
+            #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Depositos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:
@@ -3628,7 +3643,8 @@ def egresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,0,0,None,None)
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,"","","",0,0,None,None)
+            #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Egresos ingresados correctamente.")
             return redirect('Arqueos')
     except Exception as e:

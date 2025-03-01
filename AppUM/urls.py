@@ -114,6 +114,11 @@ urlpatterns = [
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
      path('detalles_caja_x_fecha/', views.buscar_detalles_movimientos_x_fecha,name="DetallesCajaXFecha"),
      path('detalles_caja_x_fecha_excel/', views.buscar_detalles_movimientos_x_fecha_excel,name="DetallesCajaXFechaExcel"),
+
+     path('nuevo_rubro/<int:id_caja>', views.nuevo_rubro_egreso,name="NuevoRubro"),
+     
+     
+     
      path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),

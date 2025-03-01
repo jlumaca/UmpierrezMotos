@@ -271,6 +271,7 @@ class ClienteRepuestosPiezas(models.Model):
 class Rubros(models.Model):
     rubro = models.TextField(null=True, blank=True)
     habilitado = models.BooleanField(default=True)
+    cantidad_usos = models.IntegerField(default=0)
 
 class MovimientoPagoMoto(models.Model):
     pago = models.ForeignKey(CuotasMoto, related_name='pago_moto_movimiento', on_delete=models.CASCADE)

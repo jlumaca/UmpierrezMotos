@@ -143,6 +143,86 @@
 
 
     </div>
+    <h3>Ingresos</h3>
+    <form method="post" enctype="multipart/form-data" action="{% url 'IngresosCaja' id_caja %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="estado" class="form-label">Moneda Monto</label>
+            <select class="form-control" name="moneda_monto_ingreso">
+                <option value="Pesos">Pesos</option>
+                <option value="Dolares">Dolares</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="estado" class="form-label">Metodo Egreso</label>
+            <select class="form-control" name="metodo_monto_ingreso">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Debito">Debito</option>
+                <option value="Credito">Credito</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="certificado" class="form-label">Monto Ingreso:</label>
+            <input type="number" class="form-control" id="ingresos" placeholder="Ingresos" name="ingresos" required>
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Motivo</label>
+            <textarea class="form-control" name="descripcion_ingreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
+    </form>
+
+    <h3>Ingresos</h3>
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'NuevoRubro' id_caja %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="certificado" class="form-label">Ingresar Rubro:</label>
+            <input type="text" class="form-control" placeholder="Rubro" name="nuevo_rubro" required>
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
+    </form>
+    <form method="post" enctype="multipart/form-data" action="{% url 'EgresosCaja' id_caja %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="estado" class="form-label">Moneda Monto</label>
+            <select class="form-control" name="moneda_monto_egreso">
+                <option value="Pesos">Pesos</option>
+                <option value="Dolares">Dolares</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="estado" class="form-label">Metodo Egreso</label>
+            <select class="form-control" name="metodo_monto_egreso">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Debito">Debito</option>
+                <option value="Credito">Credito</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="certificado" class="form-label">Monto Egreso:</label>
+            <input type="number" class="form-control" placeholder="Egresos" name="egresos" required>
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Motivo</label>
+            <textarea class="form-control" name="descripcion_egreso" id="descripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="estado" class="form-label">Rubro</label>
+            <select class="form-control" name="rubro_egreso">
+                {% for rubro in rubros %}
+                    <option value="{{ rubro.id }}">{{ rubro.id }}-{{ rubro.rubro }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <!-- <button type="button" class="btn btn-secondary" onclick="toggleEgresos('{{ forloop.counter }}')">Cancelar</button> -->
+    </form>
     <!-- <button class="btn btn-primary" onclick="generarPDF()">Ver detalles PDF</button> -->
     <h3>Movimientos</h3>
     <table class="table">

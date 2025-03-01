@@ -3622,10 +3622,12 @@ def ingresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,"",None,"",0,0,None,None)
+            moneda = req.POST['moneda_monto_ingreso']
+            metodo = req.POST['metodo_monto_ingreso']
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,moneda,None,metodo,0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
-            messages.success(req, "Depositos ingresados correctamente.")
-            return redirect('Arqueos')
+            messages.success(req, "Rubro ingresado con éxito")
+            return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
@@ -3643,10 +3645,17 @@ def egresos_caja(req,id_caja):
             caja.save()
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,"","","",0,0,None,None)
+            id_rubro = req.POST['rubro_egreso']
+            rubro = Rubros.objects.get(id=id_rubro)
+            nombre_rubro = rubro.rubro
+            rubro.cantidad_usos = int(rubro.cantidad_usos) + 1
+            rubro.save()
+            moneda = req.POST['moneda_monto_egreso']
+            metodo = req.POST['metodo_monto_egreso']
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,moneda,nombre_rubro,metodo,0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
-            messages.success(req, "Egresos ingresados correctamente.")
-            return redirect('Arqueos')
+            messages.success(req, "Rubro ingresado con éxito")
+            return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
@@ -3780,7 +3789,7 @@ def movimientos_caja(req,id_caja):
 
         
         
-
+        rubros = Rubros.objects.filter(habilitado=1).order_by('-cantidad_usos')
         page_obj = funcion_paginas_varias(req,data)
         return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj,
                                                                               "ganancias_mes":ganancias_mes,
@@ -3790,7 +3799,9 @@ def movimientos_caja(req,id_caja):
                                                                               "ganancias_netas_mes":ganancias_netas_mes,
                                                                               "ganancias_netas_dia":ganancias_netas_dia,
                                                                               "ingresos_extra_dia":ingresos_extras_dia,
-                                                                              "ingresos_extra_mes":ingresos_extras_mes})
+                                                                              "ingresos_extra_mes":ingresos_extras_mes,
+                                                                              "id_caja":id_caja,
+                                                                              "rubros":rubros})
     except Exception as e:
         return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
 
@@ -4073,6 +4084,18 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         wb.save(response)
         return response
 
+def nuevo_rubro_egreso(req,id_caja):
+    try:
+        rubro = req.POST['nuevo_rubro']
+        nuevo_rubro = Rubros(
+            rubro = rubro,
+            habilitado = 1
+        )
+        nuevo_rubro.save()
+        messages.success(req, "Rubro ingresado con éxito")
+        return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
+    except Exception as e:
+        pass
 
 def servicios_en_gestion(req):
     # try:

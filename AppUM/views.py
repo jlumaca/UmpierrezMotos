@@ -3965,19 +3965,31 @@ def buscar_detalles_movimientos_x_fecha(req):
         movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
         ingresos_extra = 0
         egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
         data_egresos = []
         data_ingresos_extra = []
         for mov in movimientos_dia:
             if mov.tipo == "Ingreso extra":
-                ingresos_extra = ingresos_extra + float(mov.monto)
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
                 data_ingresos_extra.append({
                     "valor":mov.monto,
                     "motivo":mov.movimiento
                 })
             elif mov.tipo == "Egreso":
-                egresos = egresos + float(mov.monto)
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
                 data_egresos.append({
-                    "rubro":"RUBRO",
+                    "rubro":mov.rubro,
                     "valor":mov.monto,
                     "motivo":mov.movimiento
                 })
@@ -3993,9 +4005,11 @@ def buscar_detalles_movimientos_x_fecha(req):
         subtotal_dolares = round(subtotal_dolares, 2)
         ingresos_extra = round(ingresos_extra, 2)
         egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
         total_pesos = subtotal_pesos + ingresos_extra - egresos
         total_pesos = int(total_pesos)
-        total_dolares = subtotal_dolares + ingresos_extra - egresos
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
         total_dolares = int(total_dolares)
         # fecha_json = datetime.strptime(f_detalle_str, '%d-%m-%Y').date() if f_detalle_str else None
         data = [
@@ -4009,8 +4023,8 @@ def buscar_detalles_movimientos_x_fecha(req):
          "total_dolares": total_accesorio_dia_dolares},
          {"egresos":egresos,
           "ingresos_extra":ingresos_extra,
-          "egresos_dolares":692.13,
-          "ingresos_extra_dolares":1133.37,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
             "subtotal_pesos": subtotal_pesos,
           "subtotal_dolares":subtotal_dolares,
           "total_general_pesos":total_pesos,

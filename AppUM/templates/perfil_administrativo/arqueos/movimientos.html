@@ -246,6 +246,7 @@
                 <th>Moneda</th>
                 <th>Monto</th>
                 <th>Usuario</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -268,6 +269,12 @@
                         {% endif %}
                     </td>
                     <td>{{ movimiento.usuario }}</td>
+                    <td>
+                        {% if movimiento.mostrar_boton %}
+                        <a href="{% url 'MovimientoBaja' id_caja movimiento.movimiento.id  %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        {% endif %}
+
+                    </td>
                 </tr>
                 {% endfor %}
             {% else %}

@@ -3740,10 +3740,18 @@ def movimientos_caja(req,id_caja):
         data = []
         for movimiento in movimientos:
             usuario = Personal.objects.get(id=movimiento.usuario_id)
+            es_pago_moto = MovimientoPagoMoto.objects.filter(movimiento_id=movimiento.id).first()
+            es_pago_accesorio = MovimientoPagoAccesorio.objects.filter(movimiento_id=movimiento.id).first()
+
+            if es_pago_moto or es_pago_accesorio:
+                mostrar_boton = False
+            else: 
+                mostrar_boton = True
             data.append({
                 "movimiento":movimiento,
                 "descripcion":movimiento.movimiento if movimiento.movimiento else "Sin descripción",
-                "usuario":usuario.nombre + " " + usuario.apellido
+                "usuario":usuario.nombre + " " + usuario.apellido,
+                "mostrar_boton":mostrar_boton
             })
         
         
@@ -4190,6 +4198,19 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         response['Content-Disposition'] = 'attachment; filename=Movimientos.xlsx'
         wb.save(response)
         return response
+
+def baja_movimiento(req,id_caja,id_movimiento):
+    try:
+        if req.method == "POST":
+            movimiento = Movimientos.objects.get(id=id_movimiento)
+            movimiento.delete()
+            # messages.success(req, "Movimiento borrado con éxito")
+            # return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
+            return render(req, "perfil_administrativo/arqueos/baja_movimiento.html", {"id_caja":id_caja,"message":"Movimiento borrado con éxito."})
+        else:
+            return render(req, "perfil_administrativo/arqueos/baja_movimiento.html", {"id_caja":id_caja})
+    except Exception as e:
+        pass
 
 def nuevo_rubro_egreso(req,id_caja):
     try:

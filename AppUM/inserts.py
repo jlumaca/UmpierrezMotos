@@ -160,7 +160,7 @@ def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda,metodo,tipo,id_v
     caja.depositos = nuevo_ingreso
     caja.save()  
     cliente_nombre_apellido = cliente.nombre + " " + cliente.apellido
-    movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido + " Moneda: " + moneda
+    movimiento_descripcion = "Pago de accesorio, cliente: " + cliente_nombre_apellido
     insert_movimientos_caja(movimiento_descripcion,tipo,entrega,caja.id,personal.id,moneda,None,metodo,0,1,id_venta,producto)
     #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
 

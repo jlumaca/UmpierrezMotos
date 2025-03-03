@@ -112,6 +112,8 @@ urlpatterns = [
      path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
      path('cerrar_caja/<int:id_caja>', views.cerrar_caja,name="CerrarCaja"),
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
+
+     path('movimiento_baja/<int:id_caja>/<int:id_movimiento>', views.baja_movimiento,name="MovimientoBaja"),
      path('detalles_caja_x_fecha/', views.buscar_detalles_movimientos_x_fecha,name="DetallesCajaXFecha"),
      path('detalles_caja_x_fecha_excel/', views.buscar_detalles_movimientos_x_fecha_excel,name="DetallesCajaXFechaExcel"),
 

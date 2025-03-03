@@ -100,7 +100,7 @@ def insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_persona
             )
             pago_mov.save()
 
-def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,observaciones,tipo_pago):
+def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,observaciones,tipo_pago,metodo_pago):
     nueva_cuota = CuotasMoto(
                 fecha_pago = datetime.now(),
                 fecha_prox_pago = fecha_prox_pago,
@@ -112,7 +112,8 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
                 valor_pago_dolares = entrega_dolares,
                 valor_pago_pesos = entrega_pesos,
                 observaciones = observaciones,
-                tipo_pago = tipo_pago
+                tipo_pago = tipo_pago,
+                metodo_pago = metodo_pago
             )
     nueva_cuota.save()
 

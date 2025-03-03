@@ -2485,7 +2485,8 @@ def venta_moto(req,id_moto,id_cliente):
                             resto_dolares = int(moto.precio) - fondos
                             resto_pesos = resto_dolares * float(precio_dolar)
                     
-                    alta_cuota_funcion(req,None,id_cv,int(resto_dolares),int(resto_pesos),moto.moneda_precio,"Fondos",float(precio_dolar),abs(ingreso_dolares),abs(ingreso_pesos),None,"Fondos",False,"Entrega")
+                    alta_cuota_funcion(req,None,id_cv,int(resto_dolares),int(resto_pesos),moto.moneda_precio,"Fondos",float(precio_dolar),abs(ingreso_dolares),abs(ingreso_pesos),None,None,False,"Entrega")
+                                    #(req,fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,ingresar_fin,tipo_pago)
 
             telefono = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
             # alta_financiamientos(req.POST['recargo'],req.POST['cant_cuotas'],req.POST['valor_cuota'],moto.moneda_precio,1,id_cv,1)
@@ -3157,7 +3158,7 @@ def reservar_moto(req,id_moto,id_cliente):
         id_cv = compras_ventas.id
 
         moto = Moto.objects.get(id=id_moto)
-
+        forma_pago = req.POST['forma_pago_senia']
         if moneda == "Pesos":
                 entrega_pesos = req.POST['senia']
                 entrega_dolares = 0
@@ -3176,8 +3177,18 @@ def reservar_moto(req,id_moto,id_cliente):
                 else:
                     resto_dolares = int(moto.precio) - int(entrega_dolares)
                     resto_pesos = resto_dolares * precio_dolar
+        entrega = req.POST['senia']
+        movimiento_caja_por_pago(req,entrega,id_cv,moneda,None,"Ingreso",None,"moto")
+        caja = Caja.objects.filter(estado="Abierto").first()
+        if caja:
+            cliente = Cliente.objects.get(id=id_cliente)
+            moto_datos = f"{moto.tipo} {moto.marca} {moto.modelo}"
+            cliente_datos = f"{cliente.nombre} {cliente.apellido}"
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,None,"moto")
         # fecha_prox_pago = datetime.now() + relativedelta(months=1)
-        insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña")
+        insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña",forma_pago)
         moto.pertenece_tienda = 0
         moto.save()
         messages.success(req, "Moto reservada con éxito.")

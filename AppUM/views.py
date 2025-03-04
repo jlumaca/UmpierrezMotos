@@ -3736,6 +3736,8 @@ def movimientos_caja(req,id_caja):
     try:
         print("ID CAJA ES: " + str(id_caja))
         movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
+        caja = Caja.objects.get(id=id_caja)
+        monto_inicial = caja.monto_inicial
         # print(mes_actual)
         data = []
         for movimiento in movimientos:
@@ -3913,7 +3915,8 @@ def movimientos_caja(req,id_caja):
                                                                               "total_egresos_debito_pesos":total_egresos_debito_pesos,
                                                                               "total_egresos_debito_dolares":total_egresos_debito_dolares,
                                                                               "saldo_caja":"" if None else "",
-                                                                              "saldo_sistema":"" if None else ""
+                                                                              "saldo_sistema":"" if None else "",
+                                                                              "monto_inicial":monto_inicial
                                                                               
                                                                               
                                                                               })

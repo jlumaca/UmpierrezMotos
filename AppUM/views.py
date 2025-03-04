@@ -4095,19 +4095,31 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
         ingresos_extra = 0
         egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
         data_egresos = []
         data_ingresos_extra = []
         for mov in movimientos_dia:
             if mov.tipo == "Ingreso extra":
-                ingresos_extra = ingresos_extra + float(mov.monto)
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
                 data_ingresos_extra.append({
                     "valor":mov.monto,
                     "motivo":mov.movimiento
                 })
             elif mov.tipo == "Egreso":
-                egresos = egresos + float(mov.monto)
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
                 data_egresos.append({
-                    "rubro":"RUBRO",
+                    "rubro":mov.rubro,
                     "valor":mov.monto,
                     "motivo":mov.movimiento
                 })
@@ -4123,25 +4135,26 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         subtotal_dolares = round(subtotal_dolares, 2)
         ingresos_extra = round(ingresos_extra, 2)
         egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
         total_pesos = subtotal_pesos + ingresos_extra - egresos
         total_pesos = int(total_pesos)
-        total_dolares = subtotal_dolares + ingresos_extra - egresos
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
         total_dolares = int(total_dolares)
-        # fecha_json = datetime.strptime(f_detalle_str, '%d-%m-%Y').date() if f_detalle_str else None
-        print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
-        print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
-        print("CANTIDAD ACCESORIOS DE MOTOS VENDIDAS: " + str(cantidad_vendidos_dia))
-        print("TOTAL EN PESOS: " + str(total_pesos))
-        print("TOTAL EN DOLARES: " + str(total_dolares))
-        print("EGRESOS: " + str(egresos))
-        print("INGRESOS EXTRA: " + str(ingresos_extra))
+
 
         data = [
             {"tipo": "Motos", "venta": cantidad_vendidas_dia, "total_pesos": total_moto_dia_pesos, "total_dolares": total_moto_dia_dolares},
             {"tipo": "Accesorios", "venta": cantidad_vendidos_dia, "total_pesos": total_accesorio_dia_pesos, "total_dolares": total_accesorio_dia_dolares},
             # Datos adicionales como egresos, ingresos extra, totales y subtotales
-            {"subtotal_pesos": subtotal_pesos, "subtotal_dolares": subtotal_dolares, 
-             "total_general_pesos": total_pesos, "total_general_dolares": total_dolares},
+            {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
             {"egresos_detalle": data_egresos},  # Detalles de los egresos
             {"ingresos_extra_detalle": data_ingresos_extra},  # Detalles de los ingresos extra
             {"fecha": f_detalle_str}  # Fecha del reporte
@@ -4177,22 +4190,29 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
                     cell.fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")  # Gris claro
 
         # Agregar los subtotales y totales generales debajo de la tabla de ventas
-        ws.append([])  # Fila vacía para separar las secciones
 
-        ws.append(["Subtotal Pesos", subtotal_pesos])
-        ws.append(["Subtotal Dólares", subtotal_dolares])
-        ws.append(["Total General Pesos", total_pesos])
-        ws.append(["Total General Dólares", total_dolares])
-
-        # Agregar detalles de egresos e ingresos extra
         ws.append([])  # Fila vacía para separar las secciones
-        ws.append(["Egresos", egresos])
-        ws.append(["Ingresos Extra", ingresos_extra])
+        ws.append(["Datos en Pesos"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra" in item and "egresos" in item and "subtotal_pesos" in item and "total_pesos" in item:
+        ws.append([ingresos_extra, egresos,subtotal_pesos,total_pesos])
+                # ws.append([item['ingresos_extra'], item['egresos'],item['subtotal_pesos'],item['total_pesos']])
+
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Datos en Dolares"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra_dolares" in item and "egresos_dolares" in item and "subtotal_dolares" in item and "total_dolares" in item:
+        ws.append([ingresos_extra_dolares, egresos_dolares,subtotal_dolares,total_dolares])
+                # ws.append(item['ingresos_extra_dolares'], item['egresos_dolares'],item['subtotal_dolares'],item['total_dolares']
 
         # Detalles de los egresos
         ws.append([])  # Fila vacía para separar las secciones
         ws.append(["Egresos Detalle"])
-        ws.append([])
+        # ws.append([])
         ws.append(["Monto","Motivo","Rubro"])
         for egreso in data_egresos:
             ws.append([egreso['valor'], egreso['motivo'],egreso['rubro']])
@@ -4200,7 +4220,7 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         # Detalles de los ingresos extra
         ws.append([])  # Fila vacía para separar las secciones
         ws.append(["Ingresos Extra Detalles"])
-        ws.append([])
+        # ws.append([])
         ws.append(["Monto","Motivo"])
         for ingreso in data_ingresos_extra:
             ws.append([ingreso['valor'], ingreso['motivo']])

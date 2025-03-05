@@ -121,10 +121,10 @@
                         <a href="{% url 'MovimientosCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
                         
                         {% if arqueo.arqueo.estado == "Abierto" %}
-                        <!-- <a href="{% url 'SaldoFinalCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
-                        <button onclick="toggleIngresos('{{ forloop.counter }}')" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button>
+                        <a href="{% url 'SaldoFinalCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        <!-- <button onclick="toggleIngresos('{{ forloop.counter }}')" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button> -->
                         
-                        <button onclick="toggleEgresos('{{ forloop.counter }}')" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button> -->
+                        <!-- <button onclick="toggleEgresos('{{ forloop.counter }}')" class="btn btn-sm btn-danger"><i class="fas fa-minus"></i></button>  -->
                         {% elif arqueo.arqueo.estado == "Cuadre de caja" %}
                         <a href="{% url 'CerrarCaja' arqueo.arqueo.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-lock"></i></button></a>
                         {% endif %}

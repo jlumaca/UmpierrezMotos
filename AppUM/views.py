@@ -956,7 +956,7 @@ def vista_inventario_accesorios(req):
 
 @admin_required
 def alta_accesorio(req):
-    try:
+    # try:
         if req.method == "POST":
             cantidad = int(req.POST['cantidad_accesorios'])
             if cantidad <= 0:
@@ -997,8 +997,8 @@ def alta_accesorio(req):
                 return redirect('Accesorios')
         else:
             return render(req,"perfil_administrativo/accesorios/alta_accesorio.html",{})
-    except Exception as e:
-        pass
+    # except Exception as e:
+    #     pass
 
 @admin_required
 def modificacion_accesorio(req,id_accesorio):
@@ -3580,6 +3580,16 @@ def abrir_caja(req):
             total_monedas_5 = (int(req.POST['monedas_5']) * 5)
             total_monedas_2 = (int(req.POST['monedas_2']) * 2)
             total_monedas_1 = int(req.POST['monedas_1'])
+
+
+            total_billetes_100_dolares = (int(req.POST['billetes_100_dolares']) * 100) 
+            total_billetes_50_dolares = (int(req.POST['billetes_50_dolares']) * 50)
+            total_billetes_20_dolares = (int(req.POST['billetes_20_dolares']) * 20)
+            total_billetes_10_dolares = (int(req.POST['billetes_10_dolares']) * 10)
+            total_billetes_5_dolares = (int(req.POST['billetes_5_dolares']) * 5)
+            total_billetes_2_dolares = (int(req.POST['billetes_2_dolares']) * 2)
+            total_billetes_1_dolares = (int(req.POST['billetes_1_dolares']) * 1)
+
             error_dinero = validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20)
             error_monedas = validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1)
             if error_dinero:
@@ -3589,13 +3599,23 @@ def abrir_caja(req):
             elif caja_abierta or caja_abierta_2:
                 return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":"Ya existe una caja abierta."})  
             else:
-                
-
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                total_dolares = (total_billetes_100_dolares + total_billetes_50_dolares + total_billetes_20_dolares + total_billetes_10_dolares 
+                                 + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
+                total_dolares_a_pesos = total_dolares * precio_dolar
+                total_dolares_a_pesos = round(total_dolares_a_pesos,2)
+                caja_ahorro_pesos = float(req.POST['caja_ahorro_pesos'])
+                caja_ahorro_dolares = float(req.POST['caja_ahorro_dolares'])
+                caja_ahorro_dolares_a_pesos = caja_ahorro_dolares * precio_dolar
+                caja_ahorro_dolares_a_pesos = round(caja_ahorro_dolares_a_pesos,2)
                 saldo_inicial = (
                     total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
-                    +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1
+                    +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
+                    + caja_ahorro_pesos + caja_ahorro_dolares_a_pesos
                 )
 
+                print("SALDO INICIAL ES: " +str(saldo_inicial))
                 usuario = req.user
                 persona = Personal.objects.filter(usuario=usuario.username).first()
                 
@@ -3691,6 +3711,14 @@ def saldo_final_caja(req,id_caja):
                 total_monedas_5 = (int(req.POST['monedas_5']) * 5)
                 total_monedas_2 = (int(req.POST['monedas_2']) * 2)
                 total_monedas_1 = int(req.POST['monedas_1'])
+
+                total_billetes_100_dolares = (int(req.POST['billetes_100_dolares']) * 100) 
+                total_billetes_50_dolares = (int(req.POST['billetes_50_dolares']) * 50)
+                total_billetes_20_dolares = (int(req.POST['billetes_20_dolares']) * 20)
+                total_billetes_10_dolares = (int(req.POST['billetes_10_dolares']) * 10)
+                total_billetes_5_dolares = (int(req.POST['billetes_5_dolares']) * 5)
+                total_billetes_2_dolares = (int(req.POST['billetes_2_dolares']) * 2)
+                total_billetes_1_dolares = (int(req.POST['billetes_1_dolares']) * 1)
                 error_dinero = validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20)
                 error_monedas = validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1)
                 if error_dinero:
@@ -3698,10 +3726,20 @@ def saldo_final_caja(req,id_caja):
                 elif error_monedas:
                     return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":error_monedas})
                 else:
-
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = float(dolar.precio_dolar_tienda)
+                    total_dolares = (total_billetes_100_dolares + total_billetes_50_dolares + total_billetes_20_dolares + total_billetes_10_dolares 
+                                    + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
+                    total_dolares_a_pesos = total_dolares * precio_dolar
+                    total_dolares_a_pesos = round(total_dolares_a_pesos,2)
+                    caja_ahorro_pesos = float(req.POST['caja_ahorro_pesos'])
+                    caja_ahorro_dolares = float(req.POST['caja_ahorro_dolares'])
+                    caja_ahorro_dolares_a_pesos = caja_ahorro_dolares * precio_dolar
+                    caja_ahorro_dolares_a_pesos = round(caja_ahorro_dolares_a_pesos,2)
                     saldo_final = (
                         total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
-                        +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1
+                        +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
+                        + caja_ahorro_pesos + caja_ahorro_dolares_a_pesos
                     )
 
                     caja = Caja.objects.get(id=id_caja)

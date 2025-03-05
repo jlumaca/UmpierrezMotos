@@ -11,7 +11,7 @@
             </div>
         {% endif %}
         <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
-            <h5>Billetes</h5>
+            <h5>Billetes y monedas uruguayas</h5>
             <div class="mb-3">
                 <label for="precio" class="form-label">Billetes de $2000</label>
                 <input value="0" type="number" class="form-control" name="billetes_2000" id="precio" placeholder="Ingrese la cantidad de billetes de $2000" required>
@@ -41,8 +41,6 @@
                 <input value="0" type="number" class="form-control" name="billetes_20" id="precio" placeholder="Ingrese la cantidad de billetes de $20" required>
             </div>
 
-
-            <h5>Monedas</h5>
             <div class="mb-3">
                 <label for="precio" class="form-label">Monedas de $50</label>
                 <input value="0" type="number" class="form-control" name="monedas_50" id="precio" placeholder="Ingrese la cantidad de monedas de $50" required>
@@ -64,6 +62,47 @@
                 <input value="0" type="number" class="form-control" name="monedas_1" id="precio" placeholder="Ingrese la cantidad de monedas de $1" required>
             </div>
             
+            <h5>Dolares</h5>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s100</label>
+                <input value="0" type="number" class="form-control" name="billetes_100_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s100" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s50</label>
+                <input value="0" type="number" class="form-control" name="billetes_50_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s50" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s20</label>
+                <input value="0" type="number" class="form-control" name="billetes_20_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s20" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s10</label>
+                <input value="0" type="number" class="form-control" name="billetes_10_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s10" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s5</label>
+                <input value="0" type="number" class="form-control" name="billetes_5_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s5" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s2</label>
+                <input value="0" type="number" class="form-control" name="billetes_2_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s2" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Billetes de U$s1</label>
+                <input value="0" type="number" class="form-control" name="billetes_1_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s1" required>
+            </div>
+
+
+            <h5>Cajas de ahorros</h5>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Caja de ahorro en Pesos $</label>
+                <input value="0" type="number" class="form-control" name="caja_ahorro_pesos" id="precio" placeholder="Ingrese el monto de la caja de ahorro en Pesos" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Caja de ahorro en Dolares U$s</label>
+                <input value="0" type="number" class="form-control" name="caja_ahorro_dolares" id="precio" placeholder="Ingrese el monto de la caja de ahorro en Dolares" required>
+            </div>
             
             
             <button type="submit" class="btn btn-success">Guardar</button>

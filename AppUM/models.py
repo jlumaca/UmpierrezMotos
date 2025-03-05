@@ -217,7 +217,7 @@ class CuotasMoto(models.Model):
     venta = models.ForeignKey(ComprasVentas, related_name='cuotas_venta', on_delete=models.CASCADE)
     observaciones = models.TextField(null=True, blank=True)
     comprobante_pago = models.FileField(upload_to='documentacion/comprobantes/', null=True, blank=True)
-    metodo_pago = models.CharField(max_length=20, blank=True)
+    metodo_pago = models.CharField(max_length=20, blank=True,null=True)
     tipo_pago = models.CharField(max_length=20, blank=True)
 
 class CuotasFinanciacion(models.Model):

@@ -1062,11 +1062,11 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
     else:
         
         if moto.moneda_precio == "Pesos":
-            cant_restante_pesos = moto.precio_final
-            cant_restante_dolares = int(moto.precio_final / precio_dolar.precio_dolar_tienda)
+            cant_restante_pesos = moto.precio
+            cant_restante_dolares = int(moto.precio / precio_dolar.precio_dolar_tienda)
         else:
-            cant_restante_pesos = int(moto.precio_final * precio_dolar.precio_dolar_tienda)
-            cant_restante_dolares = moto.precio_final
+            cant_restante_pesos = int(moto.precio * precio_dolar.precio_dolar_tienda)
+            cant_restante_dolares = moto.precio
 
     data_jason = json_para_resumen_pagos(moto,id_cv)
     precio = float(precio_dolar.precio_dolar_tienda) if precio_dolar.precio_dolar_tienda else 0

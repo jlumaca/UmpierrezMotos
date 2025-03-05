@@ -65,16 +65,16 @@
         </thead>
         <tbody>
                 <tr>
-                    <td>{{ ganancias_mes }}</td>
-                    <td>{{ ganancias_dia }}</td>
-                    <td>{{ egresos_dia }}</td>
+                    <td>${{ ganancias_mes }}/U$s{{ ganancias_mes_dolares }}</td>
+                    <td>${{ ganancias_dia }}/U$s{{ ganancias_dia_dolares }}</td>
+                    <td>${{ egresos_dia }}/U$s{{ egresos_dia_dolares }}</td>
                     <td>
-                        {{ egresos_mes }}
+                        ${{ egresos_mes }}/U$s{{ egresos_mes_dolares }}
                     </td>
-                    <td>{{ ganancias_netas_mes }}</td>
-                    <td>{{ ganancias_netas_dia }}</td>
-                    <td>{{ ingresos_extra_dia }}</td>
-                    <td>{{ ingresos_extra_mes }}</td>
+                    <td>${{ ganancias_netas_mes }}/U$s{{ ganancias_netas_mes_dolares }}</td>
+                    <td>${{ ganancias_netas_dia }}/U$s{{ ganancias_netas_dia_dolares }}</td>
+                    <td>${{ ingresos_extra_dia }}/U$s{{ ingresos_extra_dia_dolares }}</td>
+                    <td>${{ ingresos_extra_mes }}/U$s{{ ingresos_extra_mes_dolares }}</td>
                     
                 </tr>
         </tbody>

@@ -3644,15 +3644,21 @@ def abrir_caja(req):
 
 @admin_required
 def ingresos_caja(req,id_caja):
-    try:
+    # try:
         if int(req.POST['ingresos']) < 0 or int(req.POST['ingresos']) == 0:
             # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
             messages.error(req,"El monto del ingreso es incorrecto.")
             return redirect('Arqueos')
         else:
-
+            moneda = req.POST['moneda_monto_ingreso']
+            if moneda == "Pesos":
+                monto = int(req.POST['ingresos'])
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto = float(precio_dolar * float(req.POST['ingresos']))
             caja = Caja.objects.get(id=id_caja)
-            ingresos = caja.depositos + int(req.POST['ingresos'])
+            ingresos = float(caja.depositos) + monto
             caja.depositos = ingresos
             caja.save()
             usuario = req.user
@@ -3663,8 +3669,8 @@ def ingresos_caja(req,id_caja):
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Rubro ingresado con éxito")
             return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
-    except Exception as e:
-        return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
 @admin_required
 def egresos_caja(req,id_caja):
@@ -3674,8 +3680,15 @@ def egresos_caja(req,id_caja):
             messages.error(req,"El monto del egreso es incorrecto.")
             return redirect('Arqueos')
         else:
+            moneda = req.POST['moneda_monto_egreso']
+            if moneda == "Pesos":
+                monto = int(req.POST['egresos'])
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto = float(precio_dolar * float(req.POST['egresos']))
             caja = Caja.objects.get(id=id_caja)
-            egresos = caja.egresos + int(req.POST['egresos'])
+            egresos = float(caja.egresos) + monto
             caja.egresos = egresos
             caja.save()
             usuario = req.user
@@ -3780,6 +3793,8 @@ def movimientos_caja(req,id_caja):
         movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
         caja = Caja.objects.get(id=id_caja)
         monto_inicial = caja.monto_inicial
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
         # print(mes_actual)
         data = []
         for movimiento in movimientos:
@@ -3808,11 +3823,20 @@ def movimientos_caja(req,id_caja):
         
         for movimiento in movimientos_mes_actual:
             if movimiento.tipo == "Ingreso":
-                ganancias_mes = ganancias_mes + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    ganancias_mes = ganancias_mes + float(movimiento.monto)
+                else:
+                    ganancias_mes = ganancias_mes + (float(movimiento.monto) * precio_dolar)
             elif movimiento.tipo == "Egreso":
-                egresos_mes = egresos_mes + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    egresos_mes = egresos_mes + float(movimiento.monto)
+                else:
+                    egresos_mes = egresos_mes + (float(movimiento.monto) * precio_dolar)
             elif movimiento.tipo == "Ingreso extra":
-                ingresos_extras_mes = ingresos_extras_mes + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    ingresos_extras_mes = ingresos_extras_mes + float(movimiento.monto)
+                else:
+                    ingresos_extras_mes = ingresos_extras_mes + (float(movimiento.monto) * precio_dolar)
             else:
                 pass
             
@@ -3833,13 +3857,23 @@ def movimientos_caja(req,id_caja):
 
         fecha_actual = datetime.now().date()
         movimientos_fecha_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha_actual)
+
         for movimiento in movimientos_fecha_actual:
             if movimiento.tipo == "Ingreso":
-                ganancias_dia = ganancias_dia + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    ganancias_dia = ganancias_dia + float(movimiento.monto)
+                else:
+                    ganancias_dia = ganancias_dia + (float(movimiento.monto) * precio_dolar)
             elif movimiento.tipo == "Egreso":
-                egresos_dia = egresos_dia + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    egresos_dia = egresos_dia + float(movimiento.monto)
+                else:
+                    egresos_dia = egresos_dia + (float(movimiento.monto) * precio_dolar)
             elif movimiento.tipo == "Ingreso extra":
-                ingresos_extras_dia = ingresos_extras_dia + int(movimiento.monto)
+                if movimiento.moneda == "Pesos":
+                    ingresos_extras_dia = ingresos_extras_dia + float(movimiento.monto)
+                else:
+                    ingresos_extras_dia = ingresos_extras_dia + (float(movimiento.monto) * precio_dolar)
             else:
                 pass
             
@@ -3850,8 +3884,7 @@ def movimientos_caja(req,id_caja):
         # print("INGRESOS EXTRAS DEL DIA: " + str(ingresos_extras_dia))
         # print("GANANCIAS NETAS DEL DIA: " + str(ganancias_netas_dia))
 
-        dolar = PrecioDolar.objects.get(id=1)
-        precio_dolar = float(dolar.precio_dolar_tienda)
+        
 
         todos_movimientos_pesos = Movimientos.objects.filter(caja_id=id_caja)
         ingresos_efectivo_pesos = 0
@@ -3933,6 +3966,8 @@ def movimientos_caja(req,id_caja):
         rubros = Rubros.objects.filter(habilitado=1).order_by('-cantidad_usos')
         page_obj = funcion_paginas_varias(req,data)
         return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj,
+                                                                              
+                                                                              
                                                                               "ganancias_mes":ganancias_mes,
                                                                               "ganancias_dia":ganancias_dia,
                                                                               "egresos_dia":egresos_dia,
@@ -3941,6 +3976,18 @@ def movimientos_caja(req,id_caja):
                                                                               "ganancias_netas_dia":ganancias_netas_dia,
                                                                               "ingresos_extra_dia":ingresos_extras_dia,
                                                                               "ingresos_extra_mes":ingresos_extras_mes,
+
+                                                                              "ganancias_mes_dolares":round(ganancias_mes / precio_dolar,2),
+                                                                              "ganancias_dia_dolares":round(ganancias_dia / precio_dolar,2),
+                                                                              "egresos_dia_dolares":round(egresos_dia / precio_dolar,2),
+                                                                              "egresos_mes_dolares":round(egresos_mes / precio_dolar,2),
+                                                                              "ganancias_netas_mes_dolares":round(ganancias_netas_mes / precio_dolar,2),
+                                                                              "ganancias_netas_dia_dolares":round(ganancias_netas_dia / precio_dolar,2),
+                                                                              "ingresos_extra_dia_dolares":round(ingresos_extras_dia / precio_dolar,2),
+                                                                              "ingresos_extra_mes_dolares":round(ingresos_extras_mes / precio_dolar,2),
+                                                                              
+                                                                              
+                                                                              
                                                                               "id_caja":id_caja,
                                                                               "rubros":rubros,
                                                                               "total_ingresos_efectivo_pesos":total_ingresos_efectivo_pesos,
@@ -4598,7 +4645,29 @@ def buscar_detalles_movimientos_x_mes_anio_excel(req):
 def baja_movimiento(req,id_caja,id_movimiento):
     try:
         if req.method == "POST":
+            caja = Caja.objects.get(id=id_caja)
             movimiento = Movimientos.objects.get(id=id_movimiento)
+            if movimiento.moneda == "Pesos":
+                monto_a_quitar = float(movimiento.monto)
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto_a_quitar = float(movimiento.monto) * precio_dolar
+            
+            depositos_caja = float(caja.depositos)
+            egresos_caja = float(caja.egresos)
+            
+            if movimiento.tipo == "Ingreso" or movimiento.tipo == "Ingreso extra":
+                sumar_quitar_depositos = depositos_caja - monto_a_quitar
+                caja.depositos = abs(sumar_quitar_depositos)
+                # quitar_egresos = egresos_caja
+            else:
+                # sumar_quitar_depositos = depositos_caja + monto_a_quitar
+                quitar_egresos = egresos_caja - monto_a_quitar
+                caja.egresos = quitar_egresos
+            
+            
+            caja.save() 
             movimiento.delete()
             # messages.success(req, "Movimiento borrado con éxito")
             # return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")

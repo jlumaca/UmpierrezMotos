@@ -99,11 +99,11 @@
                     <td>
                         {% if arqueo.arqueo.estado == "Cuadre de caja" or arqueo.arqueo.estado == "Cerrado" %}
                         {% if arqueo.diferencia > 0 %}
-                        <span class="badge bg-success">+{{ arqueo.diferencia }}</span>
+                        <span class="badge bg-success">+${{ arqueo.diferencia }}/+U$s{{ arqueo.diferencia_dolares }}</span>
                         {% elif arqueo.diferencia < 0 %}
-                        <span class="badge bg-danger">{{ arqueo.diferencia }}/U$s-102,1</span>
+                        <span class="badge bg-danger">{{ arqueo.diferencia }}/U$s{{ arqueo.diferencia_dolares }}</span>
                         {% else %}
-                        <span class="badge bg-secondary">{{ arqueo.diferencia }}</span>
+                        <span class="badge bg-secondary">${{ arqueo.diferencia }}/U$s{{ arqueo.diferencia_dolares }}</span>
                         {% endif %}
                         {% endif %}
                     </td> 

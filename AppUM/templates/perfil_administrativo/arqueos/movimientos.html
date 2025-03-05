@@ -114,32 +114,68 @@
     </div>
 
     <div id="detalles_x_mes_anio" style="display: none;">
-        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
-            <div class="mb-3">
-                <div class="d-flex">
-                    <select class="form-control" id="detalles_por">
-                        <option value="1">Enero</option>
-                        <option value="2">Febrero</option>
-                        <option value="3">Marzo</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Mayo</option>
-                        <option value="6">Junio</option>
-                        <option value="7">Julio</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Setiembre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
-                    </select>
-                    <span class="mx-1">-</span>
-                    <select class="form-control" id="detalles_por">
-                        <option value="fecha">2024</option>
-                        <option value="mes">2025</option>
-                    </select>
+        <div class="mb-3">
+            <input type="checkbox" id="cbox_descargar_excel_mes_anio" class="form-check-input" onchange="descargar_excel_mes_anio()">
+            <label for="toggleMatr" class="form-check-label">Descargar en Excel</label>
+        </div>
+
+        <div id="div_descargar_pdf_mes_anio">
+            <form action="{% url 'DetallesCajaXMesAnio' %}" enctype="multipart/form-data" method="POST" id="form-reporte-MesAnio">{% csrf_token %}
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <select class="form-control" name="mes_reporte">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <span class="mx-1">-</span>
+                        <select class="form-control" name="anio_reporte">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-success">Guardar</button>
-        </form>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </form>
+        </div>
+
+        <div id="div_descargar_excel_mes_anio" style="display: none;">
+            <form action="{% url 'DetallesCajaXMesAnioExcel' %}" enctype="multipart/form-data" method="POST" id="reporte_mes_anio_excel">{% csrf_token %}
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <select class="form-control" name="mes_reporte">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <span class="mx-1">-</span>
+                        <select class="form-control" name="anio_reporte">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </form>
+        </div>
 
 
     </div>
@@ -225,7 +261,7 @@
                 <label for="estado" class="form-label">Rubro</label>
                 <select class="form-control" name="rubro_egreso">
                     {% for rubro in rubros %}
-                        <option value="{{ rubro.id }}">{{ rubro.id }}-{{ rubro.rubro }}</option>
+                        <option value="{{ rubro.id }}">{{ rubro.cantidad_usos }}-{{ rubro.rubro }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -702,6 +738,22 @@ function getCookie(name) {
     }
 
 
+    function descargar_excel_mes_anio(){
+        const cbox = document.getElementById("cbox_descargar_excel_mes_anio");
+        const form_pdf = document.getElementById("div_descargar_pdf_mes_anio");
+        const form_excel = document.getElementById("div_descargar_excel_mes_anio");
+
+        if (cbox.checked) {
+            form_pdf.style.display = "none";
+            form_excel.style.display = "block";
+            
+        } else {
+            form_pdf.style.display = "block";
+            form_excel.style.display = "none";
+        }
+    }
+
+
     document.addEventListener("DOMContentLoaded", function () {
     const btnIngresos = document.getElementById("abrir_form_ingresos"); // Primer botón "Ingresos"
     const btnCancelar = document.getElementById("cerrar_form_ingresos"); // Botón "Cancelar"
@@ -736,5 +788,269 @@ document.addEventListener("DOMContentLoaded", function () {
         btnEgresos.style.display = "block"; // Vuelve a mostrar el botón "Ingresos"
     });
 });
+
+
+
+function generarPDFMesAnio(data) {
+    // debugger;
+    console.log("Generando PDF funcion...");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Título del documento
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Reporte del Estado de caja', 70, 20);
+    
+    const mes_anio = data[5]; 
+    // const [anio, mes] = mes_anio.mes.split("-"); 
+    // const meses 
+    const mes_anio_formateado = `Mes: ${mes_anio.mes} - Año: ${mes_anio.anio}`; 
+
+    doc.setFontSize(10);
+    doc.text(mes_anio_formateado, 15, 25);
+
+    const { subtotal_pesos, subtotal_dolares, total_pesos, total_dolares } = data;
+
+    // Configuración de la tabla
+    let datosTabla = data.slice(0, 2).map(item => [
+        item.tipo, 
+        item.venta, 
+        `$ ${item.total_pesos}`, 
+        `U$S${item.total_dolares}`
+    ]);
+
+    doc.autoTable({
+        startY: 30,  // Posición inicial debajo del título
+        head: [["Tipo", "Venta", "Total $", "Total U$S"]], // Encabezados de la tabla
+        body: datosTabla, // Datos cargados desde la vista
+        theme: "grid",  // Estilo de la tabla
+        styles: { 
+            fontSize: 12, 
+            cellPadding: 6, 
+            textColor: [30, 30, 30],  // Texto oscuro
+            lineColor: [200, 200, 200], // Color de los bordes de celdas
+            lineWidth: 0.3 // Grosor de los bordes
+        }, 
+        headStyles: { 
+            fillColor: [0, 102, 204], // Azul más moderno
+            textColor: [255, 255, 255], 
+            fontSize: 14, 
+            fontStyle: 'bold'
+        },
+        bodyStyles: { 
+            textColor: [50, 50, 50], 
+            fontSize: 12 
+        }, 
+        columnStyles: { 
+            0: { halign: 'center', cellWidth: 'auto' },  // Tipo
+            1: { halign: 'center', cellWidth: 'auto' },  // Venta
+            2: { halign: 'right', cellWidth: 'auto' },   // Total $
+            3: { halign: 'right', cellWidth: 'auto' }    // Total U$S
+        }, 
+        alternateRowStyles: { fillColor: [240, 240, 255] } // Suave fondo alterno
+    });
+    let finalY = doc.lastAutoTable.finalY + 10; // Posición después de la tabla
+
+    // Agregar subtotales y totales debajo de la tabla
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    const filaTres = data[2]; // Accedes al tercer elemento del array 'data'
+    
+    const ingresos_extra_pesos = filaTres.ingresos_extra ? filaTres.ingresos_extra.toFixed(2) : "0.00";
+    doc.text(`Ingresos extra: $ ${ingresos_extra_pesos}`, 20, finalY);
+
+    const ingresos_extra_dolares = filaTres.ingresos_extra_dolares ? filaTres.ingresos_extra_dolares.toFixed(2) : "0.00";
+    doc.text(`Ingresos extra: U$s ${ingresos_extra_dolares}`, 120, finalY);
+
+    finalY += 8;
+    
+    const egresos_pesos = filaTres.egresos ? filaTres.egresos.toFixed(2) : "0.00";
+    doc.text(`Egresos: $ ${egresos_pesos}`, 20, finalY);
+
+    const egresos_dolares = filaTres.egresos_dolares ? filaTres.egresos_dolares.toFixed(2) : "0.00";
+    doc.text(`Egresos: U$s ${egresos_dolares}`, 120, finalY);
+
+    finalY += 8;
+
+    const subtotalPesos = filaTres.subtotal_pesos ? filaTres.subtotal_pesos.toFixed(2) : "0.00";
+    doc.text(`Subtotal Pesos: $ ${subtotalPesos}`, 20, finalY);
+
+    const subtotalDolares = filaTres.subtotal_dolares ? filaTres.subtotal_dolares.toFixed(2) : "0.00";
+    doc.text(`Subtotal Dólares: U$S ${subtotalDolares}`, 120, finalY);
+
+    finalY += 8;
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 204);
+
+    const totalPesos = filaTres.total_general_pesos ? filaTres.total_general_pesos.toFixed(2) : "0.00";
+    const totalDolares = filaTres.total_general_dolares ? filaTres.total_general_dolares.toFixed(2) : "0.00";
+
+
+    doc.text(`TOTAL PESOS: $ ${totalPesos}`, 20, finalY);
+    doc.text(`TOTAL DÓLARES: U$S ${totalDolares}`, 120, finalY);
+
+    finalY += 15;
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Detalle de Egresos', 70, finalY);
+    finalY += 5;
+
+    const egresosDetalle = data[3].egresos_detalle.map(item => [item.rubro, `$ ${item.valor}`, item.motivo]);
+
+    if (egresosDetalle.length > 0) {
+        doc.autoTable({
+            startY: finalY,
+            head: [["Rubro", "Valor", "Motivo"]],
+            body: egresosDetalle,
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [204, 51, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'left' },
+                1: { halign: 'right' },
+                2: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [255, 240, 240] }
+        });
+
+        finalY = doc.lastAutoTable.finalY + 10;
+    }else{
+        doc.autoTable({
+            startY: finalY,
+            head: [["Rubro", "Valor", "Motivo"]],
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [204, 51, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'left' },
+                1: { halign: 'right' },
+                2: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [255, 240, 240] }
+        });
+
+        finalY = doc.lastAutoTable.finalY + 10;
+    }
+
+    // **TABLA DE INGRESOS EXTRA**
+    finalY += 5;
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Detalle de Ingresos Extra', 70, finalY);
+    finalY += 5;
+
+    const ingresosExtraDetalle = data[4].ingresos_extra_detalle.map(item => [`$ ${item.valor}`, item.motivo]);
+
+    if (ingresosExtraDetalle.length > 0) {
+        doc.autoTable({
+            startY: finalY,
+            head: [["Valor", "Motivo"]],
+            body: ingresosExtraDetalle,
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [51, 153, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'right' },
+                1: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [240, 255, 240] }
+        });
+    }else{
+        doc.autoTable({
+            startY: finalY,
+            head: [["Valor", "Motivo"]],
+            theme: "grid",
+            styles: { fontSize: 12, textColor: [30, 30, 30], lineColor: [200, 200, 200], lineWidth: 0.3 },
+            headStyles: { fillColor: [51, 153, 51], textColor: [255, 255, 255], fontSize: 13, fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50], fontSize: 12 },
+            columnStyles: { 
+                0: { halign: 'right' },
+                1: { halign: 'left' }
+            },
+            alternateRowStyles: { fillColor: [240, 255, 240] }
+        });
+    }
+
+    // Guardar el archivo PDF
+    console.log("Datos recibidos:", data);
+    console.log("jsPDF:", window.jspdf);
+    console.log("jsPDF autoTable:", window.jspdf?.autoTable);
+    doc.save('detalles_caja_mes_anio.pdf');
+}
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('form-reporte-MesAnio').addEventListener('submit', function (event) {
+        event.preventDefault();  // Evita la recarga de la página
+        
+        const mes = document.querySelector('[name="mes_reporte"]').value;  
+        const anio = document.querySelector('[name="anio_reporte"]').value; 
+        obtenerDetallesCajaMesAnio(mes,anio);
+        // if (fecha) {
+        //     obtenerDetallesCajaMesAnio(fecha);  // Llamamos a la función que obtiene los datos y genera el PDF
+        // } else {
+        //     alert("Por favor selecciona una fecha.");
+        // }
+    });
+});
+
+async function obtenerDetallesCajaMesAnio(mes,anio) {
+    // try {
+        // debugger;
+        // Hacemos la petición POST al servidor con la fecha
+        console.log("LLEGA 1...");
+        const response = await fetch('/detalles_caja_x_mes_anio/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',  // Usamos este tipo de contenido si enviamos un formulario
+                'X-CSRFToken': getCookieMesAnio('csrftoken'),  // Asegúrate de tener el CSRF token configurado correctamente
+            }
+            ,
+            body: new URLSearchParams({
+                'mes_reporte': mes,  
+                'anio_reporte': anio
+            })
+        });
+        
+        // Verificar si la respuesta fue exitosa
+        // if (!response.ok) {
+        //     console.error('Error en la respuesta de la API:', response.statusText);
+        //     alert('Hubo un problema al obtener los datos.');
+        //     return;
+        // }
+        
+        // Convertir la respuesta JSON en un objeto de JavaScript
+        const data = await response.json();
+        // console.log(data);  // Verifica los datos recibidos
+        
+        // Aquí puedes procesar los datos o generar el PDF
+        // Generar el PDF con los datos obtenidos
+        // console.log("Datos recibidos:", data);
+        console.log("LLEGA...");
+        console.log(data)
+        generarPDFMesAnio(data);
+        // window.location.reload();
+
+    // } catch (error) {
+    //     console.error('Hubo un error al hacer la solicitud:', error);
+    //     alert('Hubo un error al obtener los detalles.');
+    // }
+}
+
+// Función para obtener el valor del cookie CSRFToken (si es necesario para el POST)
+function getCookieMesAnio(name) {
+    // debugger;
+    const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return value ? value[2] : null;
+}
+
 </script>
 {% endblock %}

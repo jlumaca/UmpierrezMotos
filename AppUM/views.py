@@ -951,8 +951,40 @@ def vista_inventario_accesorios(req):
     accesorios = Accesorio.objects.filter(activo=1).order_by('-fecha_ingreso')
     logo_um = Logos.objects.get(id=1)
     page_obj = funcion_paginas_varias(req,accesorios)  # Obtiene la página solicitada
+    seleccionados = Accesorio.objects.filter(activo=1,seleccionado=1)
 
-    return render(req,"perfil_administrativo/accesorios/accesorios.html",{'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+    return render(req,"perfil_administrativo/accesorios/accesorios.html",{"seleccionados":seleccionados,'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+
+@admin_required
+def seleccionar_accesorio(req,id_accesorio):
+    accesorios = Accesorio.objects.filter(activo=1).order_by('-fecha_ingreso')
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,accesorios)  # Obtiene la página solicitada
+
+    accesorio = Accesorio.objects.get(id=id_accesorio)
+    accesorio.seleccionado = 1
+    accesorio.save()
+
+    seleccionados = Accesorio.objects.filter(activo=1,seleccionado=1)
+
+    return render(req,"perfil_administrativo/accesorios/accesorios.html",{"seleccionados":seleccionados,'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+
+
+@admin_required
+def borrar_seleccion_accesorio(req,id_accesorio):
+    accesorios = Accesorio.objects.filter(activo=1).order_by('-fecha_ingreso')
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,accesorios)  # Obtiene la página solicitada
+
+    accesorio = Accesorio.objects.get(id=id_accesorio)
+    accesorio.seleccionado = 0
+    accesorio.save()
+
+    seleccionados = Accesorio.objects.filter(activo=1,seleccionado=1)
+
+    return render(req,"perfil_administrativo/accesorios/accesorios.html",{"seleccionados":seleccionados,'page_obj': page_obj,"accesorios":accesorios,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None})
+
+
 
 @admin_required
 def alta_accesorio(req):
@@ -1089,6 +1121,7 @@ def venta_accesorio(req,id_cliente):
             
             a = Accesorio.objects.get(id=accesorio)
             a.activo = 0
+            a.seleccionado = 0
             a.save()
         messages.success(req, "Venta generada con éxito")
         return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
@@ -1098,18 +1131,27 @@ def venta_accesorio(req,id_cliente):
 def prueba_varios_accesorios(req):
     # accesorios_json = req.POST.get("accesorios", "[]")  # Capturamos el JSON enviado
     # accesorios_seleccionados = json.loads(accesorios_json)  # Convertimos a lista Python
-    accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
-    accesorios_seleccionados = json.loads(accesorios_json)
+    # accesorios_json = req.POST.get("accesorios", req.session.get("accesorios_json", "[]"))
+    # accesorios_seleccionados = json.loads(accesorios_json)
 
-    # Guardar en sesión para que no se pierdan
-    req.session["accesorios_json"] = accesorios_seleccionados
+    # # Guardar en sesión para que no se pierdan
+    # req.session["accesorios_json"] = accesorios_seleccionados
 
-        # Aquí puedes procesar la venta de los 
-    for accesorio in req.session["accesorios_json"]:
-        #TIPO str
-        print("Accesorios seleccionados:", accesorio)
+    #     # Aquí puedes procesar la venta de los 
+    # for accesorio in req.session["accesorios_json"]:
+    #     #TIPO str
+    #     print("Accesorios seleccionados:", accesorio)
+    if req.method == "POST":
+        # Capturamos la lista de accesorios enviados desde el formulario
+        accesorios_seleccionados = req.POST.getlist("accesorios[]")
+
+        # Guardamos en sesión para futuras referencias
+        req.session["accesorios_json"] = accesorios_seleccionados
+
+        # Depuración: imprimir los accesorios seleccionados
+        print("Accesorios seleccionados:", accesorios_seleccionados)
     
-    return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
+        return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
 
 @admin_required
 def cliente_venta_accesorio(req,mostrar,vender):
@@ -1150,14 +1192,19 @@ def cliente_venta_accesorio(req,mostrar,vender):
                 c_2 = None
             data_accesorio = []
             print(accesorios_seleccionados)
+            accesorios_ids = [int(accs) for accs in accesorios_seleccionados]
+
+# Buscamos todos los accesorios en una sola consulta
+            accesorios = Accesorio.objects.filter(id__in=accesorios_ids)
             precio_total = 0
-            for accs in accesorios_seleccionados:
-                accesorio = Accesorio.objects.get(id=int(accs))
-                print(accesorio.tipo)
+            for accesorio in accesorios:
+                  # Convertimos a entero
+                a = Accesorio.objects.get(id=accesorio.id)
+                print(a.tipo)
                 data_accesorio.append({
-                    "accesorios":accesorio
+                    "accesorios":a
                 })
-                precio_total = precio_total + int(accesorio.precio)
+                precio_total = precio_total + int(a.precio)
 
             print("LLEGA LINEA 1118")
             

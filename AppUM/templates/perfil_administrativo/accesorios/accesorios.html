@@ -81,15 +81,30 @@
             </a>
         </div>
     </form>
-    <div id="carrito" class="mt-4" style="display: none;">
+    {% if seleccionados %}
+    <div id="carrito" class="mt-4">
         <h4>Accesorios Seleccionados</h4>
         <ul id="lista-carrito"></ul>
-        <form id="form-carrito" method="POST" action="{% url 'PruebaVariosAccesorios' %}">
+        <form method="POST" action="{% url 'PruebaVariosAccesorios' %}">
             {% csrf_token %}
-            <input type="hidden" name="accesorios" id="input-accesorios">
+            {% for a in seleccionados %}
+                <strong>{{ a.tipo }}</strong> {{ a.marca }} {{ a.modelo }} 
+                <!-- <button class="btn btn-danger btn-sm eliminar-accesorio" data-index="">❌</button><br> -->
+                <a href="{% url 'BorrarSeleccionAccesorio' a.id %}" 
+                class="btn btn-danger btn-sm">
+                ❌
+                </a>
+                <input type="hidden" name="accesorios[]" value="{{ a.id }}">
+                <br>
+             
+            {% endfor %}
+            <!-- <input type="hidden" name="accesorios" id="input-accesorios"> -->
             <button type="submit" class="btn btn-success mt-2">Vender seleccionados</button>
         </form>
+        
+        
     </div>
+    {% endif %}
     <table class="table">
         <thead>
             <tr>
@@ -110,11 +125,15 @@
             <!-- Filas de ejemplo de accesorios -->
             <tr>
                 <td>
-                    <input type="checkbox" class="accesorio-checkbox" 
-                            value="{{ accesorios.id }}" 
-                            data-tipo="{{ accesorios.tipo }}" 
-                            data-marca="{{ accesorios.marca }}" 
-                            data-modelo="{{ accesorios.modelo }}">
+                    <form action="{% url 'SeleccionarAccesorio' accesorios.id %}" method="POST" class="accesorio-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ accesorios.id }}">
+                        <input type="checkbox" class="accesorio-checkbox"
+                               name="seleccionado"
+                               value="1"
+                               onchange="this.form.submit()"
+                               {% if accesorios.seleccionado %}checked{% endif %}>
+                    </form>
 
                 </td>
                 <td>{{ accesorios.id }}</td>
@@ -218,70 +237,70 @@
     //         }
     //     });
     // });
-    document.addEventListener("DOMContentLoaded", function () {
-    let accesoriosSeleccionados = JSON.parse(localStorage.getItem("carrito_accesorios")) || [];
-    let carritoDiv = document.getElementById("carrito");
-    let inputAccesorios = document.getElementById("input-accesorios");
+//     document.addEventListener("DOMContentLoaded", function () {
+//     let accesoriosSeleccionados = JSON.parse(localStorage.getItem("carrito_accesorios")) || [];
+//     let carritoDiv = document.getElementById("carrito");
+//     let inputAccesorios = document.getElementById("input-accesorios");
 
-    function actualizarCarrito() {
-        let listaCarrito = document.getElementById("lista-carrito");
-        listaCarrito.innerHTML = "";
+//     function actualizarCarrito() {
+//         let listaCarrito = document.getElementById("lista-carrito");
+//         listaCarrito.innerHTML = "";
 
-        accesoriosSeleccionados.forEach((accesorio, index) => {
-            let li = document.createElement("li");
-            li.innerHTML = `
-                <strong>${accesorio.tipo}</strong> - ${accesorio.marca} ${accesorio.modelo} 
-                <button class="btn btn-danger btn-sm eliminar-accesorio" data-index="${index}">❌</button>
-            `;
-            listaCarrito.appendChild(li);
-        });
+//         accesoriosSeleccionados.forEach((accesorio, index) => {
+//             let li = document.createElement("li");
+//             li.innerHTML = `
+//                 <strong>${accesorio.tipo}</strong> - ${accesorio.marca} ${accesorio.modelo} 
+//                 <button class="btn btn-danger btn-sm eliminar-accesorio" data-index="${index}">❌</button>
+//             `;
+//             listaCarrito.appendChild(li);
+//         });
 
-        // Guardar en localStorage para persistencia
-        localStorage.setItem("carrito_accesorios", JSON.stringify(accesoriosSeleccionados));
+//         // Guardar en localStorage para persistencia
+//         localStorage.setItem("carrito_accesorios", JSON.stringify(accesoriosSeleccionados));
 
-        // Actualizar el input hidden del form con solo los IDs
-        inputAccesorios.value = JSON.stringify(accesoriosSeleccionados.map(a => a.id));
+//         // Actualizar el input hidden del form con solo los IDs
+//         inputAccesorios.value = JSON.stringify(accesoriosSeleccionados.map(a => a.id));
 
-        // Mostrar u ocultar carrito según la cantidad de accesorios seleccionados
-        carritoDiv.style.display = accesoriosSeleccionados.length > 0 ? "block" : "none";
+//         // Mostrar u ocultar carrito según la cantidad de accesorios seleccionados
+//         carritoDiv.style.display = accesoriosSeleccionados.length > 0 ? "block" : "none";
 
-        // Volver a marcar los checkboxes si están en el carrito
-        document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
-            checkbox.checked = accesoriosSeleccionados.some(a => a.id === checkbox.value);
-        });
+//         // Volver a marcar los checkboxes si están en el carrito
+//         document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
+//             checkbox.checked = accesoriosSeleccionados.some(a => a.id === checkbox.value);
+//         });
 
-        // Agregar eventos a los botones de eliminar
-        document.querySelectorAll(".eliminar-accesorio").forEach(btn => {
-            btn.addEventListener("click", function () {
-                let index = this.getAttribute("data-index");
-                accesoriosSeleccionados.splice(index, 1);
-                actualizarCarrito();
-            });
-        });
-    }
+//         // Agregar eventos a los botones de eliminar
+//         document.querySelectorAll(".eliminar-accesorio").forEach(btn => {
+//             btn.addEventListener("click", function () {
+//                 let index = this.getAttribute("data-index");
+//                 accesoriosSeleccionados.splice(index, 1);
+//                 actualizarCarrito();
+//             });
+//         });
+//     }
 
-    document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
-        checkbox.addEventListener("change", function () {
-            let accesorioId = this.value;
-            let accesorioDatos = {
-                id: accesorioId,
-                tipo: this.dataset.tipo,
-                marca: this.dataset.marca,
-                modelo: this.dataset.modelo
-            };
+//     document.querySelectorAll(".accesorio-checkbox").forEach(checkbox => {
+//         checkbox.addEventListener("change", function () {
+//             let accesorioId = this.value;
+//             let accesorioDatos = {
+//                 id: accesorioId,
+//                 tipo: this.dataset.tipo,
+//                 marca: this.dataset.marca,
+//                 modelo: this.dataset.modelo
+//             };
 
-            if (this.checked) {
-                accesoriosSeleccionados.push(accesorioDatos);
-            } else {
-                accesoriosSeleccionados = accesoriosSeleccionados.filter(a => a.id !== accesorioId);
-            }
+//             if (this.checked) {
+//                 accesoriosSeleccionados.push(accesorioDatos);
+//             } else {
+//                 accesoriosSeleccionados = accesoriosSeleccionados.filter(a => a.id !== accesorioId);
+//             }
 
-            actualizarCarrito();
-        });
-    });
+//             actualizarCarrito();
+//         });
+//     });
 
-    // Ocultar/mostrar carrito al cargar la página según si hay accesorios en localStorage
-    actualizarCarrito();
-});
+//     // Ocultar/mostrar carrito al cargar la página según si hay accesorios en localStorage
+//     actualizarCarrito();
+// });
 </script>
 {% endblock %}

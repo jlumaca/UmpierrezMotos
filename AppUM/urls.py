@@ -50,6 +50,8 @@ urlpatterns = [
 
      
      path('accesorios', views.vista_inventario_accesorios,name="Accesorios"),
+     path('seleccionar_accesorio/<int:id_accesorio>', views.seleccionar_accesorio,name="SeleccionarAccesorio"),
+     path('borrar_seleccion_accesorio/<int:id_accesorio>', views.borrar_seleccion_accesorio,name="BorrarSeleccionAccesorio"),
      path('accesorio_alta', views.alta_accesorio,name="AccesorioAlta"),
      #path('datos_accesorio_modificacion/<int:id_accesorio>', views.datos_a_modificacion_accesorio,name="DatosAccesorioModificacion"),
      path('accesorio_modificacion/<int:id_accesorio>', views.modificacion_accesorio,name="AccesorioModificacion"),

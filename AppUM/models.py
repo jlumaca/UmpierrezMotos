@@ -61,6 +61,7 @@ class Accesorio(models.Model):
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     moneda_precio = models.CharField(max_length=10,default=True,null=True)
     talle = models.CharField(max_length=20,null=True)
+    seleccionado = models.BooleanField(default=0)
 
 class Logos(models.Model):
     logo_UM = models.ImageField(null=True, blank=True, upload_to="logos/")

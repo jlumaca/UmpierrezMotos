@@ -1115,7 +1115,8 @@ def venta_accesorio(req,id_cliente):
                 accesorio_id = accesorio,
                 cliente_id = id_cliente,
                 factura_documento = doc_factura,
-                codigo_compra = codigo_compra
+                codigo_compra = codigo_compra,
+                forma_de_pago = req.POST['forma_pago']
             )
             nueva_venta_accesorio.save()
             
@@ -1241,7 +1242,8 @@ def pagos_accesorio(req,codigo_compra):
                                                                                     "total_pesos":data[1],
                                                                                     "total_dolares":data[2],
                                                                                     "total_precios_json":data[8],
-                                                                                    "codigo_compra":codigo_compra
+                                                                                    "codigo_compra":codigo_compra,
+                                                                                    "forma_pago":data[10]
                                                                                     }
                                                                                     )
     # except Exception as e:

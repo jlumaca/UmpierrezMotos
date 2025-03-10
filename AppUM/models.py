@@ -117,6 +117,7 @@ class ClienteAccesorio(models.Model):
     factura_rut = models.IntegerField(null=True)
     factura_documento = models.FileField(null=True, blank=True, upload_to="documentacion/facturas_accesorios/")
     codigo_compra = models.IntegerField(null=True,default=0)
+    forma_de_pago = models.TextField(null=True, blank=True)
 
 class PrecioDolar(models.Model):
     precio_dolar_tienda = models.DecimalField(max_digits=10, decimal_places=2,default=0)

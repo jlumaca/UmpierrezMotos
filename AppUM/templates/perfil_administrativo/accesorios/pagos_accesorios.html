@@ -121,6 +121,12 @@
     {% endif %}
 <br>
 <h5>Datos de la compra</h5>
+    <strong>Pago acordado:</strong>
+    {% if forma_pago %}
+    {{ forma_pago }}
+    {% else %}
+    No se detalló ninguna forma de pago
+    {% endif %}
     <table class="table">
         <thead>
             <tr>

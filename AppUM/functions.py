@@ -413,6 +413,7 @@ def validar_entrega_menor_precio(moneda_entrega,entrega,elemento,precio_dolar,el
 def obtener_compras_accesorios(req,codigo_compra):
         venta = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra).latest('id')
         id_venta = venta.id
+        forma_pago = venta.forma_de_pago
         #
         resultados_cuotas = (
                 CuotasAccesorios.objects
@@ -525,7 +526,8 @@ def obtener_compras_accesorios(req,codigo_compra):
             accesorio_json,
             pagos_accesorios_json,
             total_precios_json,
-            venta.cliente_id
+            venta.cliente_id,
+            forma_pago
         ]
 
         return data

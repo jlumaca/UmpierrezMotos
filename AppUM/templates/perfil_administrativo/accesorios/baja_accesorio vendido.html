@@ -25,10 +25,21 @@
                 </p>
             
                 {% if mostrar_cbox %}
-                    <div class="mb-3 form-check d-flex align-items-center">
+                    <!-- <div class="mb-3 form-check d-flex align-items-center">
                         <input type="checkbox" name="cbox_egreso_caja" class="form-check-input me-2" id="cbox_egreso_caja">
                         <label class="form-check-label">Ingresar egreso en la caja</label>
+                    </div> -->
+                    <div class="mb-3 form-check d-flex align-items-center">
+                        <input type="radio" name="opcion_elegida" class="form-check-input me-2" id="radio_egreso_caja" value="caja" checked>
+                        <label class="form-check-label" for="radio_egreso_caja">Ingresar egreso en la caja</label>
                     </div>
+                    
+                    <div class="mb-3 form-check d-flex align-items-center">
+                        <input type="radio" name="opcion_elegida" class="form-check-input me-2" id="radio_fondos" value="fondos">
+                        <label class="form-check-label" for="radio_fondos">Ingresar en los fondos del cliente (saldo a favor)</label>
+                    </div>
+                    
+                    
                     <div id="datos_egreso">
                         <div class="mb-3">
                             <label class="form-label fw-bold">
@@ -38,13 +49,13 @@
                         </div>
                 
                         <div class="mb-3">
-                            <label for="monto_egreso" class="form-label fw-bold">Ingrese el monto del egreso de la caja</label>
+                            <label for="monto_egreso" class="form-label fw-bold">Monto</label>
                             <input value="0" type="number" class="form-control border-primary shadow-sm" 
                                 name="monto_egreso" required min="0">
                         </div>
                 
                         <div class="mb-3">
-                            <label for="forma_pago" class="form-label fw-bold">Método de devolución</label>
+                            <label for="forma_pago" class="form-label fw-bold">Método</label>
                             <select class="form-select border-secondary shadow-sm" name="forma_devolucion" id="forma_pago">
                                 <option value="Efectivo">Efectivo</option>
                                 <option value="Transferencia">Transferencia</option>
@@ -52,7 +63,7 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="forma_pago" class="form-label fw-bold">Moneda devolución</label>
+                            <label for="forma_pago" class="form-label fw-bold">Moneda</label>
                             <select class="form-select border-secondary shadow-sm" name="moneda_devolucion" id="forma_pago">
                                 <option value="Pesos">Pesos</option>
                                 <option value="Dolares">Dolares</option>

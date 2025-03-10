@@ -2090,17 +2090,17 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
         for p in prueba:
             pagos = CuotasAccesorios.objects.filter(venta_id=p.id)
             if pagos.exists():
-                
                 for pago in pagos:
-                    pago.venta_id = id_venta
+                    # 
+                    # pago.venta_id = id_venta
                     if pago.moneda == "Pesos":
                         pagos_pesos = pagos_pesos + float(pago.valor_pago_pesos)
                         pagos_dolares = pagos_pesos / precio_dolar
                     else:
                         pagos_dolares = pagos_dolares + float(pago.valor_pago_dolares)
                         pagos_pesos = pagos_dolares * precio_dolar
-                    pago.save()
-        
+                
+    
         if (pagos_pesos > 0) or (pagos_dolares > 0):
             mostrar_cbox = True
         else:
@@ -2112,10 +2112,17 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
         info_dolares = "U$s" + str(pagos_dolares)
         accesorio = Accesorio.objects.get(id=venta.accesorio_id)
         if mostrar_cbox:
-            checkbox_egresos = 'cbox_egreso_caja' in req.POST
+            opcion_elegida = req.POST.get('opcion_elegida')
+            if opcion_elegida == "caja":
+                rb_egresos = True
+                rb_fondos = False
+            else:
+                rb_egresos = False
+                rb_fondos = True
+
         if req.method == "POST":
 
-            if mostrar_cbox and checkbox_egresos and ((int(req.POST['monto_egreso']) > pagos_pesos and req.POST['moneda_devolucion'] == "Pesos") or (int(req.POST['monto_egreso']) > pagos_dolares and req.POST['moneda_devolucion'] == "Dolares")):
+            if mostrar_cbox and (rb_egresos or rb_fondos) and ((int(req.POST['monto_egreso']) > pagos_pesos and req.POST['moneda_devolucion'] == "Pesos") or (int(req.POST['monto_egreso']) > pagos_dolares and req.POST['moneda_devolucion'] == "Dolares")):
                 return render(req,"perfil_administrativo/accesorios/baja_accesorio vendido.html",{"codigo_compra":codigo_compra,
                                                                                               "mostrar_cbox":mostrar_cbox,
                                                                                               "info_pesos":info_pesos,
@@ -2130,8 +2137,11 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
                 venta.save()
                 accesorio.activo = 1
                 accesorio.save()
+
+                
+
                 if mostrar_cbox:
-                    if checkbox_egresos:
+                    if rb_egresos:
                         caja = Caja.objects.filter(estado="Abierto").first()
                         if caja:
                             usuario = req.user
@@ -2141,6 +2151,47 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
                             else:
                                 monto_egreso = req.POST['monto_egreso']
                             insert_movimientos_caja(f"Egreso por baja de accesorio vendido al cliente {nom_ape}","Egreso",monto_egreso,caja.id,personal.id,req.POST['moneda_devolucion'],None,req.POST['forma_devolucion'],0,1,None,None)
+                    elif rb_fondos:
+                        if req.POST['moneda_devolucion'] == "Pesos":
+                            fondos_pesos = float(req.POST['monto_egreso'])
+                            fondos_dolares = fondos_pesos / precio_dolar
+                        else:
+                            fondos_dolares = float(req.POST['monto_egreso'])
+                            fondos_pesos = fondos_dolares * precio_dolar
+                        fondos_cliente = ClienteFondos.objects.filter(cliente_id=venta.cliente_id).first()
+                        if fondos_cliente:
+                            fondos_cliente = ClienteFondos.objects.filter(cliente_id=venta.cliente_id).latest('id')
+                            total_pesos = float(fondos_cliente.total_pesos) + fondos_pesos
+                            total_dolares = float(fondos_cliente.total_dolares) + fondos_dolares
+                        else:
+                            total_pesos = fondos_pesos
+                            total_dolares = fondos_dolares
+                        nuevo_fondo = ClienteFondos(
+                            cliente_id = venta.cliente_id,
+                            moneda = req.POST['moneda_devolucion'],
+                            ingreso_pesos = fondos_pesos,
+                            ingreso_dolares = fondos_dolares,
+                            fecha = datetime.now(),
+                            total_pesos = total_pesos,
+                            total_dolares = total_dolares,
+                            tipo = "Ingreso",
+                            metodo = req.POST['forma_devolucion'],
+                            comprobante = None
+                        )
+                        nuevo_fondo.save()
+                    pagos = CuotasAccesorios.objects.filter(venta_id=p.id).first()
+                    if pagos:
+                        pagos = CuotasAccesorios.objects.filter(venta_id=p.id).latest('id')
+                        if req.POST['moneda_devolucion'] == "Pesos":
+                            resto_pesos = float(pagos.cant_restante_pesos) + float(req.POST['monto_egreso'])
+                            resto_dolares = resto_pesos / precio_dolar
+                        else:
+                            resto_dolares = float(pagos.cant_restante_dolares) + float(req.POST['monto_egreso'])
+                            resto_pesos = resto_dolares * precio_dolar
+                        
+                        pagos.cant_restante_pesos = resto_pesos
+                        pagos.cant_restante_dolares = resto_dolares
+                        alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,req.POST['moneda_devolucion'],"Reajuste por baja de accesorio",precio_dolar,0,0,None,req.POST['forma_devolucion'],0)
                 messages.success(req, "Accesorio borrado de la ficha correctamente.")
                 return redirect(reverse('ClienteFicha', kwargs={'id_cliente': cliente.id}))
         else:

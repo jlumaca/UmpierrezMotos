@@ -132,6 +132,7 @@ urlpatterns = [
      path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),
      path('modificar_moto_vendida/<int:id_moto>/<int:id_cliente>', views.modificar_moto_vendida,name="ModificarMotoVendida"),
      path('modificar_accesorio_vendido/<int:id_accesorio>/<int:id_cliente>', views.modificar_accesorio_vendido,name="ModificarAccesorioVendido"),
+     path('baja_accesorio_vendido/<int:codigo_compra>/<int:id_accesorio>', views.borrar_accesorio_vendido,name="BorrarAccesorioVendido"),
 
 
       path('calculadora', views.calculadora_pagos,name="Calculadora"),

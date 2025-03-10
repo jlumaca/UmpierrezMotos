@@ -1,0 +1,113 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+            <h5 class="card-title text-danger">
+                <i class="fas fa-exclamation-triangle"></i> Confirmación de eliminación
+            </h5>
+            <hr>
+            {% if error_message %}
+                <div class="alert alert-danger alert-dismissible fade show text-center fw-bold shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i> {{ error_message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+
+            {% if not message %}
+            <form action="" method="POST" class="p-3 border rounded shadow-sm bg-light">
+                {% csrf_token %}
+                <p class="mb-4 text-center fw-bold text-danger">
+                    ¿Está seguro que desea borrar el accesorio de la venta? Esta acción no se puede deshacer.
+                </p>
+            
+                {% if mostrar_cbox %}
+                    <div class="mb-3 form-check d-flex align-items-center">
+                        <input type="checkbox" name="cbox_egreso_caja" class="form-check-input me-2" id="cbox_egreso_caja">
+                        <label class="form-check-label">Ingresar egreso en la caja</label>
+                    </div>
+                    <div id="datos_egreso">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Se encuentra un total de <span class="text-success">{{ info_pesos }}</span> / 
+                                <span class="text-primary">{{ info_dolares }}</span> pagado hasta el momento.
+                            </label>
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="monto_egreso" class="form-label fw-bold">Ingrese el monto del egreso de la caja</label>
+                            <input value="0" type="number" class="form-control border-primary shadow-sm" 
+                                name="monto_egreso" required min="0">
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="forma_pago" class="form-label fw-bold">Método de devolución</label>
+                            <select class="form-select border-secondary shadow-sm" name="forma_devolucion" id="forma_pago">
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Débito">Débito</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="forma_pago" class="form-label fw-bold">Moneda devolución</label>
+                            <select class="form-select border-secondary shadow-sm" name="moneda_devolucion" id="forma_pago">
+                                <option value="Pesos">Pesos</option>
+                                <option value="Dolares">Dolares</option>
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+            
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" class="btn btn-danger mx-2">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                    <a href="{% url 'DetallesCompraAccesorio' codigo_compra %}" class="btn btn-secondary mx-2">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+                
+                    
+            {% endif %}
+            {% if message %}
+                <div class="alert alert-success mt-4">
+                    <p>{{ message }}</p>
+                    <p>Para volver, haz click <a href="{% url 'DetallesCompraAccesorio' codigo_compra %}">aquí</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const cboxEgreso = document.querySelector("input[name='cbox_egreso_caja']");
+        const montoEgreso = document.querySelector("input[name='monto_egreso']");
+        // const metodoDevolucion = document.querySelector("select[name='forma_devolucion']");
+        // const camposEgreso = montoEgreso.closest(".mb-3"); // Agrupa los elementos a ocultar
+        const datos_egreso = document.getElementById("datos_egreso");
+        
+        function toggleEgresoFields() {
+            if (cboxEgreso.checked) {
+                datos_egreso.style.display = "block";  // Muestra los campos
+                montoEgreso.required = true;
+                
+            } else {
+                datos_egreso.style.display = "none";   // Oculta los campos
+                montoEgreso.required = false;
+                 // Opcional: Restablece el valor
+            }
+        }
+    
+        // Evento para detectar cambios en el checkbox
+        cboxEgreso.addEventListener("change", toggleEgresoFields);
+    
+        // Ejecutar la función al cargar la página (por si el checkbox ya viene marcado)
+        toggleEgresoFields();
+    });
+    </script>
+    
+{% endblock %}

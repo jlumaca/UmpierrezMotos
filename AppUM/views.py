@@ -1097,12 +1097,12 @@ def venta_accesorio(req,id_cliente):
         # return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
         ult_compra_accesorio = ClienteAccesorio.objects.exists()
         if ult_compra_accesorio:
-            ult_compra_accesorio = ClienteAccesorio.objects.latest('id')
+            ult_compra_accesorio = ClienteAccesorio.objects.latest('codigo_compra')
             codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
             print("CODIGO: " + str(codigo_compra))
             print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
         else:
-            codigo_compra = 0
+            codigo_compra = 1
         accesorios = req.session["accesorios_json"]
         for accesorio in accesorios:
             # print("INSERT ACCESORIO ID: " + str(accesorio))
@@ -1241,6 +1241,7 @@ def pagos_accesorio(req,codigo_compra):
                                                                                     "total_pesos":data[1],
                                                                                     "total_dolares":data[2],
                                                                                     "total_precios_json":data[8],
+                                                                                    "codigo_compra":codigo_compra
                                                                                     }
                                                                                     )
     # except Exception as e:
@@ -1770,7 +1771,7 @@ def ficha_cliente(req,id_cliente):
 
     resultados_accesorios = (
         ClienteAccesorio.objects
-        .filter(cliente__id=id_cliente)
+        .filter(cliente__id=id_cliente,codigo_compra__gte=1)
         .select_related('accesorio', 'cliente')
         .values(
             'id',
@@ -1789,6 +1790,7 @@ def ficha_cliente(req,id_cliente):
     for resultado_accesorio in resultados_accesorios:
         ca = ClienteAccesorio.objects.filter(codigo_compra=resultado_accesorio['codigo_compra']).first()
         cc = ClienteAccesorio.objects.filter(codigo_compra=resultado_accesorio['codigo_compra']).count()
+        # prueba = int(resultado_accesorio['codigo_compra'])
         if cc > 1: 
             if i == 0 or j != int(ca.codigo_compra):
                 i = 1
@@ -1801,13 +1803,14 @@ def ficha_cliente(req,id_cliente):
                     "codigo_venta":ca.codigo_compra
                 })      
         else:
-            i = 0
-            detalles = resultado_accesorio['accesorio__tipo'] + " " + resultado_accesorio['accesorio__marca'] + " " + resultado_accesorio['accesorio__modelo']
-            res_facturas.append({
-                    "detalles":detalles,
-                    "fecha":ca.fecha_compra,
-                    "codigo_venta":ca.codigo_compra
-                }) 
+            if resultado_accesorio['codigo_compra'] and int(resultado_accesorio['codigo_compra']) > 0:
+                i = 0
+                detalles = resultado_accesorio['accesorio__tipo'] + " " + resultado_accesorio['accesorio__marca'] + " " + resultado_accesorio['accesorio__modelo']
+                res_facturas.append({
+                        "detalles":detalles,
+                        "fecha":ca.fecha_compra,
+                        "codigo_venta":ca.codigo_compra
+                    }) 
         
         
     page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
@@ -2058,6 +2061,92 @@ def modificar_accesorio_vendido(req,id_accesorio,id_cliente):
             
             #
             return render(req,"perfil_administrativo/cliente/modificacion_accesorio_vendido.html",{"datos_accesorio":accesorio,"precio_accesorio":precio,"id_cliente":id_cliente,"id_venta":venta.codigo_compra})
+    # except Exception as e:
+    #     pass
+
+def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
+    # try:
+        cantidad = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra).count()
+        venta = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra,accesorio_id=id_accesorio).first()
+        if cantidad == 1:
+            id_venta = venta.id
+        else:
+            ult = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra).latest('id')
+            penult = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra).order_by('-id')[1]
+            if venta.id == ult.id:
+                id_venta = penult.id
+            else:
+                id_venta = ult.id
+        
+        
+        
+        pagos_pesos = 0
+        pagos_dolares = 0
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        prueba = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra)
+        for p in prueba:
+            pagos = CuotasAccesorios.objects.filter(venta_id=p.id)
+            if pagos.exists():
+                
+                for pago in pagos:
+                    pago.venta_id = id_venta
+                    if pago.moneda == "Pesos":
+                        pagos_pesos = pagos_pesos + float(pago.valor_pago_pesos)
+                        pagos_dolares = pagos_pesos / precio_dolar
+                    else:
+                        pagos_dolares = pagos_dolares + float(pago.valor_pago_dolares)
+                        pagos_pesos = pagos_dolares * precio_dolar
+                    pago.save()
+        
+        if (pagos_pesos > 0) or (pagos_dolares > 0):
+            mostrar_cbox = True
+        else:
+            mostrar_cbox = False
+
+        pagos_pesos = round(pagos_pesos,2)
+        pagos_dolares = round(pagos_dolares,2)
+        info_pesos = "$" + str(pagos_pesos)
+        info_dolares = "U$s" + str(pagos_dolares)
+        accesorio = Accesorio.objects.get(id=venta.accesorio_id)
+        if mostrar_cbox:
+            checkbox_egresos = 'cbox_egreso_caja' in req.POST
+        if req.method == "POST":
+
+            if mostrar_cbox and checkbox_egresos and ((int(req.POST['monto_egreso']) > pagos_pesos and req.POST['moneda_devolucion'] == "Pesos") or (int(req.POST['monto_egreso']) > pagos_dolares and req.POST['moneda_devolucion'] == "Dolares")):
+                return render(req,"perfil_administrativo/accesorios/baja_accesorio vendido.html",{"codigo_compra":codigo_compra,
+                                                                                              "mostrar_cbox":mostrar_cbox,
+                                                                                              "info_pesos":info_pesos,
+                                                                                              "info_dolares":info_dolares,
+                                                                                              "error_message":"El monto del Egreso no puede superar el total de los pagos realizados a la fecha"})
+            else:
+                # cantidad = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra).count()
+                venta = ClienteAccesorio.objects.filter(accesorio_id=id_accesorio,codigo_compra=codigo_compra).first()
+                cliente = Cliente.objects.get(id=venta.cliente_id)
+                nom_ape = cliente.nombre + " " + cliente.apellido
+                venta.codigo_compra = 0
+                venta.save()
+                accesorio.activo = 1
+                accesorio.save()
+                if mostrar_cbox:
+                    if checkbox_egresos:
+                        caja = Caja.objects.filter(estado="Abierto").first()
+                        if caja:
+                            usuario = req.user
+                            personal = Personal.objects.filter(usuario=usuario.username).first()
+                            if accesorio.moneda_precio == "Pesos":
+                                monto_egreso = req.POST['monto_egreso']
+                            else:
+                                monto_egreso = req.POST['monto_egreso']
+                            insert_movimientos_caja(f"Egreso por baja de accesorio vendido al cliente {nom_ape}","Egreso",monto_egreso,caja.id,personal.id,req.POST['moneda_devolucion'],None,req.POST['forma_devolucion'],0,1,None,None)
+                messages.success(req, "Accesorio borrado de la ficha correctamente.")
+                return redirect(reverse('ClienteFicha', kwargs={'id_cliente': cliente.id}))
+        else:
+            
+            return render(req,"perfil_administrativo/accesorios/baja_accesorio vendido.html",{"codigo_compra":codigo_compra,
+                                                                                              "mostrar_cbox":mostrar_cbox,
+                                                                                              "info_pesos":info_pesos,
+                                                                                              "info_dolares":info_dolares})
     # except Exception as e:
     #     pass
 

@@ -135,6 +135,7 @@
                     <td>
                         {{ a.detalle }}
                         <a href="{% url 'ModificarAccesorioVendido' a.id_accesorio id_cliente %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        <a href="{% url 'BorrarAccesorioVendido' codigo_compra a.id_accesorio %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                     </td>
                     <td>{{ a.precio }}</td>
                 </tr>

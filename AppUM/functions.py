@@ -458,36 +458,37 @@ def obtener_compras_accesorios(req,codigo_compra):
         total_pesos = 0
         total_dolares = 0
         for a in venta_accesorios:
-            accesorio = Accesorio.objects.get(id=a.accesorio_id)
-            # talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
-            moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
-            if accesorio.moneda_precio == "Pesos":
-                precio_en_pesos = int(accesorio.precio)
-                precio_en_dolares = int(accesorio.precio) / precio_dolar
-            else:
-                precio_en_dolares = int(accesorio.precio)
-                precio_en_pesos = int(precio_en_dolares) * precio_dolar
-            total_pesos = total_pesos + precio_en_pesos
-            total_dolares = total_dolares + precio_en_dolares
+            if int(a.codigo_compra) >= 1:
+                accesorio = Accesorio.objects.get(id=a.accesorio_id)
+                # talle = "Talle " + accesorio.talle if accesorio.talle != "Sin talle" else None
+                moneda = "$" if accesorio.moneda_precio == "Pesos" else "U$S"
+                if accesorio.moneda_precio == "Pesos":
+                    precio_en_pesos = int(accesorio.precio)
+                    precio_en_dolares = int(accesorio.precio) / precio_dolar
+                else:
+                    precio_en_dolares = int(accesorio.precio)
+                    precio_en_pesos = int(precio_en_dolares) * precio_dolar
+                total_pesos = total_pesos + precio_en_pesos
+                total_dolares = total_dolares + precio_en_dolares
 
-            if accesorio.talle == "Sin talle":
-                detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo
-            else:
-                detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo + " Talle " + accesorio.talle
-            
-            accesorio_data.append({
-                "detalle":detalle,
-                "precio": moneda + str(accesorio.precio),
-                "id_accesorio":accesorio.id
-            })
-            
-            accesorios_para_json = [
-                {
-                        "detalle":p["detalle"],
-                        "precio": p["precio"]
-                }
-                for p in accesorio_data
-            ]
+                if accesorio.talle == "Sin talle":
+                    detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo
+                else:
+                    detalle = accesorio.tipo + " " + accesorio.marca + " " + accesorio.modelo + " Talle " + accesorio.talle
+                
+                accesorio_data.append({
+                    "detalle":detalle,
+                    "precio": moneda + str(accesorio.precio),
+                    "id_accesorio":accesorio.id
+                })
+                
+                accesorios_para_json = [
+                    {
+                            "detalle":p["detalle"],
+                            "precio": p["precio"]
+                    }
+                    for p in accesorio_data
+                ]
 
         accesorio_json = json.dumps(accesorios_para_json)
         

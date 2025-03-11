@@ -19,6 +19,8 @@
         <select class="form-control" name="estado_accesorio" id="tipo_busqueda" onchange="tipo_busqueda()">
             <option value="cliente">Cliente</option>
             <option value="fecha_venta">Fecha de venta</option>
+            <option value="marca_modelo_moto">Moto</option>
+            <option value="accesorio">Accesorio</option>
 
         </select>
     </div>
@@ -48,6 +50,52 @@
             <a href="{% url 'Ventas' %}" class="btn btn-secondary">
                 <i class="fas fa-sync-alt"></i>
             </a>        
+        </div>
+    </form>
+
+    <form action="{% url 'VentaMoto' %}" enctype="multipart/form-data" method="get" id="busqueda_moto" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="marca_moto" placeholder="Marca">
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="modelo_moto" placeholder="Modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Ventas' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+        </div>
+    </form>
+
+    <form action="{% url 'VentaAccesorio' %}" enctype="multipart/form-data" method="get" id="busqueda_accesorio" style="display: none;">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <select class="form-control" name="tipo_accesorio" id="tipo_accesorio">
+                <option value="Aceite">Aceite</option>
+                <option value="Casco">Casco</option>
+                <option value="Cubremoto">Cubremoto</option>
+                <option value="Grasa de cadena">Grasa de cadena</option>
+                <option value="Guantes">Guantes</option>
+                <option value="Mecanismo">Mecanismo de casco</option>
+                <option value="Micas">Micas</option>
+                <option value="Pasamontaña">Pasamontaña</option>
+                <option value="Ropa">Ropa</option>
+                <option value="Slime">Slime</option>
+                <option value="Trancas">Trancas</option>
+                <option value="Valijas">Valijas</option>
+                <option value="Otro">Otro</option>
+            </select>
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="marca_accesorio" placeholder="Marca">
+            <span class="input-group-text">-</span>
+            <input type="text" class="form-control" name="modelo_accesorio" placeholder="Modelo">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'Ventas' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
         </div>
     </form>
 
@@ -88,29 +136,29 @@
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="Primera">
+                <a class="page-link" href="?page=1&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Primera">
                     <span aria-hidden="true">&laquo;&laquo;</span>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Anterior">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             {% endif %}
             {% for num in page_obj.paginator.page_range %}
             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                <a class="page-link" href="?page={{ num }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}">{{ num }}</a>
             </li>
             {% endfor %}
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Siguiente">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Última">
                     <span aria-hidden="true">&raquo;&raquo;</span>
                 </a>
             </li>
@@ -189,6 +237,7 @@
             {% endif %}
         </ul>
     </nav>
+    
 </div>
 <script>
     function tipo_busqueda() {
@@ -196,9 +245,13 @@
 
         var busqueda_cliente = document.getElementById("busqueda_cliente");
         var busqueda_fecha = document.getElementById("busqueda_fecha");
+        var busqueda_moto = document.getElementById("busqueda_moto");
+        var busqueda_accesorio = document.getElementById("busqueda_accesorio");
         
         busqueda_cliente.style.display = busqueda_tipo === "cliente" ? "block" : "none";
         busqueda_fecha.style.display = busqueda_tipo === "fecha_venta" ? "block" : "none";
+        busqueda_moto.style.display = busqueda_tipo === "marca_modelo_moto" ? "block" : "none";
+        busqueda_accesorio.style.display = busqueda_tipo === "accesorio" ? "block" : "none";
     }
 </script>
 {% endblock %}

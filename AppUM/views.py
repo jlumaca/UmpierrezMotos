@@ -2915,6 +2915,136 @@ def buscar_venta_fecha(req):
         pass
 
 
+def buscar_venta_marca_modelo_moto(req):
+    # try:
+            marca = req.GET.get('marca_moto', '')  # Cambiado a paréntesis
+            modelo = req.GET.get('modelo_moto', '')
+            resultados_motos = (
+                ComprasVentas.objects
+                .filter(tipo='V', moto__marca__contains=marca, moto__modelo__contains=modelo)
+                .select_related('moto','cliente')
+                .values(
+                    'id',
+                    'moto__marca', 
+                    'moto__modelo', 
+                    'fecha_compra', 
+                    'cliente__nombre',
+                    'cliente__apellido',
+                    'cliente__id'
+                ).order_by('-fecha_compra')
+            )
+
+            res_documentacion = []
+            for resultado in resultados_motos:
+                cv = ComprasVentas.objects.get(id=resultado['id'])
+                res_documentacion.append({
+                'moto': resultado
+            })
+
+            page_obj = funcion_paginas_varias(req,res_documentacion)
+            
+            resultados_accesorios = (
+                ClienteAccesorio.objects
+                .all()
+                .select_related('accesorio', 'cliente')
+                .values(
+                    'id',
+                    'accesorio__tipo',
+                    'accesorio__marca',
+                    'accesorio__modelo',
+                    'fecha_compra',
+                    'cliente__nombre',
+                    'cliente__apellido',
+                    'cliente__id'
+                
+                ).order_by('-fecha_compra')
+            )
+            res_facturas = []
+            for resultado_accesorio in resultados_accesorios:
+                    ca = ClienteAccesorio.objects.get(id=resultado_accesorio['id'])
+                    res_facturas.append({
+                    'accesorio': resultado_accesorio,
+                    'factura_documento': ca.factura_documento.url if ca.factura_documento else None
+                })
+            page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
+
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+    
+    # except Exception as e:
+    #     pass
+
+def buscar_venta_accesorio(req):
+    # try:
+            
+            resultados_motos = (
+                ComprasVentas.objects
+                .all()
+                .select_related('moto','cliente')
+                .values(
+                    'id',
+                    'moto__marca', 
+                    'moto__modelo', 
+                    'fecha_compra', 
+                    'cliente__nombre',
+                    'cliente__apellido',
+                    'cliente__id'
+                ).order_by('-fecha_compra')
+            )
+
+            res_documentacion = []
+            for resultado in resultados_motos:
+                cv = ComprasVentas.objects.get(id=resultado['id'])
+                res_documentacion.append({
+                'moto': resultado
+            })
+
+            page_obj = funcion_paginas_varias(req,res_documentacion)
+
+            tipo = req.GET.get('tipo_accesorio', '') or ''
+            marca = req.GET.get('marca_accesorio', '') or ''
+            modelo = req.GET.get('modelo_accesorio', '') or ''
+
+            # Filtrar accesorios
+            resultados_accesorios = (
+                ClienteAccesorio.objects
+                .filter(
+                    accesorio__tipo__icontains=tipo,
+                    accesorio__marca__icontains=marca,
+                    accesorio__modelo__icontains=modelo
+                )
+                .select_related('accesorio', 'cliente')
+                .values(
+                    'id',
+                    'accesorio__tipo',
+                    'accesorio__marca',
+                    'accesorio__modelo',
+                    'fecha_compra',
+                    'cliente__nombre',
+                    'cliente__apellido',
+                    'cliente__id'
+                ).order_by('-fecha_compra')
+            )
+
+            # Procesar facturas y documentos
+            res_facturas = [
+                {
+                    'accesorio': resultado,
+                    'factura_documento': ClienteAccesorio.objects.get(id=resultado['id']).factura_documento.url if ClienteAccesorio.objects.get(id=resultado['id']).factura_documento else None
+                }
+                for resultado in resultados_accesorios
+            ]
+
+            # Paginación
+            paginator = Paginator(res_facturas, 10)  # 10 registros por página
+            page_number = req.GET.get('page')
+            page_obj_accesorio = paginator.get_page(page_number)
+
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+    
+    # except Exception as e:
+    #     pass
+
+
 
 
 

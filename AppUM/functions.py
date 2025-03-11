@@ -493,7 +493,7 @@ def obtener_compras_accesorios(req,codigo_compra):
 
         accesorio_json = json.dumps(accesorios_para_json)
         
-        pagos = CuotasAccesorios.objects.filter(venta_id=id_venta).order_by('-id')
+        pagos = CuotasAccesorios.objects.filter(venta_id=id_venta,mostrar_reporte=1).order_by('-id')
         if pagos:
             p_pagos_data = [
                     {   

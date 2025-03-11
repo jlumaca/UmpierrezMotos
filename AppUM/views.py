@@ -1305,7 +1305,7 @@ def alta_paga_accesorio(req,id_venta):
         # validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
         # valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_venta,accesorio,"Accesorio",precio_dolar)
-        if (entrega_pesos > precio_total_pesos) or (entrega_dolares > precio_total_dolares):
+        if (entrega_pesos > precio_total_pesos and moneda == "Pesos") or (entrega_dolares > precio_total_dolares and moneda == "Dolares"):
             return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La entrega no puede ser superior al precio Total del o los accesorios","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         # elif validar_fecha_proximo_pago.date() < fecha_actual:
         #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
@@ -1314,7 +1314,7 @@ def alta_paga_accesorio(req,id_venta):
             # alta = alta_cuota_accesorio(req,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
             #alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
             #lista = [resto_dolares,resto_pesos,entrega_pesos,entrega_dolares]
-            alta = alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
+            alta = alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo,1)
             if alta.comprobante_pago:
                 comprobante_url = alta
             else:
@@ -1373,7 +1373,7 @@ def baja_paga_accesorio(req,id_ca):
                     caja.save()
                 mov.delete()
                 movimiento.delete()
-                cuota.delete()    
+            cuota.delete()    
             return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv,"codigo_compra":codigo_compra})
         else:
             return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"id_cv":id_cv,"codigo_compra":codigo_compra})
@@ -2084,23 +2084,34 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
         
         pagos_pesos = 0
         pagos_dolares = 0
+        total_accesorios_pesos = 0
+        total_accesorios_dolares = 0
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = float(dolar.precio_dolar_tienda)
         prueba = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra)
         for p in prueba:
+            #SUMAR TOTAL DE LA SUMA DEL PRECIO DE LOS ACCESORIOS
+            accesorio = Accesorio.objects.get(id=p.accesorio_id)
+            if accesorio.moneda_precio == "Pesos":
+                total_accesorios_pesos = total_accesorios_pesos + float(accesorio.precio)
+                total_accesorios_dolares = total_accesorios_pesos / precio_dolar
+            else:
+                total_accesorios_dolares = total_accesorios_dolares + float(accesorio.precio)
+                total_accesorios_pesos = total_accesorios_dolares * precio_dolar
             pagos = CuotasAccesorios.objects.filter(venta_id=p.id)
             if pagos.exists():
+                #SUMAR EL TOTAL DE LOS PAGOS REALIZADOSS
                 for pago in pagos:
-                    # 
-                    # pago.venta_id = id_venta
-                    if pago.moneda == "Pesos":
-                        pagos_pesos = pagos_pesos + float(pago.valor_pago_pesos)
-                        pagos_dolares = pagos_pesos / precio_dolar
-                    else:
-                        pagos_dolares = pagos_dolares + float(pago.valor_pago_dolares)
-                        pagos_pesos = pagos_dolares * precio_dolar
+                        id_venta_pagos = pago.venta_id
+                        print(id_venta_pagos)
+                        if pago.moneda == "Pesos":
+                            pagos_pesos = pagos_pesos + float(pago.valor_pago_pesos)
+                            pagos_dolares = pagos_pesos / precio_dolar
+                        else:
+                            pagos_dolares = pagos_dolares + float(pago.valor_pago_dolares)
+                            pagos_pesos = pagos_dolares * precio_dolar
                 
-    
+        #SI EXISTE AL MENOS UN PAGO QUE MUESTRE EL CHECKBOX DE REGISTRAR EGRESO O INGRESAR AL FONDO DEL CLIENTE
         if (pagos_pesos > 0) or (pagos_dolares > 0):
             mostrar_cbox = True
         else:
@@ -2108,6 +2119,7 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
 
         pagos_pesos = round(pagos_pesos,2)
         pagos_dolares = round(pagos_dolares,2)
+        
         info_pesos = "$" + str(pagos_pesos)
         info_dolares = "U$s" + str(pagos_dolares)
         accesorio = Accesorio.objects.get(id=venta.accesorio_id)
@@ -2179,19 +2191,39 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
                             comprobante = None
                         )
                         nuevo_fondo.save()
-                    pagos = CuotasAccesorios.objects.filter(venta_id=p.id).first()
-                    if pagos:
-                        pagos = CuotasAccesorios.objects.filter(venta_id=p.id).latest('id')
-                        if req.POST['moneda_devolucion'] == "Pesos":
-                            resto_pesos = float(pagos.cant_restante_pesos) + float(req.POST['monto_egreso'])
-                            resto_dolares = resto_pesos / precio_dolar
-                        else:
-                            resto_dolares = float(pagos.cant_restante_dolares) + float(req.POST['monto_egreso'])
-                            resto_pesos = resto_dolares * precio_dolar
+                    # pagos = CuotasAccesorios.objects.filter(venta_id=p.id).first()
+                    # if pagos:
+                    #     pagos = CuotasAccesorios.objects.filter(venta_id=p.id).latest('id')
+                    #     if req.POST['moneda_devolucion'] == "Pesos":
+                    #         resto_pesos = float(pagos.cant_restante_pesos) + float(req.POST['monto_egreso'])
+                    #         resto_dolares = resto_pesos / precio_dolar
+                    #     else:
+                    #         resto_dolares = float(pagos.cant_restante_dolares) + float(req.POST['monto_egreso'])
+                    #         resto_pesos = resto_dolares * precio_dolar
                         
-                        pagos.cant_restante_pesos = resto_pesos
-                        pagos.cant_restante_dolares = resto_dolares
-                        alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,req.POST['moneda_devolucion'],"Reajuste por baja de accesorio",precio_dolar,0,0,None,req.POST['forma_devolucion'],0)
+                    # prueba = ClienteAccesorio.objects.filter(codigo_compra=codigo_compra)
+                    pagos = CuotasAccesorios.objects.filter(venta_id=id_venta_pagos)
+                    if pagos.exists():
+                        accesorio_baja = Accesorio.objects.get(id=id_accesorio)
+                        if accesorio_baja.moneda_precio == "Pesos":
+                            resta_pesos = total_accesorios_pesos - float(accesorio_baja.precio) - pagos_pesos
+                            resta_dolares = resta_pesos / precio_dolar
+                        else:
+                            resta_dolares = total_accesorios_dolares - float(accesorio_baja.precio) - pagos_dolares
+                            resta_pesos = resta_dolares * precio_dolar
+                        
+                        if req.POST['moneda_devolucion'] == "Pesos":
+                            resta_pesos = resta_pesos + float(req.POST['monto_egreso'])
+                            resta_dolares = resta_pesos / precio_dolar
+                        else:
+                            resta_dolares = resta_dolares + float(req.POST['monto_egreso'])
+                            resta_pesos = resta_dolares * precio_dolar
+
+                        for p in pagos:
+                            p.venta_id = id_venta
+                            p.save()
+                        
+                        alta_cuota_accesorio(req,id_venta,resta_dolares,resta_pesos,req.POST['moneda_devolucion'],"Reajuste por baja de accesorio",precio_dolar,0,0,None,req.POST['forma_devolucion'],0,0)
                 messages.success(req, "Accesorio borrado de la ficha correctamente.")
                 return redirect(reverse('ClienteFicha', kwargs={'id_cliente': cliente.id}))
         else:

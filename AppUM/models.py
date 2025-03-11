@@ -172,6 +172,7 @@ class CuotasAccesorios(models.Model):
     comprobante_pago = models.FileField(upload_to='documentacion/facturas_accesorios/', null=True, blank=True)
     metodo_pago = models.CharField(max_length=20, blank=True)
     recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    mostrar_reporte = models.BooleanField(default=1)
 
 class Servicios(models.Model):
     fecha_ingreso = models.DateField()

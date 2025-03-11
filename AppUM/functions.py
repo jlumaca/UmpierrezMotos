@@ -745,6 +745,8 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
             p.text = p.text.replace('MOTO_MARCA', moto.marca)
         if 'MOTO_MODELO' in p.text:
             p.text = p.text.replace('MOTO_MODELO', moto.modelo)
+        if 'COLOR_MOTO' in p.text:
+            p.text = p.text.replace('COLOR_MOTO', moto.color)
         if 'MOTO_CILINDROS' in p.text:
             p.text = p.text.replace('MOTO_CILINDROS', str(moto.num_cilindros))
         if 'MOTO_MOTOR' in p.text:

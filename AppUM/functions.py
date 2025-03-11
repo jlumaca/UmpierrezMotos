@@ -1723,3 +1723,101 @@ def generar_compromiso_compra_venta_moto_ingreso(req,id_moto,id_cliente):
         #     os.remove(docx_file_path)
     # except Exception as e:
     #     pass
+
+def contexto_cliente_accesorio(req,mensaje,doc):
+        accesorios_seleccionados = req.session["accesorios_json"]
+
+        # Aquí puedes procesar la venta de los accesorios
+        # print("Accesorios seleccionados:", accesorios_seleccionados)
+        # if mostrar == 1:
+        # if req.method == "POST":
+        documento = doc
+        cliente = Cliente.objects.filter(documento=documento).first()
+        if cliente:
+            tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
+            tel_1 = tel1.telefono
+            tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
+
+            correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
+            correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
+            if tel2:
+                tel_2 = tel2.telefono
+            else:
+                tel_2 = None
+
+            if correo1:
+                c_1 = correo1.correo
+            else:
+                c_1 = None
+            
+            if correo2:
+                c_2 = correo1.correo
+            else:
+                c_2 = None
+            data_accesorio = []
+            print(accesorios_seleccionados)
+            accesorios_ids = [int(accs) for accs in accesorios_seleccionados]
+
+# Buscamos todos los accesorios en una sola consulta
+            accesorios = Accesorio.objects.filter(id__in=accesorios_ids)
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = float(dolar.precio_dolar_tienda)
+            precio_total_pesos = 0
+            for accesorio in accesorios:
+                  # Convertimos a entero
+                a = Accesorio.objects.get(id=accesorio.id)
+                print(a.tipo)
+                data_accesorio.append({
+                    "accesorios":a,
+                    "precio":"$" + str(a.precio) if a.moneda_precio == "Pesos" else "U$s" + str(a.precio)
+                })
+                if a.moneda_precio == "Pesos":
+                    precio_total_pesos = precio_total_pesos + float(a.precio)
+                    precio_total_dolares = precio_total_pesos / precio_dolar
+                else:
+                    precio_total_dolares = precio_total_dolares + float(a.precio)
+                    precio_total_pesos = precio_total_dolares * precio_dolar
+                
+
+            print("LLEGA LINEA 1118")
+
+            fondos = ClienteFondos.objects.filter(cliente_id=cliente.id).first()
+            if fondos:
+                ult_fondo = ClienteFondos.objects.filter(cliente_id=cliente.id).latest('id')
+                total_fondos_pesos = float(ult_fondo.total_pesos)
+                total_fondos_dolares = float(ult_fondo.total_dolares)
+                precio_restante_pesos = float(precio_total_pesos) - total_fondos_pesos
+                precio_restante_dolares = float(precio_total_dolares) - total_fondos_dolares
+            else:
+                total_fondos_pesos = 0
+                total_fondos_dolares = 0
+                precio_restante_pesos = 0
+                precio_restante_dolares = 0
+            
+            if (precio_restante_pesos < 0) or (precio_restante_dolares < 0):
+                precio_restante_pesos = 0
+                precio_restante_dolares = 0
+            
+            contexto = {
+                "datos_accesorio":True,
+                "cliente":cliente,
+                "accesorios":data_accesorio,
+                "tel1":tel_1,
+                "tel2":tel_2,
+                "correo1":c_1,
+                "correo2":c_2,
+                "precio_total_pesos":str(round(precio_total_pesos,2)).replace(',', '.'),
+                "precio_total_dolares":str(round(precio_total_dolares,2)).replace(',', '.'),
+                "precio_restante_pesos":str(round(precio_restante_pesos,2)).replace(',', '.'),
+                "precio_restante_dolares":str(round(precio_restante_dolares,2)).replace(',', '.'),
+                "cantidad_destinada_pesos":int(total_fondos_pesos),
+                "cantidad_destinada_dolares":int(total_fondos_dolares),
+                "error_message":mensaje
+            }
+            
+            return contexto
+        else:
+            contexto = {
+                "datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "
+            }
+            return contexto

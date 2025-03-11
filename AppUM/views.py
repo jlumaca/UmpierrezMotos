@@ -1079,55 +1079,109 @@ def detalles_accesorio(req,id_accesorio):
 
 @admin_required
 def venta_accesorio(req,id_cliente):
-    try:
-        doc_factura = req.FILES.get('factura_accesorio')
-        # if not doc_factura:
-        #     doc_factura = None
-        # nueva_venta_accesorio = ClienteAccesorio(
-        #     fecha_compra = datetime.now(),
-        #     accesorio_id = id_accesorio,
-        #     cliente_id = id_cliente,
-        #     factura_documento = doc_factura
-        # )
-        # nueva_venta_accesorio.save()
-        # accesorio = Accesorio.objects.get(id=id_accesorio)
-        # accesorio.activo = 0
-        # accesorio.save()
-        # messages.success(req, "Venta generada con éxito")
-        # return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-        ult_compra_accesorio = ClienteAccesorio.objects.exists()
-        if ult_compra_accesorio:
-            ult_compra_accesorio = ClienteAccesorio.objects.latest('codigo_compra')
-            codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
-            print("CODIGO: " + str(codigo_compra))
-            print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
+    # try:
+        fondos = ClienteFondos.objects.filter(cliente_id=id_cliente).first()
+        if fondos:
+            ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
+            ult_fondo_pesos = float(ult_fondo.total_pesos)
+            ult_fondo_dolares = float(ult_fondo.total_dolares)
+        cbox_fondos = 'incluir_fondos' in req.POST
+        if cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > ult_fondo_pesos) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > ult_fondo_dolares)):
+            cliente = Cliente.objects.get(id=id_cliente)
+            contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el fondo total del cliente",cliente.documento)
+            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
+        
+        elif cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > float(req.POST['precio_total_pesos'])) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > float(req.POST['precio_total_dolares']))):
+            cliente = Cliente.objects.get(id=id_cliente)
+            contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el precio total del o los accesorios",cliente.documento)
+            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
+        
         else:
-            codigo_compra = 1
-        accesorios = req.session["accesorios_json"]
-        for accesorio in accesorios:
-            # print("INSERT ACCESORIO ID: " + str(accesorio))
-            # print("ID CLIENTE: " + str(id_cliente))
-            # print(codigo_venta)
-            if not doc_factura:
-                doc_factura = None
-            nueva_venta_accesorio = ClienteAccesorio(
-                fecha_compra = datetime.now(),
-                accesorio_id = accesorio,
-                cliente_id = id_cliente,
-                factura_documento = doc_factura,
-                codigo_compra = codigo_compra,
-                forma_de_pago = req.POST['forma_pago']
-            )
-            nueva_venta_accesorio.save()
-            
-            a = Accesorio.objects.get(id=accesorio)
-            a.activo = 0
-            a.seleccionado = 0
-            a.save()
-        messages.success(req, "Venta generada con éxito")
-        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
-    except Exception as e:
-        return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
+            doc_factura = req.FILES.get('factura_accesorio')
+            ult_compra_accesorio = ClienteAccesorio.objects.exists()
+            if ult_compra_accesorio:
+                ult_compra_accesorio = ClienteAccesorio.objects.latest('codigo_compra')
+                codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
+                print("CODIGO: " + str(codigo_compra))
+                print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
+            else:
+                codigo_compra = 1
+            accesorios = req.session["accesorios_json"]
+            total_pesos = 0
+            total_dolares = 0
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = float(dolar.precio_dolar_tienda)
+            for accesorio in accesorios:
+                # print("INSERT ACCESORIO ID: " + str(accesorio))
+                # print("ID CLIENTE: " + str(id_cliente))
+                # print(codigo_venta)
+                if not doc_factura:
+                    doc_factura = None
+                nueva_venta_accesorio = ClienteAccesorio(
+                    fecha_compra = datetime.now(),
+                    accesorio_id = accesorio,
+                    cliente_id = id_cliente,
+                    factura_documento = doc_factura,
+                    codigo_compra = codigo_compra,
+                    forma_de_pago = req.POST['forma_pago']
+                )
+                nueva_venta_accesorio.save()
+                a = Accesorio.objects.get(id=accesorio)
+                if a.moneda_precio == "Pesos":
+                    total_pesos = total_pesos + float(a.precio)
+                    total_dolares = total_pesos / precio_dolar
+                else:
+                    total_dolares = total_dolares + float(a.precio)
+                    total_pesos = total_dolares * precio_dolar
+
+                
+                a = Accesorio.objects.get(id=accesorio)
+                a.activo = 0
+                a.seleccionado = 0
+                a.save()
+                if cbox_fondos:
+                    if fondos:
+                        ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
+                        if float(ult_fondo.total_pesos) > 0 or float(ult_fondo.total_dolares) > 0:
+                        
+                            if req.POST['moneda_venta'] == "Pesos": 
+                                resta_fondo_pesos = float(ult_fondo.total_pesos) - float(req.POST['cantidad_destinada_pesos'])
+                                resta_fondo_dolares = resta_fondo_pesos / precio_dolar
+                                ingreso_pesos = 0 - float(req.POST['cantidad_destinada_pesos'])
+                                ingreso_dolares = ingreso_pesos / precio_dolar
+                                entrega_pesos = abs(ingreso_pesos)
+                                entrega_dolares = abs(ingreso_dolares)
+
+                            else:
+                                resta_fondo_dolares = float(ult_fondo.total_dolares) - float(req.POST['cantidad_destinada_dolares'])
+                                resta_fondo_pesos = resta_fondo_dolares * precio_dolar
+                                ingreso_dolares = 0 - float(req.POST['cantidad_destinada_dolares'])
+                                ingreso_pesos = ingreso_dolares * precio_dolar
+                            
+                            resto_pesos = total_pesos - entrega_pesos
+                            resto_dolares = total_dolares - entrega_dolares
+                            if resto_pesos <= 0 or resto_dolares <= 0:
+                                resto_dolares = 0
+                                resto_pesos = 0
+                            alta_cuota_accesorio(req,nueva_venta_accesorio.id,resto_dolares,resto_pesos,req.POST['moneda_venta'],"Pago realizado con los fondos del cliente",precio_dolar,entrega_dolares,entrega_pesos,None,"Efectivo",0,1)
+                            nuevo_fondo = ClienteFondos(
+                                    cliente_id = id_cliente,
+                                    moneda = req.POST['moneda_venta'],
+                                    ingreso_pesos = ingreso_pesos,
+                                    ingreso_dolares = ingreso_dolares,
+                                    fecha = datetime.now(),
+                                    total_pesos = resta_fondo_pesos,
+                                    total_dolares = resta_fondo_dolares,
+                                    tipo = "Retiro",
+                                    metodo = "----------",
+                                    comprobante = None 
+                                )
+                            nuevo_fondo.save()
+
+            messages.success(req, "Venta generada con éxito")
+            return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+    # except Exception as e:
+    #     return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
     
 def prueba_varios_accesorios(req):
     # accesorios_json = req.POST.get("accesorios", "[]")  # Capturamos el JSON enviado
@@ -1162,64 +1216,10 @@ def cliente_venta_accesorio(req,mostrar,vender):
 
     # # Guardar en sesión para que no se pierdan
     #     req.session["accesorios_json"] = accesorios_json
-        accesorios_seleccionados = req.session["accesorios_json"]
-
-        # Aquí puedes procesar la venta de los accesorios
-        # print("Accesorios seleccionados:", accesorios_seleccionados)
-        # if mostrar == 1:
-        # if req.method == "POST":
-        documento = req.POST['tipo_documento'] + str(req.POST['documento'])
-        cliente = Cliente.objects.filter(documento=documento).first()
-        if cliente:
-            tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
-            tel_1 = tel1.telefono
-            tel2 = ClienteTelefono.objects.filter(principal=0,cliente_id=cliente.id).first()
-
-            correo1 = ClienteCorreo.objects.filter(principal=1,cliente_id=cliente.id).first()
-            correo2 = ClienteCorreo.objects.filter(principal=0,cliente_id=cliente.id).first()
-            if tel2:
-                tel_2 = tel2.telefono
-            else:
-                tel_2 = None
-
-            if correo1:
-                c_1 = correo1.correo
-            else:
-                c_1 = None
-            
-            if correo2:
-                c_2 = correo1.correo
-            else:
-                c_2 = None
-            data_accesorio = []
-            print(accesorios_seleccionados)
-            accesorios_ids = [int(accs) for accs in accesorios_seleccionados]
-
-# Buscamos todos los accesorios en una sola consulta
-            accesorios = Accesorio.objects.filter(id__in=accesorios_ids)
-            precio_total = 0
-            for accesorio in accesorios:
-                  # Convertimos a entero
-                a = Accesorio.objects.get(id=accesorio.id)
-                print(a.tipo)
-                data_accesorio.append({
-                    "accesorios":a
-                })
-                precio_total = precio_total + int(a.precio)
-
-            print("LLEGA LINEA 1118")
-            
-            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_accesorio":True,
-                                                                                "cliente":cliente,
-                                                                                "accesorios":data_accesorio,
-                                                                                "tel1":tel_1,
-                                                                                "tel2":tel_2,
-                                                                                "correo1":c_1,
-                                                                                "correo2":c_2,
-                                                                                "precio_total":int(precio_total)
-                                                                            })
-        else:
-            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+    documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+    contexto = contexto_cliente_accesorio(req,None,documento)
+    return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
+                                                                            
 
     # except Exception as e:
     #     pass

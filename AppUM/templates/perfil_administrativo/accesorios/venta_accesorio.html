@@ -89,7 +89,7 @@
                         <td>{{ accesorios.accesorios.marca }}</td>
                         <td>{{ accesorios.accesorios.modelo}}</td>
                         <td>{{ accesorios.accesorios.talle}}</td>
-                        <td>{{ accesorios.accesorios.precio}}</td>
+                        <td>{{ accesorios.precio}}</td>
                         
                     </tr>
                     {% endfor %}
@@ -98,15 +98,58 @@
 
 
             <div class="mb-3">
-                <label for="precio" class="form-label">Precio total</label>
-                <input value="{{ precio_total }}" type="number" class="form-control" name="precio_total" readonly>
+                <label for="precio" class="form-label">Precio Total $</label>
+                <input value="{{ precio_total_pesos|default:'0.00' }}" type="number" class="form-control" name="precio_total_pesos" readonly>
             </div> 
+
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Precio Total U$s</label>
+                <input value="{{ precio_total_dolares|default:'0.00' }}" type="number" class="form-control" name="precio_total_dolares" id="precio_sin_recargo" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Precio en Pesos restante con fondos incluidos</label>
+                <input value="{{ precio_restante_pesos }}" type="number" class="form-control" name="precio_sin_recargo" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="recargo" class="form-label">Precio en Dolares restante con fondos incluidos</label>
+                <input value="{{ precio_restante_dolares }}" type="number" class="form-control" name="precio_sin_recargo" readonly>
+            </div>
+
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Moneda Venta</label>
+                <div class="input-group">
+                    <select class="form-control" name="moneda_venta" id="moneda_venta" onchange="toggleFields()">
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3" id="cant_destinada_pesos">
+                <label for="recargo" class="form-label">Cantidad destinada de los fondos en Pesos</label>
+                <input value="{{ cantidad_destinada_pesos }}" type="number" class="form-control" id="txt_cant_destinada_pesos" name="cantidad_destinada_pesos" required>
+            </div>
+
+            <div class="mb-3" id="cant_destinada_dolares" style="display: none;">
+                <label for="recargo" class="form-label">Cantidad destinada de los fondos en Dolares</label>
+                <input value="{{ cantidad_destinada_dolares }}" type="number" class="form-control" id="txt_cant_destinada_dolares" name="cantidad_destinada_dolares" required>
+            </div>
+            
+
+            <div class="mb-3">
+                <input type="checkbox" id="sin_num_motor" name="incluir_fondos" class="form-check-input" checked>
+                <label for="toggleMatr" class="form-check-label">Incluir los fondos en la compra</label>
+            </div>
 
             <h4>Forma de pago</h4>
             <div class="mb-3">
                 <label for="precio" class="form-label">Forma de pago</label>
                 <textarea class="form-control" name="forma_pago" id="descripcion" placeholder="Detalle la forma de pago acordada con el cliente" rows="3"></textarea>
             </div> 
+
+            
             
             <h4>Documentación</h4>
             <div class="mb-3" id="libreta_propiedad_div">
@@ -198,6 +241,26 @@ function calcularCuotas() {
     document.getElementById("valor_cuota").innerText = `$/U$S${valorCuota.toFixed(2)}`;
 }
 
+function toggleFields(){
+    var moneda_venta = document.getElementById("moneda_venta").value;
+    var cant_destinada_pesos = document.getElementById("cant_destinada_pesos");
+    var cant_destinada_dolares = document.getElementById("cant_destinada_dolares");
+    var txt_cant_destinada_pesos = document.getElementById("txt_cant_destinada_pesos");
+    var txt_cant_destinada_dolares = document.getElementById("txt_cant_destinada_dolares");
+    if (moneda_venta === "Pesos"){
+        cant_destinada_pesos.style.display = "block";
+        cant_destinada_dolares.style.display = "none";
+        txt_cant_destinada_dolares.required = false;
+        txt_cant_destinada_pesos.required = true;
+
+    }else{
+        cant_destinada_pesos.style.display = "none";
+        cant_destinada_dolares.style.display = "block";
+        txt_cant_destinada_pesos.required = false;
+        txt_cant_destinada_dolares.required = true;
+        
+    }
+}
 
 
 

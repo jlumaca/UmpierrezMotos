@@ -425,6 +425,14 @@
                             {% if not item.certificado_venta %}
                                 <a href="{% url 'CargarCertificado' item.moto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-book"></i>Generar CV</button></a>                         
                             {% endif %}
+                            {% if item.id_cliente_anterior %}
+                                <a href="{% url 'ClienteFicha' item.id_cliente_anterior %}">
+                                    <button class="btn btn-sm btn-info">
+                                        <i class="fas fa-user"></i> Dueño anterior
+                                    </button>
+                                </a>                        
+                            {% endif %}
+                              
                     </td>
                     </tr>
 

@@ -1758,13 +1758,20 @@ def ficha_cliente(req,id_cliente):
     res_documentacion = []
     for resultado in resultados_motos:
             cv = ComprasVentas.objects.get(id=resultado['id'])
+            c_anterior = ComprasVentas.objects.filter(moto_id=resultado['moto__id'],tipo="CV").first()
+            if c_anterior:
+                c_anterior = ComprasVentas.objects.filter(moto_id=resultado['moto__id'],tipo="CV").latest('id')
+                id_cliente_anterior = c_anterior.cliente_id
+            else:
+                id_cliente_anterior = None
             res_documentacion.append({
             'moto': resultado,
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
             'facturas': cv.facturas.url if cv.facturas else None,
-            'tipo':cv.tipo
+            'tipo':cv.tipo,
+            "id_cliente_anterior":id_cliente_anterior
             # 'cantidad_cuotas':cv.cantidad_cuotas
         })
 

@@ -265,6 +265,13 @@
                             <button class="btn btn-sm btn-warning" onclick="toggleLibretaCV('{{ forloop.counter }}')">
                                 <i class="fas fa-book"></i> Libreta
                             </button>
+                            {% if item.id_cliente_actual %}
+                                <a href="{% url 'ClienteFicha' item.id_cliente_actual %}">
+                                    <button class="btn btn-sm btn-info">
+                                        <i class="fas fa-user"></i> Dueño actual
+                                    </button>
+                                </a>                        
+                            {% endif %}
                         </td>
                     </tr>
 

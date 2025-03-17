@@ -160,23 +160,29 @@ def acceso_login(req):
                             renderizar_en = "login/rol_usuario.html"
                             roles = ['Administrativo','Mecanico jefe']
                             contexto = {"roles":roles}
+                            # ejecutar_cada_5_min()
                         elif administrativo and mecanico_empleado:
                             renderizar_en = "login/rol_usuario.html"
                             roles = ['Administrativo','Mecanico empleado']
                             contexto = {"roles":roles}
+                            # ejecutar_cada_5_min()
                         elif administrativo:
                             renderizar_en = "perfil_administrativo/bienvenida.html"
                             contexto = {}
+                            # ejecutar_cada_5_min()
                         elif mecanico_jefe:
                             renderizar_en = "perfil_taller/padre_perfil_taller.html"
                             contexto = {"resultado":"MEC JEFE"}
+                            # ejecutar_cada_5_min()
                         elif mecanico_empleado:
                             renderizar_en = "perfil_taller/padre_perfil_taller.html"
                             roles = ['Mecanico empleado']
                             contexto = {"roles":roles}
+                            # ejecutar_cada_5_min()
                         else:
                             renderizar_en = "login/login.html"
                             contexto = {"resultado":"Usuario dado de baja, consulte con el administrador del sistema"}
+                            # ejecutar_cada_5_min()
                 else:
                     #ACCEDER CON SUPER USUARIO
                     renderizar_en = "login/rol_usuario.html"

@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ProyectoUM.settings")  # Asegúrate de que el nombre sea correcto
 django.setup()
 
-from AppUM.models import ClienteAccesorio  # Importación absoluta
+from AppUM.models import *  # Importación absoluta
 # import pywhatkit
 
 # contact = '+59892344264'
@@ -45,27 +45,56 @@ codigo_compra = 0
 
 
 #ASIGNAR CODIGO DE VENTA A LAS COMPRAS DE LOS CLIENTES
-i = 0
-j = 0
-for compra in compras:
-    cantidad_compras_dia = ClienteAccesorio.objects.filter(fecha_compra=compra.fecha_compra).count()
+# i = 0
+# j = 0
+# for compra in compras:
+#     cantidad_compras_dia = ClienteAccesorio.objects.filter(fecha_compra=compra.fecha_compra).count()
     
-    if cantidad_compras_dia == 1:
-        codigo_compra = codigo_compra + 1
-    else:
-        #MAS DE UNA COMPRA
-        cliente = ClienteAccesorio.objects.filter(cliente=compra.cliente,fecha_compra=compra.fecha_compra).count()
-        i = compra.cliente_id
-        if cliente == 1 or i != j:
-            codigo_compra = codigo_compra + 1
-            j = i
-        # j = compra.cliente_id
+#     if cantidad_compras_dia == 1:
+#         codigo_compra = codigo_compra + 1
+#     else:
+#         #MAS DE UNA COMPRA
+#         cliente = ClienteAccesorio.objects.filter(cliente=compra.cliente,fecha_compra=compra.fecha_compra).count()
+#         i = compra.cliente_id
+#         if cliente == 1 or i != j:
+#             codigo_compra = codigo_compra + 1
+#             j = i
+#         # j = compra.cliente_id
 
 
-    compra.codigo_compra = codigo_compra
-    compra.save()
-    
+#     compra.codigo_compra = codigo_compra
+#     compra.save()
 
+
+#LIMPIAR BASE DE DATOS
+# CuotasAccesorios.objects.all().delete()
+# ClienteCorreo.objects.all().delete()
+# ClienteTelefono.objects.all().delete()
+# ClienteFondos.objects.all().delete()
+# AnotacionesServicio.objects.all().delete()
+# ClienteAccesorio.objects.all().delete()
+# ClienteRepuestosPiezas.objects.all().delete()
+# CuotasFinanciacion.objects.all().delete()
+# Financiamientos.objects.all().delete()
+# MovimientoPagoAccesorio.objects.all().delete()
+# MovimientoPagoMoto.objects.all().delete()
+# CuotasMoto.objects.all().delete()
+# Accesorio.objects.all().delete()
+# ComprasVentas.objects.all().delete()
+# Movimientos.objects.all().delete()
+# Caja.objects.all().delete()
+# Matriculas.objects.all().delete()
+# MecanicosServicios.objects.all().delete()
+# NotificacionPersonal.objects.all().delete()
+# Notificaciones.objects.all().delete()
+# Pedidos.objects.all().delete()
+# RepuestosPiezasServicios.objects.all().delete()
+# Rubros.objects.all().delete()
+# RepuestosPiezas.objects.all().delete()
+# TareasServicios.objects.all().delete()
+# Servicios.objects.all().delete()
+# Moto.objects.all().delete()
+# Cliente.objects.all().delete()
 
 
 

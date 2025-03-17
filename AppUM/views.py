@@ -1085,6 +1085,8 @@ def venta_accesorio(req,id_cliente):
             ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
             ult_fondo_pesos = float(ult_fondo.total_pesos)
             ult_fondo_dolares = float(ult_fondo.total_dolares)
+        else: 
+            ult_fondo = None
         cbox_fondos = 'incluir_fondos' in req.POST
         if cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > ult_fondo_pesos) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > ult_fondo_dolares)):
             cliente = Cliente.objects.get(id=id_cliente)

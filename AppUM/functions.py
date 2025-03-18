@@ -1827,34 +1827,34 @@ def contexto_cliente_accesorio(req,mensaje,doc):
             }
             return contexto
 
-def sincronizar_bd_servidor_laptop():
-    origen_db = r"\\192.168.1.100\UmpierrezMotos\db.sqlite3"
-    destino_db = r"C:\UmpierrezMotos\db.sqlite3"
+# def sincronizar_bd_servidor_laptop():
+#     origen_db = "//192.168.1.100/UmpierrezMotos/db.sqlite3"
+#     destino_db = "D:/UmpierrezMotos/UmpierrezMotos/db.sqlite3"
     
-    if not os.path.exists(origen_db):
-        print("❌ No se encontró la base de datos en el servidor. Verifica la conexión.")
-        return  # No sigue con la copia si el archivo no existe
+#     if not os.path.exists(origen_db):
+#         print("❌ No se encontró la base de datos en el servidor. Verifica la conexión.")
+#         return  # No sigue con la copia si el archivo no existe
 
-    try:
-        shutil.copy2(origen_db, destino_db)
-        print("✅ Base de datos sincronizada correctamente.")
-    except Exception as e:
-        print(f"❌ Error al sincronizar la base de datos: {e}")
+#     try:
+#         shutil.copy2(origen_db, destino_db)
+#         print("✅ Base de datos sincronizada correctamente.")
+#     except Exception as e:
+#         print(f"❌ Error al sincronizar la base de datos: {e}")
 
-def sincronizar_media_servidor_laptop():
-    origen_media = r"\\192.168.1.100\UmpierrezMotos\media"
-    destino_media = r"C:\UmpierrezMotos\media"
+# def sincronizar_media_servidor_laptop():
+#     origen_media = r"\\192.168.1.100\UmpierrezMotos\media"
+#     destino_media = r"D:\UmpierrezMotos\UmpierrezMotos\media"
 
-    for root, _, files in os.walk(origen_media):
-        for file in files:
-            origen_archivo = os.path.join(root, file)
-            destino_archivo = os.path.join(destino_media, file)
+#     for root, _, files in os.walk(origen_media):
+#         for file in files:
+#             origen_archivo = os.path.join(root, file)
+#             destino_archivo = os.path.join(destino_media, file)
 
-            if not os.path.exists(destino_archivo):  # Solo copiar si no existe en la laptop
-                shutil.copy2(origen_archivo, destino_archivo)
-                print(f"✅ Copiado {file} al servidor.")
+#             if not os.path.exists(destino_archivo):  # Solo copiar si no existe en la laptop
+#                 shutil.copy2(origen_archivo, destino_archivo)
+#                 print(f"✅ Copiado {file} al servidor.")
 
-    print("✅ Carpeta 'media' sincronizada.")
+#     print("✅ Carpeta 'media' sincronizada.")
 
 # def prueba_ejec():
 #     print("SE EJECUTA...")
@@ -1863,7 +1863,11 @@ def sincronizar_media_servidor_laptop():
 #     while True:
 #         # sincronizar_bd_servidor_laptop()
 #         sincronizar_bd_servidor_laptop()
-#         time.sleep(5)  # Espera 5 minutos (300 segundos)
+#         time.sleep(300)  # Espera 5 minutos (300 segundos)
+
+# def ejecutar_hilo():
+#     hilo_sincronizacion = threading.Thread(target=ejecutar_cada_5_min, daemon=True)
+#     hilo_sincronizacion.start()
 
 # # Crear un hilo en segundo plano
 # hilo = threading.Thread(target=ejecutar_cada_5_min, daemon=True)

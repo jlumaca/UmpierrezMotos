@@ -193,6 +193,8 @@ def acceso_login(req):
             else:
                 return render(req,"login/login.html",{"resultado":"Error usuario y/o pass"})
         else:
+            # ejecutar_cada_5_min()
+            # ejecutar_hilo()
             return render(req,"login/login.html",{})
     except Exception as e:
         return render(req,"login/login.html",{"resultado":e})

@@ -1,0 +1,115 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    
+        <h4>Cambio de propietario</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+    
+        </div>
+        {% endif %}
+        {% if error_message_cliente %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message_cliente }}<a href="{% url 'ClienteAlta' %}">aquí</a>
+            </div>
+        {% endif %}
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+            
+    <form action="{% url 'FormCambioDuenio' id_moto %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <div class="mb-3" id="documento_cliente">
+            <label for="documento" class="form-label">Documento del cliente</label>
+            <div class="input-group">
+                <select class="form-control" name="tipo_documento" id="tipo_documento">
+                    <option value="CI">Cédula</option>
+                    <option value="PAS">Pasaporte</option>
+                    <option value="DNI">DNI</option>
+                </select>
+                <span class="input-group-text">-</span>
+                <input type="number" class="form-control" name="documento" placeholder="Documento">
+                <!-- Cambiar el botón a tipo submit -->
+            </div>
+            
+        </div>
+        <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+    
+    {% if cliente %}
+    <h4>Datos del cliente</h4>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Nombre</th>
+                <td>{{ cliente.nombre }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Apellido</th>
+                <td>{{ cliente.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Dirección</th>
+                <td>{{ cliente.domicilio }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Telefono/Celular</th>
+                <td>{{ telefono }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Correo</th>
+                <td>{{ correo }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h4>Datos de la moto</h4>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Marca</th>
+                <td>{{ moto.marca }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Modelo</th>
+                <td>{{ moto.modelo }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Motor (cc)</th>
+                <td>{{ moto.motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Año</th>
+                <td>{{ moto.anio }}</td>
+            </tr>
+
+
+            <tr>
+                <th scope="row">Número de Motor</th>
+                <td>{{ moto.num_motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Chasis</th>
+                <td>{{ moto.num_chasis }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Color</th>
+                <td>{{ moto.color }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <form action="{% url 'CambioDuenio' id_moto cliente.id  %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+    {% endif %}
+</div>
+
+
+
+
+{% endblock %}

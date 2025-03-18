@@ -889,6 +889,41 @@ def modificacion_moto(req,id_moto):
         return render(req,"perfil_administrativo/motos/modificacion_moto.html",{'datos_moto': moto_upd,
             "letras_matricula":letras_matricula,
             "num_matricula":num_matricula,"active_page": 'Motos',"error_message":str(e)}) 
+
+def form_cambio_propietario_moto(req,id_moto):
+    try:
+        if req.method == "POST":
+            moto = Moto.objects.get(id=id_moto)
+            documento = req.POST['tipo_documento'] + str(req.POST['documento'])
+            print("DOCUMENTO ES: " + documento)
+            cliente = Cliente.objects.filter(documento=documento).first()
+            if cliente:
+                return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto,
+                                                                                    "cliente":cliente,
+                                                                                    "moto":moto})
+            else:
+                return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto,
+                                                                                    "cliente":None,
+                                                                                    "moto":None,
+                                                                                    "error_message_cliente":"El cliente no existe, para ingresarlo haga clic "})
+        else:
+            return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto})
+    except Exception as e:
+        pass
+
+def cambio_duenio_moto(req,id_moto,id_cliente):
+    try:
+        nuevo_duenio = ComprasVentas(
+            fecha_compra = datetime.now(),
+            tipo = "CV",
+            cliente_id = id_cliente,
+            moto_id = id_moto
+        )
+        nuevo_duenio.save()
+        messages.success(req, "Propietario actual modificado con éxito.")
+        return redirect('Motos')
+    except Exception as e:
+        pass
     
 
 @admin_required
@@ -910,6 +945,7 @@ def detalles_moto(req,id_moto):
     compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,tipo="CV").first()
 
     if compra_venta:
+        compra_venta = ComprasVentas.objects.filter(moto_id=id_moto,tipo="CV").latest('id')
         cliente_id = compra_venta.cliente_id
         telefono_principal_cliente = ClienteTelefono.objects.filter(cliente_id=cliente_id,principal=1).first()
         correo_cliente = ClienteCorreo.objects.filter(cliente_id=cliente_id,principal=1).first()

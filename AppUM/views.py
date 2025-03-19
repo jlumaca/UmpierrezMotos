@@ -1772,14 +1772,14 @@ def ficha_cliente(req,id_cliente):
             c_actual = ComprasVentas.objects.filter(moto_id=resultado['moto__id'],tipo="V").first()
             if c_actual:
                 c_actual = ComprasVentas.objects.filter(moto_id=resultado['moto__id'],tipo="V").latest('id')
-                id_cliente = c_actual.cliente_id
+                id_cliente_actual = c_actual.cliente_id
             else:
-                id_cliente = None
+                id_cliente_actual = None
             res_documentacion_ma.append({
             'moto': resultado,
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
             'compra_venta': cv.compra_venta.url if cv.compra_venta else None,
-            "id_cliente_actual":id_cliente
+            "id_cliente_actual":id_cliente_actual
         })
 
 

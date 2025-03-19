@@ -2687,6 +2687,8 @@ def venta_moto(req,id_moto,id_cliente):
                 else:
                     mostrar_error = fondos > ultimo_pago.cant_restante_dolares
                     mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad restante con los pagos realizados" if mostrar_error else None
+            else:
+                mostrar_error = False
         else:
             mostrar_error = False
 

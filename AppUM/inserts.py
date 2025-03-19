@@ -117,6 +117,8 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
             )
     nueva_cuota.save()
 
+    return nueva_cuota
+
 #
 def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo,id_venta,producto):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)

@@ -73,6 +73,7 @@
                 <td>{{ moto.moto.cliente__nombre }} {{ moto.moto.cliente__apellido }}</td>
                 <td>
                     <a href="{% url 'MotoVentaForm' moto.moto.moto__id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                    <a href="{% url 'BajaReservaMoto' moto.moto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                 </td>
             </tr>
             {% endfor %}

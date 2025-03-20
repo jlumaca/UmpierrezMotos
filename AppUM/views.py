@@ -256,8 +256,15 @@ def seleccion_rol(req):
 @admin_required
 def vista_inventario_motos(req):
     motos = Moto.objects.filter(pertenece_tienda=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
     logo_um = Logos.objects.get(id=1)
-    page_obj = funcion_paginas_varias(req,motos)
+    page_obj = funcion_paginas_varias(req,data_motos)
     return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 @admin_required
@@ -3683,13 +3690,26 @@ def reservar_moto(req,id_moto,id_cliente):
             personal = Personal.objects.filter(usuario=usuario.username).first()
             insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso extra",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,pago_reserva,"moto")
         
-        moto.pertenece_tienda = 0
+    
         moto.save()
         messages.success(req, "Moto reservada con éxito.")
         return redirect('Motos')
         
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
+
+
+def baja_reserva_moto(req,id_reserva):
+    try:
+        if req.method == "POST":
+            reserva = ComprasVentas.objects.get(id=id_reserva)
+            reserva.delete()
+            messages.success(req, "Reserva borrada con éxito.")
+            return redirect('Reservas')
+        else:
+            return render(req,"perfil_administrativo/motos/baja_reserva.html",{"active_page":"Reservas"})
+    except Exception as e:
+        pass
 
 @admin_required
 def estadisticas(req):

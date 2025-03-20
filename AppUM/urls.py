@@ -179,6 +179,7 @@ urlpatterns = [
      path('reservas', views.reservas,name="Reservas"),
      path('moto_reserva_form/<int:id_moto>', views.form_reservar_moto,name="MotoReservaForm"),
      path('moto_reserva/<int:id_moto>/<int:id_cliente>', views.reservar_moto,name="MotoReserva"),
+     path('baja_moto_reserva/<int:id_reserva>', views.baja_reserva_moto,name="BajaReservaMoto"),
      path('alta_pago/<int:id_cv>', views.alta_pago,name="AltaPago"),
      path('baja_pago/<int:id_cm>', views.baja_pago,name="BajaPago"),
      path('refinanciar/<int:id_cv>', views.refinanciar_pagos,name="Refinanciar"),

@@ -172,6 +172,7 @@ urlpatterns = [
      path('moto_venta_form/<int:id_moto>', views.form_venta_moto,name="MotoVentaForm"),#SOLO RENDERIZA FORM Y DATOS
      path('detalles_cuotas/<int:id_cv>', views.detalles_cuotas,name="DetallesCuotas"),
      path('moto_venta/<int:id_moto>/<int:id_cliente>', views.venta_moto,name="MotoVenta"),#
+     path('baja_moto_vendida/<int:id_venta>', views.baja_venta_moto,name="BajaMotoVendida"),#
      path('generar_compromiso_compra_venta/<int:id_moto>/<int:id_cliente>', views.generar_compromiso_compra_venta,name="GCCV"),
 
      

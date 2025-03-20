@@ -237,10 +237,10 @@
                     <td>{{ moto.moto.fecha_ingreso|date:"d/m/Y" }}</td>
                     <td>
                         {% if moto.estado == "Reservada" %}
-    <span class="badge badge-primary" style="background-color: blue;">Reservada</span>
-{% else %}
-    <span class="badge badge-success" style="background-color: green;">En stock</span>
-{% endif %}
+                            <span class="badge badge-primary" style="background-color: blue;">Reservada</span>
+                        {% else %}
+                            <span class="badge badge-success" style="background-color: green;">En stock</span>
+                        {% endif %}
                     </td>
                     <td>
                         {% if moto.moto.precio > 0 %}
@@ -260,10 +260,10 @@
                         </a>
                         {% endif %}
                         <a href="{% url 'MotoDetalles' moto.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
-                        {% if moto.estado == "Reservada" %}
+                        {% if moto.estado != "Reservada" %}
                             <a href="{% url 'MotoVentaForm' moto.moto.id %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                            <a href="{% url 'MotoReservaForm' moto.moto.id %}"><button class="btn btn-sm btn-primary"><i class="fas fa-calendar-check"></i></button></a>
                         {% endif %}
-                        <a href="{% url 'MotoReservaForm' moto.moto.id %}"><button class="btn btn-sm btn-primary"><i class="fas fa-calendar-check"></i></button></a>
                     </td>
                 </tr>
                 {% endfor %}

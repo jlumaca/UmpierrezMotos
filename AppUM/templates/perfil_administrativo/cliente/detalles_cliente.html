@@ -416,6 +416,13 @@
                         
                         <td>
                             <a href="{% url 'DetallesCuotas' item.moto.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                            {% if item.boton_borrar %}
+                            
+                            <button class="btn btn-sm btn-danger" onclick="mostrarConfirmacionVenta('{{ item.moto.id }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                            
                             {% if not item.libreta %}
                                 <button class="btn btn-sm btn-warning" onclick="toggleLibreta('{{ forloop.counter }}')">
                                     <i class="fas fa-book"></i> Libreta
@@ -443,6 +450,16 @@
                     </td>
                     </tr>
 
+                    
+                    <tr id="confirmacion-row-borrar-moto-vendida-{{ item.moto.id }}" class="d-none">
+                        <td colspan="3" class="text-center text-danger">
+                            <p>¿Estás seguro de que deseas borrar la venta?</p>
+                            <a href="{% url 'BajaMotoVendida' item.moto.id %}"><button class="btn btn-sm btn-danger">Confirmar</button></a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelarEliminacionVenta('{{ item.moto.id }}')">Cancelar</button>
+                        </td>
+                    </tr>
+                    
+                    
                     <tr id="confirmacion-row-libreta-{{ item.moto.id }}" class="d-none">
                         <td colspan="3" class="text-center text-danger">
                             <p>¿Estás seguro de que deseas borrar la libreta de propiedad asociada a esta venta?</p>
@@ -724,6 +741,23 @@ function toggleFormulario(id) {
             forma_pago.style.display = "none";
             comprobante_pago.style.display = "none";
         }
+    }
+    
+    function mostrarConfirmacionVenta(cvId) {
+    // Ocultar otros formularios de confirmación visibles
+    document.querySelectorAll("tr[id^='confirmacion-row-']").forEach(row => {
+        row.classList.add("d-none");
+    });
+
+    // Mostrar el formulario de confirmación debajo de la fila correspondiente
+    const confirmacionRow = document.getElementById(`confirmacion-row-borrar-moto-vendida-${cvId}`);
+    confirmacionRow.classList.remove("d-none");
+    }
+
+    function cancelarEliminacionVenta(cvId) {
+        // Ocultar el mensaje de confirmación
+        const confirmacion = document.getElementById(`confirmacion-row-borrar-moto-vendida-${cvId}`);
+        confirmacion.classList.add('d-none');
     }
 </script>
 {% endblock %}

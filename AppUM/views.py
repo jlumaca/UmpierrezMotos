@@ -1824,6 +1824,11 @@ def ficha_cliente(req,id_cliente):
                 id_cliente_anterior = c_anterior.cliente_id
             else:
                 id_cliente_anterior = None
+            pagos = CuotasMoto.objects.filter(venta_id=resultado['id']).first()
+            if pagos:
+                mostrar_boton = False
+            else:
+                mostrar_boton = True
             res_documentacion.append({
             'moto': resultado,
             'libreta': cv.fotocopia_libreta.url if cv.fotocopia_libreta else None,
@@ -1831,7 +1836,8 @@ def ficha_cliente(req,id_cliente):
             'certificado_venta': cv.certificado_venta.url if cv.certificado_venta else None,
             'facturas': cv.facturas.url if cv.facturas else None,
             'tipo':cv.tipo,
-            "id_cliente_anterior":id_cliente_anterior
+            "id_cliente_anterior":id_cliente_anterior,
+            "boton_borrar":mostrar_boton
             # 'cantidad_cuotas':cv.cantidad_cuotas
         })
 
@@ -3703,11 +3709,34 @@ def baja_reserva_moto(req,id_reserva):
     try:
         if req.method == "POST":
             reserva = ComprasVentas.objects.get(id=id_reserva)
+            senias = CuotasMoto.objects.filter(venta_id=id_reserva)
+            if senias.exists:
+                for senia in senias:
+                    mov_pago = MovimientoPagoMoto.objects.filter(pago_id=senia.id).first()
+                    id_pago = mov_pago.movimiento_id
+                    mov = Movimientos.objects.get(id=id_pago)
+                    mov_pago.delete()
+                    mov.delete()
+                    senia.delete()
             reserva.delete()
             messages.success(req, "Reserva borrada con éxito.")
             return redirect('Reservas')
         else:
             return render(req,"perfil_administrativo/motos/baja_reserva.html",{"active_page":"Reservas"})
+    except Exception as e:
+        pass
+
+def baja_venta_moto(req,id_venta):
+    try:
+        venta = ComprasVentas.objects.get(id=id_venta)
+        id_cliente = venta.cliente_id
+        id_moto = venta.moto_id
+        venta.delete()
+        moto = Moto.objects.get(id=id_moto)
+        moto.pertenece_tienda = 1
+        moto.save()
+        messages.success(req, "Venta borrada con éxito.")
+        return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")      
     except Exception as e:
         pass
 

@@ -641,54 +641,119 @@ def baja_moto(req,id_moto):
 @admin_required
 def busqueda_codigo(req):
     codigo = req.GET.get('codigo')
-    motos = Moto.objects.filter(id=codigo,pertenece_tienda=1)
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    # motos = Moto.objects.filter(id=codigo,pertenece_tienda=1)
+    # page_obj = funcion_paginas_varias(req,motos)
+    # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    motos = Moto.objects.filter(id=codigo,pertenece_tienda=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 @admin_required
 def busqueda_marca(req):
     marca = req.GET.get('marca')
+    # motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1).order_by('-fecha_ingreso')
+    # page_obj = funcion_paginas_varias(req,motos)
+    # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
     motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 @admin_required
 def busqueda_modelo(req):
     modelo = req.GET.get('modelo')
     motos = Moto.objects.filter(modelo__icontains=modelo,pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 @admin_required
 def busqueda_marca_modelo(req):
     marca = req.GET.get('marca_modelo')
     modelo = req.GET.get('modelo_marca')
     motos = Moto.objects.filter(marca__icontains=marca,modelo__icontains=modelo,pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 @admin_required
 def busqueda_anio(req):
     anio = req.GET.get('anio')
     motos = Moto.objects.filter(anio=anio,pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
 @admin_required
 def busqueda_kms(req):
     km_minimo = req.GET.get('km_minimo')
     km_maximo = req.GET.get('km_maximo')
     motos = Moto.objects.filter(kilometros__range=(km_minimo, km_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 @admin_required
 def busqueda_precio(req):
     precio_minimo = req.GET.get('precio_minimo')
     precio_maximo = req.GET.get('precio_maximo')
     motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,motos)
-    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 @admin_required
 def busqueda_matricula(req):
@@ -698,8 +763,20 @@ def busqueda_matricula(req):
 
     busq_matricula = Matriculas.objects.filter(matricula = matricula).first()
     if busq_matricula:
-        moto = Moto.objects.filter(id=busq_matricula.moto_id,pertenece_tienda=1)
-        page_obj = funcion_paginas_varias(req,moto)
+        motos = Moto.objects.filter(id=busq_matricula.moto_id,pertenece_tienda=1)
+        # motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
+        data_motos = []
+        for moto in motos:
+            reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+            data_motos.append({
+                "moto":moto,
+                "estado":"Reservada" if reservada else "En stock"
+            })
+        logo_um = Logos.objects.get(id=1)
+        page_obj = funcion_paginas_varias(req,data_motos)
+        # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+        # page_obj = funcion_paginas_varias(req,moto)
         contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}
     else:
         contexto = {'page_obj': None,"motos":None,"active_page": 'Motos'}
@@ -709,26 +786,50 @@ def busqueda_matricula(req):
 @admin_required
 def busqueda_tipo_moto(req):
     tipo = req.GET.get('tipo_moto')
-    moto = Moto.objects.filter(tipo=tipo).order_by('-fecha_ingreso')
-    page_obj = funcion_paginas_varias(req,moto) 
-    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
-    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+    motos = Moto.objects.filter(tipo=tipo,pertenece_tienda=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 @admin_required
 def busqueda_num_motor(req):
     num_motor = req.GET.get('num_motor').upper()
-    moto = Moto.objects.filter(num_motor=num_motor)
-    page_obj = funcion_paginas_varias(req,moto) 
-    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
-    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+    motos = Moto.objects.filter(num_motor=num_motor)
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 @admin_required
 def busqueda_num_chasis(req):
     num_chasis = req.GET.get('num_chasis').upper()
-    moto = Moto.objects.filter(num_chasis=num_chasis)
-    page_obj = funcion_paginas_varias(req,moto) 
-    contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}  
-    return render(req,"perfil_administrativo/motos/motos.html",contexto)
+    motos = Moto.objects.filter(num_chasis=num_chasis)
+    data_motos = []
+    for moto in motos:
+        reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
+        data_motos.append({
+            "moto":moto,
+            "estado":"Reservada" if reservada else "En stock"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
 
 
 

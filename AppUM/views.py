@@ -6427,6 +6427,9 @@ def detalles_cliente_taller(req,id_cliente):
 
 def servicios_por_moto_de_cliente(req,id_moto,id_cliente):
     try:
+        moto = Moto.objects.get(id=id_moto)
+        matricula = Matriculas.objects.filter(moto_id=id_moto).first()
+        matr_actual = matricula.matricula if matricula else None
         servicios_moto = (
         Servicios.objects
         .all()
@@ -6439,7 +6442,7 @@ def servicios_por_moto_de_cliente(req,id_moto,id_cliente):
            ).order_by('-fecha_ingreso')
         )
         page_obj = funcion_paginas_varias(req,servicios_moto)
-        return render(req,"perfil_taller/clientes/servicios_por_moto.html",{"page_obj":page_obj,"id_cliente":id_cliente})                                                          
+        return render(req,"perfil_taller/clientes/servicios_por_moto.html",{"page_obj":page_obj,"id_cliente":id_cliente,"moto":moto,"matr_actual":matr_actual})                                                          
                                                                    
     except Exception as e:
         pass

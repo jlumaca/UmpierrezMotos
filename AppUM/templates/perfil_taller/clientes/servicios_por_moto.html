@@ -12,6 +12,59 @@
     {% endfor %}
 {% endif %}
 <div class="table-container" id="inventarios">
+    <h4>Detalles de la moto</h4>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Marca</th>
+                <td>{{ moto.marca }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Modelo</th>
+                <td>{{ moto.modelo }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Motor (cc)</th>
+                <td>{{ moto.motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Kilómetros</th>
+                <td>{{ moto.kilometros }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Motor</th>
+                <td>
+                    {% if moto.contiene_num_motor %}
+                    {{ moto.num_motor }}
+                    {% else %}
+                    Sin número de motor
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Chasis</th>
+                <td>
+                    {% if moto.contiene_num_chasis %}
+                    {{ moto.num_chasis }}
+                    {% else %}
+                    Sin número de chasis
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Cantidad de cilidros</th>
+                <td>{{ moto.num_cilindros }}</td>
+            </tr>
+            {% if matr_actual %}
+            <tr>
+                <th scope="row">Matrícula</th>
+                <td>{{ matr_actual }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
     <h3>Historial de servicios</h3>
       
     <table class="table">

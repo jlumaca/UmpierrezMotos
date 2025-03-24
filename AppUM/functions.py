@@ -1768,6 +1768,7 @@ def contexto_cliente_accesorio(req,mensaje,doc):
             dolar = PrecioDolar.objects.get(id=1)
             precio_dolar = float(dolar.precio_dolar_tienda)
             precio_total_pesos = 0
+            precio_total_dolares = 0
             for accesorio in accesorios:
                   # Convertimos a entero
                 a = Accesorio.objects.get(id=accesorio.id)

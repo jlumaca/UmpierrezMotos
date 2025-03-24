@@ -6160,7 +6160,7 @@ def buscar_nom_ape_taller(req):
     return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj,"clientes":cliente})
 
 def alta_cliente_taller(req):
-    try:
+    # try:
         if req.method == "POST":
             tipo_doc = req.POST['tipo_doc']
             doc = req.POST['doc']
@@ -6190,7 +6190,7 @@ def alta_cliente_taller(req):
                 correo_secundario = None
             
             doc_compuesto = tipo_doc + str(doc)
-            existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
+            existe_cliente = valid_cliente(doc_compuesto)
             if existe_cliente == "existe_cliente":
                 return render(req,"perfil_taller/clientes/alta_cliente.html",{"error_message":"El cliente ya existe"})
             # elif existe_cliente == "existe_telefono_1":
@@ -6243,8 +6243,8 @@ def alta_cliente_taller(req):
                 return redirect('ClientesTaller')
         else:
             return render(req,"perfil_taller/clientes/alta_cliente.html",{})
-    except Exception as e:
-        pass  
+    # except Exception as e:
+    #     pass  
 
 def modificacion_cliente_taller(req,id_cliente):
     try:

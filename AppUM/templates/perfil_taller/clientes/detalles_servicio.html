@@ -114,12 +114,13 @@ form label input[type="number"] {
 
     const datos_fijos = JSON.parse('{{ datos_fijos|escapejs }}');
     const tareas = JSON.parse('{{ tareas|escapejs }}');
+    const observaciones = JSON.parse('{{ observaciones|escapejs }}');
     
     console.log(datos_fijos);
     console.log(tareas);
 
     function prueba(){
-    generarResumen(datos_fijos,tareas);
+    generarResumen(datos_fijos,tareas,observaciones);
     }
 
 //     function generarResumen(datos_fijos, tareas) {
@@ -231,7 +232,7 @@ form label input[type="number"] {
 //     ventana.print();
 // }
 
-function generarResumen(datos_fijos, tareas) {
+function generarResumen(datos_fijos, tareas,observaciones) {
     // Construir el nuevo template HTML
     let resumenHTML = `
         <html lang="es">
@@ -289,20 +290,36 @@ function generarResumen(datos_fijos, tareas) {
                 </div>
                 
                 <div class="section">
-                    <h3>Información de la Moto</h3>
-                    <p><strong>Moto:</strong> ${datos_fijos.detalle || "N/A"}</p>
-                    <p><strong>Fecha del Servicio:</strong> ${datos_fijos.fecha || "N/A"}</p>
-                </div>
-                
-                <div class="section">
-                    <h3>Información del Cliente</h3>
-                    <p><strong>Cliente:</strong> ${datos_fijos.cliente || "N/A"}</p>
-                </div>
-                
-                <div class="section">
-                    <h3>Tipo de Servicio</h3>
-                    <p><strong>${datos_fijos.tipo_servicio || "N/A"}</strong></p>
-                </div>
+    <h3>Información de la Moto</h3>
+    <table style="border-collapse: collapse; width: 100%; text-align: left;">
+        <tr>
+            <th style="border: 1px solid black; padding: 5px;">Moto</th>
+            <th style="border: 1px solid black; padding: 5px;">Matrícula</th>
+            <th style="border: 1px solid black; padding: 5px;">Número de motor</th>
+            <th style="border: 1px solid black; padding: 5px;">Número de chasis</th>
+        </tr>
+        <tr>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.detalle || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.matricula || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.num_motor || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.num_chasis || "N/A"}</td>
+        </tr>
+    </table>
+</div>
+
+
+                    
+                    <div class="section">
+                        <h3>Información del Cliente</h3>
+                        <p><strong>Cliente:</strong> ${datos_fijos.cliente || "N/A"}</p>
+                        </div>
+                        
+                    <div class="section">
+                        <h3>Información del Servicio</h3>
+                        <p><strong>Tipo:</strong> ${datos_fijos.tipo_servicio || "N/A"}</p>
+                        <p><strong>Fecha:</strong> ${datos_fijos.fecha || "N/A"}</p>
+                        <p><strong>Fecha próximo servicio:</strong> ${datos_fijos.fecha || "N/A"}</p>
+                    </div>
                 
                 <div class="section">
                     <h3>Tareas Realizadas</h3>
@@ -320,6 +337,39 @@ function generarResumen(datos_fijos, tareas) {
             resumenHTML += `
                 <tr>
                     <td>${tarea.tareas || "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        resumenHTML += `
+            <tr>
+                <td colspan="1" style="text-align: center;">No se encontraron tareas.</td>
+            </tr>
+        `;
+    }
+
+    resumenHTML += `
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="section">
+                    <h3>Observaciones</h3>
+                    <table class="service-tasks">
+                        <thead>
+                            <tr>
+                                <th>Tarea</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+    if (observaciones && observaciones.length > 0) {
+        observaciones.forEach(obs => {
+            resumenHTML += `
+                <tr>
+                    <td>${obs.observaciones || "N/A"}</td>
                 </tr>
             `;
         });

@@ -1150,12 +1150,17 @@ def json_para_servicio(id_s):
     #             "tipo_servicio":servicio.titulo
     #         }
     #     ]
-
+    matricula = Matriculas.objects.filter(moto_id=servicio.moto_id).first()
+    matr_actual = matricula.matricula if matricula else "No contiene"
     datos_fijos = {
                 "detalle":moto.marca + " " + moto.modelo,
+                "num_motor":moto.num_motor if moto.contiene_num_motor else "No contiene",
+                "num_chasis":moto.num_chasis if moto.contiene_num_chasis else "No contiene",
+                "matricula":matr_actual,
                 "cliente":cliente.nombre + " " + cliente.apellido,
                 "precio":int(servicio.precio),
                 "fecha":servicio.fecha_ingreso.strftime('%d-%m-%Y'),
+                "fecha":servicio.fecha_prox_servicio.strftime('%d-%m-%Y') if servicio.fecha_prox_servicio else "No contiene",
                 "tipo_servicio":servicio.titulo
             }
     json_datos_fijos = json.dumps(datos_fijos)
@@ -1169,9 +1174,20 @@ def json_para_servicio(id_s):
             ]
     json_tareas = json.dumps(tareas_servicio)
 
+
+    observaciones = AnotacionesServicio.objects.filter(servicio_id=id_s)
+    obs_servicio = [
+                {   
+                    "observaciones":obs.anotaciones,
+                }
+                for obs in observaciones
+            ]
+    json_observaciones = json.dumps(obs_servicio)
+
     data = [
         json_datos_fijos,
-        json_tareas
+        json_tareas,
+        json_observaciones
     ]
     return data
 

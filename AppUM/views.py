@@ -6464,7 +6464,8 @@ def detalle_de_cada_servicio_de_moto(req,id_s,id_cliente):
                                                                             "fecha_cierre":contexto[13],
                                                                             "id_cliente":id_cliente,
                                                                             "datos_fijos":datos[0],
-                                                                            "tareas":datos[1]
+                                                                            "tareas":datos[1],
+                                                                            "observaciones":datos[2]
                                                                             })
 
 def pedidos(req):

@@ -1,0 +1,165 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    .descripcion-celda {
+        max-width: 300px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    .imagen-moto {
+        display: block;
+        max-width: 300px;
+        max-height: 200px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="table-container" id="motoDetails">
+    <h4>Detalles de la moto</h4>
+
+    {% if moto.foto %}
+        <div class="text-center">
+            <img src="{{ moto.foto.url }}" alt="Foto de la moto" class="imagen-moto">
+        </div>
+    {% else %}
+        <div class="text-center mt-3">
+            <div class="alert alert-warning" role="alert">
+                Esta moto no tiene una foto disponible.
+            </div>
+        </div>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Marca</th>
+                <td>{{ moto.marca }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Modelo</th>
+                <td>{{ moto.modelo }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Motor (cc)</th>
+                <td>{{ moto.motor }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Año</th>
+                <td>{{ moto.anio }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Estado</th>
+                <td>{{ moto.estado }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Kilómetros</th>
+                <td>{{ moto.kilometros }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Motor</th>
+                <td>
+                    {% if moto.contiene_num_motor %}
+                    {{ moto.num_motor }}
+                    {% else %}
+                    Sin número de motor
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Número de Chasis</th>
+                <td>
+                    {% if moto.contiene_num_chasis %}
+                    {{ moto.num_chasis }}
+                    {% else %}
+                    Sin número de chasis
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Cantidad de cilidros</th>
+                <td>{{ moto.num_cilindros }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Cantidad de pasajeros</th>
+                <td>{{ moto.cantidad_pasajeros }}</td>
+            </tr>
+            {% if matr_actual %}
+            <tr>
+                <th scope="row">Matrícula</th>
+                <td>{{ matr_actual }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th scope="row">Color</th>
+                <td>{{ moto.color }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Precio (USD)</th>
+                <td>
+                    {% if moto.precio == 0 %}
+                    Sin precio
+                    {% else %}
+                    {{ moto.precio }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Descripción</th>
+                <td class="descripcion-celda">{{ descripcion }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% if cliente %}
+    <h4>Datos del propietario</h4>
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">Nombre</th>
+                <td>{{ cliente.nombre }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Apellido</th>
+                <td>{{ cliente.apellido }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Dirección</th>
+                <td>{{ cliente.calle }} {{ cliente.numero }} {% if cliente.num_apartamento %} Apartamento {{ cliente.num_apartamento }} {% endif %}, {{ cliente.ciudad }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Telefono/Celular</th>
+                <td>{{ telefono_principal }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Correo</th>
+                <td>{{ correo }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
+    {% if libreta %}
+            <a href="{{ libreta }}" class="btn btn-info" target="_blank">Ver libreta</a>
+        {% else %}
+            <div class="alert alert-warning mb-0" role="alert">
+                No existe libreta de propiedad.
+            </div>
+        {% endif %}
+    {% if pdf %}
+        <a href="{{ pdf }}" class="btn btn-primary" target="_blank">Ver PDF</a>
+    {% else %}
+        <div class="alert alert-info mt-3" role="alert">
+            No hay un PDF disponible para esta moto.
+        </div>
+    {% endif %}
+
+    <a href="{% url 'Motos' %}" class="btn btn-secondary">Volver</a>
+</div>
+
+{% endblock %}

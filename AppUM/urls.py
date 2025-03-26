@@ -243,6 +243,10 @@ urlpatterns = [
      path('venta_repuesto/<int:id_rp>/<int:id_cliente>', views.venta_repuesto,name="VentaRepuestoPieza"),
 
 
+     path('motos_taller/', views.vista_inventario_motos_taller,name="MotosTaller"),
+     path('alta_moto_taller/', views.alta_moto_taller,name="AltaMotoTaller"),
+
+
 
 
 

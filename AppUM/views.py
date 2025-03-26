@@ -6874,3 +6874,102 @@ def venta_repuesto(req,id_rp,id_cliente):
     
 def calculadora_pagos(req):
     return render(req, "perfil_administrativo/calculadora/calculadora.html", {})
+
+def vista_inventario_motos_taller(req):
+    motos = Moto.objects.filter(pertenece_taller=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+def alta_moto_taller(req):
+    # try:
+        if req.method == "POST":
+            checkbox_num_motor = 'sin_num_motor' in req.POST
+            if checkbox_num_motor:
+                num_motor = crear_num_motor()
+                contiene_num_motor = 0
+            else:
+                num_motor = req.POST['num_motor_moto'].upper()
+                contiene_num_motor = 1
+
+            checkbox_num_chasis = 'sin_num_chasis' in req.POST
+            if checkbox_num_chasis:
+                num_chasis = crear_num_chasis()
+                contiene_num_chasis = 0
+            else:
+                num_chasis = req.POST['num_chasis_moto'].upper()
+                contiene_num_chasis = 1
+
+            if req.POST['matricula_letras'] and req.POST['matricula_numeros']:
+                matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
+                matr_moto = Matriculas.objects.filter(matricula=matricula).first()
+                if matr_moto:
+                    existe_matr = True
+                else:
+                    existe_matr = False
+            else:
+                matricula = None
+                existe_matr = False
+
+            existe_num_motor = Moto.objects.filter(num_motor=num_motor).first()
+            existe_num_chasis = Moto.objects.filter(num_chasis=num_chasis).first()
+            modificar = False
+            if existe_num_motor:
+                if existe_num_motor.pertenece_taller == 1:
+                    return render(req,"perfil_taller/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            "error_message":"Ya existe el número de motor ingresado",
+                                                                            })
+                else:
+                    modificar = True
+            elif existe_num_chasis:
+                if existe_num_chasis.pertenece_taller == 1:
+                    return render(req,"perfil_taller/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            "error_message":"Ya existe el número de chasis ingresado",
+                                                                            })
+                else:
+                    modificar = True
+            elif existe_matr:
+                return render(req,"perfil_taller/motos/alta_moto.html",{
+                                                                            "active_page": 'Motos',
+                                                                            "error_message":"Ya existe la matrícula ingresada",
+                                                                            })
+            else:
+                if modificar:
+                    moto = Moto.objects.filter(num_motor=num_motor).first()
+                    moto.pertenece_taller = 1
+                    moto.save()
+                else:
+                    marca = req.POST['marca_moto'].upper()
+                    modelo = req.POST['modelo_moto'].upper()
+                    foto = req.FILES.get('foto_moto')
+                    nueva_moto = insert_moto(marca,modelo,None,"Usada",req.POST['motor_moto'],None,None,None,None,num_motor,num_chasis,req.POST['num_cilindros'],None,0,1,req.POST['descripcion_moto'],foto,req.POST['tipo_moto'],contiene_num_motor,contiene_num_chasis)
+                    if req.POST['matricula_letras'] and req.POST['matricula_numeros']:
+                        matricula = req.POST['matricula_letras'].upper() + str(req.POST['matricula_numeros'])
+                        nueva_matr = Matriculas(
+                            matricula = matricula,
+                            moto_id = nueva_moto.id
+                        )
+                        nueva_matr.save()
+                messages.success(req, "Moto ingresada con éxito")
+                return redirect('MotosTaller')
+        else:
+            return render(req,"perfil_taller/motos/alta_moto.html",{})
+    # except Exception as e:
+    #     pass

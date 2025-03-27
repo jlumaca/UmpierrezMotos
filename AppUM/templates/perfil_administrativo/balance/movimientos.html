@@ -17,7 +17,7 @@
 {% endif %}
 <div class="table-container" id="inventarios">
     
-    <h3>Datos sobre la Caja en Efectivo</h3>
+    <h3>Datos sobre la caja</h3>
     <table class="table">
         <thead>
             <tr>
@@ -31,15 +31,64 @@
         <tbody>
                 <tr>
                     <td>{{ monto_inicial }}</td>
-                    <td>${{ total_ingresos_efectivo_pesos }}/U$s{{ total_ingresos_efectivo_dolares }}</td>        
+                    <td>${{ total_ingresos_efectivo_pesos }}/U$s{{ total_ingresos_efectivo_dolares }}</td>
+                    <td>${{ total_ingresos_transferencia_pesos }}/U$s{{ total_ingresos_transferencia_dolares }}</td>
+                    <td>
+                        ${{ total_ingresos_debito_pesos }}/U$s{{ total_ingresos_debito_dolares }}
+                    </td>
                     <td>${{ total_egresos_efectivo_pesos }}/U$s{{ total_egresos_efectivo_dolares }}</td>
+                    <td>${{ total_egresos_transferencia_pesos }}/U$s{{ total_egresos_transferencia_dolares }}</td>
+                    <td>${{ total_egresos_debito_pesos }}/U$s{{ total_egresos_debito_dolares }}</td>
                     <td>{{ saldo_caja }}</td>
                     <td>{{ saldo_sistema }}</td>
                 </tr>
         </tbody>
     </table>
-   
+    <h3>Resumen de caja del Día</h3>
+    <table class="table" id="tabla-resumen">
+        <thead>
+            <tr>  
+                <th>Ganancias del día</th>
+                <th>Egresos del día</th>
+                <th>Ganancias netas del día</th>
+                <th>Ingresos extras del día</th> 
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>${{ ganancias_dia }}/U$s{{ ganancias_dia_dolares }}</td>
+                    <td>${{ egresos_dia }}/U$s{{ egresos_dia_dolares }}</td>  
+                    <td>${{ ganancias_netas_dia }}/U$s{{ ganancias_netas_dia_dolares }}</td>
+                    <td>${{ ingresos_extra_dia }}/U$s{{ ingresos_extra_dia_dolares }}</td>
+                </tr>
+        </tbody>
+    </table>
 
+    <h3>Resumen de caja del Mes</h3>
+    <table class="table" id="tabla-resumen">
+        <thead>
+            <tr>
+                <th>Ganancias del mes</th>
+                
+                <th>Egresos del mes</th>
+                <th>Ganancias netas del mes</th>
+                
+                <th>Ingresos extras del mes</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>${{ ganancias_mes }}/U$s{{ ganancias_mes_dolares }}</td>
+                    <td>
+                        ${{ egresos_mes }}/U$s{{ egresos_mes_dolares }}
+                    </td>
+                    <td>${{ ganancias_netas_mes }}/U$s{{ ganancias_netas_mes_dolares }}</td>
+                    <td>${{ ingresos_extra_mes }}/U$s{{ ingresos_extra_mes_dolares }}</td>
+                    
+                </tr>
+        </tbody>
+    </table>
     <h3>Ver detalles</h3>
     <div class="mb-3" id="busqueda_detalles">
         <label for="documento" class="form-label">Ver detalles por</label>
@@ -155,6 +204,15 @@
                 </select>
             </div>
             <div class="mb-3">
+                <label for="estado" class="form-label">Metodo Egreso</label>
+                <select class="form-control" name="metodo_monto_ingreso">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Debito">Debito</option>
+                    <option value="Credito">Credito</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="certificado" class="form-label">Monto Ingreso:</label>
                 <input type="number" class="form-control" id="ingresos" placeholder="Ingresos" name="ingresos" required>
             </div>
@@ -189,6 +247,15 @@
                 <select class="form-control" name="moneda_monto_egreso">
                     <option value="Pesos">Pesos</option>
                     <option value="Dolares">Dolares</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Metodo Egreso</label>
+                <select class="form-control" name="metodo_monto_egreso">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Debito">Debito</option>
+                    <option value="Credito">Credito</option>
                 </select>
             </div>
             <div class="mb-3">

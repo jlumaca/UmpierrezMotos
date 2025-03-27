@@ -4247,14 +4247,10 @@ def abrir_caja(req):
                                  + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
                 total_dolares_a_pesos = total_dolares * precio_dolar
                 total_dolares_a_pesos = round(total_dolares_a_pesos,2)
-                caja_ahorro_pesos = float(req.POST['caja_ahorro_pesos'])
-                caja_ahorro_dolares = float(req.POST['caja_ahorro_dolares'])
-                caja_ahorro_dolares_a_pesos = caja_ahorro_dolares * precio_dolar
-                caja_ahorro_dolares_a_pesos = round(caja_ahorro_dolares_a_pesos,2)
                 saldo_inicial = (
                     total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
                     +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
-                    + caja_ahorro_pesos + caja_ahorro_dolares_a_pesos
+                   
                 )
 
                 print("SALDO INICIAL ES: " +str(saldo_inicial))
@@ -4309,8 +4305,8 @@ def ingresos_caja(req,id_caja):
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
             moneda = req.POST['moneda_monto_ingreso']
-            metodo = req.POST['metodo_monto_ingreso']
-            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,moneda,None,metodo,0,0,None,None)
+            
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,moneda,None,"Efectivo",0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Rubro ingresado con éxito")
             return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
@@ -4347,8 +4343,7 @@ def egresos_caja(req,id_caja):
             rubro.cantidad_usos = int(rubro.cantidad_usos) + 1
             rubro.save()
             moneda = req.POST['moneda_monto_egreso']
-            metodo = req.POST['metodo_monto_egreso']
-            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,moneda,nombre_rubro,metodo,0,0,None,None)
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,moneda,nombre_rubro,"Efectivo",0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Rubro ingresado con éxito")
             return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
@@ -4393,14 +4388,9 @@ def saldo_final_caja(req,id_caja):
                                     + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
                     total_dolares_a_pesos = total_dolares * precio_dolar
                     total_dolares_a_pesos = round(total_dolares_a_pesos,2)
-                    caja_ahorro_pesos = float(req.POST['caja_ahorro_pesos'])
-                    caja_ahorro_dolares = float(req.POST['caja_ahorro_dolares'])
-                    caja_ahorro_dolares_a_pesos = caja_ahorro_dolares * precio_dolar
-                    caja_ahorro_dolares_a_pesos = round(caja_ahorro_dolares_a_pesos,2)
                     saldo_final = (
                         total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
                         +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
-                        + caja_ahorro_pesos + caja_ahorro_dolares_a_pesos
                     )
 
                     caja = Caja.objects.get(id=id_caja)
@@ -4441,7 +4431,7 @@ def movimientos_caja(req,id_caja):
     try:
         print("ID CAJA ES: " + str(id_caja))
         req.session["id_caja_movimiento"] = id_caja
-        movimientos = Movimientos.objects.filter(caja_id=id_caja).order_by('-fecha')
+        movimientos = Movimientos.objects.filter(caja_id=id_caja,metodo="Efectivo").order_by('-fecha')
         caja = Caja.objects.get(id=id_caja)
         monto_inicial = caja.monto_inicial
         dolar = PrecioDolar.objects.get(id=1)
@@ -4466,7 +4456,7 @@ def movimientos_caja(req,id_caja):
         
         
         mes_actual = datetime.now().month
-        movimientos_mes_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes_actual)
+        movimientos_mes_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes_actual,metodo="Efectivo")
         ganancias_mes = 0
         egresos_mes = 0 
         ganancias_netas_mes = 0
@@ -4507,7 +4497,7 @@ def movimientos_caja(req,id_caja):
         ingresos_extras_dia = 0
 
         fecha_actual = datetime.now().date()
-        movimientos_fecha_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha_actual)
+        movimientos_fecha_actual = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha_actual,metodo="Efectivo")
 
         for movimiento in movimientos_fecha_actual:
             if movimiento.tipo == "Ingreso":
@@ -4537,52 +4527,52 @@ def movimientos_caja(req,id_caja):
 
         
 
-        todos_movimientos_pesos = Movimientos.objects.filter(caja_id=id_caja)
+        todos_movimientos_pesos = Movimientos.objects.filter(caja_id=id_caja,metodo="Efectivo")
         ingresos_efectivo_pesos = 0
-        ingresos_transferencia_pesos = 0
-        ingresos_debito_pesos = 0
+        # ingresos_transferencia_pesos = 0
+        # ingresos_debito_pesos = 0
         egresos_efectivo_pesos = 0
-        egresos_transferencia_pesos = 0
-        egresos_debito_pesos = 0
+        # egresos_transferencia_pesos = 0
+        # egresos_debito_pesos = 0
 
         ingresos_efectivo_dolares = 0
-        ingresos_transferencia_dolares = 0
-        ingresos_debito_dolares = 0
+        # ingresos_transferencia_dolares = 0
+        # ingresos_debito_dolares = 0
         egresos_efectivo_dolares = 0
-        egresos_transferencia_dolares = 0
-        egresos_debito_dolares = 0
+        # egresos_transferencia_dolares = 0
+        # egresos_debito_dolares = 0
 
         for mov in todos_movimientos_pesos:
             if mov.moneda == "Pesos":
                 if mov.tipo == "Egreso":
-                    if mov.metodo == "Efectivo":
+                    # if mov.metodo == "Efectivo":
                         egresos_efectivo_pesos = egresos_efectivo_pesos + float(mov.monto)
-                    elif mov.metodo == "Transferencia":
-                        egresos_transferencia_pesos = egresos_transferencia_pesos + float(mov.monto) 
-                    else:
-                        egresos_debito_pesos = egresos_debito_pesos + float(mov.monto)
+                    # elif mov.metodo == "Transferencia":
+                    #     egresos_transferencia_pesos = egresos_transferencia_pesos + float(mov.monto) 
+                    # else:
+                    #     egresos_debito_pesos = egresos_debito_pesos + float(mov.monto)
                 else:
-                    if mov.metodo == "Efectivo":
+                    # if mov.metodo == "Efectivo":
                         ingresos_efectivo_pesos = ingresos_efectivo_pesos + float(mov.monto)
-                    elif mov.metodo == "Transferencia":
-                        ingresos_transferencia_pesos = ingresos_transferencia_pesos + float(mov.monto)
-                    else:
-                        ingresos_debito_pesos = ingresos_debito_pesos + float(mov.monto)
+                    # elif mov.metodo == "Transferencia":
+                    #     ingresos_transferencia_pesos = ingresos_transferencia_pesos + float(mov.monto)
+                    # else:
+                    #     ingresos_debito_pesos = ingresos_debito_pesos + float(mov.monto)
             else:
                 if mov.tipo == "Egreso":
-                    if mov.metodo == "Efectivo":
+                    # if mov.metodo == "Efectivo":
                         egresos_efectivo_dolares = egresos_efectivo_dolares + float(mov.monto)
-                    elif mov.metodo == "Transferencia":
-                        egresos_transferencia_dolares = egresos_transferencia_dolares + float(mov.monto) 
-                    else:
-                        egresos_debito_dolares = egresos_debito_dolares + float(mov.monto)
+                    # elif mov.metodo == "Transferencia":
+                    #     egresos_transferencia_dolares = egresos_transferencia_dolares + float(mov.monto) 
+                    # else:
+                    #     egresos_debito_dolares = egresos_debito_dolares + float(mov.monto)
                 else:
-                    if mov.metodo == "Efectivo":
+                    # if mov.metodo == "Efectivo":
                         ingresos_efectivo_dolares = ingresos_efectivo_dolares + float(mov.monto)
-                    elif mov.metodo == "Transferencia":
-                        ingresos_transferencia_dolares = ingresos_transferencia_dolares + float(mov.monto)
-                    else:
-                        ingresos_debito_dolares = ingresos_debito_dolares + float(mov.monto)
+                    # elif mov.metodo == "Transferencia":
+                    #     ingresos_transferencia_dolares = ingresos_transferencia_dolares + float(mov.monto)
+                    # else:
+                    #     ingresos_debito_dolares = ingresos_debito_dolares + float(mov.monto)
 
 
         # total_ingresos_dolares = ingresos_efectivo_dolares + ingresos_transferencia_dolares + ingresos_debito_dolares
@@ -4594,21 +4584,21 @@ def movimientos_caja(req,id_caja):
         total_ingresos_efectivo_pesos = round(ingresos_efectivo_pesos + float(ingresos_efectivo_dolares * precio_dolar),2)
         total_ingresos_efectivo_dolares = round(ingresos_efectivo_dolares + float(ingresos_efectivo_pesos / precio_dolar),2)
 
-        total_ingresos_transferencia_pesos = round(ingresos_transferencia_pesos + float(ingresos_transferencia_dolares * precio_dolar),2)
-        total_ingresos_transferencia_dolares = round(ingresos_transferencia_dolares + float(ingresos_transferencia_pesos / precio_dolar),2)
+        # total_ingresos_transferencia_pesos = round(ingresos_transferencia_pesos + float(ingresos_transferencia_dolares * precio_dolar),2)
+        # total_ingresos_transferencia_dolares = round(ingresos_transferencia_dolares + float(ingresos_transferencia_pesos / precio_dolar),2)
 
-        total_ingresos_debito_pesos = round(ingresos_debito_pesos + float(ingresos_debito_dolares * precio_dolar),2)
-        total_ingresos_debito_dolares = round(ingresos_debito_dolares + float(ingresos_debito_pesos / precio_dolar),2)
+        # total_ingresos_debito_pesos = round(ingresos_debito_pesos + float(ingresos_debito_dolares * precio_dolar),2)
+        # total_ingresos_debito_dolares = round(ingresos_debito_dolares + float(ingresos_debito_pesos / precio_dolar),2)
 
 
         total_egresos_efectivo_pesos = round(egresos_efectivo_pesos + float(egresos_efectivo_dolares * precio_dolar),2)
         total_egresos_efectivo_dolares = round(egresos_efectivo_dolares + float(egresos_efectivo_pesos / precio_dolar),2)
 
-        total_egresos_transferencia_pesos = round(egresos_transferencia_pesos + float(egresos_transferencia_dolares * precio_dolar),2)
-        total_egresos_transferencia_dolares = round(egresos_transferencia_dolares + float(egresos_transferencia_pesos / precio_dolar),2)
+        # total_egresos_transferencia_pesos = round(egresos_transferencia_pesos + float(egresos_transferencia_dolares * precio_dolar),2)
+        # total_egresos_transferencia_dolares = round(egresos_transferencia_dolares + float(egresos_transferencia_pesos / precio_dolar),2)
 
-        total_egresos_debito_pesos = round(egresos_debito_pesos + float(egresos_debito_dolares * precio_dolar),2)
-        total_egresos_debito_dolares = round(egresos_debito_dolares + float(egresos_debito_pesos / precio_dolar),2)
+        # total_egresos_debito_pesos = round(egresos_debito_pesos + float(egresos_debito_dolares * precio_dolar),2)
+        # total_egresos_debito_dolares = round(egresos_debito_dolares + float(egresos_debito_pesos / precio_dolar),2)
 
         
 
@@ -4643,17 +4633,17 @@ def movimientos_caja(req,id_caja):
                                                                               "rubros":rubros,
                                                                               "total_ingresos_efectivo_pesos":total_ingresos_efectivo_pesos,
                                                                               "total_ingresos_efectivo_dolares":total_ingresos_efectivo_dolares,
-                                                                              "total_ingresos_transferencia_pesos":total_ingresos_transferencia_pesos,
-                                                                              "total_ingresos_transferencia_dolares":total_ingresos_transferencia_dolares,
-                                                                              "total_ingresos_debito_pesos":total_ingresos_debito_pesos,
-                                                                              "total_ingresos_debito_dolares":total_ingresos_debito_dolares,
+                                                                            #   "total_ingresos_transferencia_pesos":total_ingresos_transferencia_pesos,
+                                                                            #   "total_ingresos_transferencia_dolares":total_ingresos_transferencia_dolares,
+                                                                            #   "total_ingresos_debito_pesos":total_ingresos_debito_pesos,
+                                                                            #   "total_ingresos_debito_dolares":total_ingresos_debito_dolares,
 
                                                                               "total_egresos_efectivo_pesos":total_egresos_efectivo_pesos,
                                                                               "total_egresos_efectivo_dolares":total_egresos_efectivo_dolares,
-                                                                              "total_egresos_transferencia_pesos":total_egresos_transferencia_pesos,
-                                                                              "total_egresos_transferencia_dolares":total_egresos_transferencia_dolares,
-                                                                              "total_egresos_debito_pesos":total_egresos_debito_pesos,
-                                                                              "total_egresos_debito_dolares":total_egresos_debito_dolares,
+                                                                            #   "total_egresos_transferencia_pesos":total_egresos_transferencia_pesos,
+                                                                            #   "total_egresos_transferencia_dolares":total_egresos_transferencia_dolares,
+                                                                            #   "total_egresos_debito_pesos":total_egresos_debito_pesos,
+                                                                            #   "total_egresos_debito_dolares":total_egresos_debito_dolares,
                                                                               "saldo_caja":"" if None else "",
                                                                               "saldo_sistema":"" if None else "",
                                                                               "monto_inicial":monto_inicial
@@ -4676,7 +4666,7 @@ def buscar_detalles_movimientos_x_fecha(req):
         precio_dolar = float(dolar.precio_dolar_tienda)
 
         #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_moto=1)
+        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_moto=1,metodo="Efectivo")
         cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
         total_moto_dia_pesos = 0
         total_moto_dia_dolares = 0
@@ -4692,7 +4682,7 @@ def buscar_detalles_movimientos_x_fecha(req):
 
 
         #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_accesorio=1)
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_accesorio=1,metodo="Efectivo")
         cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
         total_accesorio_dia_pesos = 0
         total_accesorio_dia_dolares = 0
@@ -4706,7 +4696,7 @@ def buscar_detalles_movimientos_x_fecha(req):
                     total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
 
 
-        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha)
+        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha,metodo="Efectivo")
         ingresos_extra = 0
         egresos = 0 
         ingresos_extra_dolares = 0
@@ -4806,7 +4796,7 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
         precio_dolar = float(dolar.precio_dolar_tienda)
         id_caja = req.session["id_caja_movimiento"]
         #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_moto=1)
+        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_moto=1,metodo="Efectivo")
         cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
         total_moto_dia_pesos = 0
         total_moto_dia_dolares = 0
@@ -4822,7 +4812,7 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
 
 
         #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_accesorio=1)
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha, es_accesorio=1,metodo="Efectivo")
         cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
         total_accesorio_dia_pesos = 0
         total_accesorio_dia_dolares = 0
@@ -4836,7 +4826,7 @@ def buscar_detalles_movimientos_x_fecha_excel(req):
                     total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
 
 
-        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha)
+        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__date=fecha,metodo="Efectivo")
         ingresos_extra = 0
         egresos = 0 
         ingresos_extra_dolares = 0
@@ -4986,7 +4976,7 @@ def buscar_detalles_movimientos_x_mes_anio(req):
         precio_dolar = float(dolar.precio_dolar_tienda)
         id_caja = req.session["id_caja_movimiento"]
         #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_moto=1)
+        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_moto=1,metodo="Efectivo")
         cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio,tipo="V").count()
         total_moto_dia_pesos = 0
         total_moto_dia_dolares = 0
@@ -5002,7 +4992,7 @@ def buscar_detalles_movimientos_x_mes_anio(req):
 
 
         #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_accesorio=1)
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_accesorio=1,metodo="Efectivo")
         cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio).count()
         total_accesorio_dia_pesos = 0
         total_accesorio_dia_dolares = 0
@@ -5111,7 +5101,7 @@ def buscar_detalles_movimientos_x_mes_anio_excel(req):
         precio_dolar = float(dolar.precio_dolar_tienda)
         id_caja = req.session["id_caja_movimiento"]
         #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_moto=1)
+        movs_motos_vendidas_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_moto=1,metodo="Efectivo")
         cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio,tipo="V").count()
         total_moto_dia_pesos = 0
         total_moto_dia_dolares = 0
@@ -5127,7 +5117,7 @@ def buscar_detalles_movimientos_x_mes_anio_excel(req):
 
 
         #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
-        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_accesorio=1)
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio, es_accesorio=1,metodo="Efectivo")
         cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio).count()
         total_accesorio_dia_pesos = 0
         total_accesorio_dia_dolares = 0
@@ -5141,7 +5131,7 @@ def buscar_detalles_movimientos_x_mes_anio_excel(req):
                     total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
 
 
-        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio)
+        movimientos_dia = Movimientos.objects.filter(caja_id=id_caja,fecha__month=mes,fecha__year=anio,metodo="Efectivo")
         ingresos_extra = 0
         egresos = 0 
         ingresos_extra_dolares = 0

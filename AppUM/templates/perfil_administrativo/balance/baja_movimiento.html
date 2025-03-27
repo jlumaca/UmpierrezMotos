@@ -1,0 +1,41 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+            <h5 class="card-title text-danger">
+                <i class="fas fa-exclamation-triangle"></i> Confirmación de eliminación
+            </h5>
+            <hr>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {% if not message %}
+                    <p class="mb-4">¿Está seguro que desea borrar el movimiento? Esta acción no se puede deshacer.</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-danger mx-2">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                        <a href="{% url 'MovimientosCaja' id_caja %}" class="btn btn-secondary mx-2">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+
+            {% if message %}
+                <div class="alert alert-success mt-4">
+                    <p>{{ message }}</p>
+                    <p>Para volver a la caja, haz click <a href="{% url 'MovimientosCaja' id_caja %}">aquí</a>.</p>
+                </div>
+            {% else %}
+                <p class="text-danger mt-3">{{ error_message }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

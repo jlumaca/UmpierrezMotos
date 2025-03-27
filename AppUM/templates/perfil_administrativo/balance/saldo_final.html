@@ -92,6 +92,20 @@
                 <label for="precio" class="form-label">Billetes de U$s1</label>
                 <input value="0" type="number" class="form-control" name="billetes_1_dolares" id="precio" placeholder="Ingrese la cantidad de billetes de U$s1" required>
             </div>
+
+
+            <h5>Cajas de ahorros</h5>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Caja de ahorro en Pesos $</label>
+                <input value="0" type="number" class="form-control" name="caja_ahorro_pesos" id="precio" placeholder="Ingrese el monto de la caja de ahorro en Pesos" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Caja de ahorro en Dolares U$s</label>
+                <input value="0" type="number" class="form-control" name="caja_ahorro_dolares" id="precio" placeholder="Ingrese el monto de la caja de ahorro en Dolares" required>
+            </div>
+            
+            
+            
             <button type="submit" class="btn btn-success">Guardar</button>
             
             <a href="{% url 'Arqueos' %}" class="btn btn-secondary">Cancelar</a>

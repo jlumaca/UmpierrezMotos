@@ -6963,3 +6963,996 @@ def alta_moto_taller(req):
             return render(req,"perfil_taller/motos/alta_moto.html",{})
     # except Exception as e:
     #     pass
+
+
+def balanceo(req):
+    try:
+        # print("ID CAJA ES: " + str(id_caja))
+        # req.session["id_caja_movimiento"] = id_caja
+        movimientos = Movimientos.objects.all().order_by('-fecha')
+        # caja = Caja.objects.get(id=id_caja)
+        # monto_inicial = caja.monto_inicial
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        # print(mes_actual)
+        data = []
+        for movimiento in movimientos:
+            usuario = Personal.objects.get(id=movimiento.usuario_id)
+            es_pago_moto = MovimientoPagoMoto.objects.filter(movimiento_id=movimiento.id).first()
+            es_pago_accesorio = MovimientoPagoAccesorio.objects.filter(movimiento_id=movimiento.id).first()
+
+            if es_pago_moto or es_pago_accesorio:
+                mostrar_boton = False
+            else: 
+                mostrar_boton = True
+            data.append({
+                "movimiento":movimiento,
+                "descripcion":movimiento.movimiento if movimiento.movimiento else "Sin descripción",
+                "usuario":usuario.nombre + " " + usuario.apellido,
+                "mostrar_boton":mostrar_boton
+            })
+        
+        
+        mes_actual = datetime.now().month
+        movimientos_mes_actual = Movimientos.objects.filter(fecha__month=mes_actual)
+        ganancias_mes = 0
+        egresos_mes = 0 
+        ganancias_netas_mes = 0
+        ingresos_extras_mes = 0
+        
+        for movimiento in movimientos_mes_actual:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    ganancias_mes = ganancias_mes + float(movimiento.monto)
+                else:
+                    ganancias_mes = ganancias_mes + (float(movimiento.monto) * precio_dolar)
+            elif movimiento.tipo == "Egreso":
+                if movimiento.moneda == "Pesos":
+                    egresos_mes = egresos_mes + float(movimiento.monto)
+                else:
+                    egresos_mes = egresos_mes + (float(movimiento.monto) * precio_dolar)
+            elif movimiento.tipo == "Ingreso extra":
+                if movimiento.moneda == "Pesos":
+                    ingresos_extras_mes = ingresos_extras_mes + float(movimiento.monto)
+                else:
+                    ingresos_extras_mes = ingresos_extras_mes + (float(movimiento.monto) * precio_dolar)
+            else:
+                pass
+            
+
+        ganancias_netas_mes = ganancias_mes + ingresos_extras_mes - egresos_mes
+
+        # print("GANANCIAS DEL MES: " + str(ganancias_mes))
+        # print("EGRESOS DEL MES: -" + str(egresos_mes))
+        # print("INGRESOS EXTRAS DEL MES: " + str(ingresos_extras_mes))
+        # print("GANANCIAS NETAS DEL MES: " + str(ganancias_netas_mes))
+        
+        
+        
+        ganancias_dia = 0
+        egresos_dia = 0
+        ganancias_netas_dia = 0
+        ingresos_extras_dia = 0
+
+        fecha_actual = datetime.now().date()
+        movimientos_fecha_actual = Movimientos.objects.filter(fecha__date=fecha_actual)
+
+        for movimiento in movimientos_fecha_actual:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    ganancias_dia = ganancias_dia + float(movimiento.monto)
+                else:
+                    ganancias_dia = ganancias_dia + (float(movimiento.monto) * precio_dolar)
+            elif movimiento.tipo == "Egreso":
+                if movimiento.moneda == "Pesos":
+                    egresos_dia = egresos_dia + float(movimiento.monto)
+                else:
+                    egresos_dia = egresos_dia + (float(movimiento.monto) * precio_dolar)
+            elif movimiento.tipo == "Ingreso extra":
+                if movimiento.moneda == "Pesos":
+                    ingresos_extras_dia = ingresos_extras_dia + float(movimiento.monto)
+                else:
+                    ingresos_extras_dia = ingresos_extras_dia + (float(movimiento.monto) * precio_dolar)
+            else:
+                pass
+            
+
+        ganancias_netas_dia = ganancias_dia + ingresos_extras_dia - egresos_dia
+        # print("GANANCIAS DEL DIA: " + str(ganancias_dia))
+        # print("EGRESOS DEL DIA: -" + str(egresos_dia))
+        # print("INGRESOS EXTRAS DEL DIA: " + str(ingresos_extras_dia))
+        # print("GANANCIAS NETAS DEL DIA: " + str(ganancias_netas_dia))
+
+        
+
+        todos_movimientos_pesos = Movimientos.objects.all()
+        ingresos_efectivo_pesos = 0
+        ingresos_transferencia_pesos = 0
+        ingresos_debito_pesos = 0
+        egresos_efectivo_pesos = 0
+        egresos_transferencia_pesos = 0
+        egresos_debito_pesos = 0
+
+        ingresos_efectivo_dolares = 0
+        ingresos_transferencia_dolares = 0
+        ingresos_debito_dolares = 0
+        egresos_efectivo_dolares = 0
+        egresos_transferencia_dolares = 0
+        egresos_debito_dolares = 0
+
+        for mov in todos_movimientos_pesos:
+            if mov.moneda == "Pesos":
+                if mov.tipo == "Egreso":
+                    if mov.metodo == "Efectivo":
+                        egresos_efectivo_pesos = egresos_efectivo_pesos + float(mov.monto)
+                    elif mov.metodo == "Transferencia":
+                        egresos_transferencia_pesos = egresos_transferencia_pesos + float(mov.monto) 
+                    else:
+                        egresos_debito_pesos = egresos_debito_pesos + float(mov.monto)
+                else:
+                    if mov.metodo == "Efectivo":
+                        ingresos_efectivo_pesos = ingresos_efectivo_pesos + float(mov.monto)
+                    elif mov.metodo == "Transferencia":
+                        ingresos_transferencia_pesos = ingresos_transferencia_pesos + float(mov.monto)
+                    else:
+                        ingresos_debito_pesos = ingresos_debito_pesos + float(mov.monto)
+            else:
+                if mov.tipo == "Egreso":
+                    if mov.metodo == "Efectivo":
+                        egresos_efectivo_dolares = egresos_efectivo_dolares + float(mov.monto)
+                    elif mov.metodo == "Transferencia":
+                        egresos_transferencia_dolares = egresos_transferencia_dolares + float(mov.monto) 
+                    else:
+                        egresos_debito_dolares = egresos_debito_dolares + float(mov.monto)
+                else:
+                    if mov.metodo == "Efectivo":
+                        ingresos_efectivo_dolares = ingresos_efectivo_dolares + float(mov.monto)
+                    elif mov.metodo == "Transferencia":
+                        ingresos_transferencia_dolares = ingresos_transferencia_dolares + float(mov.monto)
+                    else:
+                        ingresos_debito_dolares = ingresos_debito_dolares + float(mov.monto)
+
+
+        total_ingresos_dolares = ingresos_efectivo_dolares + ingresos_transferencia_dolares + ingresos_debito_dolares
+        total_egresos_dolares = egresos_efectivo_dolares + egresos_transferencia_dolares + egresos_debito_dolares
+        
+        total_ingresos_pesos = ingresos_efectivo_pesos + ingresos_transferencia_pesos + ingresos_debito_pesos
+        total_egresos_pesos = egresos_efectivo_pesos + egresos_transferencia_pesos + egresos_debito_pesos
+
+        total_ingresos_efectivo_pesos = round(ingresos_efectivo_pesos + float(ingresos_efectivo_dolares * precio_dolar),2)
+        total_ingresos_efectivo_dolares = round(ingresos_efectivo_dolares + float(ingresos_efectivo_pesos / precio_dolar),2)
+
+        total_ingresos_transferencia_pesos = round(ingresos_transferencia_pesos + float(ingresos_transferencia_dolares * precio_dolar),2)
+        total_ingresos_transferencia_dolares = round(ingresos_transferencia_dolares + float(ingresos_transferencia_pesos / precio_dolar),2)
+
+        total_ingresos_debito_pesos = round(ingresos_debito_pesos + float(ingresos_debito_dolares * precio_dolar),2)
+        total_ingresos_debito_dolares = round(ingresos_debito_dolares + float(ingresos_debito_pesos / precio_dolar),2)
+
+
+        total_egresos_efectivo_pesos = round(egresos_efectivo_pesos + float(egresos_efectivo_dolares * precio_dolar),2)
+        total_egresos_efectivo_dolares = round(egresos_efectivo_dolares + float(egresos_efectivo_pesos / precio_dolar),2)
+
+        total_egresos_transferencia_pesos = round(egresos_transferencia_pesos + float(egresos_transferencia_dolares * precio_dolar),2)
+        total_egresos_transferencia_dolares = round(egresos_transferencia_dolares + float(egresos_transferencia_pesos / precio_dolar),2)
+
+        total_egresos_debito_pesos = round(egresos_debito_pesos + float(egresos_debito_dolares * precio_dolar),2)
+        total_egresos_debito_dolares = round(egresos_debito_dolares + float(egresos_debito_pesos / precio_dolar),2)
+
+        ingresos_totales = total_ingresos_efectivo_pesos + total_ingresos_transferencia_pesos + total_ingresos_debito_pesos
+        egresos_totales = total_egresos_efectivo_pesos + total_egresos_transferencia_pesos + total_egresos_debito_pesos
+        saldo_total = ingresos_totales - egresos_totales
+
+        saldo_total_dolares = round(saldo_total / precio_dolar,2)        
+        rubros = Rubros.objects.filter(habilitado=1).order_by('-cantidad_usos')
+        page_obj = funcion_paginas_varias(req,data)
+        return render(req, "perfil_administrativo/balance/balance.html", {"page_obj": page_obj,
+                                                                              
+                                                                              "saldo_total":saldo_total,
+                                                                              "saldo_total_dolares":saldo_total_dolares,
+                                                                              "ganancias_mes":ganancias_mes,
+                                                                              "ganancias_dia":ganancias_dia,
+                                                                              "egresos_dia":egresos_dia,
+                                                                              "egresos_mes":egresos_mes,
+                                                                              "ganancias_netas_mes":ganancias_netas_mes,
+                                                                              "ganancias_netas_dia":ganancias_netas_dia,
+                                                                              "ingresos_extra_dia":ingresos_extras_dia,
+                                                                              "ingresos_extra_mes":ingresos_extras_mes,
+
+                                                                              "ganancias_mes_dolares":round(ganancias_mes / precio_dolar,2),
+                                                                              "ganancias_dia_dolares":round(ganancias_dia / precio_dolar,2),
+                                                                              "egresos_dia_dolares":round(egresos_dia / precio_dolar,2),
+                                                                              "egresos_mes_dolares":round(egresos_mes / precio_dolar,2),
+                                                                              "ganancias_netas_mes_dolares":round(ganancias_netas_mes / precio_dolar,2),
+                                                                              "ganancias_netas_dia_dolares":round(ganancias_netas_dia / precio_dolar,2),
+                                                                              "ingresos_extra_dia_dolares":round(ingresos_extras_dia / precio_dolar,2),
+                                                                              "ingresos_extra_mes_dolares":round(ingresos_extras_mes / precio_dolar,2),
+                                                                              
+                                                                              
+                                                                              
+                                                                            #   "id_caja":id_caja,
+                                                                              "rubros":rubros,
+                                                                              "total_ingresos_efectivo_pesos":total_ingresos_efectivo_pesos,
+                                                                              "total_ingresos_efectivo_dolares":total_ingresos_efectivo_dolares,
+                                                                              "total_ingresos_transferencia_pesos":total_ingresos_transferencia_pesos,
+                                                                              "total_ingresos_transferencia_dolares":total_ingresos_transferencia_dolares,
+                                                                              "total_ingresos_debito_pesos":total_ingresos_debito_pesos,
+                                                                              "total_ingresos_debito_dolares":total_ingresos_debito_dolares,
+
+                                                                              "total_egresos_efectivo_pesos":total_egresos_efectivo_pesos,
+                                                                              "total_egresos_efectivo_dolares":total_egresos_efectivo_dolares,
+                                                                              "total_egresos_transferencia_pesos":total_egresos_transferencia_pesos,
+                                                                              "total_egresos_transferencia_dolares":total_egresos_transferencia_dolares,
+                                                                              "total_egresos_debito_pesos":total_egresos_debito_pesos,
+                                                                              "total_egresos_debito_dolares":total_egresos_debito_dolares,
+                                                                              "saldo_caja":"" if None else "",
+                                                                              "saldo_sistema":"" if None else "",
+                                                                            #   "monto_inicial":monto_inicial
+                                                                              
+                                                                              
+                                                                              })
+    except Exception as e:
+        return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
+
+def baja_movimiento_movimiento(req,id_movimiento):
+    # try:
+        if req.method == "POST":
+
+            movimiento = Movimientos.objects.get(id=id_movimiento)
+            id_caja = movimiento.caja_id
+            caja = Caja.objects.get(id=id_caja)
+            if movimiento.moneda == "Pesos":
+                monto_a_quitar = float(movimiento.monto)
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto_a_quitar = float(movimiento.monto) * precio_dolar
+            
+            depositos_caja = float(caja.depositos)
+            egresos_caja = float(caja.egresos)
+            
+            if movimiento.tipo == "Ingreso" or movimiento.tipo == "Ingreso extra":
+                sumar_quitar_depositos = depositos_caja - monto_a_quitar
+                caja.depositos = abs(sumar_quitar_depositos)
+                # quitar_egresos = egresos_caja
+            else:
+                # sumar_quitar_depositos = depositos_caja + monto_a_quitar
+                quitar_egresos = egresos_caja - monto_a_quitar
+                caja.egresos = quitar_egresos
+            
+            if int(caja.diferencia) != 0:
+                if movimiento.tipo == "Ingreso" or movimiento.tipo == "Ingreso extra":
+                    nueva_diferencia = float(caja.diferencia) - monto_a_quitar
+                else:
+                    nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                
+                caja.diferencia = nueva_diferencia
+            
+            
+            caja.save() 
+            movimiento.delete()
+            # messages.success(req, "Movimiento borrado con éxito")
+            # return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
+            return render(req, "perfil_administrativo/balance/baja_movimiento.html", {"id_caja":id_caja,"message":"Movimiento borrado con éxito."})
+        else:
+            return render(req, "perfil_administrativo/balance/baja_movimiento.html", {})
+    # except Exception as e:
+    #     pass
+
+def buscar_detalles_balance_movimientos_x_fecha(req):
+    # try:
+        # fecha = req.POST['']
+       
+        f_detalle_str = req.POST['f_detalles']  # Cambiado a paréntesis
+        fecha = datetime.strptime(f_detalle_str, '%Y-%m-%d').date() if f_detalle_str else None
+        print(fecha)
+        print(f_detalle_str)
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+
+        #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_motos_vendidas_dia = Movimientos.objects.filter(fecha__date=fecha, es_moto=1)
+        cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
+        total_moto_dia_pesos = 0
+        total_moto_dia_dolares = 0
+        for movimiento in movs_motos_vendidas_dia:
+            # moto = Moto.objects.get(id=movimiento.moto_id)
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_moto_dia_pesos = total_moto_dia_pesos + float(movimiento.monto)
+                    total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_moto_dia_dolares = total_moto_dia_dolares + float(movimiento.monto)
+                    total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+
+
+        #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(fecha__date=fecha, es_accesorio=1)
+        cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
+        total_accesorio_dia_pesos = 0
+        total_accesorio_dia_dolares = 0
+        for movimiento in movs_accesorios_vendidos_dia:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_accesorio_dia_pesos = total_accesorio_dia_pesos + float(movimiento.monto)
+                    total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_accesorio_dia_dolares = total_accesorio_dia_dolares + float(movimiento.monto)
+                    total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+
+
+        movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
+        ingresos_extra = 0
+        egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
+        data_egresos = []
+        data_ingresos_extra = []
+        for mov in movimientos_dia:
+            if mov.tipo == "Ingreso extra":
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
+                data_ingresos_extra.append({
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            elif mov.tipo == "Egreso":
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
+                data_egresos.append({
+                    "rubro":mov.rubro,
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            
+        
+        total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
+        total_moto_dia_dolares = round(total_moto_dia_dolares, 2)
+        total_accesorio_dia_pesos = round(total_accesorio_dia_pesos, 2)
+        total_accesorio_dia_dolares = round(total_accesorio_dia_dolares, 2)
+        subtotal_pesos = total_moto_dia_pesos + total_accesorio_dia_pesos
+        subtotal_pesos = round(subtotal_pesos, 2)
+        subtotal_dolares = total_moto_dia_dolares + total_accesorio_dia_dolares
+        subtotal_dolares = round(subtotal_dolares, 2)
+        ingresos_extra = round(ingresos_extra, 2)
+        egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
+        total_pesos = subtotal_pesos + ingresos_extra - egresos
+        total_pesos = int(total_pesos)
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
+        total_dolares = int(total_dolares)
+        # fecha_json = datetime.strptime(f_detalle_str, '%d-%m-%Y').date() if f_detalle_str else None
+        data = [
+        {"tipo": "Motos", 
+         "venta": cantidad_vendidas_dia, 
+         "total_pesos": total_moto_dia_pesos, 
+         "total_dolares": total_moto_dia_dolares},
+        {"tipo": "Accesorios", 
+         "venta": cantidad_vendidos_dia, 
+         "total_pesos": total_accesorio_dia_pesos, 
+         "total_dolares": total_accesorio_dia_dolares},
+         {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
+          {"egresos_detalle": data_egresos},  # Pasamos la lista completa
+            {"ingresos_extra_detalle": data_ingresos_extra},
+            {"fecha":f_detalle_str}
+
+        ]
+        print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
+        print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
+        print("CANTIDAD ACCESORIOS DE MOTOS VENDIDAS: " + str(cantidad_vendidos_dia))
+        print("TOTAL EN PESOS: " + str(total_pesos))
+        print("TOTAL EN DOLARES: " + str(total_dolares))
+        print("EGRESOS: " + str(egresos))
+        print("INGRESOS EXTRA: " + str(ingresos_extra))
+        
+        
+        return JsonResponse(data, safe=False)
+        
+        # motos_vendidas_mes = ComprasVentas.objects.filter(fecha_compra__month=mes_actual,tipo="V")
+        # cantidad_vendidas_mes = 0
+        # for venta in motos_vendidas_mes:
+        #     pass
+    # except Exception as e:
+    #     pass
+
+def buscar_detalles_balance_movimientos_x_fecha_excel(req):
+       
+        f_detalle_str = req.POST['f_detalles']  # Cambiado a paréntesis
+        fecha = datetime.strptime(f_detalle_str, '%Y-%m-%d').date() if f_detalle_str else None
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_motos_vendidas_dia = Movimientos.objects.filter(fecha__date=fecha, es_moto=1)
+        cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra=fecha,tipo="V").count()
+        total_moto_dia_pesos = 0
+        total_moto_dia_dolares = 0
+        for movimiento in movs_motos_vendidas_dia:
+            # moto = Moto.objects.get(id=movimiento.moto_id)
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_moto_dia_pesos = total_moto_dia_pesos + float(movimiento.monto)
+                    total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_moto_dia_dolares = total_moto_dia_dolares + float(movimiento.monto)
+                    total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+
+
+        #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(fecha__date=fecha, es_accesorio=1)
+        cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra=fecha).count()
+        total_accesorio_dia_pesos = 0
+        total_accesorio_dia_dolares = 0
+        for movimiento in movs_accesorios_vendidos_dia:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_accesorio_dia_pesos = total_accesorio_dia_pesos + float(movimiento.monto)
+                    total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_accesorio_dia_dolares = total_accesorio_dia_dolares + float(movimiento.monto)
+                    total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+
+
+        movimientos_dia = Movimientos.objects.filter(fecha__date=fecha)
+        ingresos_extra = 0
+        egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
+        data_egresos = []
+        data_ingresos_extra = []
+        for mov in movimientos_dia:
+            if mov.tipo == "Ingreso extra":
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
+                data_ingresos_extra.append({
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            elif mov.tipo == "Egreso":
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
+                data_egresos.append({
+                    "rubro":mov.rubro,
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            
+        
+        total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
+        total_moto_dia_dolares = round(total_moto_dia_dolares, 2)
+        total_accesorio_dia_pesos = round(total_accesorio_dia_pesos, 2)
+        total_accesorio_dia_dolares = round(total_accesorio_dia_dolares, 2)
+        subtotal_pesos = total_moto_dia_pesos + total_accesorio_dia_pesos
+        subtotal_pesos = round(subtotal_pesos, 2)
+        subtotal_dolares = total_moto_dia_dolares + total_accesorio_dia_dolares
+        subtotal_dolares = round(subtotal_dolares, 2)
+        ingresos_extra = round(ingresos_extra, 2)
+        egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
+        total_pesos = subtotal_pesos + ingresos_extra - egresos
+        total_pesos = int(total_pesos)
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
+        total_dolares = int(total_dolares)
+
+
+        data = [
+            {"tipo": "Motos", "venta": cantidad_vendidas_dia, "total_pesos": total_moto_dia_pesos, "total_dolares": total_moto_dia_dolares},
+            {"tipo": "Accesorios", "venta": cantidad_vendidos_dia, "total_pesos": total_accesorio_dia_pesos, "total_dolares": total_accesorio_dia_dolares},
+            # Datos adicionales como egresos, ingresos extra, totales y subtotales
+            {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
+            {"egresos_detalle": data_egresos},  # Detalles de los egresos
+            {"ingresos_extra_detalle": data_ingresos_extra},  # Detalles de los ingresos extra
+            {"fecha": f_detalle_str}  # Fecha del reporte
+        ]
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Movimientos del Día"
+
+        # Estilo para los encabezados
+        header_fill = PatternFill(start_color="0066CC", end_color="0066CC", fill_type="solid")  # Amarillo
+        header_font = Font(bold=True, color="000000")
+
+        # Encabezados de la tabla de ventas
+        headers = ["Tipo", "Cantidad Vendida", "Total Pesos", "Total Dólares"]
+        ws.append(headers)
+
+        # Aplicar estilo al encabezado
+        for col_num, cell in enumerate(ws[1], 1):
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Rellenar las filas con los datos de ventas
+        for item in data:
+            if "tipo" in item and "venta" in item and "total_pesos" in item and "total_dolares" in item:
+                ws.append([item['tipo'], item['venta'], item['total_pesos'], item['total_dolares']])
+
+        # Estilos para las celdas de la tabla de ventas
+        for row in ws.iter_rows(min_row=2, max_row=len(data)+1, min_col=1, max_col=4):
+            for cell in row:
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                if cell.row % 2 == 0:
+                    cell.fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")  # Gris claro
+
+        # Agregar los subtotales y totales generales debajo de la tabla de ventas
+
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Datos en Pesos"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra" in item and "egresos" in item and "subtotal_pesos" in item and "total_pesos" in item:
+        ws.append([ingresos_extra, egresos,subtotal_pesos,total_pesos])
+                # ws.append([item['ingresos_extra'], item['egresos'],item['subtotal_pesos'],item['total_pesos']])
+
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Datos en Dolares"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra_dolares" in item and "egresos_dolares" in item and "subtotal_dolares" in item and "total_dolares" in item:
+        ws.append([ingresos_extra_dolares, egresos_dolares,subtotal_dolares,total_dolares])
+                # ws.append(item['ingresos_extra_dolares'], item['egresos_dolares'],item['subtotal_dolares'],item['total_dolares']
+
+        # Detalles de los egresos
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Egresos Detalle"])
+        # ws.append([])
+        ws.append(["Monto","Motivo","Rubro"])
+        for egreso in data_egresos:
+            ws.append([egreso['valor'], egreso['motivo'],egreso['rubro']])
+
+        # Detalles de los ingresos extra
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Ingresos Extra Detalles"])
+        # ws.append([])
+        ws.append(["Monto","Motivo"])
+        for ingreso in data_ingresos_extra:
+            ws.append([ingreso['valor'], ingreso['motivo']])
+
+        # Configuración de la respuesta para la descarga del archivo
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=Movimientos.xlsx'
+        wb.save(response)
+        return response
+
+def buscar_detalles_balance_movimientos_x_mes_anio(req):
+    # try:
+        mes = int(req.POST['mes_reporte'])
+        anio = int(req.POST['anio_reporte'])
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_motos_vendidas_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio, es_moto=1)
+        cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio,tipo="V").count()
+        total_moto_dia_pesos = 0
+        total_moto_dia_dolares = 0
+        for movimiento in movs_motos_vendidas_dia:
+            # moto = Moto.objects.get(id=movimiento.moto_id)
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_moto_dia_pesos = total_moto_dia_pesos + float(movimiento.monto)
+                    total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_moto_dia_dolares = total_moto_dia_dolares + float(movimiento.monto)
+                    total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+
+
+        #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio, es_accesorio=1)
+        cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio).count()
+        total_accesorio_dia_pesos = 0
+        total_accesorio_dia_dolares = 0
+        for movimiento in movs_accesorios_vendidos_dia:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_accesorio_dia_pesos = total_accesorio_dia_pesos + float(movimiento.monto)
+                    total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_accesorio_dia_dolares = total_accesorio_dia_dolares + float(movimiento.monto)
+                    total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+
+
+        movimientos_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio)
+        ingresos_extra = 0
+        egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
+        data_egresos = []
+        data_ingresos_extra = []
+        for mov in movimientos_dia:
+            if mov.tipo == "Ingreso extra":
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
+                data_ingresos_extra.append({
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            elif mov.tipo == "Egreso":
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
+                data_egresos.append({
+                    "rubro":mov.rubro,
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            
+        meses = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Setiembre","Octubre","Noviembre","Diciembre"]
+        total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
+        total_moto_dia_dolares = round(total_moto_dia_dolares, 2)
+        total_accesorio_dia_pesos = round(total_accesorio_dia_pesos, 2)
+        total_accesorio_dia_dolares = round(total_accesorio_dia_dolares, 2)
+        subtotal_pesos = total_moto_dia_pesos + total_accesorio_dia_pesos
+        subtotal_pesos = round(subtotal_pesos, 2)
+        subtotal_dolares = total_moto_dia_dolares + total_accesorio_dia_dolares
+        subtotal_dolares = round(subtotal_dolares, 2)
+        ingresos_extra = round(ingresos_extra, 2)
+        egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
+        total_pesos = subtotal_pesos + ingresos_extra - egresos
+        total_pesos = int(total_pesos)
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
+        total_dolares = int(total_dolares)
+
+        print("TOTAL MOTOS DEL DIA EN PESOS: $" + str(total_moto_dia_pesos))
+        print("TOTAL MOTOS DEL DIA EN DOLARES: U$s" + str(total_moto_dia_dolares))
+        print("CANTIDAD MOTOS VENDIDOS: " + str(cantidad_vendidas_dia))
+        print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
+        print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
+        print("CANTIDAD ACCESORIOS VENDIDOS: " + str(cantidad_vendidos_dia))
+        print("TOTAL EN PESOS: " + str(total_pesos))
+        print("TOTAL EN DOLARES: " + str(total_dolares))
+        print("EGRESOS: " + str(egresos))
+        print("INGRESOS EXTRA: " + str(ingresos_extra))
+        # fecha_json = datetime.strptime(f_detalle_str, '%d-%m-%Y').date() if f_detalle_str else None
+        data = [
+        {"tipo": "Motos", 
+         "venta": cantidad_vendidas_dia, 
+         "total_pesos": total_moto_dia_pesos, 
+         "total_dolares": total_moto_dia_dolares},
+        {"tipo": "Accesorios", 
+         "venta": cantidad_vendidos_dia, 
+         "total_pesos": total_accesorio_dia_pesos, 
+         "total_dolares": total_accesorio_dia_dolares},
+         {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
+          {"egresos_detalle": data_egresos},  # Pasamos la lista completa
+            {"ingresos_extra_detalle": data_ingresos_extra},
+            {"mes":meses[mes],
+             "anio":anio}
+
+        ]
+        
+        return JsonResponse(data, safe=False)
+
+def buscar_detalles_balance_movimientos_x_mes_anio_excel(req):
+        mes = int(req.POST['mes_reporte'])
+        anio = int(req.POST['anio_reporte'])
+        dolar = PrecioDolar.objects.get(id=1)
+        precio_dolar = float(dolar.precio_dolar_tienda)
+        
+        #CANTIDAD MOTOS VENDIDAS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_motos_vendidas_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio, es_moto=1)
+        cantidad_vendidas_dia = ComprasVentas.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio,tipo="V").count()
+        total_moto_dia_pesos = 0
+        total_moto_dia_dolares = 0
+        for movimiento in movs_motos_vendidas_dia:
+            # moto = Moto.objects.get(id=movimiento.moto_id)
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_moto_dia_pesos = total_moto_dia_pesos + float(movimiento.monto)
+                    total_moto_dia_dolares = total_moto_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_moto_dia_dolares = total_moto_dia_dolares + float(movimiento.monto)
+                    total_moto_dia_pesos = total_moto_dia_dolares * precio_dolar
+
+
+        #CANTIDAD ACCESORIOS VENDIDOS EN LA FECHA INGRESADA, TOTAL DEL INGRESO EN PESOS Y DOLARES 
+        movs_accesorios_vendidos_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio, es_accesorio=1)
+        cantidad_vendidos_dia = ClienteAccesorio.objects.filter(fecha_compra__month=mes,fecha_compra__year=anio).count()
+        total_accesorio_dia_pesos = 0
+        total_accesorio_dia_dolares = 0
+        for movimiento in movs_accesorios_vendidos_dia:
+            if movimiento.tipo == "Ingreso":
+                if movimiento.moneda == "Pesos":
+                    total_accesorio_dia_pesos = total_accesorio_dia_pesos + float(movimiento.monto)
+                    total_accesorio_dia_dolares = total_accesorio_dia_pesos / precio_dolar 
+                elif movimiento.moneda == "Dolares":
+                    total_accesorio_dia_dolares = total_accesorio_dia_dolares + float(movimiento.monto)
+                    total_accesorio_dia_pesos = total_accesorio_dia_dolares * precio_dolar
+
+
+        movimientos_dia = Movimientos.objects.filter(fecha__month=mes,fecha__year=anio)
+        ingresos_extra = 0
+        egresos = 0 
+        ingresos_extra_dolares = 0
+        egresos_dolares = 0 
+        data_egresos = []
+        data_ingresos_extra = []
+        for mov in movimientos_dia:
+            if mov.tipo == "Ingreso extra":
+                if mov.moneda == "Pesos":
+                    ingresos_extra = ingresos_extra + float(mov.monto)
+                    ingresos_extra_dolares = ingresos_extra / precio_dolar
+                else:
+                    ingresos_extra_dolares = ingresos_extra_dolares + float(mov.monto)
+                    ingresos_extra = ingresos_extra_dolares * precio_dolar
+                data_ingresos_extra.append({
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            elif mov.tipo == "Egreso":
+                if mov.moneda == "Pesos":
+                    egresos = egresos + float(mov.monto)
+                    egresos_dolares = egresos / precio_dolar
+                else:
+                    egresos_dolares = egresos_dolares + float(mov.monto)
+                    egresos = egresos_dolares * precio_dolar
+                data_egresos.append({
+                    "rubro":mov.rubro,
+                    "valor":mov.monto,
+                    "motivo":mov.movimiento
+                })
+            
+        
+        total_moto_dia_pesos = round(total_moto_dia_pesos, 2)
+        total_moto_dia_dolares = round(total_moto_dia_dolares, 2)
+        total_accesorio_dia_pesos = round(total_accesorio_dia_pesos, 2)
+        total_accesorio_dia_dolares = round(total_accesorio_dia_dolares, 2)
+        subtotal_pesos = total_moto_dia_pesos + total_accesorio_dia_pesos
+        subtotal_pesos = round(subtotal_pesos, 2)
+        subtotal_dolares = total_moto_dia_dolares + total_accesorio_dia_dolares
+        subtotal_dolares = round(subtotal_dolares, 2)
+        ingresos_extra = round(ingresos_extra, 2)
+        egresos = round(egresos, 2)
+        ingresos_extra_dolares = round(ingresos_extra_dolares, 2)
+        egresos_dolares = round(egresos_dolares, 2)
+        total_pesos = subtotal_pesos + ingresos_extra - egresos
+        total_pesos = int(total_pesos)
+        total_dolares = subtotal_dolares + ingresos_extra_dolares - egresos_dolares
+        total_dolares = int(total_dolares)
+
+        print("TOTAL MOTOS DEL DIA EN PESOS: $" + str(total_moto_dia_pesos))
+        print("TOTAL MOTOS DEL DIA EN DOLARES: U$s" + str(total_moto_dia_dolares))
+        print("CANTIDAD MOTOS VENDIDOS: " + str(cantidad_vendidas_dia))
+        print("TOTAL ACCESORIOS DEL DIA EN PESOS: $" + str(total_accesorio_dia_pesos))
+        print("TOTAL ACCESORIOS DEL DIA EN DOLARES: U$s" + str(total_accesorio_dia_dolares))
+        print("CANTIDAD ACCESORIOS VENDIDOS: " + str(cantidad_vendidos_dia))
+        print("TOTAL EN PESOS: " + str(total_pesos))
+        print("TOTAL EN DOLARES: " + str(total_dolares))
+        print("EGRESOS: " + str(egresos))
+        print("INGRESOS EXTRA: " + str(ingresos_extra))
+
+
+        data = [
+            {"tipo": "Motos", "venta": cantidad_vendidas_dia, "total_pesos": total_moto_dia_pesos, "total_dolares": total_moto_dia_dolares},
+            {"tipo": "Accesorios", "venta": cantidad_vendidos_dia, "total_pesos": total_accesorio_dia_pesos, "total_dolares": total_accesorio_dia_dolares},
+            # Datos adicionales como egresos, ingresos extra, totales y subtotales
+            {"egresos":egresos,
+          "ingresos_extra":ingresos_extra,
+          "egresos_dolares":egresos_dolares,
+          "ingresos_extra_dolares":ingresos_extra_dolares,
+            "subtotal_pesos": subtotal_pesos,
+          "subtotal_dolares":subtotal_dolares,
+          "total_general_pesos":total_pesos,
+          "total_general_dolares":total_dolares},
+            {"egresos_detalle": data_egresos},  # Detalles de los egresos
+            {"ingresos_extra_detalle": data_ingresos_extra},  # Detalles de los ingresos extra
+              # Fecha del reporte
+        ]
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Movimientos del Día"
+
+        # Estilo para los encabezados
+        header_fill = PatternFill(start_color="0066CC", end_color="0066CC", fill_type="solid")  # Amarillo
+        header_font = Font(bold=True, color="000000")
+
+        # Encabezados de la tabla de ventas
+        headers = ["Tipo", "Cantidad Vendida", "Total Pesos", "Total Dólares"]
+        ws.append(headers)
+
+        # Aplicar estilo al encabezado
+        for col_num, cell in enumerate(ws[1], 1):
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Rellenar las filas con los datos de ventas
+        for item in data:
+            if "tipo" in item and "venta" in item and "total_pesos" in item and "total_dolares" in item:
+                ws.append([item['tipo'], item['venta'], item['total_pesos'], item['total_dolares']])
+
+        # Estilos para las celdas de la tabla de ventas
+        for row in ws.iter_rows(min_row=2, max_row=len(data)+1, min_col=1, max_col=4):
+            for cell in row:
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                if cell.row % 2 == 0:
+                    cell.fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")  # Gris claro
+
+        # Agregar los subtotales y totales generales debajo de la tabla de ventas
+
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Datos en Pesos"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra" in item and "egresos" in item and "subtotal_pesos" in item and "total_pesos" in item:
+        ws.append([ingresos_extra, egresos,subtotal_pesos,total_pesos])
+                # ws.append([item['ingresos_extra'], item['egresos'],item['subtotal_pesos'],item['total_pesos']])
+
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Datos en Dolares"])
+        # ws.append([])
+        ws.append(["Ingresos extra","Egresos","Subtotal", "Total"])
+        # for item in data:
+        # if "ingresos_extra_dolares" in item and "egresos_dolares" in item and "subtotal_dolares" in item and "total_dolares" in item:
+        ws.append([ingresos_extra_dolares, egresos_dolares,subtotal_dolares,total_dolares])
+                # ws.append(item['ingresos_extra_dolares'], item['egresos_dolares'],item['subtotal_dolares'],item['total_dolares']
+
+        # Detalles de los egresos
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Egresos Detalle"])
+        # ws.append([])
+        ws.append(["Monto","Motivo","Rubro"])
+        for egreso in data_egresos:
+            ws.append([egreso['valor'], egreso['motivo'],egreso['rubro']])
+
+        # Detalles de los ingresos extra
+        ws.append([])  # Fila vacía para separar las secciones
+        ws.append(["Ingresos Extra Detalles"])
+        # ws.append([])
+        ws.append(["Monto","Motivo"])
+        for ingreso in data_ingresos_extra:
+            ws.append([ingreso['valor'], ingreso['motivo']])
+
+        # Configuración de la respuesta para la descarga del archivo
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=Movimientos.xlsx'
+        wb.save(response)
+        return response
+
+@admin_required
+def ingresos_balance(req):
+    # try:
+        if int(req.POST['ingresos']) <= 0:
+            # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
+            messages.error(req,"El monto del ingreso es incorrecto.")
+            return redirect('Arqueos')
+        else:
+            moneda = req.POST['moneda_monto_ingreso']
+            if moneda == "Pesos":
+                monto = int(req.POST['ingresos'])
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto = float(precio_dolar * float(req.POST['ingresos']))
+            caja = Caja.objects.filter(estado="Abierto").first()
+            if not caja:
+                caja = Caja.objects.all().order_by('-id')[1]
+            id_caja = caja.id
+            if int(caja.diferencia) != 0:
+                sumar_diferencia = float(caja.diferencia) + monto
+                caja.diferencia = sumar_diferencia
+            ingresos = float(caja.depositos) + monto
+            caja.depositos = ingresos
+            caja.save()
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            moneda = req.POST['moneda_monto_ingreso']
+            metodo = req.POST['metodo_monto_ingreso']
+            
+            insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,moneda,None,metodo,0,0,None,None)
+            #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
+            messages.success(req, "Ingreso extra ingresado con éxito")
+            return redirect(f"{reverse('Balance')}")
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
+
+@admin_required
+def egresos_balance(req):
+    # try:
+       
+        if int(req.POST['egresos']) < 0 or int(req.POST['egresos']) == 0:
+            # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
+            messages.error(req,"El monto del egreso es incorrecto.")
+            return redirect('Balance')
+        elif not req.POST['rubro_egreso']:  
+            messages.error(req,"Debe ingresar un nuevo rubro.")
+            return redirect('Balance')
+        else:
+            id_rubro = req.POST['rubro_egreso']
+            moneda = req.POST['moneda_monto_egreso']
+            if moneda == "Pesos":
+                monto = int(req.POST['egresos'])
+            else:
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                monto = float(precio_dolar * float(req.POST['egresos']))
+            caja = Caja.objects.filter(estado="Abierto").first()
+            if not caja:
+                caja = Caja.objects.all().order_by('-id')[1]
+            id_caja = caja.id
+            if int(caja.diferencia) != 0:
+                restar_diferencia = float(caja.diferencia) - monto
+                caja.diferencia = restar_diferencia
+            egresos = float(caja.egresos) + monto
+            caja.egresos = egresos
+            caja.save()
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            rubro = Rubros.objects.get(id=id_rubro)
+            nombre_rubro = rubro.rubro
+            rubro.cantidad_usos = int(rubro.cantidad_usos) + 1
+            rubro.save()
+            moneda = req.POST['moneda_monto_egreso']
+            metodo = req.POST['metodo_monto_egreso']
+            insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,moneda,nombre_rubro,metodo,0,0,None,None)
+            #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
+            messages.success(req, "Egreso extra ingresado con éxito")
+            return redirect(f"{reverse('Balance')}")
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
+
+def nuevo_rubro_egreso_balance(req):
+    try:
+        rubro = req.POST['nuevo_rubro']
+        nuevo_rubro = Rubros(
+            rubro = rubro,
+            habilitado = 1
+        )
+        nuevo_rubro.save()
+        messages.success(req, "Rubro ingresado con éxito")
+        return redirect(f"{reverse('Balance')}")
+    except Exception as e:
+        pass
+

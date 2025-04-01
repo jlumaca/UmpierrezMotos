@@ -21,16 +21,20 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Efectivo inicial</th>
-                <th>Ingresos</th>
-                <th>Egresos</th>
-                <th>Efectivo final</th>
-                <th>Saldo caja</th>
+                
+                <th>+Efectivo</th>
+                <th>+Transferencia</th>
+                <th>+Debito</th>
+                <th>-Efectivo</th>
+                <th>-Transferencia</th>
+                <th>-Debito</th>
+                <th>Saldo</th>
+                
             </tr>
         </thead>
         <tbody>
                 <tr>
-                    <td>{{ monto_inicial }}</td>
+                    
                     <td>${{ total_ingresos_efectivo_pesos }}/U$s{{ total_ingresos_efectivo_dolares }}</td>
                     <td>${{ total_ingresos_transferencia_pesos }}/U$s{{ total_ingresos_transferencia_dolares }}</td>
                     <td>
@@ -39,12 +43,20 @@
                     <td>${{ total_egresos_efectivo_pesos }}/U$s{{ total_egresos_efectivo_dolares }}</td>
                     <td>${{ total_egresos_transferencia_pesos }}/U$s{{ total_egresos_transferencia_dolares }}</td>
                     <td>${{ total_egresos_debito_pesos }}/U$s{{ total_egresos_debito_dolares }}</td>
-                    <td>{{ saldo_caja }}</td>
-                    <td>{{ saldo_sistema }}</td>
+                    <td>
+                        {% if saldo_total > 0 %}
+                            <span class="badge bg-success">+${{ saldo_total }}/+U$s{{ saldo_total_dolares }}</span>
+                        {% elif saldo_total < 0 %}
+                            <span class="badge bg-danger">${{ saldo_total }}/U$s{{ saldo_total_dolares }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">${{ saldo_total }}/U$s{{ saldo_total_dolares }}</span>
+                        {% endif %}
+                    </td>
+                    
                 </tr>
         </tbody>
     </table>
-    <h3>Resumen de caja del Día</h3>
+    <h3>Resumen de caja del DIA</h3>
     <table class="table" id="tabla-resumen">
         <thead>
             <tr>  
@@ -64,7 +76,7 @@
         </tbody>
     </table>
 
-    <h3>Resumen de caja del Mes</h3>
+    <h3>Resumen de caja del MES</h3>
     <table class="table" id="tabla-resumen">
         <thead>
             <tr>
@@ -104,7 +116,7 @@
         </div>
 
         <div id="form_pdf">
-            <form action="{% url 'DetallesCajaXFecha' %}" method="post" id="form-reporte">{% csrf_token %}
+            <form action="{% url 'DetallesBalanceCajaXFecha' %}" method="post" id="form-reporte">{% csrf_token %}
                 <div class="mb-3">
                     <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
                 </div>
@@ -113,7 +125,7 @@
         </div>
 
         <div id="form_excel" style="display: none;">
-            <form action="{% url 'DetallesCajaXFechaExcel' %}" method="post" id="form-excel">{% csrf_token %}
+            <form action="{% url 'DetallesBalanceCajaXFechaExcel' %}" method="post" id="form-excel">{% csrf_token %}
                 <div class="mb-3">
                     <input type="date" class="form-control" name="f_detalles" id="fecha" placeholder="Ingrese la fecha" required>        
                 </div>
@@ -130,7 +142,7 @@
         </div>
 
         <div id="div_descargar_pdf_mes_anio">
-            <form action="{% url 'DetallesCajaXMesAnio' %}" enctype="multipart/form-data" method="POST" id="form-reporte-MesAnio">{% csrf_token %}
+            <form action="{% url 'DetallesBalanceCajaXMesAnio' %}" enctype="multipart/form-data" method="POST" id="form-reporte-MesAnio">{% csrf_token %}
                 <div class="mb-3">
                     <div class="d-flex">
                         <select class="form-control" name="mes_reporte">
@@ -159,7 +171,7 @@
         </div>
 
         <div id="div_descargar_excel_mes_anio" style="display: none;">
-            <form action="{% url 'DetallesCajaXMesAnioExcel' %}" enctype="multipart/form-data" method="POST" id="reporte_mes_anio_excel">{% csrf_token %}
+            <form action="{% url 'DetallesBalanceCajaXMesAnioExcel' %}" enctype="multipart/form-data" method="POST" id="reporte_mes_anio_excel">{% csrf_token %}
                 <div class="mb-3">
                     <div class="d-flex">
                         <select class="form-control" name="mes_reporte">
@@ -194,7 +206,7 @@
         <i class="fas fa-cash-register"></i> Ingresos
     </button>
     <div id="div_ingresos" style="display: none;">
-        <form method="post" enctype="multipart/form-data" action="{% url 'IngresosCaja' id_caja %}">
+        <form method="post" enctype="multipart/form-data" action="{% url 'IngresosBalance' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="estado" class="form-label">Moneda Monto</label>
@@ -231,7 +243,7 @@
         <i class="fas fa-arrow-right-from-bracket"></i> Egresos
     </button>
     <div id="div_egresos" style="display: none;">
-        <form method="post" enctype="multipart/form-data" action="{% url 'NuevoRubro' id_caja %}">
+        <form method="post" enctype="multipart/form-data" action="{% url 'NuevoRubroBalance' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="certificado" class="form-label">Ingresar Rubro:</label>
@@ -240,7 +252,7 @@
             <button type="submit" class="btn btn-success">Guardar</button>
             <!-- <button type="button" class="btn btn-secondary">Cancelar</button> -->
         </form>
-        <form method="post" enctype="multipart/form-data" action="{% url 'EgresosCaja' id_caja %}">
+        <form method="post" enctype="multipart/form-data" action="{% url 'EgresosBalance' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="estado" class="form-label">Moneda Monto</label>
@@ -317,7 +329,7 @@
                     <td>{{ movimiento.usuario }}</td>
                     <td>
                         {% if movimiento.mostrar_boton %}
-                        <a href="{% url 'MovimientoBaja' id_caja movimiento.movimiento.id  %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        <a href="{% url 'MovimientoBalanceBaja' movimiento.movimiento.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
                         {% endif %}
 
                     </td>
@@ -332,7 +344,7 @@
             {% endif %}
         </tbody>
     </table>
-    <a href="{% url 'Arqueos' %}" class="btn btn-secondary">Volver</a>
+    <a href="" class="btn btn-secondary">Volver</a>
     <!-- Paginación -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">

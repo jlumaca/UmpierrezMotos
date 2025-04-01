@@ -247,6 +247,19 @@ urlpatterns = [
      path('alta_moto_taller/', views.alta_moto_taller,name="AltaMotoTaller"),
 
 
+     path('balance/', views.balanceo,name="Balance"),
+     path('movimiento_balance_baja/<int:id_movimiento>', views.baja_movimiento_movimiento,name="MovimientoBalanceBaja"),
+     path('balance/', views.balanceo,name="Balance"),
+     path('movimiento_balance_baja/<int:id_movimiento>', views.baja_movimiento_movimiento,name="MovimientoBalanceBaja"),
+     path('detalles_balance_x_fecha/', views.buscar_detalles_balance_movimientos_x_fecha,name="DetallesBalanceCajaXFecha"),
+     path('detalles_balance_x_fecha_excel/', views.buscar_detalles_balance_movimientos_x_fecha_excel,name="DetallesBalanceCajaXFechaExcel"),
+     path('detalles_balance_x_mes_anio/', views.buscar_detalles_balance_movimientos_x_mes_anio,name="DetallesBalanceCajaXMesAnio"),
+     path('detalles_balance_x_mes_anio_excel/', views.buscar_detalles_balance_movimientos_x_mes_anio_excel,name="DetallesBalanceCajaXMesAnioExcel"),
+     path('ingresos_balance/', views.ingresos_balance,name="IngresosBalance"),
+     path('egresos_balance/', views.egresos_balance,name="EgresosBalance"),
+     path('nuevo_rubro_balance/', views.nuevo_rubro_egreso_balance,name="NuevoRubroBalance"),
+
+
 
 
 

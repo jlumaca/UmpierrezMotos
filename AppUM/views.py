@@ -4070,7 +4070,8 @@ def notificaciones_administrativo(req):
                     'id',
                     'notificacion__tipo', 
                     'notificacion__fecha', 
-                    'notificacion__descripcion', 
+                    'notificacion__descripcion',
+                    'notificacion__id' 
                      
                 )
             ).order_by('-id')
@@ -4111,6 +4112,18 @@ def notificaciones_administrativo(req):
         return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"data":data}) 
     # except Exception as e:
     #     return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
+
+def borrar_notificacion_tienda(req,id_notificacion):
+    # try:
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        
+        notificacion_usuario = NotificacionPersonal.objects.filter(notificacion_id=id_notificacion,personal=usuario_actual).first()
+        notificacion_usuario.delete()
+        return redirect('NotificacionesAdministrativo')
+
+    # except Exception as e:
+    #     pass
 
 @admin_required
 def arqueos(req):
@@ -6812,7 +6825,7 @@ def notificaciones_taller(req):
                     'notificacion__tipo', 
                     'notificacion__fecha', 
                     'notificacion__descripcion', 
-                     
+                     'notificacion__id',
                 )
             ).order_by('-id')
         else:
@@ -6852,6 +6865,18 @@ def notificaciones_taller(req):
         return render(req,"perfil_taller/notificaciones/notificaciones.html",{"data":data}) 
     # except Exception as e:
     #     return render(req,"perfil_taller/notificaciones/notificaciones.html",{"error_message":e})
+
+def borrar_notificacion_taller(req,id_notificacion):
+    # try:
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        
+        notificacion_usuario = NotificacionPersonal.objects.filter(notificacion_id=id_notificacion,personal=usuario_actual).first()
+        notificacion_usuario.delete()
+        return redirect('NotificacionesTaller')
+
+    # except Exception as e:
+    #     pass
 
 
 def venta_repuesto_form(req,id_rp):

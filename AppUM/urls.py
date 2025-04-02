@@ -131,7 +131,9 @@ urlpatterns = [
      
      
      
-     path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),     
+     path('notificaciones_administrativo', views.notificaciones_administrativo,name="NotificacionesAdministrativo"),
+     path('borrar_notificaciones_administrativo/<int:id_notificacion>', views.borrar_notificacion_tienda,name="BorrarNotificacionesAdministrativo"),     
+          
      path('cliente_ficha/<int:id_cliente>', views.ficha_cliente,name="ClienteFicha"),
      path('fondos_cliente/<int:id_cliente>', views.fondos_cliente,name="FondosCliente"),
      path('modificar_moto_vendida/<int:id_moto>/<int:id_cliente>', views.modificar_moto_vendida,name="ModificarMotoVendida"),
@@ -239,6 +241,8 @@ urlpatterns = [
      path('resetear_usuario_taller/<int:id_u>', views.resetear_usuario_taller,name="ResetearUsuarioTaller"),
 
      path('notificaciones_taller/', views.notificaciones_taller,name="NotificacionesTaller"),
+     path('borrar_notificaciones_taller/<int:id_notificacion>', views.borrar_notificacion_taller,name="BorrarNotificacionesTaller"),     
+          
 
      path('venta_repuesto_form/<int:id_rp>', views.venta_repuesto_form,name="VentaRepuestoPiezaForm"),
      path('venta_repuesto/<int:id_rp>/<int:id_cliente>', views.venta_repuesto,name="VentaRepuestoPieza"),

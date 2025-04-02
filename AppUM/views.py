@@ -4388,24 +4388,30 @@ def saldo_final_caja(req,id_caja):
                                     + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
                     total_dolares_a_pesos = total_dolares * precio_dolar
                     total_dolares_a_pesos = round(total_dolares_a_pesos,2)
-                    saldo_final = (
+                    saldo_final_declarado = (
                         total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
                         +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
                     )
 
                     caja = Caja.objects.get(id=id_caja)
-                    caja.saldo_caja = saldo_final
-                    caja.estado = "Cuadre de caja"
                     saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
-                    diferencia = float(saldo_final) - abs(float(saldo_sistema))
-                    saldo_sistema = abs(saldo_sistema)
-                    caja.saldo_sistema = saldo_sistema
-                    caja.diferencia = diferencia
+                    diferencia = float(saldo_final_declarado) - float(caja.monto_inicial)
+                    saldo_final = float(caja.monto_inicial) + diferencia + float(caja.depositos) - float(caja.egresos)
+                    # saldo_sistema = abs(saldo_sistema)
+                    
+                    #DECLARADO POR EL USUARIO, APARECERA EN "EFECTIVO FINAL"
+                    caja.saldo_caja = saldo_final_declarado
+                    #SALDO CALCULADO POR EL PROGRAMA, APARECERA EN "SALDO CAJA"
+                    caja.saldo_sistema = saldo_final
+                    #EL TOTAL DE LO QUE TENGO AL FINAL MENOS LA CANTIDAD DECLARADA AL INICIO AL ABRIR LA CAJA, APARECERA EN COLUMNA DIERENCIA
+                    diferencia_caja = saldo_final - float(caja.monto_inicial)
+                    caja.diferencia = diferencia_caja
+                    caja.estado = "Cuadre de caja"
                     caja.save()
                     # print("SALDO FINAL ES : " + str(saldo_final))
                     # print("SALDO SISTEMA ES : " + str(saldo_sistema))
                     # print("DIFERENCIA ES : " + str(diferencia))
-                    messages.success(req, saldo_sistema)
+                    messages.success(req, "Caja declarada con éxito")
                     return redirect('Arqueos')
             else:
                 return render(req,"perfil_administrativo/arqueos/saldo_final.html",{})
@@ -4434,8 +4440,20 @@ def movimientos_caja(req,id_caja):
         movimientos = Movimientos.objects.filter(caja_id=id_caja,metodo="Efectivo").order_by('-fecha')
         caja = Caja.objects.get(id=id_caja)
         monto_inicial = caja.monto_inicial
+        
+        
         dolar = PrecioDolar.objects.get(id=1)
         precio_dolar = float(dolar.precio_dolar_tienda)
+        if caja.estado == "Cuadre de caja" or caja.estado == "Cerrado": 
+            efectivo_final_pesos = float(caja.saldo_caja)
+            saldo_caja_pesos = float(caja.saldo_sistema)
+            efectivo_final_dolares = round(efectivo_final_pesos / precio_dolar,2)
+            saldo_caja_dolares = round(saldo_caja_pesos / precio_dolar,2)
+            texto_efectivo_final = f"${efectivo_final_pesos}/U$s{efectivo_final_dolares}"
+            texto_saldo_caja = f"${saldo_caja_pesos}/U$s{saldo_caja_dolares}"
+        else:
+            texto_efectivo_final = ""
+            texto_saldo_caja = ""
         # print(mes_actual)
         data = []
         for movimiento in movimientos:
@@ -4628,24 +4646,17 @@ def movimientos_caja(req,id_caja):
                                                                               "ingresos_extra_mes_dolares":round(ingresos_extras_mes / precio_dolar,2),
                                                                               
                                                                               
-                                                                              
+                                                                            
                                                                               "id_caja":id_caja,
                                                                               "rubros":rubros,
                                                                               "total_ingresos_efectivo_pesos":total_ingresos_efectivo_pesos,
                                                                               "total_ingresos_efectivo_dolares":total_ingresos_efectivo_dolares,
-                                                                            #   "total_ingresos_transferencia_pesos":total_ingresos_transferencia_pesos,
-                                                                            #   "total_ingresos_transferencia_dolares":total_ingresos_transferencia_dolares,
-                                                                            #   "total_ingresos_debito_pesos":total_ingresos_debito_pesos,
-                                                                            #   "total_ingresos_debito_dolares":total_ingresos_debito_dolares,
-
+                                                                    
                                                                               "total_egresos_efectivo_pesos":total_egresos_efectivo_pesos,
                                                                               "total_egresos_efectivo_dolares":total_egresos_efectivo_dolares,
-                                                                            #   "total_egresos_transferencia_pesos":total_egresos_transferencia_pesos,
-                                                                            #   "total_egresos_transferencia_dolares":total_egresos_transferencia_dolares,
-                                                                            #   "total_egresos_debito_pesos":total_egresos_debito_pesos,
-                                                                            #   "total_egresos_debito_dolares":total_egresos_debito_dolares,
-                                                                              "saldo_caja":"" if None else "",
-                                                                              "saldo_sistema":"" if None else "",
+                                                            
+                                                                              "efectivo_inicial":texto_efectivo_final,
+                                                                              "saldo_caja":texto_saldo_caja,
                                                                               "monto_inicial":monto_inicial
                                                                               
                                                                               

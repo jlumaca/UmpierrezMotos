@@ -230,6 +230,7 @@ urlpatterns = [
      path('baja_pedido/<int:id_pedido>', views.baja_pedido,name="BajaPedido"),
      path('cerrar_pedido/<int:id_pedido>', views.cerrar_pedido,name="CerrarPedido"),
      path('buscar_pedido_documento', views.busqueda_pedido_por_doc_cliente,name="PedidoPorDocumento"),
+     path('buscar_pedido_nombre_apellido', views.busqueda_pedido_por_nombre_apellido_cliente,name="PedidoPorNombreApellido"),
 
      path('personal_taller', views.personal_taller,name="PersonalTaller"),
      path('alta_personal_taller', views.alta_personal_taller,name="AltaPersonalTaller"),

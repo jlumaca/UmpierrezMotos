@@ -300,7 +300,7 @@ def cliente_moto(req):
                 return render(req,"perfil_administrativo/motos/alta_moto.html",{"error_message":"La moto que usted desea ingresar ya existe en el inventario de la tienda",
                                                                                 "active_page": 'Motos',
                                                                                 "telefono":telefono.telefono,
-                                                                                 "correo":correo.correo,
+                                                                                 "correo":correo.correo if correo else "El cliente no cuenta con correo",
                                                                                 "form_moto_usada":False,
                                                                                 "form_moto_ingresada":False})
             else:

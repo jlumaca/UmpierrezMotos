@@ -4407,9 +4407,9 @@ def saldo_final_caja(req,id_caja):
                     )
 
                     caja = Caja.objects.get(id=id_caja)
-                    saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
-                    diferencia = float(saldo_final_declarado) - float(caja.monto_inicial)
-                    saldo_final = float(caja.monto_inicial) + diferencia + float(caja.depositos) - float(caja.egresos)
+                    # saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
+                    # diferencia = float(saldo_final_declarado) - float(caja.monto_inicial)
+                    saldo_final = float(caja.monto_inicial) + float(caja.depositos) - float(caja.egresos)
                     # saldo_sistema = abs(saldo_sistema)
                     
                     #DECLARADO POR EL USUARIO, APARECERA EN "EFECTIVO FINAL"
@@ -4417,7 +4417,7 @@ def saldo_final_caja(req,id_caja):
                     #SALDO CALCULADO POR EL PROGRAMA, APARECERA EN "SALDO CAJA"
                     caja.saldo_sistema = saldo_final
                     #EL TOTAL DE LO QUE TENGO AL FINAL MENOS LA CANTIDAD DECLARADA AL INICIO AL ABRIR LA CAJA, APARECERA EN COLUMNA DIERENCIA
-                    diferencia_caja = saldo_final - float(caja.monto_inicial)
+                    diferencia_caja = saldo_final_declarado - saldo_final
                     caja.diferencia = diferencia_caja
                     caja.estado = "Cuadre de caja"
                     caja.save()

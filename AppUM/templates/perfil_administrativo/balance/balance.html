@@ -64,6 +64,7 @@
                 <th>Egresos del día</th>
                 <th>Ganancias netas del día</th>
                 <th>Ingresos extras del día</th> 
+                <th>Créditos a cobrar del día</th>
             </tr>
         </thead>
         <tbody>
@@ -72,6 +73,7 @@
                     <td>${{ egresos_dia }}/U$s{{ egresos_dia_dolares }}</td>  
                     <td>${{ ganancias_netas_dia }}/U$s{{ ganancias_netas_dia_dolares }}</td>
                     <td>${{ ingresos_extra_dia }}/U$s{{ ingresos_extra_dia_dolares }}</td>
+                    <td>${{ total_creditos_pesos_dia }}/U$s{{ total_creditos_dolares_dia }}</td>
                 </tr>
         </tbody>
     </table>
@@ -87,6 +89,9 @@
                 
                 <th>Ingresos extras del mes</th>
                 
+
+                <th>Créditos a cobrar del mes</th>
+
             </tr>
         </thead>
         <tbody>
@@ -97,7 +102,26 @@
                     </td>
                     <td>${{ ganancias_netas_mes }}/U$s{{ ganancias_netas_mes_dolares }}</td>
                     <td>${{ ingresos_extra_mes }}/U$s{{ ingresos_extra_mes_dolares }}</td>
+                    <td>${{ total_creditos_pesos_mes }}/U$s{{ total_creditos_dolares_mes }}</td>
                     
+                </tr>
+        </tbody>
+    </table>
+    <h3>Total de Créditos a cobrar</h3>
+    <table class="table" id="tabla-resumen">
+        <thead>
+            <tr>  
+                <th>Total x Motos</th>
+                <th>Total x Accesorios</th>
+                <th>Total</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>${{ creditos_a_cobrar_x_motos_pesos }}/U$s{{ creditos_a_cobrar_x_motos_dolares }}</td>
+                    <td>${{ creditos_a_cobrar_x_accesorios_pesos }}/U$s{{ creditos_a_cobrar_x_accesorios_dolares }}</td> 
+                    <td>${{ total_creditos_pesos }}/U$s{{ total_creditos_dolares }}</td>
                 </tr>
         </tbody>
     </table>

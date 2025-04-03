@@ -1448,7 +1448,7 @@ def alta_paga_accesorio(req,id_venta):
 
 
         comprobante = req.FILES.get('comprobante_pago')
-        caja = Caja.objects.filter(estado="Abierto").first()
+        # caja = Caja.objects.filter(estado="Abierto").first()
         forma_pago = req.POST['forma_pago']
         # fecha_proximo_pago = req.POST['f_prox_pago']
         observaciones_pago = req.POST['observaciones_pago']
@@ -1474,12 +1474,12 @@ def alta_paga_accesorio(req,id_venta):
             else:
                 comprobante_url = None
 
-            if caja:
-                if cv.fecha_compra == fecha_actual:
-                    tipo = "Ingreso"
-                else:
-                    tipo = "Ingreso extra"
-                movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda,forma_pago,tipo,alta,"accesorio")
+            
+            if cv.fecha_compra == fecha_actual:
+                tipo = "Ingreso"
+            else:
+                tipo = "Ingreso extra"
+            movimiento_caja_por_pago_accesorio(req,float(total),id_venta,moneda,forma_pago,tipo,alta,"accesorio")
                 #,metodo,tipo,id_venta,producto
             messages.success(req, "Pago ingresado con éxito")
             return redirect(f"{reverse('DetallesCompraAccesorio',kwargs={'codigo_compra':cv.codigo_compra})}?comprobante_url={comprobante_url}")
@@ -1503,7 +1503,7 @@ def baja_paga_accesorio(req,id_ca):
             
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            caja = Caja.objects.filter(estado="Abierto").first()
+            caja = Caja.objects.latest('id')
             caja.depositos = caja.depositos - quitar_deposito
             caja.save()
                 # insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
@@ -2328,15 +2328,14 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
 
                 if mostrar_cbox:
                     if rb_egresos:
-                        caja = Caja.objects.filter(estado="Abierto").first()
-                        if caja:
-                            usuario = req.user
-                            personal = Personal.objects.filter(usuario=usuario.username).first()
-                            if accesorio.moneda_precio == "Pesos":
-                                monto_egreso = req.POST['monto_egreso']
-                            else:
-                                monto_egreso = req.POST['monto_egreso']
-                            insert_movimientos_caja(f"Egreso por baja de accesorio vendido al cliente {nom_ape}","Egreso",monto_egreso,caja.id,personal.id,req.POST['moneda_devolucion'],None,req.POST['forma_devolucion'],0,1,None,None)
+                        caja = Caja.objects.latest('id')
+                        usuario = req.user
+                        personal = Personal.objects.filter(usuario=usuario.username).first()
+                        if accesorio.moneda_precio == "Pesos":
+                            monto_egreso = req.POST['monto_egreso']
+                        else:
+                            monto_egreso = req.POST['monto_egreso']
+                        insert_movimientos_caja(f"Egreso por baja de accesorio vendido al cliente {nom_ape}","Egreso",monto_egreso,caja.id,personal.id,req.POST['moneda_devolucion'],None,req.POST['forma_devolucion'],0,1,None,None)
                     elif rb_fondos:
                         if req.POST['moneda_devolucion'] == "Pesos":
                             fondos_pesos = float(req.POST['monto_egreso'])
@@ -2464,19 +2463,17 @@ def fondos_cliente(req,id_cliente):
             )
             #metodo_elegido
             nuevo_fondo.save()
-            caja = Caja.objects.filter(estado="Abierto").first()
-            
-            if caja:
-                cliente = Cliente.objects.get(id=id_cliente)
-                usuario = req.user
-                personal = Personal.objects.filter(usuario=usuario.username).first()
-                if tipo == "Ingreso":
-                    movimiento = "Ingreso extra"
-                    descripcion = f"Ingreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
-                else:
-                    movimiento = "Egreso"
-                    descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
-                insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,req.POST['moneda_fondos'],None,req.POST['metodo_elegido'],0,0,None,None)
+            caja = Caja.objects.latest('id')
+            cliente = Cliente.objects.get(id=id_cliente)
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            if tipo == "Ingreso":
+                movimiento = "Ingreso extra"
+                descripcion = f"Ingreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
+            else:
+                movimiento = "Egreso"
+                descripcion = f"Engreso de fondos del cliente {cliente.nombre} {cliente.apellido}"
+            insert_movimientos_caja(descripcion,movimiento,int(req.POST['monto_fondos']),caja.id,personal.id,req.POST['moneda_fondos'],None,req.POST['metodo_elegido'],0,0,None,None)
 
             #(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Fondos actualizados correctamente.")
@@ -3456,7 +3453,7 @@ def alta_pago_cuota(req,id_cv):
     try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
-        caja = Caja.objects.filter(estado="Abierto").first()
+        # caja = Caja.objects.filter(estado="Abierto").first()
         forma_pago = req.POST['forma_pago']
         fecha_proximo_pago = req.POST['f_prox_pago']
         observaciones_pago = req.POST['observaciones_pago']
@@ -3505,12 +3502,12 @@ def alta_pago_cuota(req,id_cv):
                 comprobante_url = alta
             else:
                 comprobante_url = None
-            if caja:
-                if cv.fecha_compra == fecha_actual:
-                    tipo = "Ingreso"
-                else:
-                    tipo = "Ingreso extra"
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto")
+            # if caja:
+            if cv.fecha_compra == fecha_actual:
+                tipo = "Ingreso"
+            else:
+                tipo = "Ingreso extra"
+            movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto")
             messages.success(req, "Pago ingresado con éxito.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
@@ -3525,7 +3522,7 @@ def alta_pago(req,id_cv):
     try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
-        caja = Caja.objects.filter(estado="Abierto").first()
+        # caja = Caja.objects.filter(estado="Abierto").first()
         forma_pago = req.POST['forma_pago']
         # fecha_proximo_pago = req.POST['f_prox_pago']
         observaciones_pago = req.POST['observaciones_pago']
@@ -3566,12 +3563,12 @@ def alta_pago(req,id_cv):
                 #LA ULTIMA REFINANCIACION LA DESACTIVA PARA QUE NO PUEDAN AGREGARSE MAS PAGOS EN LA MISMA
                 ult_financiamiento.actual = 0
                 ult_financiamiento.save()
-            if caja:
-                if cv.fecha_compra == fecha_actual:
-                    tipo = "Ingreso"
-                else:
-                    tipo = "Ingreso extra"
-                movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto") 
+            # if caja:
+            if cv.fecha_compra == fecha_actual:
+                tipo = "Ingreso"
+            else:
+                tipo = "Ingreso extra"
+            movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto") 
             messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
     except Exception as e:
@@ -3597,7 +3594,7 @@ def baja_pago(req,id_cm):
             
             usuario = req.user
             personal = Personal.objects.filter(usuario=usuario.username).first()
-            caja = Caja.objects.filter(estado="Abierto").first()
+            caja = Caja.objects.latest('id')
             caja.depositos = caja.depositos - quitar_deposito
             caja.save()
                 # insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
@@ -3788,14 +3785,14 @@ def reservar_moto(req,id_moto,id_cliente):
         # movimiento_caja_por_pago(req,entrega,id_cv,moneda,None,"Ingreso extra",None,"moto")
         # fecha_prox_pago = datetime.now() + relativedelta(months=1)
         pago_reserva = insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña",forma_pago)
-        caja = Caja.objects.filter(estado="Abierto").first()
-        if caja:
-            cliente = Cliente.objects.get(id=id_cliente)
-            moto_datos = f"{moto.tipo} {moto.marca} {moto.modelo}"
-            cliente_datos = f"{cliente.nombre} {cliente.apellido}"
-            usuario = req.user
-            personal = Personal.objects.filter(usuario=usuario.username).first()
-            insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso extra",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,pago_reserva,"moto")
+        caja = Caja.objects.latest('id')
+        # if caja:
+        cliente = Cliente.objects.get(id=id_cliente)
+        moto_datos = f"{moto.tipo} {moto.marca} {moto.modelo}"
+        cliente_datos = f"{cliente.nombre} {cliente.apellido}"
+        usuario = req.user
+        personal = Personal.objects.filter(usuario=usuario.username).first()
+        insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso extra",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,pago_reserva,"moto")
         
     
         moto.save()
@@ -7025,7 +7022,7 @@ def alta_moto_taller(req):
 
 
 def balanceo(req):
-    try:
+    # try:
         # print("ID CAJA ES: " + str(id_caja))
         # req.session["id_caja_movimiento"] = id_caja
         movimientos = Movimientos.objects.all().order_by('-fecha')
@@ -7204,8 +7201,72 @@ def balanceo(req):
         saldo_total_dolares = round(saldo_total / precio_dolar,2)        
         rubros = Rubros.objects.filter(habilitado=1).order_by('-cantidad_usos')
         page_obj = funcion_paginas_varias(req,data)
+
+        last_records = CuotasMoto.objects.values('venta_id').annotate(last_id=Max('id'))
+        pagos_motos = CuotasMoto.objects.filter(id__in=[record['last_id'] for record in last_records]).order_by('venta_id')
+        creditos_a_cobrar_x_motos_pesos = 0
+        creditos_a_cobrar_x_motos_dolares = 0
+        creditos_a_cobrar_x_motos_pesos_dia = 0
+        creditos_a_cobrar_x_motos_dolares_dia = 0
+        creditos_a_cobrar_x_motos_pesos_mes = 0
+        creditos_a_cobrar_x_motos_dolares_mes = 0
+        for pago in pagos_motos:
+            if pago.cant_restante_pesos != 0 or pago.cant_restante_dolares != 0:
+                creditos_a_cobrar_x_motos_pesos = creditos_a_cobrar_x_motos_pesos + float(pago.cant_restante_pesos)
+                creditos_a_cobrar_x_motos_dolares = creditos_a_cobrar_x_motos_dolares + float(pago.cant_restante_dolares)
+                if pago.fecha_prox_pago ==  fecha_actual:
+                    creditos_a_cobrar_x_motos_pesos_dia = creditos_a_cobrar_x_motos_pesos_dia + float(pago.cant_restante_pesos)
+                    creditos_a_cobrar_x_motos_dolares_dia = creditos_a_cobrar_x_motos_dolares_dia + float(pago.cant_restante_dolares)
+
+                if pago.fecha_prox_pago:
+                    if pago.fecha_prox_pago.month == mes_actual:
+                        creditos_a_cobrar_x_motos_pesos_mes = creditos_a_cobrar_x_motos_pesos_mes + float(pago.cant_restante_pesos)
+                        creditos_a_cobrar_x_motos_dolares_mes = creditos_a_cobrar_x_motos_dolares_mes + float(pago.cant_restante_dolares)
+
+
+
+
+        last_records_accesorios = CuotasAccesorios.objects.values('venta_id').annotate(last_id=Max('id'))
+        pagos_accesorios = CuotasAccesorios.objects.filter(id__in=[record['last_id'] for record in last_records_accesorios]).order_by('venta_id')
+        creditos_a_cobrar_x_accesorios_pesos = 0
+        creditos_a_cobrar_x_accesorios_dolares = 0
+        creditos_a_cobrar_x_accesorios_pesos_dia = 0
+        creditos_a_cobrar_x_accesorios_dolares_dia = 0
+        creditos_a_cobrar_x_accesorios_pesos_mes = 0
+        creditos_a_cobrar_x_accesorios_dolares_mes = 0
+        for pago in pagos_accesorios:
+            if pago.cant_restante_pesos != 0 or pago.cant_restante_dolares != 0:
+                creditos_a_cobrar_x_accesorios_pesos = creditos_a_cobrar_x_accesorios_pesos + float(pago.cant_restante_pesos)
+                creditos_a_cobrar_x_accesorios_dolares = creditos_a_cobrar_x_accesorios_dolares + float(pago.cant_restante_dolares)
+                if pago.fecha_pago ==  fecha_actual:
+                    creditos_a_cobrar_x_accesorios_pesos_dia = creditos_a_cobrar_x_accesorios_pesos_dia + float(pago.cant_restante_pesos)
+                    creditos_a_cobrar_x_accesorios_dolares_dia = creditos_a_cobrar_x_accesorios_dolares_dia + float(pago.cant_restante_dolares)
+
+                if pago.fecha_pago.month == mes_actual:
+                    creditos_a_cobrar_x_accesorios_pesos_mes = creditos_a_cobrar_x_accesorios_pesos_mes + float(pago.cant_restante_pesos)
+                    creditos_a_cobrar_x_accesorios_dolares_mes = creditos_a_cobrar_x_accesorios_dolares_mes + float(pago.cant_restante_dolares)
+        
+        total_creditos_pesos = round(creditos_a_cobrar_x_motos_pesos + creditos_a_cobrar_x_accesorios_pesos,2)
+        total_creditos_dolares = round(creditos_a_cobrar_x_motos_dolares + creditos_a_cobrar_x_accesorios_dolares,2) 
+        
+        total_creditos_pesos_dia = round(creditos_a_cobrar_x_motos_pesos_dia + creditos_a_cobrar_x_accesorios_pesos_dia,2)
+        total_creditos_dolares_dia = round(creditos_a_cobrar_x_motos_dolares_dia + creditos_a_cobrar_x_accesorios_dolares_dia,2)
+        total_creditos_pesos_mes = round(creditos_a_cobrar_x_motos_pesos_mes + creditos_a_cobrar_x_accesorios_pesos_mes,2)
+        total_creditos_dolares_mes = round(creditos_a_cobrar_x_motos_dolares_mes + creditos_a_cobrar_x_accesorios_dolares_mes,2)
+            
+
+
         return render(req, "perfil_administrativo/balance/balance.html", {"page_obj": page_obj,
-                                                                              
+                                                                              "creditos_a_cobrar_x_motos_pesos":round(creditos_a_cobrar_x_motos_pesos,2),
+                                                                              "creditos_a_cobrar_x_motos_dolares":round(creditos_a_cobrar_x_motos_dolares,2),
+                                                                              "creditos_a_cobrar_x_accesorios_pesos":round(creditos_a_cobrar_x_accesorios_pesos,2),
+                                                                              "creditos_a_cobrar_x_accesorios_dolares":round(creditos_a_cobrar_x_accesorios_dolares,2),
+                                                                              "total_creditos_pesos":total_creditos_pesos,
+                                                                              "total_creditos_dolares":total_creditos_dolares,
+                                                                              "total_creditos_pesos_dia":total_creditos_pesos_dia,
+                                                                              "total_creditos_dolares_dia":total_creditos_dolares_dia,
+                                                                              "total_creditos_pesos_mes":total_creditos_pesos_mes,
+                                                                              "total_creditos_dolares_mes":total_creditos_dolares_mes,
                                                                               "saldo_total":saldo_total,
                                                                               "saldo_total_dolares":saldo_total_dolares,
                                                                               "ganancias_mes":ganancias_mes,
@@ -7249,8 +7310,8 @@ def balanceo(req):
                                                                               
                                                                               
                                                                               })
-    except Exception as e:
-        return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/arqueos/movimientos.html",{"error_message":e})
 
 def baja_movimiento_movimiento(req,id_movimiento):
     # try:

@@ -123,7 +123,7 @@ def insert_cuotas_moto(fecha_prox_pago,id_cv,resto_dolares,resto_pesos,moneda,pr
 def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo,id_venta,producto):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
     cv = ComprasVentas.objects.get(id=id_cv)
-    caja = Caja.objects.filter(estado = "Abierto").first()
+    caja = Caja.objects.latest('id')
     usuario = req.user
     personal = Personal.objects.filter(usuario=usuario.username).first()
     cliente = Cliente.objects.get(id=cv.cliente_id)
@@ -147,7 +147,7 @@ def movimiento_caja_por_pago(req,entrega,id_cv,moneda,metodo,tipo,id_venta,produ
 def movimiento_caja_por_pago_accesorio(req,entrega,id_ca,moneda,metodo,tipo,id_venta,producto):
     #movimiento_caja_por_pago(entrega,id_cv,moneda)
     cv = ClienteAccesorio.objects.get(id=id_ca)
-    caja = Caja.objects.filter(estado = "Abierto").first()
+    caja = Caja.objects.latest('id')
     usuario = req.user
     personal = Personal.objects.filter(usuario=usuario.username).first()
     cliente = Cliente.objects.get(id=cv.cliente_id)

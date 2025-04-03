@@ -4416,7 +4416,7 @@ def saldo_final_caja(req,id_caja):
                     caja.saldo_caja = saldo_final_declarado
                     #SALDO CALCULADO POR EL PROGRAMA, APARECERA EN "SALDO CAJA"
                     caja.saldo_sistema = saldo_final
-                    #EL TOTAL DE LO QUE TENGO AL FINAL MENOS LA CANTIDAD DECLARADA AL INICIO AL ABRIR LA CAJA, APARECERA EN COLUMNA DIERENCIA
+                    #EL TOTAL DE LO QUE TENGO AL FINAL MENOS LA CANTIDAD CALCULADA POR EL SISTEMA, APARECERA EN COLUMNA DIERENCIA
                     diferencia_caja = saldo_final_declarado - saldo_final
                     caja.diferencia = diferencia_caja
                     caja.estado = "Cuadre de caja"

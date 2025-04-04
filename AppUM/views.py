@@ -7021,11 +7021,20 @@ def alta_moto_taller(req):
     #     pass
 
 
-def balanceo(req):
+def balanceo(req,busqueda):
     # try:
         # print("ID CAJA ES: " + str(id_caja))
         # req.session["id_caja_movimiento"] = id_caja
-        movimientos = Movimientos.objects.all().order_by('-fecha')
+        if busqueda == "metodo":
+            movimientos = Movimientos.objects.filter(metodo=req.GET.get('metodo')).order_by('-fecha')
+        elif busqueda == "fecha":
+            fecha_str = req.GET.get('f_movimiento')  # Cambiado a paréntesis
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else None
+            movimientos = Movimientos.objects.filter(fecha__date=fecha)
+        elif busqueda == "tipo":
+            movimientos = Movimientos.objects.filter(tipo=req.GET.get('tipo_movimiento')).order_by('-fecha')
+        else:
+            movimientos = Movimientos.objects.all().order_by('-fecha')
         # caja = Caja.objects.get(id=id_caja)
         # monto_inicial = caja.monto_inicial
         dolar = PrecioDolar.objects.get(id=1)
@@ -8014,7 +8023,7 @@ def ingresos_balance(req):
             insert_movimientos_caja(req.POST['descripcion_ingreso'],"Ingreso extra",req.POST['ingresos'],id_caja,personal.id,moneda,None,metodo,0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Ingreso extra ingresado con éxito")
-            return redirect(f"{reverse('Balance')}")
+            return redirect(reverse('Balance', kwargs={'busqueda': "todos"}))
     # except Exception as e:
     #     return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
@@ -8025,10 +8034,10 @@ def egresos_balance(req):
         if int(req.POST['egresos']) < 0 or int(req.POST['egresos']) == 0:
             # return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":"Ingrese un valor correcto"})
             messages.error(req,"El monto del egreso es incorrecto.")
-            return redirect('Balance')
+            return redirect(reverse('Balance', kwargs={'busqueda': "todos"}))
         elif not req.POST['rubro_egreso']:  
             messages.error(req,"Debe ingresar un nuevo rubro.")
-            return redirect('Balance')
+            return redirect(reverse('Balance', kwargs={'busqueda': "todos"}))
         else:
             id_rubro = req.POST['rubro_egreso']
             moneda = req.POST['moneda_monto_egreso']
@@ -8059,7 +8068,7 @@ def egresos_balance(req):
             insert_movimientos_caja(req.POST['descripcion_egreso'],"Egreso",req.POST['egresos'],id_caja,personal.id,moneda,nombre_rubro,metodo,0,0,None,None)
             #insert_movimientos_caja(movimiento_descripcion,tipo,monto,id_caja,id_personal,moneda,rubro,metodo,es_moto,es_accesorio,id_venta,producto)
             messages.success(req, "Egreso extra ingresado con éxito")
-            return redirect(f"{reverse('Balance')}")
+            return redirect(reverse('Balance', kwargs={'busqueda': "todos"}))
     # except Exception as e:
     #     return render(req,"perfil_administrativo/arqueos/arqueos.html",{"error_message":e})
 
@@ -8072,7 +8081,8 @@ def nuevo_rubro_egreso_balance(req):
         )
         nuevo_rubro.save()
         messages.success(req, "Rubro ingresado con éxito")
-        return redirect(f"{reverse('Balance')}")
+        # return redirect(f"{reverse('Balance')}")
+        return redirect(reverse('Balance', kwargs={'busqueda': "todos"}))
     except Exception as e:
         pass
 

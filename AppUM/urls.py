@@ -252,7 +252,7 @@ urlpatterns = [
      path('alta_moto_taller/', views.alta_moto_taller,name="AltaMotoTaller"),
 
 
-     path('balance/', views.balanceo,name="Balance"),
+     path('balance/<str:busqueda>', views.balanceo,name="Balance"),
      path('movimiento_balance_baja/<int:id_movimiento>', views.baja_movimiento_movimiento,name="MovimientoBalanceBaja"),
      path('balance/', views.balanceo,name="Balance"),
      path('movimiento_balance_baja/<int:id_movimiento>', views.baja_movimiento_movimiento,name="MovimientoBalanceBaja"),

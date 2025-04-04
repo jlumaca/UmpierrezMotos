@@ -4404,9 +4404,31 @@ def saldo_final_caja(req,id_caja):
                     )
 
                     caja = Caja.objects.get(id=id_caja)
+
+                    movimientos = Movimientos.objects.filter(caja_id=id_caja,metodo="Efectivo")
+                    ingresos_pesos = 0
+                    ingresos_dolares = 0
+                    egresos_pesos = 0
+                    egresos_dolares = 0
+                    for mov in movimientos:
+                        if mov.moneda == "Pesos":
+                            if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                                ingresos_pesos = ingresos_pesos + float(mov.monto)
+                            else:
+                                egresos_pesos = egresos_pesos + float(mov.monto)
+                        else:
+                            if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                                ingresos_dolares = ingresos_dolares + float(mov.monto)
+                            else:
+                                egresos_dolares = egresos_dolares + float(mov.monto)
+                    
+                    total_movimientos_pesos = ingresos_pesos - egresos_pesos
+                    total_movimientos_dolares = ingresos_dolares - egresos_dolares
+                    total = total_movimientos_pesos + (total_movimientos_dolares * precio_dolar)
+                    total = round(total,2)
                     # saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
                     # diferencia = float(saldo_final_declarado) - float(caja.monto_inicial)
-                    saldo_final = float(caja.monto_inicial) + float(caja.depositos) - float(caja.egresos)
+                    saldo_final = float(caja.monto_inicial) + total
                     # saldo_sistema = abs(saldo_sistema)
                     
                     #DECLARADO POR EL USUARIO, APARECERA EN "EFECTIVO FINAL"
@@ -4425,6 +4447,93 @@ def saldo_final_caja(req,id_caja):
                     return redirect('Arqueos')
             else:
                 return render(req,"perfil_administrativo/arqueos/saldo_final.html",{})
+    # except Exception as e:
+    #     return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
+
+@admin_required
+def editar_saldo_inicial(req,id_caja):
+    # try:
+            if req.method == "POST": 
+                total_billetes_2000 = (int(req.POST['billetes_2000']) * 2000) 
+                total_billetes_1000 = (int(req.POST['billetes_1000']) * 1000)
+                total_billetes_500 = (int(req.POST['billetes_500']) * 500)
+                total_billetes_200 = (int(req.POST['billetes_200']) * 200)
+                total_billetes_100 = (int(req.POST['billetes_100']) * 100)
+                total_billetes_50 = (int(req.POST['billetes_50']) * 50)
+                total_billetes_20 = (int(req.POST['billetes_20']) * 20)
+
+                total_monedas_50 = (int(req.POST['monedas_50']) * 50)
+                total_monedas_10 = (int(req.POST['monedas_10']) * 10)
+                total_monedas_5 = (int(req.POST['monedas_5']) * 5)
+                total_monedas_2 = (int(req.POST['monedas_2']) * 2)
+                total_monedas_1 = int(req.POST['monedas_1'])
+
+                total_billetes_100_dolares = (int(req.POST['billetes_100_dolares']) * 100) 
+                total_billetes_50_dolares = (int(req.POST['billetes_50_dolares']) * 50)
+                total_billetes_20_dolares = (int(req.POST['billetes_20_dolares']) * 20)
+                total_billetes_10_dolares = (int(req.POST['billetes_10_dolares']) * 10)
+                total_billetes_5_dolares = (int(req.POST['billetes_5_dolares']) * 5)
+                total_billetes_2_dolares = (int(req.POST['billetes_2_dolares']) * 2)
+                total_billetes_1_dolares = (int(req.POST['billetes_1_dolares']) * 1)
+                error_dinero = validar_billetes(total_billetes_2000,total_billetes_1000,total_billetes_500,total_billetes_200,total_billetes_100,total_billetes_50,total_billetes_20)
+                error_monedas = validar_monedas(total_monedas_50,total_monedas_10,total_monedas_5,total_monedas_2,total_monedas_1)
+                if error_dinero:
+                    return render(req,"perfil_administrativo/arqueos/editar_monto_inicial.html",{"error_message":error_dinero})
+                elif error_monedas:
+                    return render(req,"perfil_administrativo/arqueos/editar_monto_inicial.html",{"error_message":error_monedas})
+                else:
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = float(dolar.precio_dolar_tienda)
+                    total_dolares = (total_billetes_100_dolares + total_billetes_50_dolares + total_billetes_20_dolares + total_billetes_10_dolares 
+                                    + total_billetes_5_dolares + total_billetes_2_dolares + total_billetes_1_dolares)
+                    total_dolares_a_pesos = total_dolares * precio_dolar
+                    total_dolares_a_pesos = round(total_dolares_a_pesos,2)
+                    monto_inicial_declarado = (
+                        total_billetes_2000 + total_billetes_1000 + total_billetes_500 + total_billetes_200 + total_billetes_100 + total_billetes_50
+                        +total_billetes_20 + total_monedas_50 + total_monedas_10 + total_monedas_5 + total_monedas_2 + total_monedas_1 + total_dolares_a_pesos
+                    )
+
+                    caja = Caja.objects.get(id=id_caja)
+                    if caja.estado == "Cuadre de caja":
+                        movimientos = Movimientos.objects.filter(caja_id=id_caja,metodo="Efectivo")
+                        ingresos_pesos = 0
+                        ingresos_dolares = 0
+                        egresos_pesos = 0
+                        egresos_dolares = 0
+                        for mov in movimientos:
+                            if mov.moneda == "Pesos":
+                                if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                                    ingresos_pesos = ingresos_pesos + float(mov.monto)
+                                else:
+                                    egresos_pesos = egresos_pesos + float(mov.monto)
+                            else:
+                                if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                                    ingresos_dolares = ingresos_dolares + float(mov.monto)
+                                else:
+                                    egresos_dolares = egresos_dolares + float(mov.monto)
+                        
+                        total_movimientos_pesos = ingresos_pesos - egresos_pesos
+                        total_movimientos_dolares = ingresos_dolares - egresos_dolares
+                        total = total_movimientos_pesos + (total_movimientos_dolares * precio_dolar)
+                        total = round(total,2)
+                        # saldo_sistema = caja.monto_inicial + caja.depositos - caja.egresos
+                        # diferencia = float(saldo_final_declarado) - float(caja.monto_inicial)
+                        saldo_final = monto_inicial_declarado + total
+                        # saldo_sistema = abs(saldo_sistema)
+                        
+                        #SALDO CALCULADO POR EL PROGRAMA, APARECERA EN "SALDO CAJA"
+                        caja.saldo_sistema = saldo_final
+                        #EL TOTAL DE LO QUE TENGO AL FINAL MENOS LA CANTIDAD CALCULADA POR EL SISTEMA, APARECERA EN COLUMNA DIERENCIA
+                        diferencia_caja = float(caja.saldo_caja) - saldo_final
+                        caja.diferencia = diferencia_caja
+                    
+                    caja.monto_inicial = monto_inicial_declarado
+                    caja.save()
+                    messages.success(req, "Monto inicial modificado con éxito")
+                    return redirect(f"{reverse('MovimientosCaja',kwargs={'id_caja':id_caja})}")
+                    # return redirect('Arqueos')
+            else:
+                return render(req,"perfil_administrativo/arqueos/editar_monto_inicial.html",{})
     # except Exception as e:
     #     return render(req,"perfil_administrativo/arqueos/alta_caja.html",{"error_message":e})
 
@@ -4636,7 +4745,7 @@ def movimientos_caja(req,id_caja):
         page_obj = funcion_paginas_varias(req,data)
         return render(req, "perfil_administrativo/arqueos/movimientos.html", {"page_obj": page_obj,
                                                                               
-                                                                              
+                                                                              "estado_caja":caja.estado,
                                                                               "ganancias_mes":ganancias_mes,
                                                                               "ganancias_dia":ganancias_dia,
                                                                               "egresos_dia":egresos_dia,

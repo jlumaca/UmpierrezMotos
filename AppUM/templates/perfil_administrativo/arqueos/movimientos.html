@@ -30,10 +30,20 @@
         </thead>
         <tbody>
                 <tr>
-                    <td>{{ monto_inicial }}</td>
+                    <td>
+                        {{ monto_inicial }}
+                        {% if estado_caja != 'Cerrado' %}
+                            <a href="{% url 'EditarMontoInicial' id_caja %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        {% endif %}
+                    </td>
                     <td>${{ total_ingresos_efectivo_pesos }}/U$s{{ total_ingresos_efectivo_dolares }}</td>        
                     <td>${{ total_egresos_efectivo_pesos }}/U$s{{ total_egresos_efectivo_dolares }}</td>
-                    <td>{{ efectivo_inicial }}</td>
+                    <td>
+                        {{ efectivo_inicial }}
+                        {% if estado_caja == 'Cuadre de caja' %}
+                            <a href="{% url 'SaldoFinalCaja' id_caja %}"><button class="btn btn-sm btn-success"><i class="fas fa-dollar-sign"></i></button></a>
+                        {% endif %}
+                    </td>
                     <td>{{ saldo_caja }}</td>
                 </tr>
         </tbody>

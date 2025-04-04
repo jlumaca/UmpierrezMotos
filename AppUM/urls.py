@@ -118,6 +118,7 @@ urlpatterns = [
      path('saldo_caja_final/<int:id_caja>', views.saldo_final_caja,name="SaldoFinalCaja"),
      path('cerrar_caja/<int:id_caja>', views.cerrar_caja,name="CerrarCaja"),
      path('movimientos_caja/<int:id_caja>', views.movimientos_caja,name="MovimientosCaja"),
+      path('editar_monto_inicial/<int:id_caja>', views.editar_saldo_inicial,name="EditarMontoInicial"),
 
      path('movimiento_baja/<int:id_caja>/<int:id_movimiento>', views.baja_movimiento,name="MovimientoBaja"),
      path('detalles_caja_x_fecha/', views.buscar_detalles_movimientos_x_fecha,name="DetallesCajaXFecha"),

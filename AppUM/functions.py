@@ -993,9 +993,16 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
         moneda = "$" if financiamiento_buscado.moneda_cuota == "Pesos" else "U$S" if financiamiento_buscado else None
         financiamiento = f"{str(financiamiento_buscado.cantidad_cuotas)} x {moneda} {str(financiamiento_buscado.valor_cuota)}" if financiamiento_buscado else None
         fecha = financiamiento_buscado.fecha if financiamiento_buscado else None
+        mensual_quincena = "Quincena" if financiamiento_buscado.quincena else "Mensual"
         mostrar_boton = True if financiamiento_buscado.actual else False
         moneda_pago = financiamiento_buscado.moneda_cuota if financiamiento_buscado else None
-        monto_cuota = int(financiamiento_buscado.valor_cuota) if financiamiento_buscado.actual else None
+        if financiamiento_buscado:
+            if financiamiento_buscado.quincena:
+                monto_cuota = int(float(financiamiento_buscado.valor_cuota) / 2)
+            else:
+                monto_cuota = int(financiamiento_buscado.valor_cuota)
+        else:
+            monto_cuota = None
         mostrar_boton_borrar_financiacion = True if financiamiento_buscado.actual else False
     else:
         fin_actual = Financiamientos.objects.filter(venta_id=id_cv,actual=1).first()
@@ -1007,8 +1014,15 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
             fecha = fin_actual.fecha if fin_actual else None
             id_f = fin_actual.id if fin_actual else None
             moneda_pago = fin_actual.moneda_cuota if fin_actual else None
-            monto_cuota = int(fin_actual.valor_cuota) if fin_actual else None
+            if fin_actual:
+                if fin_actual.quincena:
+                    monto_cuota = int(float(fin_actual.valor_cuota) / 2)
+                else:
+                    monto_cuota = int(fin_actual.valor_cuota)
+            else:
+                monto_cuota = None
             mostrar_boton_borrar_financiacion = True if fin_actual.actual else False
+            mensual_quincena = "Quincena" if fin_actual.quincena else "Mensual"
         else:
             #SI NO EXISTE NINGUNA REFINANCIACION NO MUESTRA NADA
             # fins = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
@@ -1029,8 +1043,16 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 fecha = financiacion_anterior.fecha if financiacion_anterior else None
                 id_f = financiacion_anterior.id if financiacion_anterior else None
                 moneda_pago = financiacion_anterior.moneda_cuota if financiacion_anterior else None
-                monto_cuota = int(financiacion_anterior.valor_cuota) if financiacion_anterior else None
+                # monto_cuota = int(financiacion_anterior.valor_cuota) if financiacion_anterior else None
+                if financiacion_anterior:
+                    if financiacion_anterior.quincena:
+                        monto_cuota = int(float(financiacion_anterior.valor_cuota) / 2)
+                    else:
+                        monto_cuota = int(financiacion_anterior.valor_cuota)
+                else:
+                    monto_cuota = None
                 mostrar_boton_borrar_financiacion = False
+                mensual_quincena = "Quincena" if financiacion_anterior.quincena else "Mensual"
             else:
                 mostrar_boton = False
                 page_obj = False
@@ -1041,6 +1063,7 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 moneda_pago = None
                 monto_cuota = None
                 mostrar_boton_borrar_financiacion = False
+                mensual_quincena = None
     
     
 
@@ -1104,7 +1127,8 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 "mon_pago":moneda_pago,
                 "fin_pagos_json":data_jason[4],
                 "monto_cuota":monto_cuota,
-                "mostrar_boton_borrar_financiacion":mostrar_boton_borrar_financiacion}
+                "mostrar_boton_borrar_financiacion":mostrar_boton_borrar_financiacion,
+                "mensual_quincena":mensual_quincena}
     # datos = [
     #     cuotas_json,
     #     cliente_json,

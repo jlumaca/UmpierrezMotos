@@ -62,11 +62,20 @@
     <div id="div_refinanciamiento" style="display: none;">
         <form action="{% url 'Refinanciar' id_cv %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
-                <label for="documento" class="form-label">Moneda</label>
+                <label for="documento" class="form-label">Moneda:</label>
                 <div class="input-group">
                     <select class="form-control" name="moneda_refinanciacion" id="moneda_refinanciacion">
                         <option value="Pesos">Pesos</option>
                         <option value="Dolares">Dólares</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="documento" class="form-label">Forma de pago:</label>
+                <div class="input-group">
+                    <select class="form-control" name="quincena_mensual" id="moneda_refinanciacion">
+                        <option value="Mensual">Mensual</option>
+                        <option value="Quincena">Quincena</option>
                     </select>
                 </div>
             </div>
@@ -93,13 +102,22 @@
                 <label for="recargo" class="form-label">Cantidad de cuotas</label>
                 <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" required>
             </div>
+
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en pesos por Quincena</label>
+                <input type="number" class="form-control" name="valor_cuota_pesos_quincena" id="valor_cuota_pesos_quincena" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en dólares por Quincena</label>
+                <input type="number" class="form-control" name="valor_cuota_dolares_quincena" id="valor_cuota_dolares_quincena" readonly>
+            </div>
         
             <div class="mb-3">
-                <label for="total" class="form-label">Valor de las cuotas en pesos</label>
+                <label for="total" class="form-label">Valor de las cuotas en pesos por Mes</label>
                 <input type="number" class="form-control" name="valor_cuota_pesos" id="valor_cuota_pesos" readonly>
             </div>
             <div class="mb-3">
-                <label for="total" class="form-label">Valor de las cuotas en dólares</label>
+                <label for="total" class="form-label">Valor de las cuotas en dólares por Mes</label>
                 <input type="number" class="form-control" name="valor_cuota_dolares" id="valor_cuota_dolares" readonly>
             </div>
             <button type="submit" class="btn btn-success">Guardar</button>
@@ -316,6 +334,7 @@
             <tr>
                 <th>FECHA</th>
                 <th>FINANCIACION</th>
+                <th>MENSUAL/QUINCENA</th>
                 <th>ACCIONES</th>
             </tr>
         </thead>
@@ -323,6 +342,7 @@
             {% if fin_actual %}
             <td>{{ fecha_financiacion }}</td>
             <td>{{ financiacion_info }}</td>
+            <td>{{ mensual_quincena }}</td>
             <td>
                 {% if mostrar_boton_borrar_financiacion %}
                     <a href="{% url 'BajaFinanciamiento' id_f id_cv %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
@@ -914,6 +934,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cantCuotas = document.getElementById('cant_cuotas');
     const valorCuotaPesos = document.getElementById('valor_cuota_pesos');
     const valorCuotaDolares = document.getElementById('valor_cuota_dolares');
+    const valorCuotaPesosQuincena = document.getElementById('valor_cuota_pesos_quincena');
+    const valorCuotaDolaresQuincena = document.getElementById('valor_cuota_dolares_quincena');
     // const precioDolarTexto = document.getElementById('precio_dolar').textContent;
     // const precioDolar = parseFloat(precioDolarTexto);
 
@@ -931,10 +953,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalDolares = cant_restante_dolares + sumarRecargoDolares;
         const ValorCuotaPesos = totalPesos / cuotas;
         const ValorCuotaDolares = totalDolares / cuotas;
+        const ValorCuotaPesosQuincena = ValorCuotaPesos / 2;
+        const ValorCuotaDolaresQuincena = ValorCuotaDolares / 2;
 
         // Actualizar los campos
         valorCuotaPesos.value = ValorCuotaPesos.toFixed(0);
         valorCuotaDolares.value = ValorCuotaDolares.toFixed(0);
+        valorCuotaPesosQuincena.value = ValorCuotaPesosQuincena.toFixed(0);
+        valorCuotaDolaresQuincena.value = ValorCuotaDolaresQuincena.toFixed(0);
     }
 
     // Listeners para actualizar según los cambios en la moneda o valores ingresados

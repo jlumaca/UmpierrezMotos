@@ -3389,7 +3389,9 @@ def refinanciar_pagos(req,id_cv):
             valor_cuota = req.POST['valor_cuota_pesos']
         else:
             valor_cuota = req.POST['valor_cuota_dolares']
-        alta_financiamientos(req.POST['recargo_porcentaje_coma'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0)
+        
+        quincena = 1 if req.POST['quincena_mensual'] == "Quincena" else 0
+        alta_financiamientos(req.POST['recargo_porcentaje_coma'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0,quincena)
         messages.success(req, "Financiamiento ingresado con éxito")
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
     except Exception as e:
@@ -3487,7 +3489,15 @@ def alta_pago_cuota(req,id_cv):
             
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
-            cuota = "Cuota " + str(num_cuota_actual)   
+            if fin_actual.quincena:
+                if num_cuota_actual % 2 == 0:
+                    num_cuota_actual = int(num_cuota_actual / 2)
+                    cuota = "Cuota " + str(num_cuota_actual) + " Segunda Quincena"
+                else:
+                    num_cuota_actual = int((num_cuota_actual + 1) / 2)
+                    cuota = "Cuota " + str(num_cuota_actual) + " Primer Quincena"
+            else:
+                cuota = "Cuota " + str(num_cuota_actual)   
             if cant_cuotas == 0:
                 if fin_actual.moneda_cuota == "Pesos": #DUDA
                     resto_pesos = (int(fin_actual.cantidad_cuotas) * int(fin_actual.valor_cuota)) - int(req.POST['valor_a_pagar'])

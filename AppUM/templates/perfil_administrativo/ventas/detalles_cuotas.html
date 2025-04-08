@@ -197,6 +197,11 @@
             </div>
             
             <div class="mb-3">
+                <label for="precio" class="form-label">Fecha del próximo pago</label>
+                <input type="date" class="form-control" name="f_prox_pago" placeholder="Ingrese la fecha del próximo pago">
+            </div>
+            
+            <div class="mb-3">
                 <label for="descripcion" class="form-label">Observaciones</label>
                 <textarea class="form-control" name="observaciones_pago" id="descripcion" placeholder="Observaciones del pago" rows="3"></textarea>
             </div>
@@ -205,13 +210,24 @@
                 <label for="libreta_propiedad" class="form-label">Comprobante de pago</label>
                 <input type="file" class="form-control" name="comprobante_pago" id="comprobante_pago">
             </div>
+
+            <div id="botones_mostrar_mensaje">
+                <button type="button" class="btn btn-success" onclick="mostrarMensajeAdvertenciaAltaPago()">Guardar</button>
+                <!-- <a href="{% url 'DetallesCuotas' id_cv %}" class="btn btn-secondary">Cancelar</a> -->
+                <!-- <button class="btn btn-secondary" id="cerrar_form_ent_ini">Guardar</button> -->
+                <a href="#" class="btn btn-secondary" onclick="cerrarFormPagIni()">Cancelar</a>
+            </div>
         
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <!-- <a href="{% url 'DetallesCuotas' id_cv %}" class="btn btn-secondary">Cancelar</a> -->
-            <!-- <button class="btn btn-secondary" id="cerrar_form_ent_ini">Guardar</button> -->
-            <a href="#" class="btn btn-secondary" onclick="cerrarFormPagIni()">
-                Cancelar
-            </a>
+            <div id="mensaje_alta_pago" style="display: none;">
+                <div style="font-size: 24px; font-weight: bold; color: #d9534f;">
+                    <span style="font-size: 28px;">⚠️</span> ¡Atención! 
+                </div>
+                <p style="font-size: 16px; color: #333;">El siguiente pago no pertenece a ninguna refinanciación, debiendo refinanciar nuevamente en caso de proceder, ¿está seguro que desea dar de alta el pago?</p>
+                <button type="submit" class="btn btn-success">Aceptar</button>
+                <a href="#" class="btn btn-secondary" onclick="cerrarFormPagIni()">Cancelar</a>
+            </div>
+        
+            
         </form>
         
         
@@ -226,6 +242,7 @@
                 <th>FECHA</th>
                 <th>MONEDA</th>
                 <th>ENTREGA</th> 
+                <th>METODO</th> 
                 <th>RESTO</th>
                 <th>COMPROBANTE</th>
                 <th>ACCIONES</th>
@@ -245,11 +262,12 @@
                 <td>{{ pagos.primeros_pagos.fecha_pago }}</td>
                 <td>{{ pagos.primeros_pagos.moneda }}</td>
                 <td>{% if pagos.primeros_pagos.moneda == "Pesos" %} 
-                        {{ pagos.primeros_pagos.valor_pago_pesos }} 
+                        ${{ pagos.primeros_pagos.valor_pago_pesos }} 
                     {% else %} 
-                        {{ pagos.primeros_pagos.valor_pago_dolares }} 
+                        U$s{{ pagos.primeros_pagos.valor_pago_dolares }} 
                     {% endif %}
                 </td>
+                <td>{{ pagos.primeros_pagos.metodo_pago }}</td>
                 <td>${{ pagos.primeros_pagos.cant_restante_pesos }}/U$s{{ pagos.primeros_pagos.cant_restante_dolares }}</td>
                 <td>
                     {% if pagos.primeros_pagos.comprobante_pago %}
@@ -436,15 +454,15 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Tipo</th>
-                <th>Observaciones</th>
-                <th>Fecha</th>
-                <th>Moneda</th>
-                <th>Entrega</th> 
-                <th>Cantidad restante</th>
-                
-                <th>Comprobante</th>
-                <th>Acciones</th>
+                <th>TIPO</th>
+                <th>OBSERVACIONES</th>
+                <th>FECHA</th>
+                <th>MONEDA</th>
+                <th>ENTREGA</th> 
+                <th>METODO</th>
+                <th>CANTIDAD RESTANTE</th>
+                <th>COMPROBANTE</th>
+                <th>ACCIONES</th>
             </tr>
         </thead>
         <tbody>
@@ -462,6 +480,7 @@
                     <td>{{ cuota.cuota.cuota__fecha_pago }}</td>
                     <td>{{ cuota.cuota.cuota__moneda }}</td>
                     <td>{% if cuota.cuota.cuota__moneda == "Pesos" %} {{ cuota.cuota.cuota__valor_pago_pesos }} {% else %} {{ cuota.cuota.cuota__valor_pago_dolares }} {% endif %}</td>
+                    <td>{{ cuota.cuota.cuota__metodo_pago }}</td>
                     <td>
                         {% if cuota.cuota.cuota__cant_restante_pesos == 0 or cuota.cuota.cuota__cant_restante_dolares == 0 %}
                         <span class="badge bg-success" style="font-size: 1.2em; padding: 0.5em;">
@@ -603,6 +622,14 @@
     function cerrarFormRef(){
         var div_ref = document.getElementById("div_refinanciamiento")
         div_ref.style.display = "none";
+    }
+
+    function mostrarMensajeAdvertenciaAltaPago() {
+        // Ocultar el formulario original
+        document.getElementById('botones_mostrar_mensaje').style.display = 'none';
+        
+        // Mostrar el mensaje de advertencia
+        document.getElementById('mensaje_alta_pago').style.display = 'block';
     }
 //############################
     //NO BORRAR LO COMENTADO

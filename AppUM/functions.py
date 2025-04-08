@@ -672,6 +672,7 @@ def obtener_detalles_cuotas_financiamiento(req,id_f):
                     'cuota__valor_pago_pesos',
                     'cuota__comprobante_pago',
                     'cuota__tipo_pago',
+                    'cuota__metodo_pago',
                     'financiamiento__id'
                 ).order_by('-cuota__id')
             )

@@ -424,7 +424,7 @@ def obtener_compras_accesorios(req,codigo_compra):
                 .values(
                     'id',
                     'fecha_pago', 
-                     
+                     'metodo_pago', 
                     'cant_restante_dolares', 
                     'cant_restante_pesos', 
                     'moneda', 
@@ -1543,6 +1543,18 @@ def mi_funcion_diaria():
             moto = Moto.objects.get(id=venta.moto_id)
             tipo = "Atraso en cuota"
             descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo} Codigo {pagos.id}"
+            insert_notificaciones(descripcion,tipo)
+    
+    pagos_atrasados_accesorios = CuotasAccesorios.objects.all()
+
+    for pagos in pagos_atrasados_accesorios:
+        venta = ClienteAccesorio.objects.get(id=pagos.venta_id)
+        ult_pago = CuotasAccesorios.objects.filter(venta=venta).latest('id')
+        if pagos.fecha_prox_pago and (pagos.fecha_prox_pago.day + 1, pagos.fecha_prox_pago.month) == (hoy.day, hoy.month) and pagos.id == ult_pago.id:
+            cliente = Cliente.objects.get(id=venta.cliente_id)
+            accesorio = Accesorio.objects.get(id=venta.accesorio_id)
+            tipo = "Atraso en cuota"
+            descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {accesorio.tipo} {accesorio.marca} {accesorio.modelo} Codigo {pagos.id}"
             insert_notificaciones(descripcion,tipo)
 
 def cantidad_solicitudes_no_leidas(req):

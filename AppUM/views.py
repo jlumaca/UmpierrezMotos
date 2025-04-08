@@ -1317,7 +1317,7 @@ def venta_accesorio(req,id_cliente):
                             if resto_pesos <= 0 or resto_dolares <= 0:
                                 resto_dolares = 0
                                 resto_pesos = 0
-                            alta_cuota_accesorio(req,nueva_venta_accesorio.id,resto_dolares,resto_pesos,req.POST['moneda_venta'],"Pago realizado con los fondos del cliente",precio_dolar,entrega_dolares,entrega_pesos,None,"Efectivo",0,1)
+                            alta_cuota_accesorio(req,nueva_venta_accesorio.id,resto_dolares,resto_pesos,req.POST['moneda_venta'],"Pago realizado con los fondos del cliente",precio_dolar,entrega_dolares,entrega_pesos,None,"Efectivo",0,1,None)
                             nuevo_fondo = ClienteFondos(
                                     cliente_id = id_cliente,
                                     moneda = req.POST['moneda_venta'],
@@ -1415,6 +1415,7 @@ def alta_paga_accesorio(req,id_venta):
         precio_total_pesos = 0
         precio_total_dolares = 0
         total = req.POST['total_luego_recargo']
+        fecha_proximo_pago = req.POST['f_prox_pago'] if req.POST['f_prox_pago'] else None 
 
         
         if not existe_cuota:
@@ -1468,7 +1469,7 @@ def alta_paga_accesorio(req,id_venta):
             # alta = alta_cuota_accesorio(req,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
             #alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo)
             #lista = [resto_dolares,resto_pesos,entrega_pesos,entrega_dolares]
-            alta = alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo,1)
+            alta = alta_cuota_accesorio(req,id_venta,resto_dolares,resto_pesos,moneda,observaciones_pago,precio_dolar,entrega_dolares,entrega_pesos,comprobante,forma_pago,recargo,1,fecha_proximo_pago)
             if alta.comprobante_pago:
                 comprobante_url = alta
             else:
@@ -2396,7 +2397,7 @@ def borrar_accesorio_vendido(req,codigo_compra,id_accesorio):
                             p.venta_id = id_venta
                             p.save()
                         
-                        alta_cuota_accesorio(req,id_venta,resta_dolares,resta_pesos,req.POST['moneda_devolucion'],"Reajuste por baja de accesorio",precio_dolar,0,0,None,req.POST['forma_devolucion'],0,0)
+                        alta_cuota_accesorio(req,id_venta,resta_dolares,resta_pesos,req.POST['moneda_devolucion'],"Reajuste por baja de accesorio",precio_dolar,0,0,None,req.POST['forma_devolucion'],0,0,None)
                 messages.success(req, "Accesorio borrado de la ficha correctamente.")
                 return redirect(reverse('ClienteFicha', kwargs={'id_cliente': cliente.id}))
         else:

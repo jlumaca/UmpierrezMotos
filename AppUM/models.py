@@ -173,6 +173,7 @@ class CuotasAccesorios(models.Model):
     metodo_pago = models.CharField(max_length=20, blank=True)
     recargo = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     mostrar_reporte = models.BooleanField(default=1)
+    fecha_prox_pago = models.DateField(null=True)
 
 class Servicios(models.Model):
     fecha_ingreso = models.DateField()

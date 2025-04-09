@@ -38,8 +38,8 @@ from AppUM.models import *  # Importación absoluta
 #         descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo}"
 #         print(descripcion)
 
-compras = ClienteAccesorio.objects.all()
-codigo_compra = 0
+# compras = ClienteAccesorio.objects.all()
+# codigo_compra = 0
 
 # while compras:
 
@@ -67,34 +67,56 @@ codigo_compra = 0
 
 
 #LIMPIAR BASE DE DATOS
-CuotasAccesorios.objects.all().delete()
-ClienteCorreo.objects.all().delete()
-ClienteTelefono.objects.all().delete()
-ClienteFondos.objects.all().delete()
-AnotacionesServicio.objects.all().delete()
-ClienteAccesorio.objects.all().delete()
-ClienteRepuestosPiezas.objects.all().delete()
-CuotasFinanciacion.objects.all().delete()
-Financiamientos.objects.all().delete()
-MovimientoPagoAccesorio.objects.all().delete()
-MovimientoPagoMoto.objects.all().delete()
-CuotasMoto.objects.all().delete()
-Accesorio.objects.all().delete()
-ComprasVentas.objects.all().delete()
-Movimientos.objects.all().delete()
-Caja.objects.all().delete()
-Matriculas.objects.all().delete()
-MecanicosServicios.objects.all().delete()
-NotificacionPersonal.objects.all().delete()
-Notificaciones.objects.all().delete()
-Pedidos.objects.all().delete()
-RepuestosPiezasServicios.objects.all().delete()
-Rubros.objects.all().delete()
-RepuestosPiezas.objects.all().delete()
-TareasServicios.objects.all().delete()
-Servicios.objects.all().delete()
-Moto.objects.all().delete()
-Cliente.objects.all().delete()
+# CuotasAccesorios.objects.all().delete()
+# ClienteCorreo.objects.all().delete()
+# ClienteTelefono.objects.all().delete()
+# ClienteFondos.objects.all().delete()
+# AnotacionesServicio.objects.all().delete()
+# ClienteAccesorio.objects.all().delete()
+# ClienteRepuestosPiezas.objects.all().delete()
+# CuotasFinanciacion.objects.all().delete()
+# Financiamientos.objects.all().delete()
+# MovimientoPagoAccesorio.objects.all().delete()
+# MovimientoPagoMoto.objects.all().delete()
+# CuotasMoto.objects.all().delete()
+# Accesorio.objects.all().delete()
+# ComprasVentas.objects.all().delete()
+# Movimientos.objects.all().delete()
+# Caja.objects.all().delete()
+# Matriculas.objects.all().delete()
+# MecanicosServicios.objects.all().delete()
+# NotificacionPersonal.objects.all().delete()
+# Notificaciones.objects.all().delete()
+# Pedidos.objects.all().delete()
+# RepuestosPiezasServicios.objects.all().delete()
+# Rubros.objects.all().delete()
+# RepuestosPiezas.objects.all().delete()
+# TareasServicios.objects.all().delete()
+# Servicios.objects.all().delete()
+# Moto.objects.all().delete()
+# Cliente.objects.all().delete()
+
+
+# movimientos = Movimientos.objects.all()
+
+# for mov in movimientos:
+#     if mov.metodo == "Debito" or mov.metodo == "Débito":
+#         mov.metodo = "Tarjeta"
+#         mov.save()
+
+
+# cuotas_moto = CuotasMoto.objects.all()
+# for cuota in cuotas_moto:
+#     if cuota.metodo_pago == "Debito" or cuota.metodo_pago == "Débito":
+#         cuota.metodo_pago == "Tarjeta"
+#         cuota.save()
+
+# cuotas_accesorio = CuotasAccesorios.objects.all()
+# for cuota in cuotas_accesorio:
+#     if cuota.metodo_pago == "Debito" or cuota.metodo_pago == "Débito":
+#         cuota.metodo_pago == "Tarjeta"
+#         cuota.save()
+
 
 
 

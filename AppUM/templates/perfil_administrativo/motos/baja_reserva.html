@@ -25,6 +25,9 @@
                 {% endif %}
                 
             </form>
+            {% if error_message %}
+                <p class="text-danger mt-3">{{ error_message }}</p>
+            {% endif %}
         </div>
     </div>
 </div>

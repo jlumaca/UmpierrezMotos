@@ -1232,108 +1232,115 @@ def detalles_accesorio(req,id_accesorio):
 @admin_required
 def venta_accesorio(req,id_cliente):
     # try:
-        fondos = ClienteFondos.objects.filter(cliente_id=id_cliente).first()
-        if fondos:
-            ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
-            ult_fondo_pesos = float(ult_fondo.total_pesos)
-            ult_fondo_dolares = float(ult_fondo.total_dolares)
-        else: 
-            ult_fondo = None
-        cbox_fondos = 'incluir_fondos' in req.POST
-        if cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > ult_fondo_pesos) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > ult_fondo_dolares)):
+        validar_caja = validar_caja_abierta()
+        if not validar_caja:
             cliente = Cliente.objects.get(id=id_cliente)
-            contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el fondo total del cliente",cliente.documento)
+            documento = cliente.documento
+            contexto = contexto_cliente_accesorio(req,"No existe caja del día abierta",documento)
             return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
-        
-        elif cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > float(req.POST['precio_total_pesos'])) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > float(req.POST['precio_total_dolares']))):
-            cliente = Cliente.objects.get(id=id_cliente)
-            contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el precio total del o los accesorios",cliente.documento)
-            return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
-        
         else:
-            doc_factura = req.FILES.get('factura_accesorio')
-            ult_compra_accesorio = ClienteAccesorio.objects.exists()
-            if ult_compra_accesorio:
-                ult_compra_accesorio = ClienteAccesorio.objects.latest('codigo_compra')
-                codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
-                print("CODIGO: " + str(codigo_compra))
-                print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
+            fondos = ClienteFondos.objects.filter(cliente_id=id_cliente).first()
+            if fondos:
+                ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
+                ult_fondo_pesos = float(ult_fondo.total_pesos)
+                ult_fondo_dolares = float(ult_fondo.total_dolares)
+            else: 
+                ult_fondo = None
+            cbox_fondos = 'incluir_fondos' in req.POST
+            if cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > ult_fondo_pesos) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > ult_fondo_dolares)):
+                cliente = Cliente.objects.get(id=id_cliente)
+                contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el fondo total del cliente",cliente.documento)
+                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
+            
+            elif cbox_fondos and ult_fondo and ((req.POST['moneda_venta'] == "Pesos" and float(req.POST['cantidad_destinada_pesos']) > float(req.POST['precio_total_pesos'])) or (req.POST['moneda_venta'] == "Dolares" and float(req.POST['cantidad_destinada_dolares']) > float(req.POST['precio_total_dolares']))):
+                cliente = Cliente.objects.get(id=id_cliente)
+                contexto = contexto_cliente_accesorio(req,"La cantidad destinada no puede exceder el precio total del o los accesorios",cliente.documento)
+                return render(req,"perfil_administrativo/accesorios/venta_accesorio.html",contexto)
+            
             else:
-                codigo_compra = 1
-            accesorios = req.session["accesorios_json"]
-            total_pesos = 0
-            total_dolares = 0
-            dolar = PrecioDolar.objects.get(id=1)
-            precio_dolar = float(dolar.precio_dolar_tienda)
-            for accesorio in accesorios:
-                # print("INSERT ACCESORIO ID: " + str(accesorio))
-                # print("ID CLIENTE: " + str(id_cliente))
-                # print(codigo_venta)
-                if not doc_factura:
-                    doc_factura = None
-                nueva_venta_accesorio = ClienteAccesorio(
-                    fecha_compra = datetime.now(),
-                    accesorio_id = accesorio,
-                    cliente_id = id_cliente,
-                    factura_documento = doc_factura,
-                    codigo_compra = codigo_compra,
-                    forma_de_pago = req.POST['forma_pago']
-                )
-                nueva_venta_accesorio.save()
-                a = Accesorio.objects.get(id=accesorio)
-                if a.moneda_precio == "Pesos":
-                    total_pesos = total_pesos + float(a.precio)
-                    total_dolares = total_pesos / precio_dolar
+                doc_factura = req.FILES.get('factura_accesorio')
+                ult_compra_accesorio = ClienteAccesorio.objects.exists()
+                if ult_compra_accesorio:
+                    ult_compra_accesorio = ClienteAccesorio.objects.latest('codigo_compra')
+                    codigo_compra = int(ult_compra_accesorio.codigo_compra) + 1
+                    print("CODIGO: " + str(codigo_compra))
+                    print("ID ULT COMPRA: " + str(ult_compra_accesorio.id))
                 else:
-                    total_dolares = total_dolares + float(a.precio)
-                    total_pesos = total_dolares * precio_dolar
+                    codigo_compra = 1
+                accesorios = req.session["accesorios_json"]
+                total_pesos = 0
+                total_dolares = 0
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                for accesorio in accesorios:
+                    # print("INSERT ACCESORIO ID: " + str(accesorio))
+                    # print("ID CLIENTE: " + str(id_cliente))
+                    # print(codigo_venta)
+                    if not doc_factura:
+                        doc_factura = None
+                    nueva_venta_accesorio = ClienteAccesorio(
+                        fecha_compra = datetime.now(),
+                        accesorio_id = accesorio,
+                        cliente_id = id_cliente,
+                        factura_documento = doc_factura,
+                        codigo_compra = codigo_compra,
+                        forma_de_pago = req.POST['forma_pago']
+                    )
+                    nueva_venta_accesorio.save()
+                    a = Accesorio.objects.get(id=accesorio)
+                    if a.moneda_precio == "Pesos":
+                        total_pesos = total_pesos + float(a.precio)
+                        total_dolares = total_pesos / precio_dolar
+                    else:
+                        total_dolares = total_dolares + float(a.precio)
+                        total_pesos = total_dolares * precio_dolar
 
-                
-                a = Accesorio.objects.get(id=accesorio)
-                a.activo = 0
-                a.seleccionado = 0
-                a.save()
-                if cbox_fondos:
-                    if fondos:
-                        ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
-                        if float(ult_fondo.total_pesos) > 0 or float(ult_fondo.total_dolares) > 0:
-                        
-                            if req.POST['moneda_venta'] == "Pesos": 
-                                resta_fondo_pesos = float(ult_fondo.total_pesos) - float(req.POST['cantidad_destinada_pesos'])
-                                resta_fondo_dolares = resta_fondo_pesos / precio_dolar
-                                ingreso_pesos = 0 - float(req.POST['cantidad_destinada_pesos'])
-                                ingreso_dolares = ingreso_pesos / precio_dolar
-                                entrega_pesos = abs(ingreso_pesos)
-                                entrega_dolares = abs(ingreso_dolares)
-
-                            else:
-                                resta_fondo_dolares = float(ult_fondo.total_dolares) - float(req.POST['cantidad_destinada_dolares'])
-                                resta_fondo_pesos = resta_fondo_dolares * precio_dolar
-                                ingreso_dolares = 0 - float(req.POST['cantidad_destinada_dolares'])
-                                ingreso_pesos = ingreso_dolares * precio_dolar
+                    
+                    a = Accesorio.objects.get(id=accesorio)
+                    a.activo = 0
+                    a.seleccionado = 0
+                    a.save()
+                    if cbox_fondos:
+                        if fondos:
+                            ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).latest('id')
+                            if float(ult_fondo.total_pesos) > 0 or float(ult_fondo.total_dolares) > 0:
                             
-                            resto_pesos = total_pesos - entrega_pesos
-                            resto_dolares = total_dolares - entrega_dolares
-                            if resto_pesos <= 0 or resto_dolares <= 0:
-                                resto_dolares = 0
-                                resto_pesos = 0
-                            alta_cuota_accesorio(req,nueva_venta_accesorio.id,resto_dolares,resto_pesos,req.POST['moneda_venta'],"Pago realizado con los fondos del cliente",precio_dolar,entrega_dolares,entrega_pesos,None,"Efectivo",0,1,None)
-                            nuevo_fondo = ClienteFondos(
-                                    cliente_id = id_cliente,
-                                    moneda = req.POST['moneda_venta'],
-                                    ingreso_pesos = ingreso_pesos,
-                                    ingreso_dolares = ingreso_dolares,
-                                    fecha = datetime.now(),
-                                    total_pesos = resta_fondo_pesos,
-                                    total_dolares = resta_fondo_dolares,
-                                    tipo = "Retiro",
-                                    metodo = "----------",
-                                    comprobante = None 
-                                )
-                            nuevo_fondo.save()
+                                if req.POST['moneda_venta'] == "Pesos": 
+                                    resta_fondo_pesos = float(ult_fondo.total_pesos) - float(req.POST['cantidad_destinada_pesos'])
+                                    resta_fondo_dolares = resta_fondo_pesos / precio_dolar
+                                    ingreso_pesos = 0 - float(req.POST['cantidad_destinada_pesos'])
+                                    ingreso_dolares = ingreso_pesos / precio_dolar
+                                    entrega_pesos = abs(ingreso_pesos)
+                                    entrega_dolares = abs(ingreso_dolares)
 
-            messages.success(req, "Venta generada con éxito")
-            return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
+                                else:
+                                    resta_fondo_dolares = float(ult_fondo.total_dolares) - float(req.POST['cantidad_destinada_dolares'])
+                                    resta_fondo_pesos = resta_fondo_dolares * precio_dolar
+                                    ingreso_dolares = 0 - float(req.POST['cantidad_destinada_dolares'])
+                                    ingreso_pesos = ingreso_dolares * precio_dolar
+                                
+                                resto_pesos = total_pesos - entrega_pesos
+                                resto_dolares = total_dolares - entrega_dolares
+                                if resto_pesos <= 0 or resto_dolares <= 0:
+                                    resto_dolares = 0
+                                    resto_pesos = 0
+                                alta_cuota_accesorio(req,nueva_venta_accesorio.id,resto_dolares,resto_pesos,req.POST['moneda_venta'],"Pago realizado con los fondos del cliente",precio_dolar,entrega_dolares,entrega_pesos,None,"Efectivo",0,1,None)
+                                nuevo_fondo = ClienteFondos(
+                                        cliente_id = id_cliente,
+                                        moneda = req.POST['moneda_venta'],
+                                        ingreso_pesos = ingreso_pesos,
+                                        ingreso_dolares = ingreso_dolares,
+                                        fecha = datetime.now(),
+                                        total_pesos = resta_fondo_pesos,
+                                        total_dolares = resta_fondo_dolares,
+                                        tipo = "Retiro",
+                                        metodo = "----------",
+                                        comprobante = None 
+                                    )
+                                nuevo_fondo.save()
+
+                messages.success(req, "Venta generada con éxito")
+                return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     # except Exception as e:
     #     return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"error_message":e})
     
@@ -1417,7 +1424,6 @@ def alta_paga_accesorio(req,id_venta):
         total = req.POST['total_luego_recargo']
         fecha_proximo_pago = req.POST['f_prox_pago'] if req.POST['f_prox_pago'] else None 
 
-        
         if not existe_cuota:
             for suma in accesorios:
                 accesorio = Accesorio.objects.get(id=suma.accesorio_id)
@@ -1459,11 +1465,19 @@ def alta_paga_accesorio(req,id_venta):
         # validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],accesorio,precio_dolar,"Accesorio",existe_cuota,id_venta)
         # validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
+        validar_caja = validar_caja_abierta()
         # valores = valores_compras(existe_cuota,moneda,req.POST['valor_a_pagar'],id_venta,accesorio,"Accesorio",precio_dolar)
         if (entrega_pesos > precio_total_pesos and moneda == "Pesos") or (entrega_dolares > precio_total_dolares and moneda == "Dolares"):
-            return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La entrega no puede ser superior al precio Total del o los accesorios","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            # return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La entrega no puede ser superior al precio Total del o los accesorios","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req,"La entrega no puede ser superior al precio Total del o los accesorios.")
+            return redirect(reverse('DetallesCompraAccesorio', kwargs={'codigo_compra': cv.codigo_compra}))
         # elif validar_fecha_proximo_pago.date() < fecha_actual:
         #     return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+        elif not validar_caja:
+            # return render(req,"perfil_administrativo/accesorios/pagos_accesorios.html",{"error_message":"No existe caja del día abierta.","id_venta":id_venta,"page_obj": page_obj,"id_cliente":cv.cliente_id})
+            messages.error(req,"No existe caja del día abierta.")
+            return redirect(reverse('DetallesCompraAccesorio', kwargs={'codigo_compra': cv.codigo_compra}))
+        
         else:
             
             # alta = alta_cuota_accesorio(req,id_venta,valores[0],valores[1],moneda,observaciones_pago,precio_dolar,valores[3],valores[2],comprobante,forma_pago,recargo)
@@ -1494,43 +1508,48 @@ def baja_paga_accesorio(req,id_ca):
         venta = ClienteAccesorio.objects.get(id=cuota.venta_id)
         codigo_compra = venta.codigo_compra
         if req.method == "POST":
-            # if cuota.metodo_pago == "Efectivo":
-            if cuota.moneda == "Pesos":
-                quitar_deposito = cuota.valor_pago_pesos
+            validar_caja = validar_caja_abierta()
+            if not validar_caja:
+                return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"error_message":"No existe caja del día abierta","id_cv":id_cv,"codigo_compra":codigo_compra})
             else:
-                dolar = PrecioDolar.objects.get(id=1)
-                precio_dolar = dolar.precio_dolar_tienda
-                quitar_deposito = cuota.valor_pago_dolares * precio_dolar
-            
-            usuario = req.user
-            personal = Personal.objects.filter(usuario=usuario.username).first()
-            caja = Caja.objects.latest('id')
-            caja.depositos = caja.depositos - quitar_deposito
-            caja.save()
-                # insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
-            mov = MovimientoPagoAccesorio.objects.filter(pago=cuota).first()
-            if mov:
-                movimiento = Movimientos.objects.get(id=mov.movimiento_id)
-                caja = Caja.objects.get(id=movimiento.caja_id)
-                if int(caja.diferencia) != 0:
-                    if movimiento.moneda == "Pesos":
-                        monto_a_quitar = float(movimiento.monto)
-                    else:
-                        dolar = PrecioDolar.objects.get(id=1)
-                        precio_dolar = float(dolar.precio_dolar_tienda)
-                        monto_a_quitar = float(mov.monto) * precio_dolar
-                    if movimiento.tipo == "Ingreso" or movimiento.tipo == "Ingreso extra":
-                        nueva_diferencia = float(caja.diferencia) - monto_a_quitar
-                    else:
-                        nueva_diferencia = float(caja.diferencia) + monto_a_quitar
-                    
-                    caja.diferencia = nueva_diferencia
-                    caja.save()
-                mov.delete()
-                movimiento.delete()
-            cuota.delete()    
-            return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv,"codigo_compra":codigo_compra})
+            # if cuota.metodo_pago == "Efectivo":
+                if cuota.moneda == "Pesos":
+                    quitar_deposito = cuota.valor_pago_pesos
+                else:
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = dolar.precio_dolar_tienda
+                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
+                
+                usuario = req.user
+                personal = Personal.objects.filter(usuario=usuario.username).first()
+                caja = Caja.objects.latest('id')
+                caja.depositos = caja.depositos - quitar_deposito
+                caja.save()
+                    # insert_movimientos_caja("Se borra pago de accesorio ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None) 
+                mov = MovimientoPagoAccesorio.objects.filter(pago=cuota).first()
+                if mov:
+                    movimiento = Movimientos.objects.get(id=mov.movimiento_id)
+                    caja = Caja.objects.get(id=movimiento.caja_id)
+                    if int(caja.diferencia) != 0:
+                        if movimiento.moneda == "Pesos":
+                            monto_a_quitar = float(movimiento.monto)
+                        else:
+                            dolar = PrecioDolar.objects.get(id=1)
+                            precio_dolar = float(dolar.precio_dolar_tienda)
+                            monto_a_quitar = float(mov.monto) * precio_dolar
+                        if movimiento.tipo == "Ingreso" or movimiento.tipo == "Ingreso extra":
+                            nueva_diferencia = float(caja.diferencia) - monto_a_quitar
+                        else:
+                            nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                        
+                        caja.diferencia = nueva_diferencia
+                        caja.save()
+                    mov.delete()
+                    movimiento.delete()
+                cuota.delete()    
+                return render(req, "perfil_administrativo/accesorios/baja_pago_accesorio.html", {"message":"Pago borrado con éxito","id_cv":id_cv,"codigo_compra":codigo_compra})
         else:
+            
             return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"id_cv":id_cv,"codigo_compra":codigo_compra})
     # except Exception as e:
     #     return render(req,"perfil_administrativo/accesorios/baja_pago_accesorio.html",{"error_message":e})
@@ -2413,8 +2432,12 @@ def fondos_cliente(req,id_cliente):
     # try:
         tipo = req.POST['accion_fondo']
         ult_fondo = ClienteFondos.objects.filter(cliente_id=id_cliente).first()
+        validar_caja = validar_caja_abierta()
         if not ult_fondo and tipo == "Retiro":
             messages.error(req, "No se pueden realizar retiros ya que no existen fondos del cliente.")
+            return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
+        elif not validar_caja:
+            messages.error(req, "No existe caja del día abierta.")
             return redirect(reverse('ClienteFicha', kwargs={'id_cliente': id_cliente}))
         else: 
             dolar = PrecioDolar.objects.get(id=1)
@@ -2768,7 +2791,7 @@ def venta_moto(req,id_moto,id_cliente):
         fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).first()
         precio_moto = int(moto.precio)
         cv = ComprasVentas.objects.filter(moto_id=id_moto,cliente_id=id_cliente).first()
-
+        validar_caja = validar_caja_abierta()
         if fondos_cliente:
             fondos_cliente = ClienteFondos.objects.filter(cliente=cliente).latest('id')
             #PERMITE QUE NO SE INGRESEN MAS FONDOS DE LOS DISPONIBLES
@@ -2801,8 +2824,15 @@ def venta_moto(req,id_moto,id_cliente):
                     mensaje = "La cantidad de fondos destinada a la compra de la moto supera la cantidad restante con los pagos realizados" if mostrar_error else None
             else:
                 mostrar_error = False
+        # elif not validar_caja:
+        #     mostrar_error = True
+        #     mensaje = "No existe caja del día abierta."
         else:
             mostrar_error = False
+        
+        if not validar_caja:
+            mostrar_error = True
+            mensaje = "No existe caja del día abierta."
 
         if mostrar_error:
             contexto = contexto_venta_moto(req,id_moto,mensaje,cliente.documento)
@@ -2904,7 +2934,7 @@ def venta_moto(req,id_moto,id_cliente):
             checkbox_generar_comprobante_venta = 'comprobante_venta' in req.POST
             if checkbox_generar_comprobante_venta:
                 crear_certificado_bikeup(cliente,telefono.telefono,moto,id_cv)
-            #REDIRIGIR A LA FICHA DEL CLIENTE
+            # #REDIRIGIR A LA FICHA DEL CLIENTE
             messages.success(req, "Venta generada con éxito")
             return redirect(f"{reverse('ClienteFicha',kwargs={'id_cliente':id_cliente})}")
     # except Exception as e:
@@ -3401,43 +3431,47 @@ def refinanciar_pagos(req,id_cv):
 def baja_financiamiento(req,id_f,id_cv):
     # try:
         if req.method == "POST":
-            fin_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=id_f)
-            total_dinero = 0
-            dolar = PrecioDolar.objects.get(id=1)
-            precio_dolar = float(dolar.precio_dolar_tienda)
-            for fin in fin_cuotas:
-                cuota = CuotasMoto.objects.filter(id=fin.cuota_id).first()
-                if cuota.moneda == "Pesos":
-                    total_dinero = total_dinero + float(cuota.valor_pago_pesos)
-                else:
-                    valor_pesos = float(cuota.valor_pago_dolares) * precio_dolar 
-                    total_dinero = total_dinero + valor_pesos
-                mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
-                if mov_pago:
-                    mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
-                    caja = Caja.objects.get(id=mov.caja_id)
-                    if int(caja.diferencia) != 0:
-                        if mov.moneda == "Pesos":
-                            monto_a_quitar = float(mov.monto)
-                        else:
-                            dolar = PrecioDolar.objects.get(id=1)
-                            precio_dolar = float(dolar.precio_dolar_tienda)
-                            monto_a_quitar = float(mov.monto) * precio_dolar
-                        if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
-                            nueva_diferencia = float(caja.diferencia) - monto_a_quitar
-                        else:
-                            nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+            validar_caja = validar_caja_abierta()
+            if not validar_caja:
+                return render(req, "perfil_administrativo/ventas/baja_financiamiento.html", {"error_message":"No existe caja del día abierta.","id_cv":id_cv})
+            else:
+                fin_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=id_f)
+                total_dinero = 0
+                dolar = PrecioDolar.objects.get(id=1)
+                precio_dolar = float(dolar.precio_dolar_tienda)
+                for fin in fin_cuotas:
+                    cuota = CuotasMoto.objects.filter(id=fin.cuota_id).first()
+                    if cuota.moneda == "Pesos":
+                        total_dinero = total_dinero + float(cuota.valor_pago_pesos)
+                    else:
+                        valor_pesos = float(cuota.valor_pago_dolares) * precio_dolar 
+                        total_dinero = total_dinero + valor_pesos
+                    mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
+                    if mov_pago:
+                        mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
+                        caja = Caja.objects.get(id=mov.caja_id)
+                        if int(caja.diferencia) != 0:
+                            if mov.moneda == "Pesos":
+                                monto_a_quitar = float(mov.monto)
+                            else:
+                                dolar = PrecioDolar.objects.get(id=1)
+                                precio_dolar = float(dolar.precio_dolar_tienda)
+                                monto_a_quitar = float(mov.monto) * precio_dolar
+                            if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                                nueva_diferencia = float(caja.diferencia) - monto_a_quitar
+                            else:
+                                nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                            
+                            caja.diferencia = nueva_diferencia
+                            caja.save()
                         
-                        caja.diferencia = nueva_diferencia
-                        caja.save()
-                    
-                    mov_pago.delete()
-                    mov.delete()
+                        mov_pago.delete()
+                        mov.delete()
 
-                fin.delete()
-                cuota.delete()
-            financiamiento = Financiamientos.objects.get(id=id_f)
-            financiamiento.delete()
+                    fin.delete()
+                    cuota.delete()
+                financiamiento = Financiamientos.objects.get(id=id_f)
+                financiamiento.delete()
             # fin_actual = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
             # if fin_actual:
             #     fin_actual = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).latest('id')
@@ -3473,6 +3507,7 @@ def alta_pago_cuota(req,id_cv):
         validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",existe_cuota,id_cv)
         validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
+        validar_caja = validar_caja_abierta()
         if validar_precio:
             #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
             messages.error(req, validar_precio)
@@ -3485,6 +3520,9 @@ def alta_pago_cuota(req,id_cv):
         #     #return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"El valor ingresado de la cantidad a pagar es incorrecto","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
         #     messages.error(req, "El valor ingresado de la cantidad a pagar es incorrecto")
         #     return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
+        elif not validar_caja:
+            messages.error(req, "No existe caja del día abierta.")
+            return redirect(f"{reverse('DetallesCuotas', kwargs={'id_cv': id_cv})}?comprobante_url={None}")
         else:
             
             
@@ -3530,7 +3568,7 @@ def alta_pago_cuota(req,id_cv):
 def alta_pago(req,id_cv):
     #
     # page_obj = obtener_compras_motos(req,id_cv)
-    try:
+    # try:
         comprobante = req.FILES.get('comprobante_pago')
         moneda = req.POST['moneda_entrega']
         # caja = Caja.objects.filter(estado="Abierto").first()
@@ -3553,14 +3591,22 @@ def alta_pago(req,id_cv):
         validar_precio = validar_entrega_menor_precio(moneda,req.POST['valor_a_pagar'],moto,precio_dolar,"Moto",cuota,id_cv)
         # validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
         fecha_actual = datetime.now().date()
-        validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
+        if fecha_proximo_pago:
+            validar_fecha_proximo_pago = datetime.strptime(fecha_proximo_pago, '%Y-%m-%d')
+        else:
+            validar_fecha_proximo_pago = None
+        validar_caja = validar_caja_abierta()
         if validar_precio:
             # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":validar_precio,"id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
             messages.error(req, f"{validar_precio}")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
-        elif validar_fecha_proximo_pago.date() < fecha_actual:
+        elif fecha_proximo_pago:
+            if validar_fecha_proximo_pago.date() < fecha_actual:
             # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":"La fecha del próximo pago no debe ser anterior a la actual","id_cv":id_cv,"page_obj": page_obj,"id_cliente":cv.cliente_id})
-            messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual.")
+                messages.error(req, "La fecha del próximo pago no debe ser anterior a la actual.")
+                return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
+        elif not validar_caja:
+            messages.error(req, "No existe caja del día abierta.")
             return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         else:
                  
@@ -3581,12 +3627,12 @@ def alta_pago(req,id_cv):
                 tipo = "Ingreso extra"
             movimiento_caja_por_pago(req,float(total),id_cv,moneda,forma_pago,tipo,alta,"moto") 
             messages.success(req, "Pago ingresado con éxito, se requiere refinanciar.")
-            return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
-    except Exception as e:
-        # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
-        print("ERROR")
-        messages.error(req, f"Algo salió mal: " + str(e))
-        return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
+    #         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={comprobante_url}")
+    # except Exception as e:
+    #     # return render(req,"perfil_administrativo/ventas/detalles_cuotas.html",{"error_message":e,"id_cliente":cv.cliente_id,"page_obj":page_obj})
+    #     print("ERROR")
+    #     messages.error(req, f"Algo salió mal: " + str(e))
+    #     return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
 
 @admin_required
 def baja_pago(req,id_cm):
@@ -3596,49 +3642,53 @@ def baja_pago(req,id_cm):
         # print(id_cv)
         if req.method == "POST":
             # if cuota.metodo_pago == "Efectivo":
-            if cuota.moneda == "Pesos":
-                quitar_deposito = cuota.valor_pago_pesos
+            validar_caja = validar_caja_abierta()
+            if not validar_caja:
+                return render(req, "perfil_administrativo/ventas/baja_pago.html", {"error_message":"No existe caja del día abierta.","id_cv":id_cv})
             else:
-                dolar = PrecioDolar.objects.get(id=1)
-                precio_dolar = dolar.precio_dolar_tienda
-                quitar_deposito = cuota.valor_pago_dolares * precio_dolar
-            
-            usuario = req.user
-            personal = Personal.objects.filter(usuario=usuario.username).first()
-            caja = Caja.objects.latest('id')
-            caja.depositos = caja.depositos - quitar_deposito
-            caja.save()
-                # insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
+                if cuota.moneda == "Pesos":
+                    quitar_deposito = cuota.valor_pago_pesos
+                else:
+                    dolar = PrecioDolar.objects.get(id=1)
+                    precio_dolar = dolar.precio_dolar_tienda
+                    quitar_deposito = cuota.valor_pago_dolares * precio_dolar
                 
-            fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
-            c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
-            if c_f:
-                c_f.delete()
-                
-            mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
-            if mov_pago:
-                mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
-                caja = Caja.objects.get(id=mov.caja_id)
-                if int(caja.diferencia) != 0:
-                    if mov.moneda == "Pesos":
-                        monto_a_quitar = float(mov.monto)
-                    else:
-                        dolar = PrecioDolar.objects.get(id=1)
-                        precio_dolar = float(dolar.precio_dolar_tienda)
-                        monto_a_quitar = float(mov.monto) * precio_dolar
-                    if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
-                        nueva_diferencia = float(caja.diferencia) - monto_a_quitar
-                    else:
-                        nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                usuario = req.user
+                personal = Personal.objects.filter(usuario=usuario.username).first()
+                caja = Caja.objects.latest('id')
+                caja.depositos = caja.depositos - quitar_deposito
+                caja.save()
+                    # insert_movimientos_caja("Se borra pago de moto ingresado por error","Egreso",quitar_deposito,caja.id,personal.id,0,0,None,None)
                     
-                    caja.diferencia = nueva_diferencia
-                    caja.save()
-                mov_pago.delete()
-                mov.delete()
-            cuota.delete()
-            print("ID: " +str(mov_pago.movimiento_id)) 
-                
-            return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+                fin_actual = Financiamientos.objects.filter(venta_id=cuota.venta_id).first()
+                c_f = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id,cuota_id=id_cm).first()
+                if c_f:
+                    c_f.delete()
+                    
+                mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
+                if mov_pago:
+                    mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
+                    caja = Caja.objects.get(id=mov.caja_id)
+                    if int(caja.diferencia) != 0:
+                        if mov.moneda == "Pesos":
+                            monto_a_quitar = float(mov.monto)
+                        else:
+                            dolar = PrecioDolar.objects.get(id=1)
+                            precio_dolar = float(dolar.precio_dolar_tienda)
+                            monto_a_quitar = float(mov.monto) * precio_dolar
+                        if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                            nueva_diferencia = float(caja.diferencia) - monto_a_quitar
+                        else:
+                            nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                        
+                        caja.diferencia = nueva_diferencia
+                        caja.save()
+                    mov_pago.delete()
+                    mov.delete()
+                cuota.delete()
+                print("ID: " +str(mov_pago.movimiento_id)) 
+                    
+                return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
             # messages.success(req, "Pago borrado con éxito")
             # return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
         else:
@@ -3651,28 +3701,33 @@ def baja_primeros_pagos(req,id_cm):
         cuota = CuotasMoto.objects.get(id=id_cm)
         id_cv = cuota.venta_id
         if req.method == "POST":
-            mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
-            if mov_pago:
-                mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
-                caja = Caja.objects.get(id=mov.caja_id)
-                if int(caja.diferencia) != 0:
-                    if mov.moneda == "Pesos":
-                        monto_a_quitar = float(mov.monto)
-                    else:
-                        dolar = PrecioDolar.objects.get(id=1)
-                        precio_dolar = float(dolar.precio_dolar_tienda)
-                        monto_a_quitar = float(mov.monto) * precio_dolar
-                    if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
-                        nueva_diferencia = float(caja.diferencia) - monto_a_quitar
-                    else:
-                        nueva_diferencia = float(caja.diferencia) + monto_a_quitar
-                    
-                    caja.diferencia = nueva_diferencia
-                    caja.save()
-                mov_pago.delete()
-                mov.delete()
-            cuota.delete()    
-            return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
+            validar_caja = validar_caja_abierta()
+            if not validar_caja:
+                return render(req,"perfil_administrativo/ventas/baja_pago.html",{"error_message":"No existe caja del día abierta."})
+            else:
+
+                mov_pago = MovimientoPagoMoto.objects.filter(pago=cuota).first()
+                if mov_pago:
+                    mov = Movimientos.objects.get(id=mov_pago.movimiento_id)
+                    caja = Caja.objects.get(id=mov.caja_id)
+                    if int(caja.diferencia) != 0:
+                        if mov.moneda == "Pesos":
+                            monto_a_quitar = float(mov.monto)
+                        else:
+                            dolar = PrecioDolar.objects.get(id=1)
+                            precio_dolar = float(dolar.precio_dolar_tienda)
+                            monto_a_quitar = float(mov.monto) * precio_dolar
+                        if mov.tipo == "Ingreso" or mov.tipo == "Ingreso extra":
+                            nueva_diferencia = float(caja.diferencia) - monto_a_quitar
+                        else:
+                            nueva_diferencia = float(caja.diferencia) + monto_a_quitar
+                        
+                        caja.diferencia = nueva_diferencia
+                        caja.save()
+                    mov_pago.delete()
+                    mov.delete()
+                cuota.delete()    
+                return render(req, "perfil_administrativo/ventas/baja_pago.html", {"message":"Pago borrado con éxito","id_cv":id_cv})
         else:
             return render(req,"perfil_administrativo/ventas/baja_pago.html",{"id_cv":id_cv})
     except Exception as e:
@@ -3760,55 +3815,60 @@ def form_reservar_moto(req,id_moto):
 @admin_required
 def reservar_moto(req,id_moto,id_cliente):
     try:
-        compras_ventas = ComprasVentas(
-            fecha_compra = datetime.now(),
-            tipo = "R",
-            cliente_id = id_cliente,
-            moto_id = id_moto
-        )
-        compras_ventas.save()
-        moneda = req.POST['moneda_senia']
-        dolar = PrecioDolar.objects.get(id=1)
-        precio_dolar = dolar.precio_dolar_tienda
-        id_cv = compras_ventas.id
-
-        moto = Moto.objects.get(id=id_moto)
-        forma_pago = req.POST['forma_pago_senia']
-        if moneda == "Pesos":
-                entrega_pesos = req.POST['senia']
-                entrega_dolares = 0
-                if moto.moneda_precio == "Pesos":
-                    resto_pesos = int(moto.precio) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / precio_dolar
-                else:
-                    resto_pesos = int((moto.precio * precio_dolar)) - int(entrega_pesos)
-                    resto_dolares = resto_pesos / precio_dolar
+        validar_caja = validar_caja_abierta()
+        if not validar_caja:
+             return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":"No existe caja del día abierta.","active_page":"Motos"})
         else:
-                entrega_pesos = 0
-                entrega_dolares = req.POST['senia']
-                if moto.moneda_precio == "Pesos":
-                    resto_dolares = int((moto.precio / precio_dolar)) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * precio_dolar
-                else:
-                    resto_dolares = int(moto.precio) - int(entrega_dolares)
-                    resto_pesos = resto_dolares * precio_dolar
-        entrega = req.POST['senia']
-        # movimiento_caja_por_pago(req,entrega,id_cv,moneda,None,"Ingreso extra",None,"moto")
-        # fecha_prox_pago = datetime.now() + relativedelta(months=1)
-        pago_reserva = insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña",forma_pago)
-        caja = Caja.objects.latest('id')
-        # if caja:
-        cliente = Cliente.objects.get(id=id_cliente)
-        moto_datos = f"{moto.tipo} {moto.marca} {moto.modelo}"
-        cliente_datos = f"{cliente.nombre} {cliente.apellido}"
-        usuario = req.user
-        personal = Personal.objects.filter(usuario=usuario.username).first()
-        insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso extra",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,pago_reserva,"moto")
+
+            compras_ventas = ComprasVentas(
+                fecha_compra = datetime.now(),
+                tipo = "R",
+                cliente_id = id_cliente,
+                moto_id = id_moto
+            )
+            compras_ventas.save()
+            moneda = req.POST['moneda_senia']
+            dolar = PrecioDolar.objects.get(id=1)
+            precio_dolar = dolar.precio_dolar_tienda
+            id_cv = compras_ventas.id
+
+            moto = Moto.objects.get(id=id_moto)
+            forma_pago = req.POST['forma_pago_senia']
+            if moneda == "Pesos":
+                    entrega_pesos = req.POST['senia']
+                    entrega_dolares = 0
+                    if moto.moneda_precio == "Pesos":
+                        resto_pesos = int(moto.precio) - int(entrega_pesos)
+                        resto_dolares = resto_pesos / precio_dolar
+                    else:
+                        resto_pesos = int((moto.precio * precio_dolar)) - int(entrega_pesos)
+                        resto_dolares = resto_pesos / precio_dolar
+            else:
+                    entrega_pesos = 0
+                    entrega_dolares = req.POST['senia']
+                    if moto.moneda_precio == "Pesos":
+                        resto_dolares = int((moto.precio / precio_dolar)) - int(entrega_dolares)
+                        resto_pesos = resto_dolares * precio_dolar
+                    else:
+                        resto_dolares = int(moto.precio) - int(entrega_dolares)
+                        resto_pesos = resto_dolares * precio_dolar
+            entrega = req.POST['senia']
+            # movimiento_caja_por_pago(req,entrega,id_cv,moneda,None,"Ingreso extra",None,"moto")
+            # fecha_prox_pago = datetime.now() + relativedelta(months=1)
+            pago_reserva = insert_cuotas_moto(None,id_cv,resto_dolares,resto_pesos,moneda,precio_dolar,entrega_dolares,entrega_pesos,None,"Seña",forma_pago)
+            caja = Caja.objects.latest('id')
+            # if caja:
+            cliente = Cliente.objects.get(id=id_cliente)
+            moto_datos = f"{moto.tipo} {moto.marca} {moto.modelo}"
+            cliente_datos = f"{cliente.nombre} {cliente.apellido}"
+            usuario = req.user
+            personal = Personal.objects.filter(usuario=usuario.username).first()
+            insert_movimientos_caja(f"Reserva de {moto_datos}, cliente: {cliente_datos}","Ingreso extra",entrega,caja.id,personal.id,moneda,None,forma_pago,1,0,pago_reserva,"moto")
+            
         
-    
-        moto.save()
-        messages.success(req, "Moto reservada con éxito.")
-        return redirect('Motos')
+            moto.save()
+            messages.success(req, "Moto reservada con éxito.")
+            return redirect('Motos')
         
     except Exception as e:
         return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"active_page":"Motos"})
@@ -3817,19 +3877,23 @@ def reservar_moto(req,id_moto,id_cliente):
 def baja_reserva_moto(req,id_reserva):
     try:
         if req.method == "POST":
-            reserva = ComprasVentas.objects.get(id=id_reserva)
-            senias = CuotasMoto.objects.filter(venta_id=id_reserva)
-            if senias.exists:
-                for senia in senias:
-                    mov_pago = MovimientoPagoMoto.objects.filter(pago_id=senia.id).first()
-                    id_pago = mov_pago.movimiento_id
-                    mov = Movimientos.objects.get(id=id_pago)
-                    mov_pago.delete()
-                    mov.delete()
-                    senia.delete()
-            reserva.delete()
-            messages.success(req, "Reserva borrada con éxito.")
-            return redirect('Reservas')
+            validar_caja = validar_caja_abierta()
+            if not validar_caja:
+                return render(req,"perfil_administrativo/motos/baja_reserva.html",{"error_message":"No existe caja del día abierta."})
+            else:
+                reserva = ComprasVentas.objects.get(id=id_reserva)
+                senias = CuotasMoto.objects.filter(venta_id=id_reserva)
+                if senias.exists:
+                    for senia in senias:
+                        mov_pago = MovimientoPagoMoto.objects.filter(pago_id=senia.id).first()
+                        id_pago = mov_pago.movimiento_id
+                        mov = Movimientos.objects.get(id=id_pago)
+                        mov_pago.delete()
+                        mov.delete()
+                        senia.delete()
+                reserva.delete()
+                messages.success(req, "Reserva borrada con éxito.")
+                return redirect('Reservas')
         else:
             return render(req,"perfil_administrativo/motos/baja_reserva.html",{"active_page":"Reservas"})
     except Exception as e:

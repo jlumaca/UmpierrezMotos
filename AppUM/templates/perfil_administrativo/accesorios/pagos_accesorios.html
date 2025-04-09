@@ -35,9 +35,16 @@
     </div> -->
     <h3>Pagos</h3>
     {% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3">
+                {% if message.tags == "error" %}
+                    <i class="fas fa-exclamation-circle"></i>
+                {% elif message.tags == "success" %}
+                    <i class="fas fa-check-circle"></i>
+                {% endif %}
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
     {% if error_message %}
             <div class="alert alert-danger mt-3">

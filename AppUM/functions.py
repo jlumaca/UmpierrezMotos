@@ -1926,3 +1926,17 @@ def contexto_cliente_accesorio(req,mensaje,doc):
 # # Crear un hilo en segundo plano
 # hilo = threading.Thread(target=ejecutar_cada_5_min, daemon=True)
 # hilo.start()
+
+def validar_caja_abierta():
+    try:
+        caja = Caja.objects.filter(estado="Abierto").first()
+        ult_caja = Caja.objects.latest('id')
+        hoy = date.today()
+        if not caja:
+            return False
+        elif ult_caja.apertura.date() != hoy:
+            return False
+        else:
+            return True
+    except Exception as e:
+        pass

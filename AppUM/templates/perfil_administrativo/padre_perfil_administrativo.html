@@ -69,11 +69,16 @@
                 
                     <!-- Tienda -->
                     <a href="{% url 'Tienda' %}" class="nav-link me-3">TIENDA</a>
-                
+
                     <!-- Usuario -->
                     <span class="navbar-text me-3">
                         <strong>USUARIO:</strong> {{ request.user.first_name }}
                     </span>
+                    {% if administrativo_taller %}
+                        <a href="{% url 'CambiarAPerfilTaller' %}" class="text-decoration-none me-3" title="Cambiar Perfil">
+                            <i class="fas fa-user-circle fa-lg text-primary"></i>
+                        </a>
+                    {% endif %}
                     <a href="{% url 'EditarUsuario' %}" class="me-3" title="Editar Perfil">
                         <i class="fas fa-user-edit fa-lg"></i>
                     </a>

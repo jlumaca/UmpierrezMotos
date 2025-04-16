@@ -266,6 +266,10 @@ urlpatterns = [
      path('nuevo_rubro_balance/', views.nuevo_rubro_egreso_balance,name="NuevoRubroBalance"),
 
 
+     path('cambiar_a_perfil_taller/', views.cambiar_a_perfil_taller,name="CambiarAPerfilTaller"),
+     path('cambiar_a_perfil_tienda/', views.cambiar_a_perfil_tienda,name="CambiarAPerfilTienda"),
+
+
 
 
 

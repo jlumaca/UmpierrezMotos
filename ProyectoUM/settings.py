@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'AppUM.context_processors.cantidad_solicitudes_no_leidas',
+                'AppUM.context_processors.perfiles_usuario_actual_administrativo',
             ],
         },
     },

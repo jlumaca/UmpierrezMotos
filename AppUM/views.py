@@ -8611,3 +8611,9 @@ def nuevo_rubro_egreso_balance(req):
     except Exception as e:
         pass
 
+def cambiar_a_perfil_taller(req):
+    return render(req,"perfil_taller/padre_perfil_taller.html",{})
+
+def cambiar_a_perfil_tienda(req):
+    return render(req,"perfil_administrativo/bienvenida.html",{})
+

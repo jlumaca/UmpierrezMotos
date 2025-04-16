@@ -23,5 +23,7 @@ def perfiles_usuario_actual_administrativo(req):
             permisos = True
         else:
             permisos = False
+    else:
+        permisos = None
     
     return {'administrativo_taller': permisos,'taller_administrativo':permisos}

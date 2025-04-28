@@ -1899,13 +1899,25 @@ def buscar_por_doc(req):
 
 @admin_required
 def buscar_nom_ape(req):
-    nombre = req.GET.get('nombre').capitalize()
-    apellido = req.GET.get('apellido').capitalize()
-    cliente = Cliente.objects.filter(
-         nombre__icontains = nombre,
-         apellido__icontains = apellido,
-         cliente_telefono__principal=True
-     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    nombre = req.GET.get('nombre')
+    apellido = req.GET.get('apellido')
+    if nombre and apellido:
+        cliente = Cliente.objects.filter(
+            nombre__icontains = nombre,
+            apellido__icontains = apellido,
+            cliente_telefono__principal=True
+        ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    elif nombre:
+        cliente = Cliente.objects.filter(
+            nombre__icontains = nombre,
+            cliente_telefono__principal=True
+        ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    else:
+        cliente = Cliente.objects.filter(
+            apellido__icontains = apellido,
+            cliente_telefono__principal=True
+        ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
     page_obj = funcion_paginas_varias(req,cliente)  # Obtiene la página solicitada
     return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
 

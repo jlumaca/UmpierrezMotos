@@ -19,7 +19,9 @@
         <select class="form-control" name="estado_accesorio" id="tipo_busqueda" onchange="tipo_busqueda()">
             <option value="cliente">Cliente</option>
             <option value="fecha_venta">Fecha de venta</option>
-            <option value="marca_modelo_moto">Moto</option>
+            <option value="marca_modelo_moto">Moto-Marca y Modelo</option>
+            <option value="num_motor_moto">Nº de Motor</option>
+            <option value="num_chasis_moto">Nº de Chasis</option>
             <option value="accesorio">Accesorio</option>
 
         </select>
@@ -96,6 +98,36 @@
             <a href="{% url 'Ventas' %}" class="btn btn-secondary">
                 <i class="fas fa-sync-alt"></i>
             </a>
+        </div>
+    </form>
+
+
+    <form action="{% url 'VentaNumMotor' %}" enctype="multipart/form-data" method="get" id="busqueda_num_motor" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="num_motor" class="form-control" placeholder="Buscar por número de Motor" required>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Ventas' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+
+
+    <form action="{% url 'VentaNumChasis' %}" enctype="multipart/form-data" method="get" id="busqueda_num_chasis" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="num_chasis" class="form-control" placeholder="Buscar por número de Chasis" required>
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Ventas' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
         </div>
     </form>
 
@@ -247,11 +279,15 @@
         var busqueda_fecha = document.getElementById("busqueda_fecha");
         var busqueda_moto = document.getElementById("busqueda_moto");
         var busqueda_accesorio = document.getElementById("busqueda_accesorio");
+        var busqueda_num_motor = document.getElementById("busqueda_num_motor");
+        var busqueda_num_chasis = document.getElementById("busqueda_num_chasis");
         
         busqueda_cliente.style.display = busqueda_tipo === "cliente" ? "block" : "none";
         busqueda_fecha.style.display = busqueda_tipo === "fecha_venta" ? "block" : "none";
         busqueda_moto.style.display = busqueda_tipo === "marca_modelo_moto" ? "block" : "none";
         busqueda_accesorio.style.display = busqueda_tipo === "accesorio" ? "block" : "none";
+        busqueda_num_motor.style.display = busqueda_tipo === "num_motor_moto" ? "block" : "none";
+        busqueda_num_chasis.style.display = busqueda_tipo === "num_chasis_moto" ? "block" : "none";
     }
 </script>
 {% endblock %}

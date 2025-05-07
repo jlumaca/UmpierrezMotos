@@ -100,6 +100,8 @@ urlpatterns = [
      path('venta_fecha', views.buscar_venta_fecha,name="VentasFecha"),
      path('venta_marca_modelo_moto', views.buscar_venta_marca_modelo_moto,name="VentaMoto"),
      path('venta_x_accesorio', views.buscar_venta_accesorio,name="VentaAccesorio"),
+     path('venta_x_num_motor', views.buscar_venta_num_motor_moto,name="VentaNumMotor"),
+     path('venta_x_num_chasis', views.buscar_venta_num_chasis_moto,name="VentaNumChasis"),
      # path('alta_cuota/<int:id_cv>', views.alta_cuota,name="AltaCuota"),buscar_venta_marca_modelo_moto
      
      

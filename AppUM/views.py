@@ -4509,6 +4509,7 @@ def notificaciones_administrativo(req):
                 .filter(leido=False,personal=usuario_actual)
                 .values(
                     'id',
+                    'notificacion__id',
                     'notificacion__tipo', 
                     'notificacion__fecha', 
                     'notificacion__descripcion', 
@@ -7374,6 +7375,7 @@ def notificaciones_taller(req):
                     'notificacion__tipo', 
                     'notificacion__fecha', 
                     'notificacion__descripcion', 
+                    'notificacion__id',
                      
                 )
             ).order_by('-id')

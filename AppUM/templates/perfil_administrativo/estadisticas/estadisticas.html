@@ -32,6 +32,7 @@
                 <option value="moto_mas_vendida">Motos más vendidas</option>
                 <option value="marca_mas_vendida">Marcas de motos más vendidas</option>
                 <option value="accesorios_ventas">Ventas de accesorios por mes</option>
+                <option value="accesorios_mas_vendidos">Accesorios más vendidos x Tipo</option>
                 
             </select>
         </div>
@@ -67,7 +68,7 @@
             </table>
         </figure>
         
-
+    <figure class="highcharts-figure">
     <div id="container_marcamasvendida" style="display: none;"></div>
        
     
@@ -91,7 +92,7 @@
             </tbody>
         </table>
     </figure>
-
+    <figure class="highcharts-figure">
     <div id="container_motomasvendida" style="display: none;"></div>
        
     
@@ -116,6 +117,9 @@
         </table>
     </figure>
 
+
+    
+
     <figure class="highcharts-figure">
         <div id="container_ventas_accesoriosxmes" style="display: none;"></div>
        
@@ -123,27 +127,58 @@
         <table id="datatable_accesorios">
             <thead style="display: none;">
                 <tr>
-                    <th></th>
+                    <th>Mes</th>
+                    {% for anio in years_available %}
+                        <th>{{ anio }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody style="display: none;">
+                {% for mes in meses_disponibles %}
+                    <tr>
+                        <th>{{ mes }}</th>
+                        {% for anio in years_available %}
+                            <td>{{ ventas_anuales.anio|default_if_none:"0"|slice:mes|default_if_none:"0" }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+
+    <figure class="highcharts-figure">
+    <div id="container_tipoaccsmasvendido" style="display: none;"></div>
+       
+    
+        <table id="datatable_accs_tipo" style="display: none;">
+            <thead style="display: none;">
+                <tr>
+                    <th>Tipo</th>
                     <th>Ventas</th>
                     
                 </tr>
             </thead>
             <tbody style="display: none;">
-                {% for accesorio in accesorios %}
+                {% for accs in tipo_accesorio_vendidos %}
                     <tr>
-                        <th></th>
-                        <td>{{ accesorio }}</td>
-                        
+                        <th>{{ accs.tipo }}</th>
+                        <th>{{ accs.total_vendidos }}</th>    
                     </tr>
 
                 {% endfor %}
             </tbody>
         </table>
     </figure>
+
     <pre id="debug" style="display: none;"></pre>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var rawData = '{{ ventas_anuales_json|escapejs }}';
+            document.getElementById("debug").innerText = rawData; // Esto muestra el JSON en la página para verificar
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var rawData = '{{ ventas_anuales_accs_json|escapejs }}';
             document.getElementById("debug").innerText = rawData; // Esto muestra el JSON en la página para verificar
         });
     </script>
@@ -157,36 +192,79 @@
         var container_marcamasvendida = document.getElementById("container_marcamasvendida");
         var container_motomasvendida = document.getElementById("container_motomasvendida");
         var container_ventas_accesoriosxmes = document.getElementById("container_ventas_accesoriosxmes");
-        var anio_estadistica_venta_moto = document.getElementById("anio_estadistica_venta_moto");
+        // var anio_estadistica_venta_moto = document.getElementById("anio_estadistica_venta_moto");
+
+        var container_tipoaccsmasvendido = document.getElementById("container_tipoaccsmasvendido");
         
         if (mostrarxgrafico === "ventasxmes") {
             container_ventasxmes.style.display = "block";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "none";
-            anio_estadistica_venta_moto.style.display = "block";
+            // anio_estadistica_venta_moto.style.display = "block";
+            container_tipoaccsmasvendido.style.display = "none";
         }else if (mostrarxgrafico === "moto_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "block";
             container_ventas_accesoriosxmes.style.display = "none";
-            anio_estadistica_venta_moto.style.display = "none";
+            // anio_estadistica_venta_moto.style.display = "none";
+            container_tipoaccsmasvendido.style.display = "none";
         }else if (mostrarxgrafico === "marca_mas_vendida"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "block";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "none";
-            anio_estadistica_venta_moto.style.display = "none";
-        }else{
+            // anio_estadistica_venta_moto.style.display = "none";
+            container_tipoaccsmasvendido.style.display = "none";
+        }else if (mostrarxgrafico === "accesorios_ventas"){
             container_ventasxmes.style.display = "none";
             container_marcamasvendida.style.display = "none";
             container_motomasvendida.style.display = "none";
             container_ventas_accesoriosxmes.style.display = "block";
-            anio_estadistica_venta_moto.style.display = "none";
-            anio_estadistica_venta_moto.style.display = "none";
+            // anio_estadistica_venta_moto.style.display = "none";
+            container_tipoaccsmasvendido.style.display = "none";
+        }else{
+            container_ventasxmes.style.display = "none";
+            container_marcamasvendida.style.display = "none";
+            container_motomasvendida.style.display = "none";
+            container_ventas_accesoriosxmes.style.display = "none";
+            // anio_estadistica_venta_moto.style.display = "none";
+            container_tipoaccsmasvendido.style.display = "block";
         }
-
+        
     }
+
+    Highcharts.chart('container_tipoaccsmasvendido', {
+    data: {
+        table: 'datatable_accs_tipo'
+    },
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Accesorios más vendidos'
+    },
+    xAxis: {
+       
+        title: {
+            text: 'Tipo'
+        },
+        // Ejemplo para ajustar los valores de x si fuera necesario
+         // Personaliza según tus datos
+        // Ajusta si deseas un intervalo específico entre categorías
+    },
+    yAxis: {
+        min: 0, // Valor mínimo en el eje y
+         // Valor máximo en el eje y
+         // Intervalo entre marcas en el eje y
+        allowDecimals: false,
+        title: {
+            text: 'Ventas'
+        }
+    }
+});
+
     document.addEventListener("DOMContentLoaded", function () {
         try {
             var ventasAnuales = JSON.parse('{{ ventas_anuales_json|safe }}'); // Convertimos JSON de Django a JS
@@ -302,35 +380,61 @@ Highcharts.chart('container_motomasvendida', {
     }
 });
 
-Highcharts.chart('container_ventas_accesoriosxmes', {
-    data: {
-        table: 'datatable_accesorios'
-    },
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Ventas de accesorios por mes'
-    },
-    xAxis: {
-        categories: ['Ventas'],
-        title: {
-            text: 'Mes'
-        },
-        // Ejemplo para ajustar los valores de x si fuera necesario
-        categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'], // Personaliza según tus datos
-        tickInterval: 1 // Ajusta si deseas un intervalo específico entre categorías
-    },
-    yAxis: {
-        min: 0, // Valor mínimo en el eje y
-        
-        tickInterval: 10, // Intervalo entre marcas en el eje y
-        allowDecimals: false,
-        title: {
-            text: 'Ventas'
+document.addEventListener("DOMContentLoaded", function () {
+        try {
+            var ventasAnuales = JSON.parse('{{ ventas_anuales_accs_json|safe }}'); // Convertimos JSON de Django a JS
+            console.log("Ventas Anuales:", ventasAnuales); // Depuración en la consola
+
+            var seriesData = [];
+            var yearsAvailable = JSON.parse('{{ years_available|safe }}'); // Convertimos la lista de años
+
+            yearsAvailable.forEach(function (year) {
+                if (ventasAnuales[year]) {
+                    seriesData.push({
+                        name: year.toString(),
+                        data: ventasAnuales[year]
+                    });
+                }
+            });
+
+            Highcharts.chart('container_ventas_accesoriosxmes', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Ventas de motos por mes'
+                },
+                xAxis: {
+                    categories: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    title: {
+                        text: 'Mes'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    tickInterval: 10,
+                    allowDecimals: false,
+                    title: {
+                        text: 'Ventas'
+                    }
+                },
+                tooltip: {
+                    shared: true
+                },
+                plotOptions: {
+                    column: {
+                        grouping: true,
+                        shadow: false,
+                        borderWidth: 0
+                    }
+                },
+                series: seriesData
+            });
+        } catch (error) {
+            console.error("Error al procesar JSON:", error);
         }
-    }
-});
+    });
+    
 
 
 </script>

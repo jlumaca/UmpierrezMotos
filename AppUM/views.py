@@ -3384,11 +3384,11 @@ def buscar_venta_num_motor_moto(req):
 
 def buscar_venta_num_chasis_moto(req):
     # try:
-            num_chasis = req.GET.get('num_chasis', '')  # Cambiado a paréntesis
+            marca = req.GET.get('marca', '')  # Cambiado a paréntesis
             
             resultados_motos = (
                 ComprasVentas.objects
-                .filter(tipo='V', moto__num_chasis=num_chasis)
+                .filter(tipo='V', moto__marca=marca)
                 .select_related('moto','cliente')
                 .values(
                     'id',
@@ -4384,7 +4384,7 @@ def baja_venta_moto(req,id_venta):
 
 @admin_required
 def estadisticas(req):
-    try:
+    # try:
         anio_actual = req.GET.get("anio", now().year)  
         anio_actual = int(anio_actual)  # Asegurar que sea un entero
         # years_available = range(2023,2026)
@@ -4412,6 +4412,7 @@ def estadisticas(req):
 
         ventas_anuales = {anio: [0] * 12 for anio in years_available}  # Diccionario para almacenar ventas por año y mes
 
+        ventas_anuales_accs = {anio: [0] * 12 for anio in years_available}
         # Obtener ventas por mes y año
         for anio in years_available:
             ventas_mensuales = (
@@ -4424,6 +4425,17 @@ def estadisticas(req):
             # Llenar la lista con los datos obtenidos
             for venta in ventas_mensuales:
                 ventas_anuales[anio][venta['fecha_compra__month'] - 1] = venta['total']
+            
+            ventas_mensuales_accs = (
+                ClienteAccesorio.objects
+                .filter(fecha_compra__year=anio)
+                .values('fecha_compra__month')
+                .annotate(total=Count('id'))
+            )
+            
+            # Llenar la lista con los datos obtenidos
+            for venta in ventas_mensuales_accs:
+                ventas_anuales_accs[anio][venta['fecha_compra__month'] - 1] = venta['total']
 
 
 
@@ -4439,6 +4451,19 @@ def estadisticas(req):
         datos_marcas = [
             {'marca': resultado['moto__marca'], 'total_vendidas': resultado['total_vendidas']}
             for resultado in marcas_mas_vendidas
+        ]
+
+        tipo_accesorio_mas_vendidos = (
+            ClienteAccesorio.objects
+            .all()
+            .values('accesorio__tipo')
+            .annotate(total_vendidos=Count('id'))
+            .order_by('-total_vendidos')[:5]
+        )
+
+        tipo_accesorio_vendidos = [
+            {'tipo': resultado['accesorio__tipo'], 'total_vendidos': resultado['total_vendidos']}
+            for resultado in tipo_accesorio_mas_vendidos
         ]
 
         # 5 Motos más vendidas
@@ -4474,23 +4499,26 @@ def estadisticas(req):
             
             "marcas": datos_marcas,
             "motos": datos_motos,
+            "tipo_accesorio_vendidos":tipo_accesorio_vendidos,
             "accesorios": datos_accesorios_ventas,
             "active_page": "Estadisticas",
             "years_available":years_available,
             "years_available": years_available,  # Lista de años
             "meses_disponibles": meses_disponibles,  # Lista de meses
             "ventas_anuales": ventas_anuales,
+            "ventas_anuales_accs": ventas_anuales_accs,
             "years_available": list(years_available),  # Convertimos a lista para evitar problemas en el template
-        "ventas_anuales_json": json.dumps(ventas_anuales)
+        "ventas_anuales_json": json.dumps(ventas_anuales),
+        "ventas_anuales_accs_json": json.dumps(ventas_anuales_accs)
             
             
         })
 
-    except Exception as e:
-        return render(req, "perfil_administrativo/estadisticas/estadisticas.html", {
-            "error_message": str(e),
-            "active_page": "Estadisticas"
-        })
+    # except Exception as e:
+    #     return render(req, "perfil_administrativo/estadisticas/estadisticas.html", {
+    #         "error_message": str(e),
+    #         "active_page": "Estadisticas"
+    #     })
 
 @admin_required
 def datos_tienda(req):

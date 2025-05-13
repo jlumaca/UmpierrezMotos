@@ -127,6 +127,7 @@ class Notificaciones(models.Model):
     descripcion = models.TextField(null=True, blank=True)
     fecha = models.DateField()
     tipo = models.CharField(max_length=20)
+    url = models.CharField(max_length=20,null=True,blank=True)
 
 class NotificacionPersonal(models.Model):
     personal = models.ForeignKey(Personal, related_name='personal_notificacion', on_delete=models.CASCADE)

@@ -1531,7 +1531,7 @@ def mi_funcion_diaria():
         if cliente.fecha_nacimiento and (cliente.fecha_nacimiento.day, cliente.fecha_nacimiento.month) == (hoy.day, hoy.month):
             tipo = "Cumpleaños"
             descripcion = f"¡Hoy es el cumpleaños de {cliente.nombre} {cliente.apellido}!"
-            insert_notificaciones(descripcion,tipo)
+            insert_notificaciones(descripcion,tipo,None)
     
     pagos_atrasados = CuotasMoto.objects.all()
 
@@ -1543,7 +1543,8 @@ def mi_funcion_diaria():
             moto = Moto.objects.get(id=venta.moto_id)
             tipo = "Atraso en cuota"
             descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {moto.marca} {moto.modelo} Codigo {pagos.id}"
-            insert_notificaciones(descripcion,tipo)
+            url = f"cliente_ficha/{cliente.id}"
+            insert_notificaciones(descripcion,tipo,url)
     
     pagos_atrasados_accesorios = CuotasAccesorios.objects.all()
 
@@ -1555,7 +1556,8 @@ def mi_funcion_diaria():
             accesorio = Accesorio.objects.get(id=venta.accesorio_id)
             tipo = "Atraso en cuota"
             descripcion = f"El cliente {cliente.nombre} {cliente.apellido} se encuentra atrasado en el pago de su {accesorio.tipo} {accesorio.marca} {accesorio.modelo} Codigo {pagos.id}"
-            insert_notificaciones(descripcion,tipo)
+            url = f"cliente_ficha/{cliente.id}"
+            insert_notificaciones(descripcion,tipo,url)
 
 def cantidad_solicitudes_no_leidas(req):
     if req.user.is_authenticated:

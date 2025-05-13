@@ -280,11 +280,12 @@ def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual
     )
     financiamiento.save()
 
-def insert_notificaciones(descripcion,tipo):
+def insert_notificaciones(descripcion,tipo,url):
     nueva_notificacion = Notificaciones(
         descripcion = descripcion,
         fecha = datetime.now(),
-        tipo = tipo
+        tipo = tipo,
+        url=url
     )
 
     nueva_notificacion.save()

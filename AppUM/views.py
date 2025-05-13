@@ -4640,7 +4640,8 @@ def notificaciones_administrativo(req):
                     'notificacion__tipo', 
                     'notificacion__fecha', 
                     'notificacion__descripcion',
-                    'notificacion__id' 
+                    'notificacion__id',
+                    'notificacion__url',
                      
                 )
             ).order_by('-id')
@@ -4654,7 +4655,8 @@ def notificaciones_administrativo(req):
                     'notificacion__id',
                     'notificacion__tipo', 
                     'notificacion__fecha', 
-                    'notificacion__descripcion', 
+                    'notificacion__descripcion',
+                    'notificacion__url', 
                      
                 )
             ).order_by('-id')
@@ -4663,11 +4665,11 @@ def notificaciones_administrativo(req):
         data = []
         for notificacion in notificaciones:
             if notificacion['notificacion__tipo'] == "Atraso en pago":
-                acciones = {"nombre": "Enviar correo", "url": ""}
+                acciones = {"nombre": "Ver detalle", "url": notificacion['notificacion__url']}
             elif notificacion['notificacion__tipo'] == "Cumpleaños":
-                acciones = [{"nombre": "Ver detalle", "url": ""},]
+                acciones = None
             else:
-                acciones = [{"nombre": "Ver detalle", "url": ""},]
+                acciones = [{"nombre": "Ver detalle", "url": notificacion['notificacion__url']},]
             data.append({
                 "notificacion":notificacion,
                 "acciones":acciones
@@ -4679,7 +4681,7 @@ def notificaciones_administrativo(req):
             notificacion.leido = 1
             notificacion.save()
         
-        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"data":data}) 
+        return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"data":data,"prueba":"'ClienteFicha' 1 "}) 
     # except Exception as e:
     #     return render(req,"perfil_administrativo/notificaciones/notificaciones.html",{"error_message":e})
 

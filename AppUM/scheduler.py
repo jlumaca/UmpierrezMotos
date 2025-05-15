@@ -7,7 +7,7 @@ def iniciar_scheduler():
     
     # Programar la función para que se ejecute todos los días a las 9 AM
     scheduler.add_job(mi_funcion_diaria, 
-                      trigger=CronTrigger(hour=14, minute=57), 
+                      trigger=CronTrigger(hour=6, minute=00), 
                       id="mi_funcion_diaria", 
                       replace_existing=True)
     

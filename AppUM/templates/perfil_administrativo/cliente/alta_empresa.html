@@ -1,0 +1,149 @@
+{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de Empresa</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">RUT de la Empresa</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="doc" placeholder="RUT" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            
+            <!-- <div class="mb-3">
+                <label for="estado" class="form-label">Tipo de documento</label>
+                <select class="form-control" name="tipo_documento" id="tipo">
+                    <option value="CI">Cédula</option>
+                    <option value="PAS">Pasaporte</option>
+                    <option value="DNI">DNI</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Documento</label>
+                <input type="text" class="form-control" name="documento" id="marca" placeholder="Ingrese el documento" maxlength="20">
+            </div> -->
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Nombre</label>
+                <input type="text" class="form-control" name="nombre" id="modelo" placeholder="Ingrese el nombre" maxlength="20" required>
+            </div>
+            
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Telefono 1</label>
+                <input type="number" class="form-control" name="telefono_principal" placeholder="Ingrese el telefono principal" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Telefono 2</label>
+                <input type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el telefono secundario">
+            </div>
+
+            <div class="mb-3">
+                <label for="documento" class="form-label">Correo electrónico</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="correo_1" placeholder="Correo">
+                    <span class="input-group-text">-</span>
+                    <select class="form-control" placeholder="Dominio del correo" id="dominio_principal" name="dominio_correo" onchange="correos()">
+                        <option value="@gmail.com">@gmail.com</option>
+                        <option value="@hotmail.com">@hotmail.com</option>
+                        <option value="@outlook.com">@outlook.com</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="id_otro_correo" name="otro_correo" placeholder="Dominio del correo" style="display: none;">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="documento" class="form-label">Correo electrónico 2</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="correo_2" placeholder="Correo">
+                    <span class="input-group-text">-</span>
+                    <select class="form-control" placeholder="Dominio del correo" id="dominio_principal_2" name="dominio_correo_2" onchange="correos2()">
+                        <option value="@gmail.com">@gmail.com</option>
+                        <option value="@hotmail.com">@hotmail.com</option>
+                        <option value="@outlook.com">@outlook.com</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="id_otro_correo_2" name="otro_correo_2" placeholder="Dominio del correo" style="display: none;">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control" name="domicilio" placeholder="Ingrese el domicilio" required>
+            </div>
+            
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+<script>
+    function correos(){
+        var dominio_correo = document.getElementById("dominio_principal").value;
+        var dom_correo = document.getElementById("dominio_principal")
+        var otro_correo = document.getElementById("id_otro_correo");
+        if (dominio_correo  === "Otro") {
+            otro_correo.style.display = "block";
+            
+        }else{
+            otro_correo.style.display = "none";
+            
+        }
+    }
+
+    function correos2(){
+        var dominio_correo = document.getElementById("dominio_principal_2").value;
+        var dom_correo = document.getElementById("dominio_principal_2")
+        var otro_correo = document.getElementById("id_otro_correo_2");
+        if (dominio_correo  === "Otro") {
+            otro_correo.style.display = "block";
+            
+        }else{
+            otro_correo.style.display = "none";
+            
+        }
+    }
+
+    function localidades2(){
+        var localidades = document.getElementById("id_localidad").value;
+        var otra_localidad = document.getElementById("otra_localidad")
+
+        if (localidades  === "Otro") {
+            otra_localidad.style.display = "block";
+            
+        }else{
+            otra_localidad.style.display = "none";
+            
+        }
+    }
+
+    function localidades() {
+        const localidadSelect = document.getElementById('id_localidad');
+        const otraLocalidadDiv = document.getElementById('otra_localidad');
+        // Mostrar solo si la opción seleccionada es "Otro"
+        if (localidadSelect.value === 'Otro') {
+            otraLocalidadDiv.style.display = 'flex'; // Mostrar el input y el span
+        } else {
+            otraLocalidadDiv.style.display = 'none'; // Ocultar en cualquier otra opción
+        }
+    }
+</script>
+{% endblock %}

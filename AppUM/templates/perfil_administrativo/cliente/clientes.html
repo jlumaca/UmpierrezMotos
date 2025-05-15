@@ -178,6 +178,79 @@
             </ul>
         </div>
     </nav>
+    <h3>Empresas</h3>
+    <a href="{% url 'EmpresaAlta' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-user-plus"></i> Alta de Empresa
+    </a>
+    <div class="mb-3">
+        <label for="estado" class="form-label">Buscar por:</label>
+        <select class="form-control" name="tipo_busqueda_empresa" id="tipo_busqueda_empresa" onchange="tipo_busqueda_empresas()">
+            <option value="rut">RUT</option>
+            <option value="nombre_empresa">Nombre de Empresa</option>
+        </select>
+    </div>
+
+    <!-- Formulario de búsqueda por marca -->
+    <form action="" enctype="multipart/form-data" method="get" id="busqueda_rut">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="number" name="documento" class="form-control" placeholder="Buscar por RUT">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+
+    <form action="" enctype="multipart/form-data" method="get" id="busqueda_nombre_empresa" style="display: none;">{% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <a href="{% url 'Clientes' %}" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+            </a>
+            
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Empresa</th> <!-- NOMBRE Y APELLIDO -->
+                <th>Telefono/Celular</th>
+                
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj_empresas %}
+                {% for cliente in page_obj_empresas %}
+                <tr>
+                    <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                    <td>{{ cliente.cliente_telefono__telefono }}</td>
+                   
+                    <td>
+                        <a href="{% url 'EmpresaModificacion' cliente.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        <a href="{% url 'ClienteFicha' cliente.id %}"><button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de empresas.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
 </div>
 
 <script>
@@ -189,6 +262,17 @@
 
         busqueda_documento.style.display = busqueda_tipo === "documento" ? "block" : "none";
         busqueda_nombre_apellido.style.display = busqueda_tipo === "nombre_apellido" ? "block" : "none";
+
+    }
+
+    function tipo_busqueda_empresas() {
+        var busqueda_tipo = document.getElementById("tipo_busqueda_empresa").value;
+        var busqueda_documento = document.getElementById("busqueda_rut");
+        var busqueda_nombre_apellido = document.getElementById("busqueda_nombre_empresa");
+
+
+        busqueda_documento.style.display = busqueda_tipo === "rut" ? "block" : "none";
+        busqueda_nombre_apellido.style.display = busqueda_tipo === "nombre_empresa" ? "block" : "none";
 
     }
 </script>

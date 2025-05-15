@@ -77,6 +77,7 @@ class Cliente(models.Model):
     # numero = models.IntegerField()
     # num_apartamento = models.IntegerField()
     domicilio = models.CharField(max_length=500,blank=True) 
+    tipo = models.CharField(max_length=500,default="Cliente")
 
 
 class ClienteCorreo(models.Model):

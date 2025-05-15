@@ -7114,11 +7114,18 @@ def estadisticas_taller(req):
         pass
 
 def clientes_taller(req):
+    #
     clientes = Cliente.objects.filter(
         cliente_telefono__principal=True
     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
     page_obj = funcion_paginas_varias(req,clientes)
-    return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj,"clientes":clientes})
+
+    empresas = Cliente.objects.filter(
+        cliente_telefono__principal=True,tipo="Empresa"
+    ).values('id','nombre', 'apellido', 'cliente_telefono__telefono').order_by('nombre')
+
+    page_obj_empresas = funcion_paginas_varias(req,empresas)
+    return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj,"clientes":clientes,"page_obj_empresas":page_obj_empresas})
 
 def buscar_por_doc_taller(req):
     tipo_doc = req.GET.get('tipo_doc_busq')
@@ -7142,6 +7149,46 @@ def buscar_nom_ape_taller(req):
      ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
     page_obj = funcion_paginas_varias(req,cliente)  # Obtiene la página solicitada
     return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj,"clientes":cliente})
+
+def buscar_por_rut_taller(req):
+    tipo_doc = "RUT"
+    doc_num = req.GET.get('documento')
+    documento = tipo_doc + str(doc_num)
+
+    empresa = Cliente.objects.filter(
+         documento = documento,
+         cliente_telefono__principal=True,
+         tipo = "Empresa"
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_emp = funcion_paginas_varias(req,empresa)  # Obtiene la página solicitada
+
+
+    clientes = Cliente.objects.filter(
+         tipo = "Cliente",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_cli = funcion_paginas_varias(req,clientes)  # Obtiene la página solicitada
+
+    return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj_cli,"page_obj_empresas":page_obj_emp})
+
+
+def buscar_nom_emp_taller(req):
+    nombre = req.GET.get('nombre')
+    apellido = ""
+    
+    empresa = Cliente.objects.filter(
+        nombre__icontains = nombre,
+        cliente_telefono__principal=True
+    ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    clientes = Cliente.objects.filter(
+         tipo = "Cliente",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    page_obj = funcion_paginas_varias(req,clientes)  # Obtiene la página solicitada
+    page_obj_emp = funcion_paginas_varias(req,empresa)
+    return render(req,"perfil_taller/clientes/clientes.html",{'page_obj': page_obj,"page_obj_empresas":page_obj_emp})
 
 def alta_cliente_taller(req):
     # try:
@@ -7229,6 +7276,95 @@ def alta_cliente_taller(req):
             return render(req,"perfil_taller/clientes/alta_cliente.html",{})
     # except Exception as e:
     #     pass  
+
+def alta_empresa_taller(req):
+    # try:
+        if req.method == "POST":
+            tipo_doc = "RUT"
+            doc = req.POST['doc']
+            nombre = req.POST['nombre'].title()
+            apellido = ""
+            # f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+            # f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+            telefono_principal = req.POST['telefono_principal']
+            telefono_secundario = req.POST['telefono_secundario']
+            correo = req.POST['correo_1']
+            dominio_correo = req.POST['dominio_correo']
+            correo_2 = req.POST['correo_2']
+            dominio_correo_2 = req.POST['dominio_correo_2']
+            # localidad = req.POST['localidad'].title()
+            # calle = req.POST['calle'].title()
+            # numero = req.POST['numero']
+            # num_apto = req.POST['num_apto']
+            
+            if correo:
+                correo_principal = correo + dominio_correo
+                correo_principal = correo_principal.lower()
+            else:
+                correo_principal = None
+            
+            if correo_2:
+                correo_secundario = correo_2 + dominio_correo_2
+                correo_secundario = correo_secundario.lower()
+            else:
+                correo_secundario = None
+            
+            doc_compuesto = tipo_doc + str(doc)
+            # existe_cliente = valid_cliente(doc_compuesto,telefono_principal,telefono_secundario,correo_principal,correo_secundario)
+            existe_cliente = valid_cliente(doc_compuesto)
+            if existe_cliente == "existe_cliente":
+                return render(req,"perfil_taller/clientes/alta_empresa.html",{"error_message":"El cliente ya existe"})
+            # elif existe_cliente == "existe_telefono_1":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 1 ya existe"})
+            # elif existe_cliente == "existe_telefono_2":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El telefono 2 ya existe"})
+            # elif existe_cliente == "existe_correo_1":
+            #     return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 1 ya existe"})
+            # elif existe_cliente == "existe_correo_2":
+                # return render(req,"perfil_administrativo/cliente/alta_cliente.html",{"error_message":"El correo 2 ya existe"})
+            elif telefono_principal == telefono_secundario:
+                return render(req,"perfil_taller/clientes/alta_empresa.html",{"error_message":"Los numeros de teléfono no pueden ser iguales"})
+            elif (correo_principal and correo_secundario) and (correo_principal == correo_secundario):
+                return render(req,"perfil_taller/clientes/alta_empresa.html",{"error_message":"Los correos no pueden ser iguales"})
+            else:
+                # if localidad == "Otro":
+                #     ciudad = req.POST['localidad_otro'].title()
+                # else:
+                #     ciudad = localidad
+
+                # if num_apto:
+                #     n_a = num_apto
+                # else:
+                #     n_a = 0
+
+                nuevo_cliente = Cliente(
+                    documento = doc_compuesto,
+                    nombre = nombre,
+                    apellido = apellido,
+                    fecha_nacimiento = None,
+                    domicilio = req.POST['domicilio'].title(),
+                    tipo = "Empresa"
+                )
+
+                nuevo_cliente.save()
+                insert_cliente_telefono(telefono_principal,1,nuevo_cliente.id)
+
+                if telefono_secundario:
+                    insert_cliente_telefono(telefono_secundario,0,nuevo_cliente.id)
+
+                if correo_principal:
+                    correo_principal = correo_principal.lower()
+                    insert_cliente_correo(correo_principal,1,nuevo_cliente.id)
+                
+                if correo_secundario:
+                    correo_secundario = correo_secundario.lower()
+                    insert_cliente_correo(correo_secundario,0,nuevo_cliente.id)
+                messages.success(req, "La empresa fue ingresada con éxito.")
+                return redirect('ClientesTaller')
+        else:
+            return render(req,"perfil_taller/clientes/alta_empresa.html",{})
+    # except Exception as e:
+    #     pass
 
 def modificacion_cliente_taller(req,id_cliente):
     try:
@@ -7330,6 +7466,141 @@ def modificacion_cliente_taller(req,id_cliente):
             return render(req,"perfil_taller/clientes/modificacion_cliente.html",contexto)
     except Exception as e:
         return render(req,"perfil_taller/clientes/modificacion_cliente.html",{"error_message":e})
+
+def modificacion_empresa_taller(req,id_cliente):
+    try:
+        if req.method == "POST":
+            tipo_doc = "RUT"
+            doc = req.POST['doc']
+            documento = tipo_doc + str(doc)
+            tel1 = req.POST['telefono_principal']
+            tel2 = req.POST['telefono_secundario']
+            correo1 = req.POST['correo_1'] + req.POST['dominio_correo']
+            correo2 = req.POST['correo_2'] + req.POST['dominio_correo_2']
+
+            correo1 = correo1.lower()
+            correo2 = correo2.lower()
+            # valid_cliente = valid_cliente_mod(id_cliente,documento,tel1,tel2,correo1,correo2)
+            valid_cliente = valid_cliente_mod(id_cliente,documento)
+            if valid_cliente == "existe_cliente":
+                contexto = contexto_para_cliente(id_cliente,"El RUT ingresado ya existe")
+                return render(req,"perfil_taller/clientes/modificacion_empresa.html",contexto)
+            
+            # elif valid_cliente == "existe_tel_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 1 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_tel_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El telefono 2 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_principal":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 1 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            # elif valid_cliente == "existe_correo_secundario":
+            #     contexto = contexto_para_cliente(id_cliente,"El correo 2 ingresado ya existe")
+            #     return render(req,"perfil_administrativo/cliente/modificacion_cliente.html",contexto)
+            elif tel1 == tel2:
+                contexto = contexto_para_cliente(id_cliente,"Los telefonos no pueden ser iguales")
+                return render(req,"perfil_taller/clientes/modificacion_empresa.html",contexto)
+            elif (correo1 == correo2) and (req.POST['correo_1'] and req.POST['correo_2']):
+                contexto = contexto_para_cliente(id_cliente,"Los correos no pueden ser iguales")
+                return render(req,"perfil_taller/clientes/modificacion_empresa.html",contexto)
+            else:
+            
+                tel1_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=1).first()
+                if tel1_actual.telefono != tel1:
+                    #SI EL TEL1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL1
+                    tel1_actual.delete()
+                    insert_cliente_telefono(tel1,1,id_cliente)
+
+                if tel2:
+                    tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    checkbox = 'convert_to_tel1' in req.POST    
+                    if tel2_actual:
+                        if tel2_actual.telefono != tel2:
+                            #SI EL TEL2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO TEL2
+                            tel2_actual.delete()
+                            insert_cliente_telefono(tel2,0,id_cliente)
+                    else:
+                        insert_cliente_telefono(tel2,0,id_cliente)
+                    if checkbox:
+                        tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        tel2_actual.principal = 1
+                        tel1_actual.principal = 0
+                        tel2_actual.save()
+                        tel1_actual.save()
+                else:
+                    tel2_actual = ClienteTelefono.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    if tel2_actual:
+                        tel2_actual.delete()
+
+
+                if req.POST['correo_1']:
+                    correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
+                    if correo1_actual:
+                        correo1 = correo1.lower()
+                        if correo1_actual.correo != correo1:
+                            #SI EL CORREO1 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO1
+                            correo1_actual.delete()
+                            insert_cliente_correo(correo1,1,id_cliente)
+                        else:
+                            insert_cliente_correo(correo1,1,id_cliente)
+                    else:
+                        insert_cliente_correo(correo1,1,id_cliente)
+                else:
+                    correo1_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=1).first()
+                    if correo1_actual:
+                        correo1_actual.delete()
+                
+                if req.POST['correo_2']:
+                    tiene_correo = ClienteCorreo.objects.filter(cliente_id=id_cliente).first()
+                    if not tiene_correo:
+                        insert_cliente_correo(correo2,1,id_cliente)
+                    else:
+                        correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        if correo2_actual:
+                            correo2 = correo2.lower()
+                            if correo2_actual.correo != correo2:
+                                #SI EL CORREO2 INGRESADO ES DISTINTO DEL ACTUAL --->>> BORRAR ACTUAL E INGRESAR NUEVO CORREO2
+                                correo2_actual.delete()
+                                insert_cliente_correo(correo2,0,id_cliente)
+                        else:
+                            insert_cliente_correo(correo2,0,id_cliente)
+                    
+                    
+                    
+                    checkbox_correo = 'convert_to_correo1' in req.POST
+                    if checkbox_correo:
+                        correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                        correo2_actual.principal = 1
+                        correo1_actual.principal = 0 
+                        correo1_actual.save()
+                        correo2_actual.save()
+                else:
+                    correo2_actual = ClienteCorreo.objects.filter(cliente_id=id_cliente,principal=0).first()
+                    if correo2_actual:
+                        correo2_actual.delete()
+                
+                f_nac_str = req.POST.get('f_nac')  # Cambiado a paréntesis
+                f_nac = datetime.strptime(f_nac_str, '%Y-%m-%d').date() if f_nac_str else None
+
+                mod_cliente = Cliente.objects.get(id=id_cliente)
+                mod_cliente.documento = documento
+                mod_cliente.nombre = req.POST['nombre'].title()
+                # mod_cliente.fecha_nacimiento = f_nac
+                # mod_cliente.ciudad = req.POST['localidad'].title()
+                # mod_cliente.calle = req.POST['calle'].title()
+                # mod_cliente.numero = req.POST['numero']
+                # mod_cliente.num_apartamento = req.POST['num_apto']
+                mod_cliente.domicilio = req.POST['domicilio'].title()
+                
+                mod_cliente.save()
+                messages.success(req, "Empresa modificada con éxito")
+                return redirect('ClientesTaller')
+        else:
+            contexto = contexto_para_cliente(id_cliente,None)
+            return render(req,"perfil_taller/clientes/modificacion_empresa.html",contexto)
+    except Exception as e:
+        return render(req,"perfil_taller/clientes/modificacion_empresa.html",{"error_message":e})
 
 
 def detalles_cliente_taller(req,id_cliente):

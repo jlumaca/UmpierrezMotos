@@ -1,0 +1,141 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h4>Alta de cliente</h4>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+            </div>
+        {% endif %}
+        <form action="{% url 'EmpresaModificacionTaller' datos_cliente.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">RUT</label>
+                <div class="input-group">
+                    <input value="{{ doc_num }}" type="text" class="form-control" name="doc" placeholder="RUT" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            
+            <!-- <div class="mb-3">
+                <label for="estado" class="form-label">Tipo de documento</label>
+                <select class="form-control" name="tipo_documento" id="tipo">
+                    <option value="CI">Cédula</option>
+                    <option value="PAS">Pasaporte</option>
+                    <option value="DNI">DNI</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Documento</label>
+                <input type="text" class="form-control" name="documento" id="marca" placeholder="Ingrese el documento" maxlength="20">
+            </div> -->
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Nombre</label>
+                <input value="{{ datos_cliente.nombre }}" type="text" class="form-control" name="nombre" id="modelo" placeholder="Ingrese el nombre" maxlength="20" required>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Telefono 1</label>
+                <input value="{{ tel_princ.telefono }}" type="number" class="form-control" name="telefono_principal" placeholder="Ingrese el telefono principal" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Teléfono 2</label>
+                {% if tel_sec %}
+                    <input value="{{ tel_sec }}" type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el teléfono secundario">
+                {% else %}
+                    <input type="number" class="form-control" name="telefono_secundario" placeholder="Ingrese el teléfono secundario">
+                {% endif %}
+            
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="convertToTel1" name="convert_to_tel1">
+                    <label class="form-check-label" for="convertToTel1">Convertir en teléfono 1</label>
+                </div>
+            </div>
+            
+
+
+            <div class="mb-3">
+                <label for="documento" class="form-label">Correo electrónico</label>
+                <div class="input-group">
+                    <input value="{{ correo_princ }}" type="text" class="form-control" name="correo_1" placeholder="Correo">
+                    <span class="input-group-text">-</span>
+                    <select class="form-control" placeholder="Dominio del correo" id="dominio_principal" name="dominio_correo" onchange="correos()">
+                        <option value="@gmail.com" {% if dom_princ == "@gmail.com" %}selected{% endif %} >@gmail.com</option>
+                        <option value="@hotmail.com" {% if dom_princ == "@hotmail.com" %}selected{% endif %} >@hotmail.com</option>
+                        <option value="@outlook.com" {% if dom_princ == "@outlook.com" %}selected{% endif %} >@outlook.com</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="id_otro_correo" name="otro_correo" placeholder="Dominio del correo" style="display: none;">
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="documento" class="form-label">Correo electrónico 2</label>
+                <div class="input-group">
+                    <input value="{{ correo_sec }}" type="text" class="form-control" name="correo_2" placeholder="Correo">
+                    <span class="input-group-text">-</span>
+                    <select class="form-control" placeholder="Dominio del correo" id="dominio_principal_2" name="dominio_correo_2" onchange="correos2()">
+                        <option value="@gmail.com" {% if dom_sec == "@gmail.com" %}selected{% endif %}>@gmail.com</option>
+                        <option value="@hotmail.com" {% if dom_sec == "@hotmail.com" %}selected{% endif %}>@hotmail.com</option>
+                        <option value="@outlook.com" {% if dom_sec == "@outlook.com" %}selected{% endif %}>@outlook.com</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="id_otro_correo_2" name="otro_correo_2" placeholder="Dominio del correo" style="display: none;">
+                    
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="convertToCorreo1" name="convert_to_correo1">
+                    <label class="form-check-label" for="convertToCorreo1">Convertir en correo 1</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Domicilio</label>
+                <input value="{{ datos_cliente.domicilio }}" type="text" class="form-control" name="domicilio" placeholder="Ingrese el domicilio" required>
+            </div>
+            
+            
+            <button type="submit" class="btn btn-success">Guardar</button>
+            
+            <a href="{% url 'ClientesTaller' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+       
+    </div>
+</div>
+<script>
+
+
+    function correos(){
+        var dominio_correo = document.getElementById("dominio_principal").value;
+        var dom_correo = document.getElementById("dominio_principal")
+        var otro_correo = document.getElementById("id_otro_correo");
+        if (dominio_correo  === "Otro") {
+            otro_correo.style.display = "block";
+            
+        }else{
+            otro_correo.style.display = "none";
+            
+        }
+    }
+
+    function correos2(){
+        var dominio_correo = document.getElementById("dominio_principal_2").value;
+        var dom_correo = document.getElementById("dominio_principal_2")
+        var otro_correo = document.getElementById("id_otro_correo_2");
+        if (dominio_correo  === "Otro") {
+            otro_correo.style.display = "block";
+            
+        }else{
+            otro_correo.style.display = "none";
+            
+        }
+    }
+</script>
+{% endblock %}

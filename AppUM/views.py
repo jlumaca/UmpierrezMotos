@@ -2129,7 +2129,14 @@ def buscar_por_doc(req):
          cliente_telefono__principal=True
      ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
     page_obj = funcion_paginas_varias(req,cliente)  # Obtiene la página solicitada
-    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
+
+    empresas = Cliente.objects.filter(
+         tipo = "Empresa",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_emp = funcion_paginas_varias(req,empresas)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente,"page_obj_empresas":page_obj_emp})
 
 @admin_required
 def buscar_nom_ape(req):
@@ -2153,7 +2160,55 @@ def buscar_nom_ape(req):
         ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
 
     page_obj = funcion_paginas_varias(req,cliente)  # Obtiene la página solicitada
-    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente})
+
+    empresas = Cliente.objects.filter(
+         tipo = "Empresa",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_emp = funcion_paginas_varias(req,empresas)  # Obtiene la página solicitada
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"clientes":cliente,"page_obj_empresas":page_obj_emp})
+
+
+@admin_required
+def buscar_por_rut(req):
+    tipo_doc = "RUT"
+    doc_num = req.GET.get('documento')
+    documento = tipo_doc + str(doc_num)
+
+    empresa = Cliente.objects.filter(
+         documento = documento,
+         cliente_telefono__principal=True,
+         tipo = "Empresa"
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_emp = funcion_paginas_varias(req,empresa)  # Obtiene la página solicitada
+
+
+    clientes = Cliente.objects.filter(
+         tipo = "Cliente",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+    page_obj_cli = funcion_paginas_varias(req,clientes)  # Obtiene la página solicitada
+
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj_cli,"page_obj_empresas":page_obj_emp})
+
+@admin_required
+def buscar_nom_emp(req):
+    nombre = req.GET.get('nombre')
+    apellido = ""
+    
+    empresa = Cliente.objects.filter(
+        nombre__icontains = nombre,
+        cliente_telefono__principal=True
+    ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    clientes = Cliente.objects.filter(
+         tipo = "Cliente",
+         cliente_telefono__principal=True
+     ).values('id','nombre', 'apellido', 'cliente_telefono__telefono')
+
+    page_obj = funcion_paginas_varias(req,clientes)  # Obtiene la página solicitada
+    page_obj_emp = funcion_paginas_varias(req,empresa)
+    return render(req,"perfil_administrativo/cliente/clientes.html",{'page_obj': page_obj,"page_obj_empresas":page_obj_emp})
 
 @admin_required
 def ficha_cliente(req,id_cliente):

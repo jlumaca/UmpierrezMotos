@@ -191,7 +191,7 @@
     </div>
 
     <!-- Formulario de búsqueda por marca -->
-    <form action="" enctype="multipart/form-data" method="get" id="busqueda_rut">{% csrf_token %}
+    <form action="{% url 'BusquedaRUT' %}" enctype="multipart/form-data" method="get" id="busqueda_rut">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="number" name="documento" class="form-control" placeholder="Buscar por RUT">
             <button class="btn btn-outline-primary" type="submit">
@@ -205,7 +205,7 @@
         </div>
     </form>
 
-    <form action="" enctype="multipart/form-data" method="get" id="busqueda_nombre_empresa" style="display: none;">{% csrf_token %}
+    <form action="{% url 'BusquedaNombreEmpresa' %}" enctype="multipart/form-data" method="get" id="busqueda_nombre_empresa" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre">
             <button class="btn btn-outline-primary" type="submit">
@@ -250,6 +250,58 @@
             {% endif %}
         </tbody>
     </table>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+        <div class="pagination-container">
+            <ul class="pagination justify-content-center">
+                {% if page_obj_empresas.has_previous %}
+    <li class="page-item">
+        <a class="page-link" href="?page=1{% if request.GET.nombre %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}" aria-label="Primera">
+            &laquo;&laquo;
+        </a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.nombre|default:'' %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}" aria-label="Anterior">
+            &laquo;
+        </a>
+    </li>
+{% endif %}
+
+{% for num in page_obj_empresas.paginator.page_range %}
+    {% if num == 1 or num == page_obj_empresas.paginator.num_pages %}
+        <li class="page-item {% if num == page_obj_empresas.number %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.nombre|default:'' %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}">{{ num }}</a>
+        </li>
+    {% elif num >= page_obj_empresas.number|add:"-2" and num <= page_obj_empresas.number|add:"2" %}
+        <li class="page-item {% if num == page_obj_empresas.number %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.nombre|default:'' %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}">{{ num }}</a>
+        </li>
+    {% elif num == 2 and page_obj_empresas.number > 4 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+    {% elif num == page_obj_empresas.paginator.num_pages|add:"-1" and page_obj_empresas.number < page_obj_empresas.paginator.num_pages|add:"-3" %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+    {% endif %}
+{% endfor %}
+
+{% if page_obj_empresas.has_next %}
+    <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj_empresas.next_page_number }}{% if request.GET.nombre|default:'' %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}" aria-label="Siguiente">
+            &raquo;
+        </a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj_empresas.paginator.num_pages }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre|default:'' }}{% endif %}{% if request.GET.apellido|default:'' %}&apellido={{ request.GET.apellido|default:'' }}{% endif %}" aria-label="Última">
+            &raquo;&raquo;
+        </a>
+    </li>
+{% endif %}
+
+
+
+            </ul>
+        </div>
+    </nav>
 
 </div>
 

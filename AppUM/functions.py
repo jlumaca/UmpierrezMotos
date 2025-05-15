@@ -719,6 +719,8 @@ def crear_certificado_bikeup(cliente,telefono,moto,id_cv):
     # direccion = cliente.calle.upper() + " " + str(cliente.numero) + apto + ", " + cliente.ciudad.upper()
     for i in range(2,longitud_doc):
                     doc_num = doc_num + cliente.documento[i]
+    if cliente.tipo == "Empresa":
+        doc_num = cliente.documento
     if moto.moneda_precio == "Pesos":
         moneda = "PESOS"
     else:

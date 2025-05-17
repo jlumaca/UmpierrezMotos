@@ -211,6 +211,7 @@ class Financiamientos(models.Model):
     inicial = models.BooleanField(default=False)
     precio_moto_actual = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     quincena = models.BooleanField(default=False)
+    semanal = models.BooleanField(default=False)
 
 class CuotasMoto(models.Model):
     fecha_pago = models.DateField()

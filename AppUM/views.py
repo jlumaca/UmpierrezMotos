@@ -3893,6 +3893,7 @@ def buscar_pagos_por_refinanciamiento(req):
 
 
 def refinanciar_pagos(req,id_cv):
+    #
     try:
         if req.POST['moneda_refinanciacion'] == "Pesos":
             valor_cuota = req.POST['valor_cuota_pesos']
@@ -3900,7 +3901,8 @@ def refinanciar_pagos(req,id_cv):
             valor_cuota = req.POST['valor_cuota_dolares']
         
         quincena = 1 if req.POST['quincena_mensual'] == "Quincena" else 0
-        alta_financiamientos(req.POST['recargo_porcentaje_coma'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0,quincena)
+        semanal = 1 if req.POST['quincena_mensual'] == "Semanal" else 0
+        alta_financiamientos(req.POST['recargo_porcentaje_coma'],req.POST['cant_cuotas'],valor_cuota,req.POST['moneda_refinanciacion'],1,id_cv,0,quincena,semanal)
         messages.success(req, "Financiamiento ingresado con éxito")
         return redirect(f"{reverse('DetallesCuotas',kwargs={'id_cv':id_cv})}?comprobante_url={None}")
     except Exception as e:
@@ -4049,6 +4051,7 @@ def alta_pago_cuota(req,id_cv):
             
             cant_cuotas = CuotasFinanciacion.objects.filter(financiamiento_id=fin_actual.id).count() 
             num_cuota_actual = cant_cuotas + 1
+            #
             if fin_actual.quincena:
                 if num_cuota_actual % 2 == 0:
                     num_cuota_actual = int(num_cuota_actual / 2)
@@ -4056,6 +4059,21 @@ def alta_pago_cuota(req,id_cv):
                 else:
                     num_cuota_actual = int((num_cuota_actual + 1) / 2)
                     cuota = "Cuota " + str(num_cuota_actual) + " Primer Quincena"
+            elif fin_actual.semanal:
+                if num_cuota_actual % 4 == 0:
+                    #nuevo num de cuota
+                    num_cuota_actual = num_cuota_actual / 4
+                    j = 4
+                else:
+                    i = num_cuota_actual
+                    j = 4
+                    while i % 4 != 0:
+                        i += 1
+                        j -= 1
+                        
+                    num_cuota_actual = i / 4
+                
+                cuota = "Cuota " + str(int(num_cuota_actual)) + " Semana " + str(j)
             else:
                 cuota = "Cuota " + str(num_cuota_actual)   
             if cant_cuotas == 0:

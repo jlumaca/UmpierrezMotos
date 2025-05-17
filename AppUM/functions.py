@@ -1002,6 +1002,8 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
         if financiamiento_buscado:
             if financiamiento_buscado.quincena:
                 monto_cuota = int(float(financiamiento_buscado.valor_cuota) / 2)
+            elif financiamiento_buscado.semanal:
+                monto_cuota = int(float(financiamiento_buscado.valor_cuota) / 4)
             else:
                 monto_cuota = int(financiamiento_buscado.valor_cuota)
         else:
@@ -1020,12 +1022,18 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
             if fin_actual:
                 if fin_actual.quincena:
                     monto_cuota = int(float(fin_actual.valor_cuota) / 2)
+                    mensual_quincena = "Quincena"
+                elif fin_actual.semanal:
+                    monto_cuota = int(float(fin_actual.valor_cuota) / 4)
+                    mensual_quincena = "Semanal"
                 else:
                     monto_cuota = int(fin_actual.valor_cuota)
+                    mensual_quincena = "Mensual"
             else:
                 monto_cuota = None
             mostrar_boton_borrar_financiacion = True if fin_actual.actual else False
-            mensual_quincena = "Quincena" if fin_actual.quincena else "Mensual"
+            # mensual_quincena = "Quincena" if fin_actual.quincena else "Mensual"
+            
         else:
             #SI NO EXISTE NINGUNA REFINANCIACION NO MUESTRA NADA
             # fins = Financiamientos.objects.filter(venta_id=id_cv,inicial=0).first()
@@ -1050,6 +1058,8 @@ def funcion_detalles_cuotas(req,id_cv,buscar,id_buscar_f):
                 if financiacion_anterior:
                     if financiacion_anterior.quincena:
                         monto_cuota = int(float(financiacion_anterior.valor_cuota) / 2)
+                    elif financiacion_anterior.semanal:
+                        monto_cuota = int(float(financiacion_anterior.valor_cuota) / 4)
                     else:
                         monto_cuota = int(financiacion_anterior.valor_cuota)
                 else:

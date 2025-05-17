@@ -223,7 +223,7 @@ def alta_cuota_accesorio(req,id_cv,resto_dolares,resto_pesos,moneda,observacione
     return nueva_cuota
 
 
-def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial,quincena):
+def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual,venta_id,inicial,quincena,semanal):
     ult_fin = Financiamientos.objects.filter(venta_id=venta_id).first()
     if ult_fin:
         ult_fin = Financiamientos.objects.filter(venta_id=venta_id).latest('id')
@@ -276,7 +276,8 @@ def alta_financiamientos(recargo,cantidad_cuotas,valor_cuota,moneda_cuota,actual
         venta_id = venta_id,
         inicial = inicial,
         precio_moto_actual = valor_precio_en_financiamiento,
-        quincena = quincena
+        quincena = quincena,
+        semanal = semanal
     )
     financiamiento.save()
 

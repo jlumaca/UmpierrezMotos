@@ -75,7 +75,8 @@
                 <div class="input-group">
                     <select class="form-control" name="quincena_mensual" id="moneda_refinanciacion">
                         <option value="Mensual">Mensual</option>
-                        <option value="Quincena">Quincena</option>
+                        <option value="Quincena">Quincenal</option>
+                        <option value="Semanal">Semanal</option>
                     </select>
                 </div>
             </div>
@@ -101,6 +102,16 @@
             <div class="mb-3">
                 <label for="recargo" class="form-label">Cantidad de cuotas</label>
                 <input type="number" class="form-control" name="cant_cuotas" id="cant_cuotas" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en pesos por Semana</label>
+                <input type="number" class="form-control" name="valor_cuota_pesos_semana" id="valor_cuota_pesos_semana" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="total" class="form-label">Valor de las cuotas en dólares por Semana</label>
+                <input type="number" class="form-control" name="valor_cuota_dolares_semana" id="valor_cuota_dolares_semana" readonly>
             </div>
 
             <div class="mb-3">
@@ -352,7 +363,7 @@
             <tr>
                 <th>FECHA</th>
                 <th>FINANCIACION</th>
-                <th>MENSUAL/QUINCENA</th>
+                <th>MENSUAL/QUINCENA/SEMANAL</th>
                 <th>ACCIONES</th>
             </tr>
         </thead>
@@ -964,6 +975,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const valorCuotaDolares = document.getElementById('valor_cuota_dolares');
     const valorCuotaPesosQuincena = document.getElementById('valor_cuota_pesos_quincena');
     const valorCuotaDolaresQuincena = document.getElementById('valor_cuota_dolares_quincena');
+    const valorCuotaPesosSemana = document.getElementById('valor_cuota_pesos_semana');
+    const valorCuotaDolaresSemana = document.getElementById('valor_cuota_dolares_semana');
     // const precioDolarTexto = document.getElementById('precio_dolar').textContent;
     // const precioDolar = parseFloat(precioDolarTexto);
 
@@ -983,12 +996,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const ValorCuotaDolares = totalDolares / cuotas;
         const ValorCuotaPesosQuincena = ValorCuotaPesos / 2;
         const ValorCuotaDolaresQuincena = ValorCuotaDolares / 2;
+        const ValorCuotaPesosSemana = ValorCuotaPesos / 4;
+        const ValorCuotaDolaresSemana = ValorCuotaDolares / 4;
 
         // Actualizar los campos
         valorCuotaPesos.value = ValorCuotaPesos.toFixed(0);
         valorCuotaDolares.value = ValorCuotaDolares.toFixed(0);
         valorCuotaPesosQuincena.value = ValorCuotaPesosQuincena.toFixed(0);
         valorCuotaDolaresQuincena.value = ValorCuotaDolaresQuincena.toFixed(0);
+        valorCuotaPesosSemana.value = ValorCuotaPesosSemana.toFixed(0);
+        valorCuotaDolaresSemana.value = ValorCuotaDolaresSemana.toFixed(0);
     }
 
     // Listeners para actualizar según los cambios en la moneda o valores ingresados

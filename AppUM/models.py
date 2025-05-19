@@ -69,8 +69,8 @@ class Logos(models.Model):
 
 class Cliente(models.Model):
     documento = models.CharField(max_length=20, unique=True)
-    nombre = models.CharField(max_length=20)
-    apellido  = models.CharField(max_length=20)
+    nombre = models.CharField(max_length=200)
+    apellido  = models.CharField(max_length=200)
     fecha_nacimiento = models.DateField(null=True,blank=True)
     # ciudad = models.CharField(max_length=40)
     # calle = models.CharField(max_length=40)

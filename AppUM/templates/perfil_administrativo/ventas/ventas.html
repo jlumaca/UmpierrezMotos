@@ -165,38 +165,71 @@
         </tbody>
     </table>
     <nav aria-label="Page navigation">
+    <div class="pagination-container">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Primera">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Anterior">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=1&{{ extra_query }}" aria-label="Primera">&laquo;&laquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ extra_query }}" aria-label="Anterior">&laquo;</a>
+                </li>
             {% endif %}
+
             {% for num in page_obj.paginator.page_range %}
-            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                <a class="page-link" href="?page={{ num }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}">{{ num }}</a>
-            </li>
+                {% if num == 1 or num == page_obj.paginator.num_pages %}
+                    <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&{{ extra_query }}">{{ num }}</a>
+                    </li>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                    <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&{{ extra_query }}">{{ num }}</a>
+                    </li>
+                {% elif num == 2 and page_obj.number > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% elif num == page_obj.paginator.num_pages|add:"-1" and page_obj.number < page_obj.paginator.num_pages|add:"-3" %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
             {% endfor %}
+
             {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Siguiente">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&marca_moto={{ request.GET.marca_moto }}&modelo_moto={{ request.GET.modelo_moto }}" aria-label="Última">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
-            </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ extra_query }}" aria-label="Siguiente">&raquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ extra_query }}" aria-label="Última">&raquo;&raquo;</a>
+                </li>
             {% endif %}
         </ul>
-    </nav>
+    </div>
+</nav>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <br>
 <br>
     <h3>Accesorios</h3>
@@ -236,39 +269,47 @@
             {% endif %}
         </tbody>
     </table>
-    <nav aria-label="Page navigation">
+    <nav aria-label="Page navigation accesorios">
+    <div class="pagination-container">
         <ul class="pagination justify-content-center">
             {% if page_objAccs.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="Primera">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_objAccs.previous_page_number }}" aria-label="Anterior">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=1&{{ extra_query }}" aria-label="Primera">&laquo;&laquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_objAccs.previous_page_number }}&{{ extra_query }}" aria-label="Anterior">&laquo;</a>
+                </li>
             {% endif %}
+
             {% for num in page_objAccs.paginator.page_range %}
-            <li class="page-item {% if page_objAccs.number == num %}active{% endif %}">
-                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-            </li>
+                {% if num == 1 or num == page_objAccs.paginator.num_pages %}
+                    <li class="page-item {% if num == page_objAccs.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&{{ extra_query }}">{{ num }}</a>
+                    </li>
+                {% elif num >= page_objAccs.number|add:"-2" and num <= page_objAccs.number|add:"2" %}
+                    <li class="page-item {% if num == page_objAccs.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&{{ extra_query }}">{{ num }}</a>
+                    </li>
+                {% elif num == 2 and page_objAccs.number > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% elif num == page_objAccs.paginator.num_pages|add:"-1" and page_objAccs.number < page_objAccs.paginator.num_pages|add:"-3" %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
             {% endfor %}
+
             {% if page_objAccs.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_objAccs.next_page_number }}" aria-label="Siguiente">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_objAccs.paginator.num_pages }}" aria-label="Última">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
-            </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_objAccs.next_page_number }}&{{ extra_query }}" aria-label="Siguiente">&raquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_objAccs.paginator.num_pages }}&{{ extra_query }}" aria-label="Última">&raquo;&raquo;</a>
+                </li>
             {% endif %}
         </ul>
-    </nav>
+    </div>
+</nav>
+
+
     
 </div>
 <script>

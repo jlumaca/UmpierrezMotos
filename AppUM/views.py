@@ -32,6 +32,8 @@ from openpyxl.styles import Font
 from django.http import HttpResponse
 from io import BytesIO
 from openpyxl.styles import PatternFill, Font, Alignment
+from django.db.models import Q
+from urllib.parse import urlencode
 # import json
 # from docx import Document
 
@@ -3356,25 +3358,35 @@ def vista_ventas(req):
                 })
             page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
 
-            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+            query_params = req.GET.copy()
+            query_params.pop('page', None)  # Remueve page si ya existe
+            extra_query = query_params.urlencode()
+
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio,"extra_query": extra_query})
     except Exception as e:
         pass
 
 def buscar_venta_cliente(req):
     # try:
-            nombre = req.GET.get('nombre').capitalize()
-            apellido = req.GET.get('apellido').capitalize()
+            nombre = req.GET.get('nombre', '').strip().lower()
+            apellido = req.GET.get('apellido', '').strip().lower()
 
-            clientes = Cliente.objects.filter(
-            nombre__icontains = nombre,
-            apellido__icontains = apellido
-            )
+            filtros = Q()
+            if nombre:
+                filtros &= Q(nombre__icontains=nombre)
+            if apellido:
+                filtros &= Q(apellido__icontains=apellido)
+
+            clientes = Cliente.objects.filter(filtros)
+
+            res_documentacion = []
+            res_facturas = []
 
             for cliente in clientes:
                 resultados_motos = (
                     ComprasVentas.objects
-                    .filter(tipo='V',cliente=cliente)
-                    .select_related('moto','cliente')
+                    .filter(tipo='V', cliente=cliente)
+                    .select_related('moto', 'cliente')
                     .values(
                         'id',
                         'moto__marca', 
@@ -3383,16 +3395,15 @@ def buscar_venta_cliente(req):
                         'cliente__nombre',
                         'cliente__apellido',
                         'cliente__id'
-                    ).order_by('-fecha_compra')
+                    )
+                    .order_by('-fecha_compra')
                 )
 
-                res_documentacion = []
                 for resultado in resultados_motos:
-                    cv = ComprasVentas.objects.get(id=resultado['id'])
                     res_documentacion.append({
-                    'moto': resultado
-                })
-                    
+                        'moto': resultado
+                    })
+
                 resultados_accesorios = (
                     ClienteAccesorio.objects
                     .filter(cliente=cliente)
@@ -3406,21 +3417,33 @@ def buscar_venta_cliente(req):
                         'cliente__nombre',
                         'cliente__apellido',
                         'cliente__id'
-                    
-                    ).order_by('-fecha_compra')
+                    )
+                    .order_by('-fecha_compra')
                 )
-                res_facturas = []
+
+                # Para obtener todas las facturas de una vez y evitar múltiples .get()
+                accesorios_ids = [r['id'] for r in resultados_accesorios]
+                accesorios_con_factura = ClienteAccesorio.objects.in_bulk(accesorios_ids)
+
                 for resultado_accesorio in resultados_accesorios:
-                        ca = ClienteAccesorio.objects.get(id=resultado_accesorio['id'])
-                        res_facturas.append({
+                    ca = accesorios_con_factura.get(resultado_accesorio['id'])
+                    res_facturas.append({
                         'accesorio': resultado_accesorio,
-                        'factura_documento': ca.factura_documento.url if ca.factura_documento else None
+                        'factura_documento': ca.factura_documento.url if ca and ca.factura_documento else None
                     })
 
-            page_obj = funcion_paginas_varias(req,res_documentacion)
-            page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
+            page_obj = funcion_paginas_varias(req, res_documentacion)
+            page_obj_accesorio = funcion_paginas_varias(req, res_facturas)
 
-            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+            query_params = req.GET.copy()
+            query_params.pop('page', None)  # Remueve page si ya existe
+            extra_query = query_params.urlencode()
+
+            return render(req, "perfil_administrativo/ventas/ventas.html", {
+                "page_obj": page_obj,
+                "page_objAccs": page_obj_accesorio
+                ,"extra_query": extra_query
+            })
     # except Exception as e:
     #     pass
 
@@ -3535,8 +3558,11 @@ def buscar_venta_marca_modelo_moto(req):
                     'factura_documento': ca.factura_documento.url if ca.factura_documento else None
                 })
             page_obj_accesorio = funcion_paginas_varias(req,res_facturas)
+            query_params = req.GET.copy()
+            query_params.pop('page', None)  # Remueve page si ya existe
+            extra_query = query_params.urlencode()
 
-            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio,"extra_query": extra_query})
     
     # except Exception as e:
     #     pass
@@ -3606,8 +3632,11 @@ def buscar_venta_accesorio(req):
             paginator = Paginator(res_facturas, 10)  # 10 registros por página
             page_number = req.GET.get('page')
             page_obj_accesorio = paginator.get_page(page_number)
+            query_params = req.GET.copy()
+            query_params.pop('page', None)  # Remueve page si ya existe
+            extra_query = query_params.urlencode()
 
-            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio})
+            return render(req,"perfil_administrativo/ventas/ventas.html",{"page_obj":page_obj,"page_objAccs":page_obj_accesorio,"extra_query": extra_query})
     
     # except Exception as e:
     #     pass

@@ -802,7 +802,7 @@ def busqueda_tipo_moto(req):
 @admin_required
 def busqueda_num_motor(req):
     num_motor = req.GET.get('num_motor').upper()
-    motos = Moto.objects.filter(num_motor=num_motor)
+    motos = Moto.objects.filter(num_motor=num_motor,pertenece_tienda=1)
     data_motos = []
     for moto in motos:
         reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()
@@ -818,7 +818,7 @@ def busqueda_num_motor(req):
 @admin_required
 def busqueda_num_chasis(req):
     num_chasis = req.GET.get('num_chasis').upper()
-    motos = Moto.objects.filter(num_chasis=num_chasis)
+    motos = Moto.objects.filter(num_chasis=num_chasis,pertenece_tienda=1)
     data_motos = []
     for moto in motos:
         reservada = ComprasVentas.objects.filter(tipo="R",moto_id=moto.id).first()

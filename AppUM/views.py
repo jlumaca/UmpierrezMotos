@@ -777,7 +777,7 @@ def busqueda_matricula(req):
         # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
         # page_obj = funcion_paginas_varias(req,moto)
-        contexto = {'page_obj': page_obj,"motos":moto,"active_page": 'Motos'}
+        contexto = {'page_obj': page_obj,"motos":motos,"active_page": 'Motos'}
     else:
         contexto = {'page_obj': None,"motos":None,"active_page": 'Motos'}
 

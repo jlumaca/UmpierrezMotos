@@ -7878,20 +7878,23 @@ def busqueda_pedido_por_doc_cliente(req):
     # try:
         documento = req.GET.get('tipo_documento') + str(req.GET.get('documento'))
         cliente_busq = Cliente.objects.filter(documento=documento).first()
-        pedidos = Pedidos.objects.filter(cliente_id=cliente_busq.id).order_by('fecha')
-        data = []
-        for pedido in pedidos:
-            cliente = Cliente.objects.get(id=pedido.cliente_id)
-            cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
+        if cliente_busq:
+            pedidos = Pedidos.objects.filter(cliente_id=cliente_busq.id).order_by('fecha')
+            data = []
+            for pedido in pedidos:
+                cliente = Cliente.objects.get(id=pedido.cliente_id)
+                cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
 
-            data.append({
-                "id_pedido":pedido.id,
-                "pedido":pedido.detalle,
-                "fecha":pedido.fecha,
-                "cliente":cliente.nombre + " " + cliente.apellido,
-                "telefono":cliente_telefono.telefono
-            })
-        page_obj = funcion_paginas_varias(req,data)
+                data.append({
+                    "id_pedido":pedido.id,
+                    "pedido":pedido.detalle,
+                    "fecha":pedido.fecha,
+                    "cliente":cliente.nombre + " " + cliente.apellido,
+                    "telefono":cliente_telefono.telefono
+                })
+            page_obj = funcion_paginas_varias(req,data)
+        else:
+            page_obj = None
         return render(req,"perfil_administrativo/pedidos/pedidos.html",{'page_obj': page_obj})
     # except Exception as e:
     #     pass
@@ -7901,20 +7904,23 @@ def busqueda_pedido_por_nombre_apellido_cliente(req):
         nombre = req.GET.get('nombre')
         apellido = req.GET.get('apellido')
         cliente_busq = Cliente.objects.filter(nombre__contains=nombre,apellido__contains=apellido).first()
-        pedidos = Pedidos.objects.filter(cliente_id=cliente_busq.id).order_by('fecha')
-        data = []
-        for pedido in pedidos:
-            cliente = Cliente.objects.get(id=pedido.cliente_id)
-            cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
+        if cliente_busq:
+            pedidos = Pedidos.objects.filter(cliente_id=cliente_busq.id).order_by('fecha')
+            data = []
+            for pedido in pedidos:
+                cliente = Cliente.objects.get(id=pedido.cliente_id)
+                cliente_telefono = ClienteTelefono.objects.filter(cliente_id=pedido.cliente_id,principal=1).first()
 
-            data.append({
-                "id_pedido":pedido.id,
-                "pedido":pedido.detalle,
-                "fecha":pedido.fecha,
-                "cliente":cliente.nombre + " " + cliente.apellido,
-                "telefono":cliente_telefono.telefono
-            })
-        page_obj = funcion_paginas_varias(req,data)
+                data.append({
+                    "id_pedido":pedido.id,
+                    "pedido":pedido.detalle,
+                    "fecha":pedido.fecha,
+                    "cliente":cliente.nombre + " " + cliente.apellido,
+                    "telefono":cliente_telefono.telefono
+                })
+            page_obj = funcion_paginas_varias(req,data)
+        else:
+            page_obj = None
         return render(req,"perfil_administrativo/pedidos/pedidos.html",{'page_obj': page_obj})
     # except Exception as e:
     #     pass

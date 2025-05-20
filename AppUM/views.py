@@ -8252,6 +8252,160 @@ def vista_inventario_motos_taller(req):
     page_obj = funcion_paginas_varias(req,data_motos)
     return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
 
+def busqueda_marca_taller(req):
+    marca = req.GET.get('marca')
+    # motos = Moto.objects.filter(marca__icontains=marca,pertenece_tienda=1).order_by('-fecha_ingreso')
+    # page_obj = funcion_paginas_varias(req,motos)
+    # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"active_page": 'Motos'})
+    motos = Moto.objects.filter(marca__icontains=marca,pertenece_taller=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+
+def busqueda_modelo_taller(req):
+    modelo = req.GET.get('modelo')
+    motos = Moto.objects.filter(modelo__icontains=modelo,pertenece_taller=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+def busqueda_matricula_taller(req):
+    matricula_letras = req.GET.get('letras_matricula').upper()
+    matricula_numeros = str(req.GET.get('numeros_matricula'))
+    matricula = matricula_letras + matricula_numeros
+
+    busq_matricula = Matriculas.objects.filter(matricula = matricula).first()
+    if busq_matricula:
+        motos = Moto.objects.filter(id=busq_matricula.moto_id,pertenece_taller=1)
+        # motos = Moto.objects.filter(precio__range=(precio_minimo, precio_maximo),pertenece_tienda=1).order_by('-fecha_ingreso')
+        data_motos = []
+        for moto in motos:
+            matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+            servicio = Servicios.objects.filter(moto_id=moto.id).first()
+            if servicio:
+                cliente = Cliente.objects.get(id=servicio.cliente_id)
+                datos_cliente = cliente.nombre + " " + cliente.apellido
+            else:
+                cliente = None
+                datos_cliente = None
+            data_motos.append({
+                "moto":moto,
+                "matricula":matricula.matricula if matricula else "Sin matrícula",
+                "cliente":datos_cliente if cliente else "Sin cliente asignado"
+            })
+        logo_um = Logos.objects.get(id=1)
+        page_obj = funcion_paginas_varias(req,data_motos)
+        # return render(req,"perfil_administrativo/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+        # page_obj = funcion_paginas_varias(req,moto)
+        contexto = {'page_obj': page_obj,"motos":motos,"active_page": 'Motos'}
+    else:
+        contexto = {'page_obj': None,"motos":None,"active_page": 'Motos'}
+
+    return render(req,"perfil_taller/motos/motos.html",contexto)
+
+
+def busqueda_tipo_moto_taller(req):
+    tipo = req.GET.get('tipo_moto')
+    motos = Moto.objects.filter(tipo=tipo,pertenece_taller=1).order_by('-fecha_ingreso')
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+
+def busqueda_num_motor_taller(req):
+    num_motor = req.GET.get('num_motor').upper()
+    motos = Moto.objects.filter(num_motor=num_motor,pertenece_taller=1)
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+
+def busqueda_num_chasis_taller(req):
+    num_chasis = req.GET.get('num_chasis').upper()
+    motos = Moto.objects.filter(num_chasis=num_chasis,pertenece_taller=1)
+    data_motos = []
+    for moto in motos:
+        matricula = Matriculas.objects.filter(moto_id=moto.id).first()
+        servicio = Servicios.objects.filter(moto_id=moto.id).first()
+        if servicio:
+            cliente = Cliente.objects.get(id=servicio.cliente_id)
+            datos_cliente = cliente.nombre + " " + cliente.apellido
+        else:
+            cliente = None
+            datos_cliente = None
+        data_motos.append({
+            "moto":moto,
+            "matricula":matricula.matricula if matricula else "Sin matrícula",
+            "cliente":datos_cliente if cliente else "Sin cliente asignado"
+        })
+    logo_um = Logos.objects.get(id=1)
+    page_obj = funcion_paginas_varias(req,data_motos)
+    return render(req,"perfil_taller/motos/motos.html",{'page_obj': page_obj,"motos":motos,"logo_um":logo_um.logo_UM.url if logo_um.logo_UM else None,"active_page": 'Motos'})
+
+
+
 def alta_moto_taller(req):
     # try:
         if req.method == "POST":

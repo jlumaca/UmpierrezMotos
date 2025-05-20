@@ -37,7 +37,7 @@
     </div>
 
     <!-- Formulario de búsqueda por marca -->
-    <form action="{% url 'BusquedaTipoMoto' %}" enctype="multipart/form-data" style="display: none;" method="get" id="busqueda_tipo">{% csrf_token %}
+    <form action="{% url 'BusquedaTipoMotoTaller' %}" enctype="multipart/form-data" style="display: none;" method="get" id="busqueda_tipo">{% csrf_token %}
         <div class="input-group mb-3">
             <select class="form-control" name="tipo_moto" id="tipo_moto">
                 <option value="Moto">Moto</option>
@@ -56,7 +56,7 @@
         </div>
     </form>
     
-    <form action="{% url 'BusquedaNumMotor' %}" enctype="multipart/form-data" method="get" id="busqueda_num_motor" style="display: none;">{% csrf_token %}
+    <form action="{% url 'BusquedaNumMotorTaller' %}" enctype="multipart/form-data" method="get" id="busqueda_num_motor" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="num_motor" class="form-control" placeholder="Buscar por número de motor" required>
             <button class="btn btn-outline-primary" type="submit">
@@ -70,7 +70,7 @@
         </div>
     </form>
     
-    <form action="{% url 'BusquedaNumChasis' %}" enctype="multipart/form-data" method="get" id="busqueda_num_chasis" style="display: none;">{% csrf_token %}
+    <form action="{% url 'BusquedaNumChasisTaller' %}" enctype="multipart/form-data" method="get" id="busqueda_num_chasis" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="num_chasis" class="form-control" placeholder="Buscar por número de chasis" required>
             <button class="btn btn-outline-primary" type="submit">
@@ -84,7 +84,7 @@
         </div>
     </form>
 
-    <form action="{% url 'BusquedaMarca' %}" enctype="multipart/form-data" method="get" id="busqueda_marca">{% csrf_token %}
+    <form action="{% url 'BusquedaMarcaTaller' %}" enctype="multipart/form-data" method="get" id="busqueda_marca">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="marca" class="form-control" placeholder="Buscar por marca">
             <button class="btn btn-outline-primary" type="submit">
@@ -99,7 +99,7 @@
     </form>
 
     <!-- Formulario de búsqueda por modelo -->
-    <form action="{% url 'BusquedaModelo' %}" enctype="multipart/form-data" method="get" id="busqueda_modelo" style="display: none;">{% csrf_token %}
+    <form action="{% url 'BusquedaModeloTaller' %}" enctype="multipart/form-data" method="get" id="busqueda_modelo" style="display: none;">{% csrf_token %}
         <div class="input-group mb-3">
             <input type="text" name="modelo" class="form-control" placeholder="Buscar por modelo">
             <button class="btn btn-outline-primary" type="submit">
@@ -112,66 +112,10 @@
     </form>
 
     <!-- Formulario de búsqueda por marca y modelo -->
-    <form action="{% url 'BusquedaMarcaModelo' %}" enctype="multipart/form-data" method="get" id="busqueda_marca_modelo" style="display: none;">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" name="marca_modelo" placeholder="Marca">
-            <span class="input-group-text">-</span>
-            <input type="text" class="form-control" name="modelo_marca" placeholder="Modelo">
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-            <a href="{% url 'MotosTaller' %}" class="btn btn-secondary">
-                <i class="fas fa-sync-alt"></i>
-            </a>
-        </div>
-    </form>
 
     <!-- Formulario de búsqueda por año -->
-    <form action="{% url 'BusquedaAnio' %}" enctype="multipart/form-data" method="get" id="busqueda_anio" style="display: none;">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" name="anio" placeholder="Buscar por año" required>
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-            <a href="{% url 'MotosTaller' %}" class="btn btn-secondary">
-                <i class="fas fa-sync-alt"></i>
-            </a>
-        </div>
-    </form>
-
-    <!-- Formulario de búsqueda por kilómetros -->
-    <form action="{% url 'BusquedaKms' %}" enctype="multipart/form-data" method="get" id="busqueda_kms" style="display: none;">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <input type="number" class="form-control" name="km_minimo" placeholder="Kilometraje mínimo" required>
-            <span class="input-group-text">-</span>
-            <input type="number" class="form-control" name="km_maximo" placeholder="Kilometraje máximo" required>
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-            <a href="{% url 'MotosTaller' %}" class="btn btn-secondary">
-                <i class="fas fa-sync-alt"></i>
-            </a>
-        </div>
-    </form>
-    <form action="{% url 'BusquedaPrecio' %}" enctype="multipart/form-data" method="get" id="busqueda_precio" style="display: none;">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <input type="number" class="form-control" name="precio_minimo" placeholder="Precio mínimo" required>
-            <span class="input-group-text">-</span>
-            <input type="number" class="form-control" name="precio_maximo" placeholder="Precio máximo" required>
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-            <a href="{% url 'MotosTaller' %}" class="btn btn-secondary">
-                <i class="fas fa-sync-alt"></i>
-            </a>
-        </div>
-    </form>
     
-    <form action="{% url 'BusquedaMatricula' %}" enctype="multipart/form-data" method="get" id="busqueda_matricula" style="display: none;">
+    <form action="{% url 'BusquedaMatriculaTaller' %}" enctype="multipart/form-data" method="get" id="busqueda_matricula" style="display: none;">
         {% csrf_token %}
         <div class="input-group mb-3">
             <input maxlength="3" type="text" class="form-control" name="letras_matricula" placeholder="Caracteres alfabeticos">

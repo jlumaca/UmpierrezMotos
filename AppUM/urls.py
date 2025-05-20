@@ -261,6 +261,13 @@ urlpatterns = [
 
 
      path('motos_taller/', views.vista_inventario_motos_taller,name="MotosTaller"),
+     path('busqueda_marca_taller', views.busqueda_marca_taller,name="BusquedaMarcaTaller"),
+     path('busqueda_modelo_taller', views.busqueda_modelo_taller,name="BusquedaModeloTaller"),
+     path('busqueda_matricula_taller', views.busqueda_matricula_taller,name="BusquedaMatriculaTaller"),
+     path('busqueda_tipo_taller', views.busqueda_tipo_moto_taller,name="BusquedaTipoMotoTaller"),
+     path('busqueda_num_motor_taller', views.busqueda_num_motor_taller,name="BusquedaNumMotorTaller"),
+     path('busqueda_num_chasis_taller', views.busqueda_num_chasis_taller,name="BusquedaNumChasisTaller"),
+
      path('alta_moto_taller/', views.alta_moto_taller,name="AltaMotoTaller"),
 
 

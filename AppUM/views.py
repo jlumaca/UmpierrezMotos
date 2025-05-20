@@ -272,6 +272,8 @@ def vista_inventario_motos(req):
 @admin_required
 def cliente_moto(req):
     # try:
+        print("TIPO DOC: " + req.POST['tipo_documento'])
+        print("DOC: " + str(req.POST['documento']))
         num_motor = req.POST['num_motor_moto'].upper()
         documento = req.POST['tipo_documento'] + str(req.POST['documento'])
 
@@ -625,8 +627,10 @@ def alta_moto_usada_sin_dueno(req):
 
 @admin_required
 def form_alta_moto(req):
+    empresas = Cliente.objects.filter(tipo="Empresa")
     return render(req,"perfil_administrativo/motos/alta_moto.html",{"active_page": 'Motos',
-                                                                            "consultar_moto_cliente":True})
+                                                                            "consultar_moto_cliente":True,
+                                                                            "empresas":empresas})
 
 
 @admin_required
@@ -1002,6 +1006,7 @@ def modificacion_moto(req,id_moto):
 
 def form_cambio_propietario_moto(req,id_moto):
     try:
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if req.method == "POST":
             moto = Moto.objects.get(id=id_moto)
             documento = req.POST['tipo_documento'] + str(req.POST['documento'])
@@ -1010,14 +1015,16 @@ def form_cambio_propietario_moto(req,id_moto):
             if cliente:
                 return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto,
                                                                                     "cliente":cliente,
-                                                                                    "moto":moto})
+                                                                                    "moto":moto,
+                                                                                    "empresas":empresas})
             else:
                 return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto,
                                                                                     "cliente":None,
                                                                                     "moto":None,
+                                                                                    "empresas":empresas,
                                                                                     "error_message_cliente":"El cliente no existe, para ingresarlo haga clic "})
         else:
-            return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto})
+            return render(req,"perfil_administrativo/motos/cambio_duenio.html",{"id_moto":id_moto,"empresas":empresas})
     except Exception as e:
         pass
 
@@ -1368,8 +1375,8 @@ def prueba_varios_accesorios(req):
 
         # Depuración: imprimir los accesorios seleccionados
         print("Accesorios seleccionados:", accesorios_seleccionados)
-    
-        return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {})
+        empresas = Cliente.objects.filter(tipo="Empresa")
+        return render(req, "perfil_administrativo/accesorios/venta_accesorio.html", {"empresas":empresas})
 
 @admin_required
 def cliente_venta_accesorio(req,mostrar,vender):
@@ -3133,6 +3140,7 @@ def baja_personal(req,donde,id_personal):
 @admin_required
 def form_venta_moto(req,id_moto):
     try:
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if req.method == "POST":
             tipo_doc = req.POST['tipo_documento']
             doc = req.POST['documento']
@@ -3140,7 +3148,7 @@ def form_venta_moto(req,id_moto):
             contexto = contexto_venta_moto(req,id_moto,None,documento)
             return render(req,"perfil_administrativo/motos/venta_moto.html",contexto)
         else:
-            return render(req,"perfil_administrativo/motos/venta_moto.html",{})
+            return render(req,"perfil_administrativo/motos/venta_moto.html",{"empresas":empresas})
     except Exception as e:
         return render(req,"perfil_administrativo/motos/venta_moto.html",{"error_message":e})
 
@@ -4459,6 +4467,7 @@ def reservas(req):
 @admin_required
 def form_reservar_moto(req,id_moto):
     try:
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if req.method == "POST":
             tipo_doc = req.POST['tipo_documento']
             doc = req.POST['documento']
@@ -4498,11 +4507,11 @@ def form_reservar_moto(req,id_moto):
                                                                                 "correo2":c_2
                                                                                 })
             else:
-                return render(req,"perfil_administrativo/motos/reservar_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+                return render(req,"perfil_administrativo/motos/reservar_moto.html",{"datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic ","empresas":empresas})
         else:
-            return render(req,"perfil_administrativo/motos/reservar_moto.html",{})
+            return render(req,"perfil_administrativo/motos/reservar_moto.html",{"empresas":empresas})
     except Exception as e:
-        return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e})
+        return render(req,"perfil_administrativo/motos/reservar_moto.html",{"error_message":e,"empresas":empresas})
 
 @admin_required
 def reservar_moto(req,id_moto,id_cliente):
@@ -6437,9 +6446,10 @@ def servicios_en_gestion(req):
 
 def form_alta_servicio(req):
     try:
-        return render(req,"perfil_taller/servicios/alta_servicio.html",{"buscar_moto_cliente":True,"div_mecanicos":False})
+        empresas = Cliente.objects.filter(tipo="Empresa")
+        return render(req,"perfil_taller/servicios/alta_servicio.html",{"buscar_moto_cliente":True,"div_mecanicos":False,"empresas":empresas})
     except Exception as e:
-        return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":e,"buscar_moto_cliente":True})
+        return render(req,"perfil_taller/servicios/alta_servicio.html",{"error_message":e,"buscar_moto_cliente":True,"empresas":empresas})
 
 def cliente_moto_servicio(req):
     # try:
@@ -7791,12 +7801,13 @@ def pedidos(req):
     #     pass
 
 def cliente_pedido(req):
-    try:
+    # try:
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if req.method == "POST":
             documento = req.POST['tipo_doc'] + str(req.POST['doc'])
             cliente = Cliente.objects.filter(documento=documento).first()
             if not cliente:
-                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "})
+                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic ","empresas":empresas})
             else:
                 correo = ClienteCorreo.objects.filter(cliente_id=cliente.id,principal=1).first()
                 if correo:
@@ -7808,11 +7819,11 @@ def cliente_pedido(req):
                     telefono = telefono.telefono
                 else:
                     telefono = "El cliente no cuenta con teléfono"
-                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":True,"cliente":cliente,"correo":correo,"telefono":telefono})
+                return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":True,"cliente":cliente,"correo":correo,"telefono":telefono,"empresas":empresas})
         else:
-            return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False})
-    except Exception as e:
-        pass
+            return render(req,"perfil_administrativo/pedidos/alta_pedido.html",{"ingresar_pedido":False,"empresas":empresas})
+    # except Exception as e:
+    #     pass
 
 def alta_pedido(req,id_cliente):
     try:
@@ -8170,6 +8181,7 @@ def borrar_notificacion_taller(req,id_notificacion):
 
 def venta_repuesto_form(req,id_rp):
     # try:
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if req.method == "POST":
             tipo_doc = req.POST['tipo_documento']
             doc = req.POST['documento']
@@ -8177,7 +8189,7 @@ def venta_repuesto_form(req,id_rp):
             contexto = contexto_venta_repuesto(req,id_rp,None,documento)
             return render(req,"perfil_taller/repuestos/venta_repuesto.html",contexto)
         else:
-            return render(req,"perfil_taller/repuestos/venta_repuesto.html",{})
+            return render(req,"perfil_taller/repuestos/venta_repuesto.html",{"empresas":empresas})
     # except Exception as e:
     #     pass
 

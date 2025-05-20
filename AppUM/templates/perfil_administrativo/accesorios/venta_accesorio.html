@@ -26,14 +26,19 @@
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
-                    <select class="form-control" name="tipo_documento" id="tipo_documento">
-                        <option value="CI">Cédula</option>
-                        <option value="PAS">Pasaporte</option>
-                        <option value="DNI">DNI</option>
-                        <option value="RUT">RUT</option>
+                    <select class="form-control" name="tipo_documento" id="tipo_documento" onchange="toggleFieldsCliente()">
+                            <option value="CI">Cédula</option>
+                            <option value="PAS">Pasaporte</option>
+                            <option value="DNI">DNI</option>
+                            <option value="RUT">Empresa</option>
                     </select>
                     <span class="input-group-text">-</span>
-                    <input type="text" class="form-control" name="documento" placeholder="Documento">
+                    <input type="text" class="form-control" name="documento" id="campo_documento" placeholder="Documento">
+                    <select class="form-control" name="rut_empresa" id="empresas_en_bd" style="display: none;" onchange="copiarValorEmpresa()">
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa.documento }}">{{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
                     <button class="btn btn-outline-primary" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
@@ -262,6 +267,40 @@ function toggleFields(){
         
     }
 }
+
+
+function toggleFieldsCliente() {
+        var estado = document.getElementById("tipo_documento").value;
+        var div_documento = document.getElementById("campo_documento");
+        var div_empresas = document.getElementById("empresas_en_bd");
+        var empresaSeleccionada = document.getElementById("empresas_en_bd").value;
+        var valorProcesado = empresaSeleccionada.substring(3);
+       
+       
+        if (estado === "RUT") {
+            div_empresas.style.display = "block";
+            div_documento.style.display = "none";
+            document.getElementById("campo_documento").value = valorProcesado;
+            var documentoCompleto = tipo + documento;
+            console.log(documentoCompleto);
+            
+           
+        }else{
+            div_empresas.style.display = "none";
+            div_documento.style.display = "block";
+           
+        }
+    }
+
+    function copiarValorEmpresa() {
+        const select = document.getElementById("empresas_en_bd");
+        const tipo = document.getElementById("tipo_documento").value;
+        const valorEmpresa = select.value.substring(3);  // quitar los 3 primeros caracteres
+        document.getElementById("campo_documento").value = valorEmpresa;
+
+        console.log("Documento final:", tipo + valorEmpresa);
+    }
+
 
 
 

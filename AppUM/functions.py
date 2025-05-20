@@ -1583,6 +1583,7 @@ def cantidad_solicitudes_no_leidas(req):
 
 def contexto_venta_repuesto(req,id_rp,mensaje_error,documento):
         cliente = Cliente.objects.filter(documento=documento).first()
+        empresas = Cliente.objects.filter(tipo="Empresa")
         if cliente:
                 tel1 = ClienteTelefono.objects.filter(principal=1,cliente_id=cliente.id).first()
                 tel_1 = tel1.telefono
@@ -1614,11 +1615,13 @@ def contexto_venta_repuesto(req,id_rp,mensaje_error,documento):
                             "tel2":tel_2,
                             "correo1":c_1,
                             "correo2":c_2,
-                            "error_message":mensaje_error if mensaje_error else None}
+                            "error_message":mensaje_error if mensaje_error else None
+                            ,"empresas":empresas}
             # return render(req,"perfil_administrativo/motos/venta_moto.html",{})
         else:
             contexto = {"datos":False,
-                        "error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "}
+                        "error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic ",
+                        "empresas":empresas}
     
         return contexto             
 
@@ -1798,6 +1801,7 @@ def generar_compromiso_compra_venta_moto_ingreso(req,id_moto,id_cliente):
 
 def contexto_cliente_accesorio(req,mensaje,doc):
         accesorios_seleccionados = req.session["accesorios_json"]
+        empresas = Cliente.objects.filter(tipo="Empresa")
 
         # Aquí puedes procesar la venta de los accesorios
         # print("Accesorios seleccionados:", accesorios_seleccionados)
@@ -1871,6 +1875,8 @@ def contexto_cliente_accesorio(req,mensaje,doc):
                 precio_restante_pesos = 0
                 precio_restante_dolares = 0
             
+            
+            
             contexto = {
                 "datos_accesorio":True,
                 "cliente":cliente,
@@ -1886,12 +1892,13 @@ def contexto_cliente_accesorio(req,mensaje,doc):
                 "cantidad_destinada_pesos":int(total_fondos_pesos),
                 "cantidad_destinada_dolares":int(total_fondos_dolares),
                 "error_message":mensaje
+                ,"empresas":empresas
             }
             
             return contexto
         else:
             contexto = {
-                "datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic "
+                "datos_moto":False,"error_message_cliente":"El cliente no se encuentra registrado en el sistema, para ingresarlo haga clic ","empresas":empresas
             }
             return contexto
 

@@ -1740,7 +1740,7 @@ def alta_cliente(req):
                     apellido = apellido,
                     fecha_nacimiento = f_nac,
                     domicilio = req.POST['domicilio'].title(),
-                    tipo = "Empresa"
+                    tipo = "Cliente"
                 )
 
                 nuevo_cliente.save()
@@ -7309,7 +7309,8 @@ def alta_cliente_taller(req):
                     nombre = nombre,
                     apellido = apellido,
                     fecha_nacimiento = f_nac,
-                    domicilio = req.POST['domicilio'].title()
+                    domicilio = req.POST['domicilio'].title(),
+                    tipo = "Cliente"
                     # ciudad = ciudad,
                     # calle = calle,
                     # numero = numero,

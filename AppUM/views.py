@@ -3710,11 +3710,11 @@ def buscar_venta_num_motor_moto(req):
 
 def buscar_venta_num_chasis_moto(req):
     # try:
-            marca = req.GET.get('marca', '')  # Cambiado a paréntesis
+            num_chasis = req.GET.get('num_chasis', '')  # Cambiado a paréntesis
             
             resultados_motos = (
                 ComprasVentas.objects
-                .filter(tipo='V', moto__marca=marca)
+                .filter(tipo='V', moto__num_chasis=num_chasis)
                 .select_related('moto','cliente')
                 .values(
                     'id',

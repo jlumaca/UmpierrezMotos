@@ -289,6 +289,7 @@ urlpatterns = [
 
      path('hojas_presupuestales/', views.hojas_presupuestales,name="HojasPresupuestales"),
      path('nuevo_presupuesto/', views.nuevo_presupuesto,name="NuevoPresupuesto"),
+     path('cliente_moto_presupuesto/', views.buscar_moto_cliente,name="ClienteMotoPresupuesto"),
 
 
 

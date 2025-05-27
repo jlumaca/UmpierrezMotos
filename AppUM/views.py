@@ -9560,11 +9560,104 @@ def cambiar_a_perfil_tienda(req):
     return render(req,"perfil_administrativo/bienvenida.html",{})
 
 def hojas_presupuestales(req):
-    return render(req,"perfil_taller/hojas_presupuestales/hojas_presupuestales.html",{})
+    presupuestos = Presupuestos.objects.all().order_by('-fecha')
+    data = []
+    for p in presupuestos:
+        usuario = Personal.objects.get(id=p.usuario_id)
+        data.append({
+            "presupuesto":p,
+            "usuario":usuario.nombre + " " + usuario.apellido
+        })
+    
+    page_obj = funcion_paginas_varias(req,data)
+    return render(req,"perfil_taller/hojas_presupuestales/hojas_presupuestales.html",{"page_obj":page_obj})
+
+def buscar_moto_cliente(req):
+    tipo_doc = req.POST.get("tipo_doc", "")
+    doc = req.POST.get("doc", "")
+    documento = tipo_doc + str(doc)
+    num_chasis = req.POST.get("num_chasis_moto", "")
+    cliente = Cliente.objects.filter(documento=documento).first()
+    moto = Moto.objects.filter(num_chasis=num_chasis).first()
+    matricula = Matriculas.objects.filter(moto=moto).first()
+    if matricula:
+        letras_matr = matricula.matricula[0:3:1]
+        num_matr = matricula.matricula[3:7:1]
+        padron = int(matricula.padron)
+    else:
+        letras_matr = None
+        num_matr = None
+        padron = None
+    
+    if cliente:
+        tipo_documento_ci = cliente.documento[0:2:1]
+        tipo_documento_pas_dni = cliente.documento[0:3:1]
+
+        longitud_doc = len(cliente.documento)
+        doc_num = ""
+        
+        if tipo_documento_ci == "CI":
+            #
+            tipo_doc = "CI"
+            for i in range(2,longitud_doc):
+                doc_num = doc_num + cliente.documento[i]
+        elif tipo_documento_pas_dni == "DNI":
+            tipo_doc = "DNI"
+            for i in range(3,longitud_doc):
+                doc_num = doc_num + cliente.documento[i]
+        else:
+            tipo_doc = "PAS"
+            for i in range(3,longitud_doc):
+                doc_num = doc_num + cliente.documento[i]
+    else:
+        tipo_doc = None
+        doc_num= None
+    if not moto and not cliente:
+        contexto = {
+            "error_message":"La moto y el cliente no se encuentran registrados en el sistema"
+        }
+        # return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{"error_message":"La moto y el cliente no se encuentran registrados en el sistema"})
+    elif not cliente:
+        contexto = {
+            "error_message":"El cliente no se encuentra registrado en el sistema",
+            "marca_moto":moto.marca,
+            "modelo_moto":moto.modelo,
+            "num_motor":moto.num_motor,
+            "num_chasis":moto.num_chasis,
+            "letras_matr":letras_matr,
+            "num_matr":num_matr,
+            "padron":padron
+        }
+        # return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{"error_message":"El cliente no se encuentra registrado en el sistema"})
+    elif not moto:
+        contexto = {
+            "error_message":"La moto no se encuentra registrada en el sistema",
+            "nombre_cliente":cliente.nombre,
+            "apellido_cliente":cliente.apellido,
+            "tipo_doc":tipo_doc,
+            "doc_num":doc_num
+        }
+        # return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{"error_message":"La moto no se encuentra registrada en el sistema"})
+    else:
+        contexto = {
+            "marca_moto":moto.marca,
+            "modelo_moto":moto.modelo,
+            "num_motor":moto.num_motor,
+            "num_chasis":moto.num_chasis,
+            "nombre_cliente":cliente.nombre,
+            "apellido_cliente":cliente.apellido,
+            "letras_matr":letras_matr,
+            "num_matr":num_matr,
+            "padron":padron,
+            "tipo_doc":tipo_doc,
+            "doc_num":doc_num
+        }
+        # return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{})
+    return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",contexto)
 
 def nuevo_presupuesto(req):
     if req.method == "POST":
-        titulo = req.POST.get("titulo", "Presupuesto sin título")
+        titulo = req.POST.get("titulo_presupuesto", "Presupuesto sin título")
         fecha = date.today()
         # usuario = req.user.personal
         anotaciones = req.POST.get("anotaciones", "")
@@ -9572,6 +9665,24 @@ def nuevo_presupuesto(req):
         precios = req.POST.getlist("precio[]")
         monedas = req.POST.getlist("moneda[]")
 
+        marca_moto = req.POST.get("marca_moto", "")
+        modelo_moto = req.POST.get("modelo_moto", "")
+        num_motor_moto = req.POST.get("num_motor_moto", "")
+        num_chasis_moto = req.POST.get("num_chasis_moto", "")
+        nombre = req.POST.get("nombre", "")
+        apellido = req.POST.get("apellido", "")
+        matr_letras = req.POST.get("matricula_letras", "")
+        matr_num = req.POST.get("matricula_numeros", "")
+        num_padron = req.POST.get("num_padron", "")
+        
+        tipo_doc = req.POST.get("tipo_doc", "")
+        num_doc = req.POST.get("doc", "")
+
+        if tipo_doc == "PAS":
+            tipo_doc = "Pasaporte"
+
+        matricula = matr_letras.upper() + str(matr_num)
+    
         servicios_completos = list(zip(servicios, precios, monedas))
 
         # Cargar la plantilla HTML
@@ -9581,7 +9692,14 @@ def nuevo_presupuesto(req):
             "fecha": fecha,
             "anotaciones": anotaciones,
             "servicios": servicios_completos,
-            # "usuario": usuario
+            "marca_modelo": marca_moto.upper() + " " + modelo_moto.upper(),
+            "num_motor":num_motor_moto.upper(),
+            "num_chasis":num_chasis_moto.upper(),
+            "cliente": nombre.title() + " " + apellido.title(),
+            "matricula":matricula,
+            "num_padron":num_padron,
+            "documento": tipo_doc + ": " + str(num_doc)
+           
         })
 
         # Crear el PDF

@@ -39,7 +39,25 @@
             </tr>
         </thead>
         <tbody>
-            
+            {% if page_obj %}
+                {% for pres in page_obj %}
+                <tr>
+                    
+                    <td>{{ pres.presupuesto.titulo }}</td>
+                    <td>{{ pres.presupuesto.fecha }}</td>
+                    <td>{{ pres.usuario }}</td>
+                    <td>
+                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de presupuestos disponibles.
+                    </td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
 {% endblock %}

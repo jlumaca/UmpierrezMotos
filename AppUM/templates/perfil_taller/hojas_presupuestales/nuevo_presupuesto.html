@@ -33,8 +33,90 @@ form label input[type="number"] {
         {% endif %}
 
         <!-- Formulario de búsqueda de cliente -->
-        
-        <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}    
+         <div class="mb-3">
+            <input type="checkbox" onchange="mostrarForm_busq()" id="datos_moto_cliente_bd" class="form-check-input">
+            <label for="toggleMatr" class="form-check-label">Obtener datos del cliente y moto desde la base de datos</label>
+        </div>
+        <div id="form_busqueda" style="display: none;">
+        <form action="{% url 'ClienteMotoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_doc">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" name="doc" placeholder="Documento" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+            <div class="mb-3" id="div_num_chasis">
+                <label for="num_chasis" class="form-label">Número de chasis</label>
+                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
+            </div>
+            <button type="submit" class="btn btn-success">Aceptar</button>
+        </form>
+        </div>
+        <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input value="{{ marca_moto }}" type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input value="{{ modelo_moto }}" type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20" required>
+            </div>
+
+            <div class="mb-3" id="matr">
+                <label for="matricula" class="form-label">Matricula</label>
+                <div class="d-flex">
+                    <input value="{{ letras_matr }}" type="text" class="form-control me-1" name="matricula_letras" id="matricula_letras" placeholder="Caracteres alfabeticos"  maxlength="3" required>
+                    <span class="mx-1">-</span>
+                    <input value="{{ num_matr }}" type="number" class="form-control ms-1" name="matricula_numeros" id="matricula_numeros" placeholder="Caracteres numéricos" required>
+                </div>
+            </div>
+
+            <div class="mb-3" id="num_padron_sn">
+                <label for="num_chasis" class="form-label">Número de padrón</label>
+                <input value="{{ padron }}" type="number" class="form-control" name="num_padron" id="txt_num_padron_sn" placeholder="Ingrese el número de padron" maxlength="40" required>
+            </div> 
+
+            <div class="mb-3" id="div_num_motor">
+                <label for="num_motor" class="form-label">Número de motor</label>
+                <input value="{{ num_motor }}" type="text" class="form-control" name="num_motor_moto" id="num_motor" placeholder="Ingrese el número de motor" maxlength="40">
+            </div>
+            <div class="mb-3" id="div_num_chasis">
+                <label for="num_chasis" class="form-label">Número de chasis</label>
+                <input value="{{ num_chasis }}" type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
+            </div>
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_doc">
+                        <option value="CI" {% if tipo_doc == "CI" %}selected{% endif %}>Cédula</option>
+                        <option value="PAS" {% if tipo_doc == "PAS" %}selected{% endif %}>Pasaporte</option>
+                        <option value="DNI" {% if tipo_doc == "DNI" %}selected{% endif %}>DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input value="{{ doc_num }}" type="text" class="form-control" name="doc" placeholder="Documento" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Nombre</label>
+                <input value="{{ nombre_cliente }}" type="text" class="form-control" name="nombre" id="modelo" placeholder="Ingrese el nombre" maxlength="200" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Apellido</label>
+                <input value="{{ apellido_cliente }}" type="text" class="form-control" name="apellido" placeholder="Ingrese el apellido" maxlength="200" required>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Título</label>
+                <input type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
+            </div>   
             <div class="mb-3">
                 <label for="precio" class="form-label">Texto</label>
                 <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3"></textarea>
@@ -295,7 +377,18 @@ function toggleFieldsCliente() {
         console.log("Documento final:", tipo + valorEmpresa);
     }
 
+    function mostrarForm_busq(){
 
+        const cbox = document.getElementById("datos_moto_cliente_bd");
+        const form_busqueda = document.getElementById("form_busqueda");
+        
+
+        if (cbox.checked) {
+            form_busqueda.style.display = "block";
+        } else {
+            form_busqueda.style.display = "none";
+        }
+    }
 
 </script>
 

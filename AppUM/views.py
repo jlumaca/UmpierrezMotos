@@ -34,6 +34,8 @@ from io import BytesIO
 from openpyxl.styles import PatternFill, Font, Alignment
 from django.db.models import Q
 from urllib.parse import urlencode
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 # import json
 # from docx import Document
 
@@ -9557,3 +9559,45 @@ def cambiar_a_perfil_taller(req):
 def cambiar_a_perfil_tienda(req):
     return render(req,"perfil_administrativo/bienvenida.html",{})
 
+def hojas_presupuestales(req):
+    return render(req,"perfil_taller/hojas_presupuestales/hojas_presupuestales.html",{})
+
+def nuevo_presupuesto(req):
+    if req.method == "POST":
+        titulo = req.POST.get("titulo", "Presupuesto sin título")
+        fecha = date.today()
+        # usuario = req.user.personal
+        anotaciones = req.POST.get("anotaciones", "")
+        servicios = req.POST.getlist("servicios[]")
+        precios = req.POST.getlist("precio[]")
+        monedas = req.POST.getlist("moneda[]")
+
+        servicios_completos = list(zip(servicios, precios, monedas))
+
+        # Cargar la plantilla HTML
+        template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")
+        html = template.render({
+            "titulo": titulo,
+            "fecha": fecha,
+            "anotaciones": anotaciones,
+            "servicios": servicios_completos,
+            # "usuario": usuario
+        })
+
+        # Crear el PDF
+        buffer = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=buffer)
+
+        if not pisa_status.err:
+            presupuesto = Presupuestos(
+                titulo=titulo,
+                fecha=fecha,
+                usuario_id=8
+            )
+            presupuesto.archivo.save(f"{titulo}.pdf", ContentFile(buffer.getvalue()))
+            presupuesto.save()
+            return redirect("HojasPresupuestales")  # Ajustá el nombre de tu URL
+        else:
+            return render(req, "perfil_taller/hojas_presupuestales/nuevo_presupuesto.html", {"error": "Error al generar el PDF."})
+    else:
+        return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{})

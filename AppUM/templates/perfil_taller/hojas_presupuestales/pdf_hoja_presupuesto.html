@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; }
+        h2, h3 { text-align: center; }
+        .servicio-linea {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border-bottom: 1px dashed #999;
+        }
+        .servicio-linea span {
+            font-size: 12px;
+        }
+        .texto {
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h2>{{ titulo }}</h2>
+    <p><strong>Fecha:</strong> {{ fecha }}</p>
+    <p><strong>Responsable:</strong> {{ usuario }}</p>
+
+    <h3>Anotaciones</h3>
+    <p class="texto">{{ anotaciones }}</p>
+
+    <h3>Servicios</h3>
+    <div>
+        {% for servicio, precio, moneda in servicios %}
+            <div class="servicio-linea">
+                <span>{{ servicio }}</span>
+                <span>
+                    {% if moneda == "Pesos" %}
+                        ${{ precio }}
+                    {% else %}
+                        U$s{{ precio }}
+                    {% endif %}
+                </span>
+                <br>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,302 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    form label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+form label span {
+    flex-grow: 1;
+}
+
+form label input[type="number"] {
+    max-width: 100px;
+    text-align: right;
+}
+</style>
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h2>Nuevo presupuesto</h4>
+        {% if messages %}
+        <div class="messages">
+            <div class="alert alert alert-success">{{ message }}</div>
+        </div>
+        {% endif %}
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de búsqueda de cliente -->
+        
+        <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %}    
+            <div class="mb-3">
+                <label for="precio" class="form-label">Texto</label>
+                <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3"></textarea>
+            </div> 
+            <div id="serviciosLista" class="mb-4">
+
+            </div>
+
+            <div class="d-flex">
+            
+                <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
+            </div>
+
+
+            <br>
+    
+    
+            <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'HojasPresupuestales' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+
+
+    function agregarServicio() {
+    const serviciosLista = document.getElementById("serviciosLista");
+
+    const nuevoServicio = document.createElement("div");
+    nuevoServicio.classList.add("d-flex", "align-items-center", "mb-2", "gap-2");
+
+    // Checkbox
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "servicios[]";
+    checkbox.value = "";
+    checkbox.classList.add("form-check-input");
+
+    // Nombre editable del servicio
+    const span = document.createElement("span");
+    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
+    span.contentEditable = true;
+    span.textContent = "Nuevo servicio";
+
+    // Select de moneda
+    const selectMoneda = document.createElement("select");
+    selectMoneda.name = "moneda[]";
+    selectMoneda.classList.add("form-select", "w-auto");
+
+    const opcionPesos = document.createElement("option");
+    opcionPesos.value = "Pesos";
+    opcionPesos.textContent = "Pesos";
+
+    const opcionDolares = document.createElement("option");
+    opcionDolares.value = "Dolares";
+    opcionDolares.textContent = "Dólares";
+
+    selectMoneda.appendChild(opcionPesos);
+    selectMoneda.appendChild(opcionDolares);
+
+    // Campo para precio
+    const inputPrecio = document.createElement("input");
+    inputPrecio.type = "number";
+    inputPrecio.name = "precio[]";
+    inputPrecio.classList.add("form-control", "w-auto");
+    inputPrecio.placeholder = "Precio";
+    inputPrecio.min = 0;
+    inputPrecio.step = 0.01;
+
+    // Evento para actualizar el valor del checkbox cuando se edita el nombre
+    span.addEventListener("input", () => {
+        const textoServicio = span.textContent.trim();
+        checkbox.value = textoServicio;
+    });
+
+    // Agregar todos los elementos al contenedor
+    nuevoServicio.appendChild(checkbox);
+    nuevoServicio.appendChild(span);
+    nuevoServicio.appendChild(selectMoneda);
+    nuevoServicio.appendChild(inputPrecio);
+
+    // Agregar al DOM
+    serviciosLista.appendChild(nuevoServicio);
+}
+
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     const inputBusqueda = document.getElementById('buscar_pieza');
+//     const listaResultados = document.getElementById('resultados_piezas');
+
+//     inputBusqueda.addEventListener('input', function () {
+//         const query = inputBusqueda.value.trim();
+
+//         if (query.length > 0) {
+//             fetch(`/buscar_repuesto_alta/?query=${query}`)
+//                 .then(response => response.json())
+//                 .then(data => {
+//                     listaResultados.innerHTML = ''; // Limpiar resultados previos
+//                     data.forEach(item => {
+//                         const li = document.createElement('li');
+//                         li.classList.add('list-group-item');
+//                         li.textContent = `${item.nombre} - ${item.descripcion}`;
+//                         listaResultados.appendChild(li);
+//                     });
+//                 })
+//                 .catch(error => console.error('Error en la búsqueda:', error));
+//         } else {
+//             listaResultados.innerHTML = ''; // Limpiar si el input está vacío
+//         }
+//     });
+// });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBusqueda = document.getElementById('buscar_pieza');
+    const listaResultados = document.getElementById('resultados_piezas');
+    const listaSeleccionadas = document.getElementById('piezas_seleccionadas');
+    let piezasSeleccionadas = new Map(); // Almacena piezas seleccionadas (id → objeto pieza)
+
+    // Actualizar las seleccionadas en la parte superior
+    function actualizarSeleccionados() {
+    listaSeleccionadas.innerHTML = ''; // Limpiar lista seleccionada
+    piezasSeleccionadas.forEach((item, id) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="d-flex align-items-center mb-2">
+                <input type="checkbox" name="piezas_seleccionadas[]" value="${id}" class="me-2" checked>
+                <span class="flex-grow-1">${item.nombre} - ${item.descripcion}</span>
+                <input type="number" name="cantidad_piezas[]" class="form-control w-auto ms-2" placeholder="Cantidad" min="0" step="0.01" value="1">
+            </label>
+        `;
+        listaSeleccionadas.appendChild(div);
+    });
+}
+
+    // Evento para escuchar cambios en los checkboxes
+    listaResultados.addEventListener('change', function (event) {
+        if (event.target.type === 'checkbox') {
+            const piezaId = event.target.value;
+            const nombre = event.target.dataset.nombre;
+            const descripcion = event.target.dataset.descripcion;
+
+            if (event.target.checked) {
+                piezasSeleccionadas.set(piezaId, { nombre, descripcion });
+            } else {
+                piezasSeleccionadas.delete(piezaId);
+            }
+            actualizarSeleccionados();
+        }
+    });
+
+    // Evento para la búsqueda
+    inputBusqueda.addEventListener('input', function () {
+        const query = inputBusqueda.value.trim();
+
+        if (query.length > 0) {
+            fetch(`/buscar_repuesto_alta/?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    listaResultados.innerHTML = ''; // Limpiar resultados previos
+
+                    data.forEach(item => {
+                        const isChecked = piezasSeleccionadas.has(item.id.toString());
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label class="d-flex align-items-center mb-2">
+                                <input type="checkbox" name="piezas[]" value="${item.id}" class="me-2"
+                                    data-nombre="${item.nombre}" data-descripcion="${item.stock}"
+                                    ${isChecked ? 'checked' : ''}>
+                                <span class="flex-grow-1">${item.nombre} - ${item.stock}</span>
+                                
+                            </label>
+                        `;
+                        listaResultados.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error en la búsqueda:', error));
+        } else {
+            listaResultados.innerHTML = ''; // Limpiar si el input está vacío
+        }
+    });
+
+    // Mantener el estado de los checkboxes en cada búsqueda
+    listaResultados.addEventListener('DOMNodeInserted', function () {
+        listaResultados.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            if (piezasSeleccionadas.has(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    });
+});
+
+document.getElementById('piezas_seleccionadas').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const piezasSeleccionadas = [];
+    document.querySelectorAll('#piezas_seleccionadas label').forEach(label => {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        const cantidadInput = label.querySelector('input[type="number"]');
+        
+        if (checkbox.checked) {
+            piezasSeleccionadas.push({
+                id: checkbox.value,
+                cantidad: cantidadInput.value
+            });
+        }
+    });
+
+    fetch('/buscar_repuesto_alta/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ piezas: piezasSeleccionadas })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+
+function toggleFieldsCliente() {
+        var estado = document.getElementById("tipo_documento").value;
+        var div_documento = document.getElementById("campo_documento");
+        var div_empresas = document.getElementById("empresas_en_bd");
+        var empresaSeleccionada = document.getElementById("empresas_en_bd").value;
+        var valorProcesado = empresaSeleccionada.substring(3);
+       
+       
+        if (estado === "RUT") {
+            div_empresas.style.display = "block";
+            div_documento.style.display = "none";
+            document.getElementById("campo_documento").value = valorProcesado;
+            var documentoCompleto = tipo + documento;
+            console.log(documentoCompleto);
+            
+           
+        }else{
+            div_empresas.style.display = "none";
+            div_documento.style.display = "block";
+           
+        }
+    }
+
+    function copiarValorEmpresa() {
+        const select = document.getElementById("empresas_en_bd");
+        const tipo = document.getElementById("tipo_documento").value;
+        const valorEmpresa = select.value.substring(3);  // quitar los 3 primeros caracteres
+        document.getElementById("campo_documento").value = valorEmpresa;
+
+        console.log("Documento final:", tipo + valorEmpresa);
+    }
+
+
+
+</script>
+
+{% endblock %}

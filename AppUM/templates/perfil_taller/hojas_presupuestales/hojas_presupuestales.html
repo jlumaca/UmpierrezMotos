@@ -1,0 +1,45 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .badge-reserva {
+    background-color: #007bff; /* Azul */
+}
+.badge-stock {
+    background-color: #28a745; /* Verde */
+}
+</style>
+<title>Motos</title>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+<div class="table-container" id="inventarios">
+    <h3>Presupuestos</h3>
+    <a href="{% url 'NuevoPresupuesto' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-file-alt"></i> Ingreso
+</a>
+
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                
+                <th>Título</th>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+{% endblock %}

@@ -1961,3 +1961,112 @@ def validar_caja_abierta():
             return True
     except Exception as e:
         pass
+
+
+def crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,padron,num_motor,num_chasis,id_p,items,anotaciones,precio_total):
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'presupuestos')
+
+    # doc.save(docx_file_path)
+    # doc = Document('D:\Escritorio\SISTEMA UMPIERREZ MOTOS\cert_bikeup.docx')  # Este es el archivo de Word que quieres editar
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Ruta del archivo de plantilla (ajustado para que sea desde media)
+    plantilla_path = os.path.join(settings.BASE_DIR, 'media', 'PRESUPUESTO.docx')
+    
+    # Crear el documento Word a partir del archivo de plantilla
+    doc = Document(plantilla_path)
+
+    locale.setlocale(locale.LC_TIME, 'spanish')
+    
+    for p in doc.paragraphs:
+        if 'cliente_nombre_apellido' in p.text:
+            p.text = p.text.replace('cliente_nombre_apellido', nombre_apellido)
+        if 'documento_cliente' in p.text:
+            p.text = p.text.replace('documento_cliente', documento)
+        if 'marca_modelo_moto' in p.text:
+            p.text = p.text.replace('marca_modelo_moto', marca_modelo)
+        if 'num_motor_moto' in p.text:
+            p.text = p.text.replace('num_motor_moto', num_motor)
+        if 'num_chasis_moto' in p.text:
+            p.text = p.text.replace('num_chasis_moto', num_chasis)
+        if 'matricula_moto' in p.text:
+            p.text = p.text.replace('matricula_moto', matricula)
+        if 'padron_moto' in p.text:
+            p.text = p.text.replace('padron_moto', padron)
+        if 'detalles_del_presupuesto' in p.text:
+            p.text = p.text.replace('detalles_del_presupuesto', anotaciones)
+        if 'precio_total' in p.text:
+            p.text = p.text.replace('precio_total', precio_total)
+
+
+    for table in doc.tables:
+        if table.cell(0, 0).text.strip().lower() == "cantidad":
+            fila_modelo = table.rows[1]  # Segunda fila como modelo
+            for item in items:
+                nueva_fila = table.add_row()
+                nueva_fila.cells[0].text = str(item["cantidad"])
+                nueva_fila.cells[1].text = item["descripcion"]
+                nueva_fila.cells[2].text = f"{item['precio_unitario']}"
+                nueva_fila.cells[3].text = f"{item['subtotal']}"
+            table._tbl.remove(fila_modelo._tr)  # Eliminar la fila modelo
+            break
+        
+
+    nombre_archivo = f"Presupuesto_{marca_modelo}_{nombre_apellido}"
+    docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
+    doc.save(docx_file_path)
+
+    ruta_archivo = convertir_docx_a_pdf_presupuesto(docx_file_path,nombre_archivo,id_p)
+    if os.path.exists(docx_file_path):
+        os.remove(docx_file_path)
+
+
+def convertir_docx_a_pdf_presupuesto(docx_file_path,nombre_archivo,id_p):
+    # Inicializar COM
+    pythoncom.CoInitialize()
+
+    try:
+        # Iniciar una instancia de Word
+        word = win32com.client.Dispatch("Word.Application")
+        
+        # Abrir el archivo .docx
+        doc = word.Documents.Open(docx_file_path)
+
+        # Asegurarse de que el directorio para guardar el PDF exista
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'presupuestos')
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Definir la ruta del archivo PDF de salida
+        pdf_file_path = os.path.join(output_dir, f'{nombre_archivo}.pdf')
+
+        # Guardar el documento como .pdf
+        doc.SaveAs(pdf_file_path, FileFormat=17)  # El formato 17 corresponde a PDF
+        
+        # Cerrar el documento y la aplicación de Word
+        doc.Close()
+        word.Quit()
+
+        # Eliminar el archivo .docx original después de generar el PDF
+        if os.path.exists(docx_file_path):
+            os.remove(docx_file_path)
+            print(f"El archivo .docx '{docx_file_path}' ha sido eliminado.")
+
+        # Devolver la ruta del archivo PDF generado
+        presupuesto = Presupuestos.objects.get(id=id_p)
+    
+    # Abrir el archivo PDF y asignarlo al campo certificado_venta
+        with open(pdf_file_path, 'rb') as pdf_file:
+            presupuesto.archivo.save(f'{nombre_archivo}.pdf', File(pdf_file))
+    
+    # Guardar los cambios en la base de datos
+        presupuesto.save()
+
+        return pdf_file_path
+
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Finalizar COM (si es necesario)
+        pythoncom.CoUninitialize()

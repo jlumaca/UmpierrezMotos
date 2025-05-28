@@ -292,7 +292,7 @@ class MovimientoPagoAccesorio(models.Model):
 class Presupuestos(models.Model):
     titulo = models.CharField(max_length=300)
     fecha = models.DateField()
-    archivo = models.FileField(upload_to='documentacion/presupuestos/', null=True, blank=True)
+    archivo = models.FileField(upload_to='presupuestos/', null=True, blank=True)
     usuario = models.ForeignKey(Personal, related_name='personal_presupuesto', on_delete=models.CASCADE)
 
 

@@ -125,6 +125,23 @@ form label input[type="number"] {
 
             </div>
 
+            <div class="mb-3">
+                    <label for="documento" class="form-label">Moneda del Precio Total</label>
+                    <div class="input-group">
+                        <select class="form-control" name="moneda_total">
+                            <option value="Pesos">Pesos</option>
+                            <option value="Dolares">Dólares</option>
+                        </select>
+                    </div>
+            </div>
+
+            <input         type="number" 
+                            step="0.01" 
+                            class="form-control" 
+                            name="precio_dolar" 
+                            id="precio_dolar" 
+                            placeholder="Ingrese el precio del dólar" required>
+
             <div class="d-flex">
             
                 <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
@@ -163,6 +180,14 @@ form label input[type="number"] {
     span.contentEditable = true;
     span.textContent = "Nuevo servicio";
 
+    const inputCantidad = document.createElement("input");
+    inputCantidad.type = "number";
+    inputCantidad.name = "cantidad[]";
+    inputCantidad.classList.add("form-control", "w-auto");
+    inputCantidad.placeholder = "Cantidad";
+    inputCantidad.min = 0;
+    inputCantidad.step = 0.01;
+
     // Select de moneda
     const selectMoneda = document.createElement("select");
     selectMoneda.name = "moneda[]";
@@ -178,6 +203,8 @@ form label input[type="number"] {
 
     selectMoneda.appendChild(opcionPesos);
     selectMoneda.appendChild(opcionDolares);
+
+    
 
     // Campo para precio
     const inputPrecio = document.createElement("input");
@@ -197,6 +224,7 @@ form label input[type="number"] {
     // Agregar todos los elementos al contenedor
     nuevoServicio.appendChild(checkbox);
     nuevoServicio.appendChild(span);
+    nuevoServicio.appendChild(inputCantidad);
     nuevoServicio.appendChild(selectMoneda);
     nuevoServicio.appendChild(inputPrecio);
 

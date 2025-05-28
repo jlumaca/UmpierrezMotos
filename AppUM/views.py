@@ -36,6 +36,7 @@ from django.db.models import Q
 from urllib.parse import urlencode
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+import math
 # import json
 # from docx import Document
 
@@ -9664,6 +9665,7 @@ def nuevo_presupuesto(req):
         servicios = req.POST.getlist("servicios[]")
         precios = req.POST.getlist("precio[]")
         monedas = req.POST.getlist("moneda[]")
+        cantidad = req.POST.getlist("cantidad[]")
 
         marca_moto = req.POST.get("marca_moto", "")
         modelo_moto = req.POST.get("modelo_moto", "")
@@ -9674,48 +9676,97 @@ def nuevo_presupuesto(req):
         matr_letras = req.POST.get("matricula_letras", "")
         matr_num = req.POST.get("matricula_numeros", "")
         num_padron = req.POST.get("num_padron", "")
+
+        precio_dolar = float(req.POST.get("precio_dolar", ""))
         
         tipo_doc = req.POST.get("tipo_doc", "")
         num_doc = req.POST.get("doc", "")
 
         if tipo_doc == "PAS":
-            tipo_doc = "Pasaporte"
-
+            tipo_doc = "Pasaporte.: "
+        
+        documento = tipo_doc + ".: " + str(num_doc)
+        nombre_apellido = nombre.title() + " " + apellido.title()
+        marca_modelo = marca_moto.upper() + " " + modelo_moto.upper()
         matricula = matr_letras.upper() + str(matr_num)
-    
-        servicios_completos = list(zip(servicios, precios, monedas))
+        items = []
+        total_pesos = 0
+        total_dolares = 0
+        for i in range(len(servicios)):
+            try:
+                cant = int(cantidad[i])
+                precio_unitario = float(precios[i])
+                moneda = monedas[i]
+                descripcion = servicios[i]
 
-        # Cargar la plantilla HTML
-        template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")
-        html = template.render({
-            "titulo": titulo,
-            "fecha": fecha,
-            "anotaciones": anotaciones,
-            "servicios": servicios_completos,
-            "marca_modelo": marca_moto.upper() + " " + modelo_moto.upper(),
-            "num_motor":num_motor_moto.upper(),
-            "num_chasis":num_chasis_moto.upper(),
-            "cliente": nombre.title() + " " + apellido.title(),
-            "matricula":matricula,
-            "num_padron":num_padron,
-            "documento": tipo_doc + ": " + str(num_doc)
-           
-        })
+                # Si querés mostrar el símbolo según la moneda
+                subtotal = cant * precio_unitario
+                
+                if moneda == 'Pesos':
+                    simbolo = '$'
+                    total_pesos = total_pesos + subtotal
+                    total_dolares = total_pesos / precio_dolar
+                else:
+                    simbolo = 'U$s'  # default
+                    total_dolares = total_dolares + subtotal
+                    total_pesos = total_dolares * precio_dolar
+                    
 
-        # Crear el PDF
-        buffer = BytesIO()
-        pisa_status = pisa.CreatePDF(html, dest=buffer)
-
-        if not pisa_status.err:
-            presupuesto = Presupuestos(
-                titulo=titulo,
-                fecha=fecha,
-                usuario_id=8
-            )
-            presupuesto.archivo.save(f"{titulo}.pdf", ContentFile(buffer.getvalue()))
-            presupuesto.save()
-            return redirect("HojasPresupuestales")  # Ajustá el nombre de tu URL
+                items.append({
+                    "cantidad": cant,
+                    "descripcion": descripcion,
+                    "precio_unitario": f"{simbolo} {precio_unitario:.2f}",
+                    "subtotal": f"{simbolo} {subtotal:.2f}",
+                })
+            except (ValueError, IndexError):
+                continue  # Saltar si hay algún error en el input
+        moneda_total = req.POST.get("moneda_total", "")
+        if moneda_total == "Pesos":
+            precio_total = "$ " + str(math.ceil(total_pesos)) + ".00 expresado en pesos uruguayos."
         else:
-            return render(req, "perfil_taller/hojas_presupuestales/nuevo_presupuesto.html", {"error": "Error al generar el PDF."})
+            precio_total = "U$s " + str(math.ceil(total_dolares)) + ".00 expresado en dólares estadounidenses."
+        # servicios_completos = list(zip(servicios, precios, monedas))
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        presupuesto = Presupuestos(
+            titulo=titulo,
+            fecha=fecha,
+            usuario=usuario_actual
+        )
+        presupuesto.save()
+        crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_total)
+        return redirect("HojasPresupuestales")
+        # Cargar la plantilla HTML
+        # template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")
+        # html = template.render({
+        #     "titulo": titulo,
+        #     "fecha": fecha,
+        #     "anotaciones": anotaciones,
+        #     "servicios": servicios_completos,
+        #     "marca_modelo": marca_moto.upper() + " " + modelo_moto.upper(),
+        #     "num_motor":num_motor_moto.upper(),
+        #     "num_chasis":num_chasis_moto.upper(),
+        #     "cliente": nombre.title() + " " + apellido.title(),
+        #     "matricula":matricula,
+        #     "num_padron":num_padron,
+        #     "documento": tipo_doc + ": " + str(num_doc)
+           
+        # })
+
+        # # Crear el PDF
+        # buffer = BytesIO()
+        # pisa_status = pisa.CreatePDF(html, dest=buffer)
+
+        # if not pisa_status.err:
+        #     presupuesto = Presupuestos(
+        #         titulo=titulo,
+        #         fecha=fecha,
+        #         usuario_id=8
+        #     )
+        #     presupuesto.archivo.save(f"{titulo}.pdf", ContentFile(buffer.getvalue()))
+        #     presupuesto.save()
+        #     return redirect("HojasPresupuestales")  # Ajustá el nombre de tu URL
+        # else:
+        #     return render(req, "perfil_taller/hojas_presupuestales/nuevo_presupuesto.html", {"error": "Error al generar el PDF."})
     else:
         return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{})

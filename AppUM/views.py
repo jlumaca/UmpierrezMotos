@@ -9656,7 +9656,8 @@ def buscar_moto_cliente(req):
             "num_matr":num_matr,
             "padron":padron,
             "tipo_doc":tipo_doc,
-            "doc_num":doc_num
+            "doc_num":doc_num,
+            "anio_moto":moto.anio
         }
         # return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{})
     return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",contexto)
@@ -9671,7 +9672,7 @@ def nuevo_presupuesto(req):
         precios = req.POST.getlist("precio[]")
         monedas = req.POST.getlist("moneda[]")
         cantidad = req.POST.getlist("cantidad[]")
-
+        notas = req.POST.getlist("notas[]")
         marca_moto = req.POST.get("marca_moto", "")
         modelo_moto = req.POST.get("modelo_moto", "")
         num_motor_moto = req.POST.get("num_motor_moto", "")
@@ -9681,6 +9682,7 @@ def nuevo_presupuesto(req):
         matr_letras = req.POST.get("matricula_letras", "")
         matr_num = req.POST.get("matricula_numeros", "")
         num_padron = req.POST.get("num_padron", "")
+        anio = req.POST.get("anio_moto", "")
 
         precio_dolar = float(req.POST.get("precio_dolar", ""))
         
@@ -9692,7 +9694,8 @@ def nuevo_presupuesto(req):
         
         documento = tipo_doc + ".: " + str(num_doc)
         nombre_apellido = nombre.title() + " " + apellido.title()
-        marca_modelo = marca_moto.upper() + " " + modelo_moto.upper()
+        marca = marca_moto.upper()
+        modelo = modelo_moto.upper() 
         matricula = matr_letras.upper() + str(matr_num)
         items = []
         total_pesos = 0
@@ -9726,10 +9729,15 @@ def nuevo_presupuesto(req):
             except (ValueError, IndexError):
                 continue  # Saltar si hay algún error en el input
         moneda_total = req.POST.get("moneda_total", "")
+        costo_mano_obra = req.POST.get("costo_mano_obra", "") 
         if moneda_total == "Pesos":
-            precio_total = "$ " + str(math.ceil(total_pesos)) + ".00 expresado en pesos uruguayos."
+            costo_total = float(costo_mano_obra) + total_pesos
+            precio_total = "$ " + str(math.ceil(costo_total)) + ".00 expresado en pesos uruguayos."
+            precio_piezas = math.ceil(total_pesos)
         else:
-            precio_total = "U$s " + str(math.ceil(total_dolares)) + ".00 expresado en dólares estadounidenses."
+            costo_total = float(costo_mano_obra) + total_dolares
+            precio_total = "U$s " + str(math.ceil(costo_total)) + ".00 expresado en dólares estadounidenses."
+            precio_piezas = math.ceil(total_dolares)
         # servicios_completos = list(zip(servicios, precios, monedas))
         usuario = req.user
         usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
@@ -9739,8 +9747,7 @@ def nuevo_presupuesto(req):
             usuario=usuario_actual
         )
         presupuesto.save()
-        crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_total)
-        messages.success(req, "Presupuesto creado con éxito.")
+        crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,notas)
         return redirect("HojasPresupuestales")
         # Cargar la plantilla HTML
         # template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")

@@ -60,6 +60,7 @@ form label input[type="number"] {
         </form>
         </div>
         <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
+            <h4>Datos de la moto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
                 <input value="{{ marca_moto }}" type="text" class="form-control" name="marca_moto" id="marca" placeholder="Ingrese la marca" maxlength="20" required>
@@ -67,6 +68,11 @@ form label input[type="number"] {
             <div class="mb-3">
                 <label for="modelo" class="form-label">Modelo</label>
                 <input value="{{ modelo_moto }}" type="text" class="form-control" name="modelo_moto" id="modelo" placeholder="Ingrese el modelo" maxlength="20" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Año</label>
+                <input value="{{ anio_moto }}" type="number" class="form-control" name="anio_moto" id="modelo" placeholder="Ingrese el año" maxlength="20" required>
             </div>
 
             <div class="mb-3" id="matr">
@@ -91,6 +97,7 @@ form label input[type="number"] {
                 <label for="num_chasis" class="form-label">Número de chasis</label>
                 <input value="{{ num_chasis }}" type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
             </div>
+            <h4>Datos del cliente</h4>
             <div class="mb-3" id="documento_cliente">
                 <label for="documento" class="form-label">Documento del cliente</label>
                 <div class="input-group">
@@ -113,6 +120,7 @@ form label input[type="number"] {
                 <label for="precio" class="form-label">Apellido</label>
                 <input value="{{ apellido_cliente }}" type="text" class="form-control" name="apellido" placeholder="Ingrese el apellido" maxlength="200" required>
             </div>
+            <h4>Datos del presupuesto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Título</label>
                 <input type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
@@ -121,9 +129,7 @@ form label input[type="number"] {
                 <label for="precio" class="form-label">Texto</label>
                 <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3"></textarea>
             </div> 
-            <div id="serviciosLista" class="mb-4">
-
-            </div>
+            
 
             <div class="mb-3">
                     <label for="documento" class="form-label">Moneda del Precio Total</label>
@@ -135,17 +141,38 @@ form label input[type="number"] {
                     </div>
             </div>
 
-            <input         type="number" 
+            <div class="mb-3">
+                <label for="num_chasis" class="form-label">Mano de obra $/U$s</label>
+                <input type="number" class="form-control" name="costo_mano_obra" placeholder="Ingrese el costo de la mano de obra" maxlength="40" required>
+            </div> 
+            <div class="mb-3" id="num_padron_sn">
+                <label for="num_chasis" class="form-label">Precio del dólar</label>
+                <input      type="number" 
                             step="0.01" 
                             class="form-control" 
                             name="precio_dolar" 
                             id="precio_dolar" 
                             placeholder="Ingrese el precio del dólar" required>
-
+            </div>
+            <h4>Piezas a utilizar</h4>
             <div class="d-flex">
             
-                <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar</button>
+                <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar piezas</button>
             </div>
+            <div id="serviciosLista" class="mb-4">
+
+            </div>
+            <h4>Notas</h4>
+            <div class="d-flex">
+            
+                <button type="button" id="agregar-notas" class="btn btn-primary" onclick="agregarNotas()">Agregar notas</button>
+            </div>
+
+            <div id="notasLista" class="mb-4">
+
+            </div>
+
+            
 
 
             <br>
@@ -159,7 +186,37 @@ form label input[type="number"] {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
+    function agregarNotas() {
+    const notasLista = document.getElementById("notasLista");
 
+    const nuevoServicio = document.createElement("div");
+    nuevoServicio.classList.add("d-flex", "align-items-center", "mb-2", "gap-2");
+
+    // Checkbox
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "notas[]";
+    checkbox.value = "";
+    checkbox.classList.add("form-check-input");
+
+    // Nombre editable del servicio
+    const span = document.createElement("span");
+    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
+    span.contentEditable = true;
+    span.textContent = "Nueva nota";
+
+    // Evento para actualizar el valor del checkbox cuando se edita el nombre
+    span.addEventListener("input", () => {
+        const textoServicio = span.textContent.trim();
+        checkbox.value = textoServicio;
+    });
+
+    // Agregar todos los elementos al contenedor
+    nuevoServicio.appendChild(checkbox);
+    nuevoServicio.appendChild(span);
+    // Agregar al DOM
+    notasLista.appendChild(nuevoServicio);
+}
 
     function agregarServicio() {
     const serviciosLista = document.getElementById("serviciosLista");

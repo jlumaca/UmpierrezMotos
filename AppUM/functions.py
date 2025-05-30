@@ -1963,7 +1963,7 @@ def validar_caja_abierta():
         pass
 
 
-def crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,padron,num_motor,num_chasis,id_p,items,anotaciones,precio_total):
+def crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,padron,num_motor,num_chasis,id_p,items,anotaciones,precio_piezas,anio,precio_total,precio_mano_obra,moneda,notas):
     output_dir = os.path.join(settings.MEDIA_ROOT, 'presupuestos')
 
     # doc.save(docx_file_path)
@@ -1984,8 +1984,12 @@ def crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,padron,nu
             p.text = p.text.replace('cliente_nombre_apellido', nombre_apellido)
         if 'documento_cliente' in p.text:
             p.text = p.text.replace('documento_cliente', documento)
-        if 'marca_modelo_moto' in p.text:
-            p.text = p.text.replace('marca_modelo_moto', marca_modelo)
+        if 'marca_moto' in p.text:
+            p.text = p.text.replace('marca_moto', marca)
+        if 'modelo_moto' in p.text:
+            p.text = p.text.replace('modelo_moto', modelo)
+        if 'anio_moto' in p.text:
+            p.text = p.text.replace('anio_moto', anio)
         if 'num_motor_moto' in p.text:
             p.text = p.text.replace('num_motor_moto', num_motor)
         if 'num_chasis_moto' in p.text:
@@ -1996,24 +2000,69 @@ def crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,padron,nu
             p.text = p.text.replace('padron_moto', padron)
         if 'detalles_del_presupuesto' in p.text:
             p.text = p.text.replace('detalles_del_presupuesto', anotaciones)
-        if 'precio_total' in p.text:
-            p.text = p.text.replace('precio_total', precio_total)
+        if 'costo_total' in p.text:
+            p.text = p.text.replace('costo_total', precio_total)
+    fila_total = None
+    fila_mano_obra = None
 
-
+    if moneda == "Pesos":
+        simbolo = "$"
+    else:
+        simbolo = "U$s"
     for table in doc.tables:
         if table.cell(0, 0).text.strip().lower() == "cantidad":
-            fila_modelo = table.rows[1]  # Segunda fila como modelo
+            # Buscar filas especiales
+            for row in table.rows:
+                desc_text = row.cells[1].text.lower().strip()
+                if "total de repuestos" in desc_text:
+                    fila_total = row
+                elif "mano de obra" in desc_text:
+                    fila_mano_obra = row
+
+            # Eliminar las filas especiales
+            if fila_total:
+                table._tbl.remove(fila_total._tr)
+            if fila_mano_obra:
+                table._tbl.remove(fila_mano_obra._tr)
+
+            # Eliminar fila modelo vacía si existe
+            if len(table.rows) > 1:
+                table._tbl.remove(table.rows[1]._tr)
+
+            # Agregar ítems
             for item in items:
                 nueva_fila = table.add_row()
                 nueva_fila.cells[0].text = str(item["cantidad"])
                 nueva_fila.cells[1].text = item["descripcion"]
                 nueva_fila.cells[2].text = f"{item['precio_unitario']}"
                 nueva_fila.cells[3].text = f"{item['subtotal']}"
-            table._tbl.remove(fila_modelo._tr)  # Eliminar la fila modelo
+
+            # Agregar fila de total de repuestos
+            nueva_fila_total = table.add_row()
+            nueva_fila_total.cells[0].text = ""
+            nueva_fila_total.cells[1].text = "Total de repuestos a utilizar"
+            nueva_fila_total.cells[2].text = ""
+            nueva_fila_total.cells[3].text = f"{simbolo} {precio_piezas}"
+
+            # Agregar fila de mano de obra
+            nueva_fila_mano_obra = table.add_row()
+            nueva_fila_mano_obra.cells[0].text = ""
+            nueva_fila_mano_obra.cells[1].text = "Mano de obra del trabajo a realizar"
+            nueva_fila_mano_obra.cells[2].text = ""
+            nueva_fila_mano_obra.cells[3].text = f"{simbolo} {precio_mano_obra}"
+
+            break
+    
+    texto_notas = "\n".join(notas)  # Une las notas con saltos de línea
+
+    for paragraph in doc.paragraphs:
+        if "notas_ingresadas" in paragraph.text:
+            # Reemplazamos el texto del párrafo entero
+            paragraph.text = texto_notas
             break
         
 
-    nombre_archivo = f"Presupuesto_{marca_modelo}_{nombre_apellido}"
+    nombre_archivo = f"Presupuesto_{marca}_{modelo}_{nombre_apellido}"
     docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
     doc.save(docx_file_path)
 

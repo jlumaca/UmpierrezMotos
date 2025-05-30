@@ -9561,13 +9561,18 @@ def cambiar_a_perfil_tienda(req):
     return render(req,"perfil_administrativo/bienvenida.html",{})
 
 def hojas_presupuestales(req):
-    presupuestos = Presupuestos.objects.all().order_by('-fecha')
+    presupuestos = Presupuestos.objects.all().order_by('-id')
     data = []
+    usuario_log = req.user
+    usuario_actual = Personal.objects.filter(usuario=usuario_log.username).first()
+    mecanico = Mecanico.objects.filter(personal_ptr_id = usuario_actual.id).first()
     for p in presupuestos:
         usuario = Personal.objects.get(id=p.usuario_id)
         data.append({
             "presupuesto":p,
-            "usuario":usuario.nombre + " " + usuario.apellido
+            "usuario":usuario.nombre + " " + usuario.apellido,
+            "pdf":p.archivo.url if p.archivo else None,
+            "es_jefe":True if mecanico.jefe else False
         })
     
     page_obj = funcion_paginas_varias(req,data)
@@ -9735,6 +9740,7 @@ def nuevo_presupuesto(req):
         )
         presupuesto.save()
         crear_presupuesto(documento,nombre_apellido,marca_modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_total)
+        messages.success(req, "Presupuesto creado con éxito.")
         return redirect("HojasPresupuestales")
         # Cargar la plantilla HTML
         # template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")
@@ -9770,3 +9776,11 @@ def nuevo_presupuesto(req):
         #     return render(req, "perfil_taller/hojas_presupuestales/nuevo_presupuesto.html", {"error": "Error al generar el PDF."})
     else:
         return render(req,"perfil_taller/hojas_presupuestales/nuevo_presupuesto.html",{})
+
+def baja_presupuesto(req,id_p):
+    if req.method == "POST":
+        p = Presupuestos.objects.get(id=id_p)
+        p.delete()
+        return render(req,"perfil_taller/hojas_presupuestales/baja_presupuesto.html",{"message":"Presupuesto borrado con éxito"})
+    else:
+        return render(req,"perfil_taller/hojas_presupuestales/baja_presupuesto.html",{})

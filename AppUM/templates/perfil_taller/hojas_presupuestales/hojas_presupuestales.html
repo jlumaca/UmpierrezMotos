@@ -47,7 +47,14 @@
                     <td>{{ pres.presupuesto.fecha }}</td>
                     <td>{{ pres.usuario }}</td>
                     <td>
-                        <a href=""><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        {% if pres.es_jefe %}
+                            <a href="{% url 'BajaPresupuesto' pres.presupuesto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                        {% endif %}
+                        <a href="{{ pres.pdf }}" target="_blank">
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}

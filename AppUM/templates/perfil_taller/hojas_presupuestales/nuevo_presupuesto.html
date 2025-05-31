@@ -203,7 +203,7 @@ form label input[type="number"] {
     const span = document.createElement("span");
     span.classList.add("flex-grow-1", "border", "p-1", "rounded");
     span.contentEditable = true;
-    span.textContent = "Nueva nota";
+    span.textContent = "";
 
     // Evento para actualizar el valor del checkbox cuando se edita el nombre
     span.addEventListener("input", () => {
@@ -235,7 +235,7 @@ form label input[type="number"] {
     const span = document.createElement("span");
     span.classList.add("flex-grow-1", "border", "p-1", "rounded");
     span.contentEditable = true;
-    span.textContent = "Nuevo servicio";
+    span.textContent = "";
 
     const inputCantidad = document.createElement("input");
     inputCantidad.type = "number";

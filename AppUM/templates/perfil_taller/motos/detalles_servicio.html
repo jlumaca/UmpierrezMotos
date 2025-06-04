@@ -1,0 +1,405 @@
+{% extends "perfil_taller/padre_perfil_taller.html" %}
+{% load static %}
+
+{% block contenidoQueCambia %}
+<style>
+    form label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+form label span {
+    flex-grow: 1;
+}
+
+form label input[type="number"] {
+    max-width: 100px;
+    text-align: right;
+}
+</style>
+<div class="table-container" id="inventarios">
+    <div class="form-container" id="motoForm">
+        <h2>Detalles del servicio</h4> 
+            <a id="imprimir-resumen" class="btn btn-primary" onclick="prueba()" data-id-cv="{{ id_cv }}">
+                <i class="fas fa-print"></i> Imprimir Resumen
+            </a> 
+            <h4>Tareas de mantenimiento realizadas</h4>
+            <div id="serviciosLista" class="mb-4">
+                <ul id="serviciosLista" class="list-group mb-4">
+                    {% for servicio in tareas_realizadas %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ servicio.tarea }}</span>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Aún no hay tareas realizadas.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+             
+            <br>
+            <!-- <h4>Mecánicos asignados</h4> -->
+            <h4 class="mb-3">🔧 Mecánicos Asignados</h4>
+            <div id="serviciosLista" class="mb-4">
+                    <ul id="serviciosLista" class="list-group mb-4">
+                        {% for mecanico in mecanicos %}
+                        <li class="list-group-item d-flex align-items-center flex-column" id="servicio-{{ servicio.id }}">
+                            <div class="d-flex w-100 align-items-center">
+                                <span class="flex-grow-1">{{ mecanico.mecanico.nombre }} {{ mecanico.mecanico.apellido }}</span>
+                            </div>
+                        </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No existen mecánicos asignados a este servicio.</li>
+                        {% endfor %}  
+                    </ul>
+                </div>
+            
+            <h4>Actuaciones y/o anotaciones</h4>
+            <div id="serviciosLista" class="mb-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>DETALLE</th>
+                            <th>FECHA</th>
+                            <th>MECANICO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% if anotaciones %}
+                    {% for anotacion in anotaciones %}
+                        <tr>
+                            <td>{{ anotacion.anotacion.anotaciones }}</td>
+                            <td>{{ anotacion.anotacion.fecha }}</td>
+                            <td>
+                                {{ anotacion.mecanico.nombre }} {{ anotacion.mecanico.apellido }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Aún no hay anotaciones
+                    </td>
+                </tr>
+                {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4>Información sobre el servicio</h4>
+            <!-- {% url 'AgregarAnotacionServicio' id_servicio %} -->
+            <div class="mb-3">
+                <label for="color" class="form-label">Tipo de servicio</label>
+                <input value="{{ info_servicio.titulo }}" type="text" class="form-control" name="tipo_servicio_modificar" id="color" placeholder="Ingrese el tipo de servicio" maxlength="20" readonly>
+            </div>
+            <div class="mb-3">
+                    <label for="precio" class="form-label">Prioridad</label>
+                    <input value="{{ info_servicio.prioridad }}" type="date" class="form-control" name="fecha_estimada" readonly>
+            </div>
+                
+            <div class="mb-3">
+                    <label for="precio" class="form-label">Fecha estimada</label>
+                    <input value="{{ fecha_cierre }}" type="date" class="form-control" name="fecha_estimada" placeholder="Ingrese la fecha estimada de entrega de la moto" readonly>
+            </div>
+            <a href="{% url 'DetallesMotoTaller' moto.id  %}" class="btn btn-secondary">Volver</a>
+            
+        
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+
+    const datos_fijos = JSON.parse('{{ datos_fijos|escapejs }}');
+    const tareas = JSON.parse('{{ tareas|escapejs }}');
+    const observaciones = JSON.parse('{{ observaciones|escapejs }}');
+    
+    console.log(datos_fijos);
+    console.log(tareas);
+
+    function prueba(){
+    generarResumen(datos_fijos,tareas,observaciones);
+    }
+
+//     function generarResumen(datos_fijos, tareas) {
+//     // Construir el encabezado de la tabla con estilos en línea para impresión
+//     let resumenHTML = `
+//         <html>
+//         <head>
+//             <title>Resumen del servicio</title>
+//             <style>
+//                 body {
+//                     font-family: Arial, sans-serif;
+//                     color: #000;
+//                     background-color: #fff;
+//                     margin: 20px;
+//                 }
+//                 h5 {
+//                     text-align: left;
+//                     border-bottom: 2px solid #000;
+//                     padding-bottom: 5px;
+//                 }
+//                 table {
+//                     width: 100%;
+//                     border-collapse: collapse;
+//                     margin-bottom: 20px;
+//                 }
+//                 th, td {
+//                     border: 1px solid #000;
+//                     padding: 8px;
+//                     text-align: left;
+//                 }
+//                 th {
+//                     background-color: #f0f0f0;
+//                     font-weight: bold;
+//                 }
+//                 tr:nth-child(even) {
+//                     background-color: #f9f9f9;
+//                 }
+//             </style>
+//         </head>
+//         <body>
+//             <div style="display: flex; align-items: center; justify-content: center; background-color: #f7ca4d; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+//     <div style="text-align: center;">
+//         <img src="" 
+//              style="width: auto; max-width: 100%; max-height: 100px;" 
+//              alt="Logo de la tienda">
+//     </div>
+// </div>
+
+//             <h5>DATOS PRINCIPALES</h5>
+//             <table>
+//                 <thead>
+                    
+//                     <tr>
+//                         <th>DETALLE</th>
+//                         <th>FECHA</th>
+//                         <th>CLIENTE</th>
+                        
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+//                     <tr>
+//                         <td>${datos_fijos.detalle || "N/A"}</td>
+//                         <td>${datos_fijos.fecha || "N/A"}</td>
+//                         <td>${datos_fijos.cliente || "N/A"}</td>
+                
+//                     </tr>
+                
+//                 </tbody>
+//             </table>
+//             <h5>TAREAS REALIZADAS</h5>
+//             <table>
+//                 <thead>
+//                     <tr>
+//                         <th>TAREA</th>   
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+
+//        `;             
+//        if (tareas && tareas.length > 0) {
+//         tareas.forEach(tarea => {
+//             resumenHTML += `
+//                 <tr>
+//                     <td>${tarea.tareas || "N/A"}</td>
+//                 </tr>
+//             `;
+//         });
+//     } else {
+//         // Mostrar mensaje si no hay cuotas
+//         resumenHTML += `
+//             <tr>
+//                 <td colspan="5" style="text-align: center;">No se encontraron tareas.</td>
+//             </tr>
+//         `;
+//     }
+
+//     // Cerrar tabla y añadir pie de página
+//     resumenHTML += `
+//                 </tbody>
+//             </table>
+//         </body>
+//         </html>
+//     `;
+
+//     // Crear una ventana nueva para imprimir
+//     const ventana = window.open("", "_blank");
+//     ventana.document.write(resumenHTML);
+//     ventana.document.close();
+//     ventana.print();
+// }
+
+function generarResumen(datos_fijos, tareas,observaciones) {
+    // Construir el nuevo template HTML
+    let resumenHTML = `
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Detalle del Servicio de Moto</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    width: 80%;
+                    margin: 20px auto;
+                    padding: 20px;
+                    border: 1px solid #ccc;
+                    border-radius: 8px;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .section {
+                    margin-bottom: 20px;
+                }
+                .section h3 {
+                    margin-bottom: 10px;
+                }
+                .service-tasks {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .service-tasks th, .service-tasks td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: center;
+                }
+                .service-tasks th {
+                    background-color: #f4f4f4;
+                }
+                .total {
+                    text-align: right;
+                    margin-top: 20px;
+                    font-size: 1.2em;
+                    font-weight: bold;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>ACA VA EL LOGO</h1>
+                </div>
+                
+                <div class="section">
+    <h3>Información de la Moto</h3>
+    <table style="border-collapse: collapse; width: 100%; text-align: left;">
+        <tr>
+            <th style="border: 1px solid black; padding: 5px;">Moto</th>
+            <th style="border: 1px solid black; padding: 5px;">Matrícula</th>
+            <th style="border: 1px solid black; padding: 5px;">Número de motor</th>
+            <th style="border: 1px solid black; padding: 5px;">Número de chasis</th>
+        </tr>
+        <tr>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.detalle || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.matricula || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.num_motor || "N/A"}</td>
+            <td style="border: 1px solid black; padding: 5px;">${datos_fijos.num_chasis || "N/A"}</td>
+        </tr>
+    </table>
+</div>
+
+
+                    
+                    <div class="section">
+                        <h3>Información del Cliente</h3>
+                        <p><strong>Cliente:</strong> ${datos_fijos.cliente || "N/A"}</p>
+                        </div>
+                        
+                    <div class="section">
+                        <h3>Información del Servicio</h3>
+                        <p><strong>Tipo:</strong> ${datos_fijos.tipo_servicio || "N/A"}</p>
+                        <p><strong>Fecha:</strong> ${datos_fijos.fecha || "N/A"}</p>
+                        <p><strong>Fecha próximo servicio:</strong> ${datos_fijos.fecha || "N/A"}</p>
+                    </div>
+                
+                <div class="section">
+                    <h3>Tareas Realizadas</h3>
+                    <table class="service-tasks">
+                        <thead>
+                            <tr>
+                                <th>Tarea</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+    if (tareas && tareas.length > 0) {
+        tareas.forEach(tarea => {
+            resumenHTML += `
+                <tr>
+                    <td>${tarea.tareas || "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        resumenHTML += `
+            <tr>
+                <td colspan="1" style="text-align: center;">No se encontraron tareas.</td>
+            </tr>
+        `;
+    }
+
+    resumenHTML += `
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="section">
+                    <h3>Observaciones</h3>
+                    <table class="service-tasks">
+                        <thead>
+                            <tr>
+                                <th>Tarea</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+    if (observaciones && observaciones.length > 0) {
+        observaciones.forEach(obs => {
+            resumenHTML += `
+                <tr>
+                    <td>${obs.observaciones || "N/A"}</td>
+                </tr>
+            `;
+        });
+    } else {
+        resumenHTML += `
+            <tr>
+                <td colspan="1" style="text-align: center;">No se encontraron tareas.</td>
+            </tr>
+        `;
+    }
+
+    resumenHTML += `
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="total">
+                    Precio Total: $${datos_fijos.precio_total || "0"}
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Crear una ventana nueva para imprimir
+    const ventana = window.open("", "_blank");
+    ventana.document.write(resumenHTML);
+    ventana.document.close();
+    ventana.print();
+}
+
+</script>
+{% endblock %}

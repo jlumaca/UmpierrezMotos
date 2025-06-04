@@ -18,7 +18,7 @@
                         <button type="submit" class="btn btn-danger mx-2">
                             <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
-                        <a href="{% url 'Motos' %}" class="btn btn-secondary mx-2">
+                        <a href="{% url 'MotosTaller' %}" class="btn btn-secondary mx-2">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
                     </div>
@@ -28,7 +28,7 @@
             {% if message %}
                 <div class="alert alert-success mt-4">
                     <p>{{ message }}</p>
-                    <p>Para volver al menú de motos, haz click <a href="{% url 'Motos' %}">aquí</a>.</p>
+                    <p>Para volver al menú de motos, haz click <a href="{% url 'MotosTaller' %}">aquí</a>.</p>
                 </div>
             {% else %}
                 <p class="text-danger mt-3">{{ error_message }}</p>

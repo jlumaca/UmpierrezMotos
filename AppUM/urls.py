@@ -269,6 +269,9 @@ urlpatterns = [
      path('busqueda_num_chasis_taller', views.busqueda_num_chasis_taller,name="BusquedaNumChasisTaller"),
 
      path('alta_moto_taller/', views.alta_moto_taller,name="AltaMotoTaller"),
+     path('modificacion_moto_taller/<int:id_moto>', views.modificacion_moto_taller,name="ModMotoTaller"),
+     path('detalles_moto_taller/<int:id_moto>', views.detalles_moto_taller,name="DetallesMotoTaller"),
+     path('servicios_moto_taller/<int:id_s>/<int:id_cliente>', views.servicios_de_la_moto,name="ServiciosMoto"),
 
 
      path('balance/<str:busqueda>', views.balanceo,name="Balance"),

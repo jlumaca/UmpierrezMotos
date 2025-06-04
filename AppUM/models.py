@@ -47,7 +47,7 @@ class Moto(models.Model):
 class Matriculas(models.Model):
     moto = models.ForeignKey(Moto, related_name='moto', on_delete=models.CASCADE, null=True)
     matricula = models.CharField(max_length=20, unique=True)
-    padron = models.IntegerField(unique=True, null=True, blank=True)
+    padron = models.IntegerField(null=True, blank=True)
 
 
 

@@ -1,4 +1,4 @@
-{% extends "perfil_administrativo/padre_perfil_administrativo.html" %}
+{% extends "perfil_taller/padre_perfil_taller.html" %}
 {% load static %}
 
 {% block contenidoQueCambia %}
@@ -10,7 +10,7 @@
             {{ error_message }}
             </div>
         {% endif %}
-        <form action="{% url 'MotoModificacion' datos_moto.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
+        <form action="{% url 'ModMotoTaller' datos_moto.id %}" enctype="multipart/form-data" method="POST">{% csrf_token %}
             <div class="mb-3">
                 <label for="marca" class="form-label">Tipo</label>
                 <select class="form-control" name="tipo_moto" id="tipo_moto">
@@ -34,13 +34,6 @@
             <div class="mb-3">
                 <label for="anio" class="form-label">Año</label>
                 <input value="{{ datos_moto.anio }}" type="number" class="form-control" name="anio_moto" id="anio" placeholder="Ingrese el año">
-            </div>
-            <div class="mb-3">
-                <label for="estado" class="form-label">Estado</label>
-                <select value="{{ datos_moto.estado }}" class="form-control" name="estado_moto" id="estado" onchange="toggleFields()">
-                    <option value="Usada" {% if datos_moto.estado == "Usada" %}selected{% endif %}>Usada</option>
-                    <option value="Nueva" {% if datos_moto.estado == "Nueva" %}selected{% endif %}>Nueva</option>
-                </select>
             </div>
             <div class="mb-3" id="kms">
                 <label for="kilometros" class="form-label" id="label_km">Kilómetros</label>
@@ -126,19 +119,6 @@
                 <label for="color" class="form-label">Color</label>
                 <input value="{{ datos_moto.color }}" type="text" class="form-control" name="color_moto" id="color" placeholder="Ingrese el color" maxlength="20">
             </div>
-            <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Moneda</label>
-                <div class="input-group">
-                    <select value="{{ datos_moto.moneda_precio }}" class="form-control" name="moneda_precio" id="moneda_precio">
-                        <option value="Pesos" {% if datos_moto.moneda_precio == "Pesos" %}selected{% endif %}>Pesos</option>
-                        <option value="Dolares" {% if datos_moto.moneda_precio == "Dolares" %}selected{% endif %}>Dólares</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="precio" class="form-label">Precio</label>
-                <input value="{{ precio }}" type="number" class="form-control" name="precio_moto" id="precio" placeholder="Ingrese el precio" required>
-            </div>
             <div class="mb-3">
                 <label for="descripcion" class="form-label">Descripción</label>
                 <textarea class="form-control" name="descripcion_moto" id="descripcion" placeholder="Ingrese una descripción" rows="3">{{ datos_moto.observaciones }}</textarea>
@@ -148,16 +128,10 @@
                 <label for="foto" class="form-label">Foto</label>
                 <input type="file" class="form-control" name="foto_moto" id="foto">
             </div>
-
-            <div class="mb-3">
-                <input type="checkbox" id="toggleMatr" class="form-check-input" name="crear_pdf">
-                <label for="toggleMatr" class="form-check-label">Generar PDF</label>
-            </div>
-            
             
             <button type="submit" class="btn btn-success">Guardar</button>
             
-            <a href="{% url 'Motos' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'MotosTaller' %}" class="btn btn-secondary">Cancelar</a>
         </form>
        
     </div>

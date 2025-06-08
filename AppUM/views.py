@@ -37,6 +37,7 @@ from urllib.parse import urlencode
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 import math
+from decimal import Decimal, ROUND_HALF_UP
 # import json
 # from docx import Document
 
@@ -1433,7 +1434,8 @@ def alta_paga_accesorio(req,id_venta):
         precio_dolar = dolar.precio_dolar_tienda
         precio_total_pesos = 0
         precio_total_dolares = 0
-        total = req.POST['total_luego_recargo']
+        # total = req.POST['total_luego_recargo']
+        total = Decimal(req.POST['total_luego_recargo']).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         fecha_proximo_pago = req.POST['f_prox_pago'] if req.POST['f_prox_pago'] else None 
         
 
@@ -1442,10 +1444,11 @@ def alta_paga_accesorio(req,id_venta):
                 accesorio = Accesorio.objects.get(id=suma.accesorio_id)
                 if accesorio.moneda_precio == "Pesos":
                     precio_total_pesos = precio_total_pesos + int(accesorio.precio)
-                    precio_total_dolares = precio_total_dolares + (precio_total_pesos / float(precio_dolar))
+                    precio_total_dolares = (precio_total_pesos / float(precio_dolar))
+                    # print("PRECIO TOTAL $ ACCS ES: " + str(precio_total_pesos))
                 else:
                     precio_total_dolares = precio_total_dolares + int(accesorio.precio)
-                    precio_total_pesos = precio_total_pesos + (precio_total_dolares * float(precio_dolar))
+                    precio_total_pesos = (precio_total_dolares * float(precio_dolar))
         else:
             ult_cuota = CuotasAccesorios.objects.filter(venta_id=id_venta).latest('id')
             precio_total_pesos = float(ult_cuota.cant_restante_pesos)
@@ -1463,6 +1466,9 @@ def alta_paga_accesorio(req,id_venta):
             resto_pesos = resto_dolares * float(precio_dolar)
             entrega_dolares = float(total)
             entrega_pesos = entrega_dolares * float(precio_dolar)
+        
+        print("RESTO PESOS: " + str(resto_pesos))
+        print("RESTO DOLARES: " + str(resto_dolares))
         
         
 
@@ -1520,6 +1526,10 @@ def alta_paga_accesorio(req,id_venta):
                 ult_fondo = ClienteFondos.objects.filter(cliente=cv.cliente).latest('id')
                 total_pesos = float(ult_fondo.total_pesos) - float(entrega_pesos)
                 total_dolares = float(ult_fondo.total_dolares) - float(entrega_dolares) 
+                if total_pesos == 0 or total_dolares == 0:
+                    #ESTO ES PARA EVITAR QUE EN UNA MONEDA QUEDE UN REMANENTE MAYOR A 0 Y 0 EN EL OTRO (SE DA POR EL CAMBIO DEL PRECIO DEL DOLAR)
+                    total_pesos = 0
+                    total_dolares = 0
                 ingreso_pesos = 0 - float(entrega_pesos)
                 ingreso_dolares = 0 - float(entrega_dolares) 
                 retiro_fondos = ClienteFondos(

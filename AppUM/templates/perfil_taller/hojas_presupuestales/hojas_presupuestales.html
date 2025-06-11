@@ -49,6 +49,7 @@
                     <td>
                         {% if pres.es_jefe %}
                             <a href="{% url 'BajaPresupuesto' pres.presupuesto.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                            <a href="{% url 'ModPresupuesto' pres.presupuesto.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
                         {% endif %}
                         <a href="{{ pres.pdf }}" target="_blank">
                             <button class="btn btn-sm btn-primary">

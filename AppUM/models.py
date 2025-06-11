@@ -291,9 +291,38 @@ class MovimientoPagoAccesorio(models.Model):
 
 class Presupuestos(models.Model):
     titulo = models.CharField(max_length=300)
+    texto = models.TextField(null=True, blank=True,default=True)
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    mano_de_obra = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
+    precio_dolar = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
+    fuente_precios = models.CharField(max_length=200,default=True)
     fecha = models.DateField()
     archivo = models.FileField(upload_to='presupuestos/', null=True, blank=True)
     usuario = models.ForeignKey(Personal, related_name='personal_presupuesto', on_delete=models.CASCADE)
+    marca = models.CharField(max_length=20,default=True)
+    modelo = models.CharField(max_length=20,default=True)
+    anio = models.IntegerField(null=True, blank=True,default=True)
+    matricula = models.CharField(max_length=20, default=True)
+    padron = models.IntegerField(null=True, blank=True,default=True)
+    num_motor = models.CharField(max_length=40, default=True)
+    num_chasis = models.CharField(max_length=40, default=True)
+    documento = models.CharField(max_length=20, default=True)
+    nombre = models.CharField(max_length=200,default=True)
+    apellido = models.CharField(max_length=200,default=True)
+    tipo_doc = models.CharField(max_length=10,default=True,null=True)
+
+class PiezasPresupuesto(models.Model):
+    presupuesto = models.ForeignKey(Presupuestos, related_name='piezas_presupuesto', on_delete=models.CASCADE)
+    piezas = models.CharField(max_length=200)
+    cantidad = models.IntegerField(null=True, blank=True)
+    moneda = models.CharField(max_length=10,default=True,null=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
+
+class NotasPresupuesto(models.Model):
+    presupuesto = models.ForeignKey(Presupuestos, related_name='notas_presupuesto', on_delete=models.CASCADE)
+    notas = models.CharField(max_length=200)
+
+    
 
 
     

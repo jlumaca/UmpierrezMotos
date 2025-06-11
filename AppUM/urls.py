@@ -294,6 +294,7 @@ urlpatterns = [
      path('nuevo_presupuesto/', views.nuevo_presupuesto,name="NuevoPresupuesto"),
      path('cliente_moto_presupuesto/', views.buscar_moto_cliente,name="ClienteMotoPresupuesto"),
      path('baja_presupuesto/<int:id_p>', views.baja_presupuesto,name="BajaPresupuesto"),
+     path('mod_presupuesto/<int:id_p>', views.mod_presupuesto,name="ModPresupuesto"),
 
 
 

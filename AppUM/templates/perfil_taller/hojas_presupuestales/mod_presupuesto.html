@@ -33,33 +33,7 @@ form label input[type="number"] {
         {% endif %}
 
         <!-- Formulario de búsqueda de cliente -->
-         <div class="mb-3">
-            <input type="checkbox" onchange="mostrarForm_busq()" id="datos_moto_cliente_bd" class="form-check-input">
-            <label for="toggleMatr" class="form-check-label">Obtener datos del cliente y moto desde la base de datos</label>
-        </div>
-        <div id="form_busqueda" style="display: none;">
-        <form action="{% url 'ClienteMotoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
-            <div class="mb-3" id="documento_cliente">
-                <label for="documento" class="form-label">Documento del cliente</label>
-                <div class="input-group">
-                    <select class="form-control" name="tipo_doc">
-                        <option value="CI">Cédula</option>
-                        <option value="PAS">Pasaporte</option>
-                        <option value="DNI">DNI</option>
-                    </select>
-                    <span class="input-group-text">-</span>
-                    <input type="text" class="form-control" name="doc" placeholder="Documento" required>
-                    <!-- Cambiar el botón a tipo submit -->
-                </div>
-            </div>
-            <div class="mb-3" id="div_num_chasis">
-                <label for="num_chasis" class="form-label">Número de chasis</label>
-                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
-            </div>
-            <button type="submit" class="btn btn-success">Aceptar</button>
-        </form>
-        </div>
-        <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
+        <form action="" enctype="multipart/form-data" method="POST" id="formulario">{% csrf_token %} 
             <h4>Datos de la moto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
@@ -123,11 +97,11 @@ form label input[type="number"] {
             <h4>Datos del presupuesto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Título</label>
-                <input type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
+                <input value="{{ titulo }}" type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
             </div>   
             <div class="mb-3">
                 <label for="precio" class="form-label">Texto</label>
-                <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3"></textarea>
+                    <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3">{{ texto }}</textarea>
             </div> 
             
 
@@ -135,29 +109,26 @@ form label input[type="number"] {
                     <label for="documento" class="form-label">Moneda del Precio Total</label>
                     <div class="input-group">
                         <select class="form-control" name="moneda_total">
-                            <option value="Pesos">Pesos</option>
-                            <option value="Dolares">Dólares</option>
+                            <option value="Pesos" {% if moneda == "Pesos" %}selected{% endif %}>Pesos</option>
+                            <option value="Dolares" {% if moneda == "Dolares" %}selected{% endif %}>Dólares</option>
                         </select>
                     </div>
             </div>
 
             <div class="mb-3">
                 <label for="num_chasis" class="form-label">Mano de obra $/U$s</label>
-                <input type="number" class="form-control" name="costo_mano_obra" placeholder="Ingrese el costo de la mano de obra" maxlength="40" required>
+                <input step="0.01" type="number" class="form-control" name="costo_mano_obra" placeholder="Ingrese el costo de la mano de obra" maxlength="40" required>
             </div> 
             <div class="mb-3" id="num_padron_sn">
                 <label for="num_chasis" class="form-label">Precio del dólar</label>
-                <input      type="number" 
-                            step="0.01" 
-                            class="form-control" 
-                            name="precio_dolar" 
-                            id="precio_dolar" 
+                <input      
+                           type="number" step="0.01" class="form-control" name="precio_dolar"
                             placeholder="Ingrese el precio del dólar" required>
             </div>
 
             <div class="mb-3">
                 <label for="marca" class="form-label">Fuente de precios</label>
-                <input type="text" class="form-control" name="fuente_precios" placeholder="Ingrese la empresa de la fuente de precios" maxlength="300" required>
+                <input value="{{ fuente_precios }}" type="text" class="form-control" name="fuente_precios" placeholder="Ingrese la empresa de la fuente de precios" maxlength="300" required>
             </div>  
             <h4>Piezas a utilizar</h4>
             <div class="d-flex">
@@ -165,7 +136,30 @@ form label input[type="number"] {
                 <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar piezas</button>
             </div>
             <div id="serviciosLista" class="mb-4">
+            {% for pieza in piezas %}
+            <div class="d-flex align-items-center mb-2 gap-2">
+                <!-- Checkbox oculto y marcado -->
+                <input type="checkbox" name="servicios[]" value="{{ pieza.id }}" checked style="display: none;">
 
+                <!-- Nombre de la pieza editable -->
+                <span class="flex-grow-1 border p-1 rounded" contenteditable="true">{{ pieza.piezas }}</span>
+
+                <!-- Cantidad -->
+                <input type="number" name="cantidad[]" value="{{ pieza.cantidad }}" class="form-control w-auto" placeholder="Cantidad" min="0" step="0.01">
+
+                <!-- Moneda -->
+                <select name="moneda[]" class="form-select w-auto">
+                    <option value="Pesos" {% if pieza.moneda == "Pesos" %}selected{% endif %}>Pesos</option>
+                    <option value="Dolares" {% if pieza.moneda == "Dolares" %}selected{% endif %}>Dólares</option>
+                </select>
+
+                <!-- Precio -->
+                <input type="number" name="precio[]" value="{{ pieza.precio }}" class="form-control w-auto" placeholder="Precio" min="0" step="0.01">
+
+                <!-- Botón eliminar -->
+                <button type="button" id="btn_borrar_pieza" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
+            </div>
+                {% endfor %}
             </div>
             <h4>Notas</h4>
             <div class="d-flex">
@@ -191,6 +185,23 @@ form label input[type="number"] {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
+    const eliminados = new Set();
+    const botonEliminar = document.getElementById("btn_borrar_pieza");
+botonEliminar.addEventListener("click", () => {
+    const nombre = span.textContent.trim();
+    eliminados.add(nombre);
+    serviciosLista.removeChild(nuevoServicio);
+});
+
+document.getElementById("formulario").addEventListener("submit", function() {
+    eliminados.forEach(nombre => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "eliminados[]";
+        input.value = nombre;
+        this.appendChild(input);
+    });
+});
     function agregarNotas() {
     const notasLista = document.getElementById("notasLista");
 

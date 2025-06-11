@@ -1963,7 +1963,7 @@ def validar_caja_abierta():
         pass
 
 
-def crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,padron,num_motor,num_chasis,id_p,items,anotaciones,precio_piezas,anio,precio_total,precio_mano_obra,moneda,notas):
+def crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,padron,num_motor,num_chasis,id_p,items,anotaciones,precio_piezas,anio,precio_total,precio_mano_obra,moneda,notas,fuente_precios):
     output_dir = os.path.join(settings.MEDIA_ROOT, 'presupuestos')
 
     # doc.save(docx_file_path)
@@ -2002,6 +2002,8 @@ def crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,padron,nu
             p.text = p.text.replace('detalles_del_presupuesto', anotaciones)
         if 'costo_total' in p.text:
             p.text = p.text.replace('costo_total', precio_total)
+        if 'fuente_precios' in p.text:
+            p.text = p.text.replace('fuente_precios', fuente_precios)
     fila_total = None
     fila_mano_obra = None
 

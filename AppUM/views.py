@@ -8460,7 +8460,9 @@ def alta_moto_taller(req):
                                                                             "error_message":"Ya existe el número de motor ingresado",
                                                                             })
                 else:
-                    modificar = True
+                    moto = Moto.objects.filter(num_motor=num_motor).first()
+                    moto.pertenece_taller = 1
+                    moto.save()
             elif existe_num_chasis:
                 if existe_num_chasis.pertenece_taller == 1:
                     return render(req,"perfil_taller/motos/alta_moto.html",{
@@ -8468,18 +8470,20 @@ def alta_moto_taller(req):
                                                                             "error_message":"Ya existe el número de chasis ingresado",
                                                                             })
                 else:
-                    modificar = True
+                    moto = Moto.objects.filter(num_motor=num_chasis).first()
+                    moto.pertenece_taller = 1
+                    moto.save()
             elif existe_matr:
                 return render(req,"perfil_taller/motos/alta_moto.html",{
                                                                             "active_page": 'Motos',
                                                                             "error_message":"Ya existe la matrícula ingresada",
                                                                             })
             else:
-                if modificar:
-                    moto = Moto.objects.filter(num_motor=num_motor).first()
-                    moto.pertenece_taller = 1
-                    moto.save()
-                else:
+                # if modificar:
+                #     moto = Moto.objects.filter(num_motor=num_motor).first()
+                #     moto.pertenece_taller = 1
+                #     moto.save()
+                # else:
                     marca = req.POST['marca_moto'].upper()
                     modelo = req.POST['modelo_moto'].upper()
                     foto = req.FILES.get('foto_moto')
@@ -8491,8 +8495,8 @@ def alta_moto_taller(req):
                             moto_id = nueva_moto.id
                         )
                         nueva_matr.save()
-                messages.success(req, "Moto ingresada con éxito")
-                return redirect('MotosTaller')
+            messages.success(req, "Moto ingresada con éxito")
+            return redirect('MotosTaller')
         else:
             return render(req,"perfil_taller/motos/alta_moto.html",{})
     # except Exception as e:
@@ -9693,11 +9697,12 @@ def nuevo_presupuesto(req):
         matr_num = req.POST.get("matricula_numeros", "")
         num_padron = req.POST.get("num_padron", "")
         anio = req.POST.get("anio_moto", "")
-
+        fuente_precios = req.POST.get("fuente_precios", "").upper()
         precio_dolar = float(req.POST.get("precio_dolar", ""))
         
         tipo_doc = req.POST.get("tipo_doc", "")
         num_doc = req.POST.get("doc", "")
+        doc_tipo = req.POST.get("tipo_doc", "")
 
         if tipo_doc == "PAS":
             tipo_doc = "Pasaporte.: "
@@ -9751,13 +9756,53 @@ def nuevo_presupuesto(req):
         # servicios_completos = list(zip(servicios, precios, monedas))
         usuario = req.user
         usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        # servicios = req.POST.getlist("servicios[]")
+        # precios = req.POST.getlist("precio[]")
+        # monedas = req.POST.getlist("moneda[]")
+        # cantidad = req.POST.getlist("cantidad[]")
+        # notas = req.POST.getlist("notas[]")
         presupuesto = Presupuestos(
             titulo=titulo,
             fecha=fecha,
-            usuario=usuario_actual
+            usuario=usuario_actual,
+            texto = anotaciones,
+            moneda = moneda_total,
+            mano_de_obra = costo_mano_obra,
+            precio_dolar = precio_dolar,
+            fuente_precios = fuente_precios,
+            marca = marca_moto,
+            modelo = modelo_moto,
+            anio = anio,
+            matricula = matricula,
+            padron = num_padron,
+            num_motor = num_motor_moto,
+            num_chasis = num_chasis_moto,
+            documento = num_doc,
+            nombre = nombre,
+            apellido = apellido,
+            tipo_doc = doc_tipo
         )
         presupuesto.save()
-        crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,notas)
+
+        
+        for i in range(len(servicios)):
+            pieza = PiezasPresupuesto(
+                presupuesto=presupuesto,
+                piezas=servicios[i],
+                cantidad=int(cantidad[i]) if cantidad[i] else None,
+                moneda=monedas[i],
+                precio=Decimal(precios[i]) if precios[i] else None
+            )
+            pieza.save()
+        for i in range(len(notas)):
+            nota = NotasPresupuesto(
+                presupuesto=presupuesto,
+                notas=notas[i],
+            )
+            nota.save()
+            
+            #notas
+        crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,notas,fuente_precios)
         return redirect("HojasPresupuestales")
         # Cargar la plantilla HTML
         # template = get_template("perfil_taller/hojas_presupuestales/pdf_hoja_presupuesto.html")
@@ -9796,6 +9841,14 @@ def nuevo_presupuesto(req):
 
 def baja_presupuesto(req,id_p):
     if req.method == "POST":
+        piezas = PiezasPresupuesto.objects.filter(presupuesto_id=id_p)
+        if piezas:
+            for pieza in piezas:
+                pieza.delete()
+        notas = NotasPresupuesto.objects.filter(presupuesto_id=id_p)
+        if notas:
+            for nota in notas:
+                nota.delete()
         p = Presupuestos.objects.get(id=id_p)
         p.delete()
         return render(req,"perfil_taller/hojas_presupuestales/baja_presupuesto.html",{"message":"Presupuesto borrado con éxito"})
@@ -9990,3 +10043,38 @@ def servicios_de_la_moto(req,id_s,id_cliente):
                                                                             "tareas":datos[1],
                                                                             "observaciones":datos[2]
                                                                             })
+                                                                        
+
+def mod_presupuesto(req,id_p):
+    presupuesto = Presupuestos.objects.get(id=id_p)
+    if req.method == "POST":
+        eliminados = req.POST.getlist("eliminados[]")
+        print(eliminados)
+        for nombre in eliminados:
+            print(nombre)
+    else:
+        # precio_dolar = "{:.2f}".format(presupuesto.precio_dolar) if presupuesto.precio_dolar else "0.00"
+        # mano_obra = float(presupuesto.mano_de_obra) if presupuesto.mano_de_obra else 0.0
+        piezas = PiezasPresupuesto.objects.filter(presupuesto=presupuesto)
+        contexto = {
+            "marca_moto":presupuesto.marca,
+            "modelo_moto":presupuesto.modelo,
+            "num_motor":presupuesto.num_motor,
+            "num_chasis":presupuesto.num_chasis,
+            "nombre_cliente":presupuesto.nombre,
+            "apellido_cliente":presupuesto.apellido,
+            "letras_matr":presupuesto.matricula[0:3:1],
+            "num_matr":presupuesto.matricula[3:7:1],
+            "padron":presupuesto.padron,
+            "tipo_doc":presupuesto.tipo_doc,
+            "doc_num":presupuesto.documento,
+            "anio_moto":presupuesto.anio,
+            "titulo":presupuesto.titulo,
+            # "mano_obra":mano_obra,
+            # "precio_dolar":precio_dolar,
+            "fuente_precios":presupuesto.fuente_precios,
+            "moneda":presupuesto.moneda,
+            "texto":presupuesto.texto if presupuesto.texto else "Sin descripción del presupuesto.",
+            "piezas":piezas
+        }
+        return render(req,"perfil_taller/hojas_presupuestales/mod_presupuesto.html",contexto)

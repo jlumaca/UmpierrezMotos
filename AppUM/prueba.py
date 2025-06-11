@@ -118,6 +118,50 @@ from AppUM.models import *  # Importación absoluta
 #         cuota.save()
 
 
+# Obtenemos todos los códigos de compra válidos (distintos de 0)
+# codigos_validos = ClienteAccesorio.objects.exclude(codigo_compra=0).values_list('codigo_compra', flat=True).distinct()
+
+# for codigo in codigos_validos:
+#     # Obtenemos todas las ventas asociadas a ese código
+#     ventas = ClienteAccesorio.objects.filter(codigo_compra=codigo)
+    
+#     # Obtenemos todos los accesorios de esas ventas
+#     accesorios = [venta.accesorio for venta in ventas if venta.accesorio.moneda_precio == "Dolares"]
+#     total_dolares = sum([a.precio for a in accesorios])
+    
+#     accesorios = [venta.accesorio for venta in ventas if venta.accesorio.moneda_precio == "Pesos"]
+#     total_pesos = sum([a.precio for a in accesorios])
+    
+#     # Obtenemos los pagos asociados a la última venta (como dijiste que se guarda en una sola)
+#     venta_final = ventas.last()
+#     pagos = CuotasAccesorios.objects.filter(venta=venta_final).order_by('fecha_pago', 'id')
+    
+#     acumulado_dolares = 0
+#     acumulado_pesos = 0
+
+#     for cuota in pagos:
+#         # Acumulamos los pagos por moneda
+#         acumulado_dolares += cuota.valor_pago_dolares
+#         acumulado_pesos += cuota.valor_pago_pesos
+        
+#         # Calculamos lo que queda según la moneda de la cuota
+#         if cuota.moneda == "Dolares":
+#             restante_dolares = total_dolares - acumulado_dolares
+#             restante_pesos = restante_dolares * cuota.precio_dolar
+#         elif cuota.moneda == "Pesos":
+#             restante_pesos = total_pesos - acumulado_pesos
+#             restante_dolares = restante_pesos / cuota.precio_dolar if cuota.precio_dolar else 0
+#         else:
+#             # Moneda inválida o vacía
+#             restante_dolares = total_dolares - acumulado_dolares
+#             restante_pesos = total_pesos - acumulado_pesos
+
+#         cuota.cant_restante_dolares = round(restante_dolares, 2)
+#         cuota.cant_restante_pesos = round(restante_pesos, 2)
+#         cuota.save()
+
+
+
 
 
 

@@ -9603,7 +9603,7 @@ def buscar_moto_cliente(req):
     if matricula:
         letras_matr = matricula.matricula[0:3:1]
         num_matr = matricula.matricula[3:7:1]
-        padron = int(matricula.padron)
+        padron = int(matricula.padron) if matricula.padron else 0
     else:
         letras_matr = None
         num_matr = None
@@ -10048,14 +10048,64 @@ def servicios_de_la_moto(req,id_s,id_cliente):
 def mod_presupuesto(req,id_p):
     presupuesto = Presupuestos.objects.get(id=id_p)
     if req.method == "POST":
+
+        #PIEZAS NUEVAS
+        nueva_cantidad = req.POST.getlist("nueva_cantidad[]")
+        nuevo_precio = req.POST.getlist("nuevo_precio[]")
+        nueva_moneda = req.POST.getlist("nueva_moneda[]")
+        nueva_pieza = req.POST.getlist("nueva_pieza[]")
+        for i in range(len(nueva_pieza)):
+            pieza = PiezasPresupuesto(
+                presupuesto=presupuesto,
+                piezas=nueva_pieza[i],
+                cantidad=int(nueva_cantidad[i]) if nueva_cantidad[i] else None,
+                moneda=nueva_moneda[i],
+                precio=Decimal(nuevo_precio[i]) if nuevo_precio[i] else None
+            )
+            pieza.save()
+        #PIEZAS MODIFICADAS
+        servicios = req.POST.getlist("servicios[]")
+        precios = req.POST.getlist("precio[]")
+        monedas = req.POST.getlist("moneda[]")
+        cantidad = req.POST.getlist("cantidad[]")
+        nombre_pieza = req.POST.getlist("nombre_pieza[]")
+        for i in range(len(servicios)):
+            pieza = PiezasPresupuesto.objects.get(id=servicios[i])
+            pieza.piezas = nombre_pieza[i]
+            pieza.cantidad = int(cantidad[i]) if cantidad[i] else None
+            pieza.moneda = monedas[i]
+            pieza.precio = Decimal(precios[i]) if precios[i] else None
+            
+            pieza.save()
+
+        #PIEZAS ELIMINADAS
         eliminados = req.POST.getlist("eliminados[]")
-        print(eliminados)
-        for nombre in eliminados:
-            print(nombre)
+        if eliminados:
+            for nombre in eliminados:
+                pieza = PiezasPresupuesto.objects.get(id=nombre)
+                pieza.delete()
+        
+        #NOTAS NUEVAS
+        nueva_nota = req.POST.getlist("notas[]")
+        nombre_nota = req.POST.getlist("nombre_nota[]")
+        for i in range(len(nueva_nota)):
+            pieza = NotasPresupuesto(
+                presupuesto=presupuesto,
+                notas=nombre_nota[i],
+            )
+            pieza.save()
+        
+        #NOTAS ELIMINADAS
+        notas_eliminados = req.POST.getlist("notasEliminadas[]")
+        if notas_eliminados:
+            for nombre in notas_eliminados:
+                nota = NotasPresupuesto.objects.get(id=nombre)
+                nota.delete()
     else:
         # precio_dolar = "{:.2f}".format(presupuesto.precio_dolar) if presupuesto.precio_dolar else "0.00"
         # mano_obra = float(presupuesto.mano_de_obra) if presupuesto.mano_de_obra else 0.0
         piezas = PiezasPresupuesto.objects.filter(presupuesto=presupuesto)
+        notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
         contexto = {
             "marca_moto":presupuesto.marca,
             "modelo_moto":presupuesto.modelo,
@@ -10075,6 +10125,7 @@ def mod_presupuesto(req,id_p):
             "fuente_precios":presupuesto.fuente_precios,
             "moneda":presupuesto.moneda,
             "texto":presupuesto.texto if presupuesto.texto else "Sin descripción del presupuesto.",
-            "piezas":piezas
+            "piezas":piezas,
+            "notas":notas
         }
         return render(req,"perfil_taller/hojas_presupuestales/mod_presupuesto.html",contexto)

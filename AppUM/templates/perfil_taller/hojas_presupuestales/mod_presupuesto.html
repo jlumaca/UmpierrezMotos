@@ -137,29 +137,30 @@ form label input[type="number"] {
             </div>
             <div id="serviciosLista" class="mb-4">
             {% for pieza in piezas %}
-            <div class="d-flex align-items-center mb-2 gap-2">
-                <!-- Checkbox oculto y marcado -->
-                <input type="checkbox" name="servicios[]" value="{{ pieza.id }}" checked style="display: none;">
+                <div class="d-flex align-items-center mb-2 gap-2" data-id="{{ pieza.id }}">
+                    <!-- Checkbox oculto y marcado -->
+                    <input type="checkbox" name="servicios[]" value="{{ pieza.id }}" checked style="display: none;">
 
-                <!-- Nombre de la pieza editable -->
-                <span class="flex-grow-1 border p-1 rounded" contenteditable="true">{{ pieza.piezas }}</span>
+                    <!-- Nombre de la pieza editable -->
+                    
+                    <input type="text" name="nombre_pieza[]" value="{{ pieza.piezas }}" class="form-control w-auto" placeholder="Pieza">
 
-                <!-- Cantidad -->
-                <input type="number" name="cantidad[]" value="{{ pieza.cantidad }}" class="form-control w-auto" placeholder="Cantidad" min="0" step="0.01">
+                    <!-- Cantidad -->
+                    <input type="number" name="cantidad[]" value="{{ pieza.cantidad }}" class="form-control w-auto" placeholder="Cantidad" min="0" step="0.01">
 
-                <!-- Moneda -->
-                <select name="moneda[]" class="form-select w-auto">
-                    <option value="Pesos" {% if pieza.moneda == "Pesos" %}selected{% endif %}>Pesos</option>
-                    <option value="Dolares" {% if pieza.moneda == "Dolares" %}selected{% endif %}>Dólares</option>
-                </select>
+                    <!-- Moneda -->
+                    <select name="moneda[]" class="form-select w-auto">
+                        <option value="Pesos" {% if pieza.moneda == "Pesos" %}selected{% endif %}>Pesos</option>
+                        <option value="Dolares" {% if pieza.moneda == "Dolares" %}selected{% endif %}>Dólares</option>
+                    </select>
 
-                <!-- Precio -->
-                <input type="number" name="precio[]" value="{{ pieza.precio }}" class="form-control w-auto" placeholder="Precio" min="0" step="0.01">
+                    <!-- Precio -->
+                    <input type="number" name="precio[]" value="{{ pieza.precio }}" class="form-control w-auto" placeholder="Precio" min="0" step="0.01">
 
-                <!-- Botón eliminar -->
-                <button type="button" id="btn_borrar_pieza" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
-            </div>
-                {% endfor %}
+                    <!-- Botón eliminar -->
+                    <button type="button" id="btn_borrar_pieza" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
+                </div>
+            {% endfor %}
             </div>
             <h4>Notas</h4>
             <div class="d-flex">
@@ -168,7 +169,18 @@ form label input[type="number"] {
             </div>
 
             <div id="notasLista" class="mb-4">
+                {% for pieza in notas %}
+                <div class="d-flex align-items-center mb-2 gap-2" data-id="{{ pieza.id }}">
+                    <!-- Checkbox oculto y marcado -->
+                    <input type="checkbox" name="notas[]" value="{{ pieza.id }}" checked style="display: none;">
 
+                    <!-- Nombre de la pieza editable -->
+                    
+                    <input type="text" value="{{ pieza.notas }}" class="form-control w-auto" placeholder="Pieza">
+                    <!-- Botón eliminar -->
+                    <button type="button" id="btn_borrar_nota" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
+                </div>
+            {% endfor %}
             </div>
 
             
@@ -186,22 +198,61 @@ form label input[type="number"] {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
     const eliminados = new Set();
-    const botonEliminar = document.getElementById("btn_borrar_pieza");
-botonEliminar.addEventListener("click", () => {
-    const nombre = span.textContent.trim();
-    eliminados.add(nombre);
-    serviciosLista.removeChild(nuevoServicio);
-});
 
-document.getElementById("formulario").addEventListener("submit", function() {
-    eliminados.forEach(nombre => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "eliminados[]";
-        input.value = nombre;
-        this.appendChild(input);
+    // Escuchar clicks en todos los botones de eliminar
+    document.getElementById("serviciosLista").addEventListener("click", function(event) {
+        if (event.target && event.target.matches("button#btn_borrar_pieza")) {
+            const piezaDiv = event.target.closest("div[data-id]");
+            const piezaId = piezaDiv.getAttribute("data-id");
+
+            if (piezaId) {
+                eliminados.add(piezaId);
+            }
+
+            // Eliminar visualmente del DOM
+            piezaDiv.remove();
+        }
     });
-});
+
+    // Enviar los eliminados como inputs ocultos en el formulario
+    document.getElementById("formulario").addEventListener("submit", function() {
+        eliminados.forEach(id => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "eliminados[]";
+            input.value = id;
+            this.appendChild(input);
+        });
+    });
+
+    const notasEliminadas = new Set();
+
+    // Escuchar clicks en todos los botones de eliminar
+    document.getElementById("notasLista").addEventListener("click", function(event) {
+        if (event.target && event.target.matches("button#btn_borrar_nota")) {
+            const notaDiv = event.target.closest("div[data-id]");
+            const piezaId = notaDiv.getAttribute("data-id");
+
+            if (piezaId) {
+                notasEliminadas.add(piezaId);
+            }
+
+            // Eliminar visualmente del DOM
+            notaDiv.remove();
+        }
+    });
+
+    // Enviar los eliminados como inputs ocultos en el formulario
+    document.getElementById("formulario").addEventListener("submit", function() {
+        notasEliminadas.forEach(id => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "notasEliminadas[]";
+            input.value = id;
+            this.appendChild(input);
+        });
+    });
+
     function agregarNotas() {
     const notasLista = document.getElementById("notasLista");
 
@@ -216,15 +267,15 @@ document.getElementById("formulario").addEventListener("submit", function() {
     checkbox.style.display = "none";
 
     // Nombre editable del servicio
-    const span = document.createElement("span");
-    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
-    span.contentEditable = true;
-    span.textContent = "";
+    const inputNombre = document.createElement("input");
+    inputNombre.type = "text";
+    inputNombre.name = "nombre_nota[]";  // el name correcto para el formulario
+    inputNombre.classList.add("form-control", "flex-grow-1", "p-1", "rounded");
+    inputNombre.placeholder = "Nombre de la piezaa";
 
-    // Actualizar valor del checkbox con el texto ingresado
-    span.addEventListener("input", () => {
-        const textoServicio = span.textContent.trim();
-        checkbox.value = textoServicio;
+    // Si querés actualizar el value del checkbox como antes:
+    inputNombre.addEventListener("input", () => {
+        checkbox.value = inputNombre.value.trim();
     });
 
     // Botón para eliminar la nota
@@ -238,7 +289,7 @@ document.getElementById("formulario").addEventListener("submit", function() {
 
     // Agregar elementos al contenedor
     nuevoServicio.appendChild(checkbox);
-    nuevoServicio.appendChild(span);
+    nuevoServicio.appendChild(inputNombre);
     nuevoServicio.appendChild(botonEliminar);
 
     // Agregar al DOM
@@ -254,24 +305,35 @@ document.getElementById("formulario").addEventListener("submit", function() {
     // Checkbox oculto y seleccionado
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.name = "servicios[]";
+    checkbox.name = "nueva_pieza[]";
     checkbox.checked = true;
     checkbox.style.display = "none";
 
     // Nombre editable del servicio
-    const span = document.createElement("span");
-    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
-    span.contentEditable = true;
-    span.textContent = "";
+    // const span = document.createElement("input");
+    // span.classList.add("flex-grow-1", "border", "p-1", "rounded");
+    // span.contentEditable = true;
+    // span.textContent = "";
 
-    span.addEventListener("input", () => {
-        checkbox.value = span.textContent.trim();
+    // span.addEventListener("input", () => {
+    //     checkbox.value = span.textContent.trim();
+    // });
+
+    const inputNombre = document.createElement("input");
+    inputNombre.type = "text";
+    inputNombre.name = "nombre_pieza[]";  // el name correcto para el formulario
+    inputNombre.classList.add("form-control", "flex-grow-1", "p-1", "rounded");
+    inputNombre.placeholder = "Nombre de la pieza";
+
+    // Si querés actualizar el value del checkbox como antes:
+    inputNombre.addEventListener("input", () => {
+        checkbox.value = inputNombre.value.trim();
     });
 
     // Input de cantidad
     const inputCantidad = document.createElement("input");
     inputCantidad.type = "number";
-    inputCantidad.name = "cantidad[]";
+    inputCantidad.name = "nueva_cantidad[]";
     inputCantidad.classList.add("form-control", "w-auto");
     inputCantidad.placeholder = "Cantidad";
     inputCantidad.min = 0;
@@ -279,7 +341,7 @@ document.getElementById("formulario").addEventListener("submit", function() {
 
     // Select de moneda
     const selectMoneda = document.createElement("select");
-    selectMoneda.name = "moneda[]";
+    selectMoneda.name = "nueva_moneda[]";
     selectMoneda.classList.add("form-select", "w-auto");
 
     const opcionPesos = document.createElement("option");
@@ -296,7 +358,7 @@ document.getElementById("formulario").addEventListener("submit", function() {
     // Input de precio
     const inputPrecio = document.createElement("input");
     inputPrecio.type = "number";
-    inputPrecio.name = "precio[]";
+    inputPrecio.name = "nuevo_precio[]";
     inputPrecio.classList.add("form-control", "w-auto");
     inputPrecio.placeholder = "Precio";
     inputPrecio.min = 0;
@@ -313,7 +375,7 @@ document.getElementById("formulario").addEventListener("submit", function() {
 
     // Agregar todos los elementos al contenedor
     nuevoServicio.appendChild(checkbox);
-    nuevoServicio.appendChild(span);
+    nuevoServicio.appendChild(inputNombre);
     nuevoServicio.appendChild(inputCantidad);
     nuevoServicio.appendChild(selectMoneda);
     nuevoServicio.appendChild(inputPrecio);
@@ -323,7 +385,19 @@ document.getElementById("formulario").addEventListener("submit", function() {
     serviciosLista.appendChild(nuevoServicio);
 }
 
+document.getElementById("formulario").addEventListener("submit", function() {
+    // Copiar el contenido de cada span contenteditable al input hidden correspondiente
+    document.querySelectorAll("#serviciosLista div[data-id]").forEach(div => {
+        const span = div.querySelector(".nombre-pieza");
+        const inputHidden = div.querySelector('input[name="nombre_pieza[]"]');
 
+        if (span && inputHidden) {
+            inputHidden.value = span.textContent.trim();
+        }
+    });
+
+    // (acá también podrías agregar el código para enviar eliminados[] y modificados[] si lo estás usando)
+});
 
 // document.addEventListener('DOMContentLoaded', function () {
 //     const inputBusqueda = document.getElementById('buscar_pieza');

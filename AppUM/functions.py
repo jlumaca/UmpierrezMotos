@@ -2054,14 +2054,20 @@ def crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,padron,nu
             nueva_fila_mano_obra.cells[3].text = f"{simbolo} {precio_mano_obra}"
 
             break
-    
-    texto_notas = "\n".join(notas)  # Une las notas con saltos de línea
+    if notas:
+        texto_notas = "\n".join(notas)  # Une las notas con saltos de línea
 
-    for paragraph in doc.paragraphs:
-        if "notas_ingresadas" in paragraph.text:
-            # Reemplazamos el texto del párrafo entero
-            paragraph.text = texto_notas
-            break
+        for paragraph in doc.paragraphs:
+            if "notas_ingresadas" in paragraph.text:
+                # Reemplazamos el texto del párrafo entero
+                paragraph.text = texto_notas
+                break
+    else:
+        for paragraph in doc.paragraphs:
+            if "notas_ingresadas" in paragraph.text:
+                # Reemplazamos el texto del párrafo entero
+                paragraph.text = ""
+                break
         
 
     nombre_archivo = f"Presupuesto_{marca}_{modelo}_{nombre_apellido}"

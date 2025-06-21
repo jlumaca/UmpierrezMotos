@@ -322,6 +322,13 @@ class NotasPresupuesto(models.Model):
     presupuesto = models.ForeignKey(Presupuestos, related_name='notas_presupuesto', on_delete=models.CASCADE)
     notas = models.CharField(max_length=200)
 
+
+class HojasMembretadas(models.Model):
+    titulo = models.CharField(max_length=300)
+    texto = models.TextField(null=True, blank=True,default=True)
+    usuario = models.ForeignKey(Personal, related_name='personal_hoja_membretada', on_delete=models.CASCADE)
+    archivo = models.FileField(upload_to='hojas_membretadas/', null=True, blank=True)
+
     
 
 

@@ -33,7 +33,33 @@ form label input[type="number"] {
         {% endif %}
 
         <!-- Formulario de búsqueda de cliente -->
-        <form action="" enctype="multipart/form-data" method="POST" id="formulario">{% csrf_token %} 
+         <div class="mb-3">
+            <input type="checkbox" onchange="mostrarForm_busq()" id="datos_moto_cliente_bd" class="form-check-input">
+            <label for="toggleMatr" class="form-check-label">Obtener datos del cliente y moto desde la base de datos</label>
+        </div>
+        <div id="form_busqueda" style="display: none;">
+        <form action="{% url 'ClienteMotoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
+            <div class="mb-3" id="documento_cliente">
+                <label for="documento" class="form-label">Documento del cliente</label>
+                <div class="input-group">
+                    <select class="form-control" name="tipo_doc">
+                        <option value="CI">Cédula</option>
+                        <option value="PAS">Pasaporte</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" name="doc" placeholder="Documento" required>
+                    <!-- Cambiar el botón a tipo submit -->
+                </div>
+            </div>
+            <div class="mb-3" id="div_num_chasis">
+                <label for="num_chasis" class="form-label">Número de chasis</label>
+                <input type="text" class="form-control" name="num_chasis_moto" id="num_chasis" placeholder="Ingrese el número de chasis" maxlength="40">
+            </div>
+            <button type="submit" class="btn btn-success">Aceptar</button>
+        </form>
+        </div>
+        <form action="{% url 'NuevoPresupuesto' %}" enctype="multipart/form-data" method="POST">{% csrf_token %} 
             <h4>Datos de la moto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
@@ -97,11 +123,11 @@ form label input[type="number"] {
             <h4>Datos del presupuesto</h4>
             <div class="mb-3">
                 <label for="marca" class="form-label">Título</label>
-                <input value="{{ titulo }}" type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
+                <input type="text" class="form-control" name="titulo_presupuesto" placeholder="Ingrese el título del presupuesto" maxlength="300" required>
             </div>   
             <div class="mb-3">
                 <label for="precio" class="form-label">Texto</label>
-                    <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3">{{ texto }}</textarea>
+                <textarea class="form-control" name="anotaciones" id="descripcion" placeholder="Texto del presupuesto" rows="3"></textarea>
             </div> 
             
 
@@ -109,26 +135,29 @@ form label input[type="number"] {
                     <label for="documento" class="form-label">Moneda del Precio Total</label>
                     <div class="input-group">
                         <select class="form-control" name="moneda_total">
-                            <option value="Pesos" {% if moneda == "Pesos" %}selected{% endif %}>Pesos</option>
-                            <option value="Dolares" {% if moneda == "Dolares" %}selected{% endif %}>Dólares</option>
+                            <option value="Pesos">Pesos</option>
+                            <option value="Dolares">Dólares</option>
                         </select>
                     </div>
             </div>
 
             <div class="mb-3">
                 <label for="num_chasis" class="form-label">Mano de obra $/U$s</label>
-                <input value="{{ mano_obra }}"  step="0.01" type="number" class="form-control" name="costo_mano_obra" placeholder="Ingrese el costo de la mano de obra" maxlength="40" required>
+                <input type="number" class="form-control" name="costo_mano_obra" placeholder="Ingrese el costo de la mano de obra" maxlength="40" required>
             </div> 
             <div class="mb-3" id="num_padron_sn">
                 <label for="num_chasis" class="form-label">Precio del dólar</label>
-                <input      
-                           type="number" step="0.01" class="form-control" name="precio_dolar"
-                            placeholder="Ingrese el precio del dólar" value="{{ precio_dolar }}" required>
+                <input      type="number" 
+                            step="0.01" 
+                            class="form-control" 
+                            name="precio_dolar" 
+                            id="precio_dolar" 
+                            placeholder="Ingrese el precio del dólar" required>
             </div>
 
             <div class="mb-3">
                 <label for="marca" class="form-label">Fuente de precios</label>
-                <input value="{{ fuente_precios }}" type="text" class="form-control" name="fuente_precios" placeholder="Ingrese la empresa de la fuente de precios" maxlength="300" required>
+                <input type="text" class="form-control" name="fuente_precios" placeholder="Ingrese la empresa de la fuente de precios" maxlength="300" required>
             </div>  
             <h4>Piezas a utilizar</h4>
             <div class="d-flex">
@@ -136,31 +165,7 @@ form label input[type="number"] {
                 <button type="button" id="agregar-servicio" class="btn btn-primary" onclick="agregarServicio()">Agregar piezas</button>
             </div>
             <div id="serviciosLista" class="mb-4">
-            {% for pieza in piezas %}
-                <div class="d-flex align-items-center mb-2 gap-2" data-id="{{ pieza.id }}">
-                    <!-- Checkbox oculto y marcado -->
-                    <input type="checkbox" name="servicios[]" value="{{ pieza.id }}" checked style="display: none;">
 
-                    <!-- Nombre de la pieza editable -->
-                    
-                    <input type="text" name="nombre_pieza[]" value="{{ pieza.nombre }}" class="form-control w-auto" placeholder="Pieza">
-
-                    <!-- Cantidad -->
-                    <input type="number" name="cantidad[]" value="{{ pieza.cantidad }}" class="form-control w-auto" placeholder="Cantidad" min="0" step="0.01">
-
-                    <!-- Moneda -->
-                    <select name="moneda[]" class="form-select w-auto">
-                        <option value="Pesos" {% if pieza.moneda == "Pesos" %}selected{% endif %}>Pesos</option>
-                        <option value="Dolares" {% if pieza.moneda == "Dolares" %}selected{% endif %}>Dólares</option>
-                    </select>
-
-                    <!-- Precio -->
-                    <input type="number" name="precio[]" value="{{ pieza.precio }}" class="form-control w-auto" placeholder="Precio" min="0" step="0.01">
-
-                    <!-- Botón eliminar -->
-                    <button type="button" id="btn_borrar_pieza" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
-                </div>
-            {% endfor %}
             </div>
             <h4>Notas</h4>
             <div class="d-flex">
@@ -169,18 +174,7 @@ form label input[type="number"] {
             </div>
 
             <div id="notasLista" class="mb-4">
-                {% for pieza in notas %}
-                <div class="d-flex align-items-center mb-2 gap-2" data-id="{{ pieza.id }}">
-                    <!-- Checkbox oculto y marcado -->
-                    <input type="checkbox" name="notas_id[]" value="{{ pieza.id }}" checked style="display: none;">
 
-                    <!-- Nombre de la pieza editable -->
-                    
-                    <input type="text" value="{{ pieza.notas }}" name="nombre_nota[]" class="form-control w-auto" placeholder="Pieza">
-                    <!-- Botón eliminar -->
-                    <button type="button" id="btn_borrar_nota" class="btn btn-sm btn-danger ms-2" onclick="this.parentElement.remove()">❌</button>
-                </div>
-            {% endfor %}
             </div>
 
             
@@ -197,62 +191,6 @@ form label input[type="number"] {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
-    const eliminados = new Set();
-
-    // Escuchar clicks en todos los botones de eliminar
-    document.getElementById("serviciosLista").addEventListener("click", function(event) {
-        if (event.target && event.target.matches("button#btn_borrar_pieza")) {
-            const piezaDiv = event.target.closest("div[data-id]");
-            const piezaId = piezaDiv.getAttribute("data-id");
-
-            if (piezaId) {
-                eliminados.add(piezaId);
-            }
-
-            // Eliminar visualmente del DOM
-            piezaDiv.remove();
-        }
-    });
-
-    // Enviar los eliminados como inputs ocultos en el formulario
-    document.getElementById("formulario").addEventListener("submit", function() {
-        eliminados.forEach(id => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "eliminados[]";
-            input.value = id;
-            this.appendChild(input);
-        });
-    });
-
-    const notasEliminadas = new Set();
-
-    // Escuchar clicks en todos los botones de eliminar
-    document.getElementById("notasLista").addEventListener("click", function(event) {
-        if (event.target && event.target.matches("button#btn_borrar_nota")) {
-            const notaDiv = event.target.closest("div[data-id]");
-            const piezaId = notaDiv.getAttribute("data-id");
-
-            if (piezaId) {
-                notasEliminadas.add(piezaId);
-            }
-
-            // Eliminar visualmente del DOM
-            notaDiv.remove();
-        }
-    });
-
-    // Enviar los eliminados como inputs ocultos en el formulario
-    document.getElementById("formulario").addEventListener("submit", function() {
-        notasEliminadas.forEach(id => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "notasEliminadas[]";
-            input.value = id;
-            this.appendChild(input);
-        });
-    });
-
     function agregarNotas() {
     const notasLista = document.getElementById("notasLista");
 
@@ -267,15 +205,15 @@ form label input[type="number"] {
     checkbox.style.display = "none";
 
     // Nombre editable del servicio
-    const inputNombre = document.createElement("input");
-    inputNombre.type = "text";
-    inputNombre.name = "nuevo_nombre_nota[]";  // el name correcto para el formulario
-    inputNombre.classList.add("form-control", "flex-grow-1", "p-1", "rounded");
-    inputNombre.placeholder = "Nombre de la piezaa";
+    const span = document.createElement("span");
+    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
+    span.contentEditable = true;
+    span.textContent = "";
 
-    // Si querés actualizar el value del checkbox como antes:
-    inputNombre.addEventListener("input", () => {
-        checkbox.value = inputNombre.value.trim();
+    // Actualizar valor del checkbox con el texto ingresado
+    span.addEventListener("input", () => {
+        const textoServicio = span.textContent.trim();
+        checkbox.value = textoServicio;
     });
 
     // Botón para eliminar la nota
@@ -289,7 +227,7 @@ form label input[type="number"] {
 
     // Agregar elementos al contenedor
     nuevoServicio.appendChild(checkbox);
-    nuevoServicio.appendChild(inputNombre);
+    nuevoServicio.appendChild(span);
     nuevoServicio.appendChild(botonEliminar);
 
     // Agregar al DOM
@@ -305,35 +243,24 @@ form label input[type="number"] {
     // Checkbox oculto y seleccionado
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.name = "nueva_pieza[]";
+    checkbox.name = "servicios[]";
     checkbox.checked = true;
     checkbox.style.display = "none";
 
     // Nombre editable del servicio
-    // const span = document.createElement("input");
-    // span.classList.add("flex-grow-1", "border", "p-1", "rounded");
-    // span.contentEditable = true;
-    // span.textContent = "";
+    const span = document.createElement("span");
+    span.classList.add("flex-grow-1", "border", "p-1", "rounded");
+    span.contentEditable = true;
+    span.textContent = "";
 
-    // span.addEventListener("input", () => {
-    //     checkbox.value = span.textContent.trim();
-    // });
-
-    const inputNombre = document.createElement("input");
-    inputNombre.type = "text";
-    inputNombre.name = "nombre_pieza[]";  // el name correcto para el formulario
-    inputNombre.classList.add("form-control", "flex-grow-1", "p-1", "rounded");
-    inputNombre.placeholder = "Nombre de la pieza";
-
-    // Si querés actualizar el value del checkbox como antes:
-    inputNombre.addEventListener("input", () => {
-        checkbox.value = inputNombre.value.trim();
+    span.addEventListener("input", () => {
+        checkbox.value = span.textContent.trim();
     });
 
     // Input de cantidad
     const inputCantidad = document.createElement("input");
     inputCantidad.type = "number";
-    inputCantidad.name = "nueva_cantidad[]";
+    inputCantidad.name = "cantidad[]";
     inputCantidad.classList.add("form-control", "w-auto");
     inputCantidad.placeholder = "Cantidad";
     inputCantidad.min = 0;
@@ -341,7 +268,7 @@ form label input[type="number"] {
 
     // Select de moneda
     const selectMoneda = document.createElement("select");
-    selectMoneda.name = "nueva_moneda[]";
+    selectMoneda.name = "moneda[]";
     selectMoneda.classList.add("form-select", "w-auto");
 
     const opcionPesos = document.createElement("option");
@@ -358,7 +285,7 @@ form label input[type="number"] {
     // Input de precio
     const inputPrecio = document.createElement("input");
     inputPrecio.type = "number";
-    inputPrecio.name = "nuevo_precio[]";
+    inputPrecio.name = "precio[]";
     inputPrecio.classList.add("form-control", "w-auto");
     inputPrecio.placeholder = "Precio";
     inputPrecio.min = 0;
@@ -375,7 +302,7 @@ form label input[type="number"] {
 
     // Agregar todos los elementos al contenedor
     nuevoServicio.appendChild(checkbox);
-    nuevoServicio.appendChild(inputNombre);
+    nuevoServicio.appendChild(span);
     nuevoServicio.appendChild(inputCantidad);
     nuevoServicio.appendChild(selectMoneda);
     nuevoServicio.appendChild(inputPrecio);
@@ -385,19 +312,7 @@ form label input[type="number"] {
     serviciosLista.appendChild(nuevoServicio);
 }
 
-document.getElementById("formulario").addEventListener("submit", function() {
-    // Copiar el contenido de cada span contenteditable al input hidden correspondiente
-    document.querySelectorAll("#serviciosLista div[data-id]").forEach(div => {
-        const span = div.querySelector(".nombre-pieza");
-        const inputHidden = div.querySelector('input[name="nombre_pieza[]"]');
 
-        if (span && inputHidden) {
-            inputHidden.value = span.textContent.trim();
-        }
-    });
-
-    // (acá también podrías agregar el código para enviar eliminados[] y modificados[] si lo estás usando)
-});
 
 // document.addEventListener('DOMContentLoaded', function () {
 //     const inputBusqueda = document.getElementById('buscar_pieza');

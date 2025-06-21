@@ -10049,6 +10049,51 @@ def mod_presupuesto(req,id_p):
     presupuesto = Presupuestos.objects.get(id=id_p)
     if req.method == "POST":
 
+        titulo = req.POST.get("titulo_presupuesto", "Presupuesto sin título")
+        fecha = date.today()
+        # usuario = req.user.personal
+        anotaciones = req.POST.get("anotaciones", "")
+        servicios = req.POST.getlist("servicios[]")
+        precios = req.POST.getlist("precio[]")
+        monedas = req.POST.getlist("moneda[]")
+        cantidad = req.POST.getlist("cantidad[]")
+        # notas = req.POST.getlist("notas[]")
+        marca_moto = req.POST.get("marca_moto", "")
+        modelo_moto = req.POST.get("modelo_moto", "")
+        num_motor_moto = req.POST.get("num_motor_moto", "")
+        num_chasis_moto = req.POST.get("num_chasis_moto", "")
+        nombre_cliente = req.POST.get("nombre", "")
+        apellido = req.POST.get("apellido", "")
+        matr_letras = req.POST.get("matricula_letras", "")
+        matr_num = req.POST.get("matricula_numeros", "")
+        num_padron = req.POST.get("num_padron", "")
+        anio = req.POST.get("anio_moto", "")
+        fuente_precios = req.POST.get("fuente_precios", "").upper()
+        precio_dolar = float(req.POST.get("precio_dolar", ""))
+        tipo_doc = req.POST.get("tipo_doc", "")
+        num_doc = req.POST.get("doc", "")
+        moneda_total = req.POST.get("moneda_total", "")
+        costo_mano_obra = req.POST.get("costo_mano_obra", "") 
+
+        presupuesto.marca = marca_moto
+        presupuesto.modelo = modelo_moto
+        presupuesto.anio = anio
+        presupuesto.matricula = matr_letras.upper() + str(matr_num)
+        presupuesto.padron = num_padron
+        presupuesto.num_chasis = num_chasis_moto
+        presupuesto.num_motor = num_motor_moto
+        presupuesto.tipo_doc = tipo_doc
+        presupuesto.documento = num_doc
+        presupuesto.nombre = nombre_cliente
+        presupuesto.apellido = apellido
+        presupuesto.titulo = titulo
+        presupuesto.texto = anotaciones
+        presupuesto.moneda = moneda_total
+        presupuesto.mano_de_obra = costo_mano_obra
+        presupuesto.precio_dolar = precio_dolar
+        presupuesto.fuente_precios = fuente_precios
+        presupuesto.save()
+
         #PIEZAS NUEVAS
         nueva_cantidad = req.POST.getlist("nueva_cantidad[]")
         nuevo_precio = req.POST.getlist("nuevo_precio[]")
@@ -10085,26 +10130,144 @@ def mod_presupuesto(req,id_p):
                 pieza = PiezasPresupuesto.objects.get(id=nombre)
                 pieza.delete()
         
-        #NOTAS NUEVAS
-        nueva_nota = req.POST.getlist("notas[]")
-        nombre_nota = req.POST.getlist("nombre_nota[]")
-        for i in range(len(nueva_nota)):
-            pieza = NotasPresupuesto(
-                presupuesto=presupuesto,
-                notas=nombre_nota[i],
-            )
-            pieza.save()
+        # piezas_actuales = PiezasPresupuesto.objects.filter(presupuesto=presupuesto)
+        # todas_las_piezas = [
+        #     (p.piezas, p.cantidad, p.precio, p.moneda)
+        #     {
+        #             "cantidad": p.cantidad,
+        #             "descripcion": p.piezas,
+        #             "precio_unitario": f"{simbolo} {p.precio:.2f}",
+        #             "subtotal": f"{simbolo} {subtotal:.2f}",
+        #     }
+        #     for p in piezas_actuales
+        # ]
         
+        #NOTAS NUEVAS
+        notas_nueva = req.POST.getlist("nuevo_nombre_nota[]")
+        nueva_nota = req.POST.getlist("notas[]")
+        if nueva_nota:
+            for nombre in notas_nueva:
+                if nombre.strip():  # para evitar guardar notas vacías
+                    nota = NotasPresupuesto(
+                        presupuesto=presupuesto,
+                        notas=nombre.strip(),
+                    )
+                    nota.save()
+            todas_notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
+            todas_las_notas = [n.notas for n in todas_notas if n.notas.strip()]
+        else:
+            existen_notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
+            if existen_notas:
+                todas_las_notas = [n.notas for n in existen_notas]
+            else:
+                todas_las_notas = None
+                
+        #NOTAS MODIFICADAS
+
+        # servicios = req.POST.getlist("servicios[]")
+        # precios = req.POST.getlist("precio[]")
+        # monedas = req.POST.getlist("moneda[]")
+        # cantidad = req.POST.getlist("cantidad[]")
+        # nombre_nota = req.POST.getlist("nombre_nota[]")
+        notas_mod = req.POST.getlist("notas_id[]")
+        nombre_nota = req.POST.getlist("nombre_nota[]")
+        for i in range(len(notas_mod)):
+            nota = NotasPresupuesto.objects.get(id=notas_mod[i])
+            # print(i.strip())
+            nota.notas = nombre_nota[i]
+            nota.save()
+
+            existen_notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
+            if existen_notas:
+                todas_las_notas = [n.notas for n in existen_notas]
+            else:
+                todas_las_notas = None
+                
         #NOTAS ELIMINADAS
         notas_eliminados = req.POST.getlist("notasEliminadas[]")
         if notas_eliminados:
             for nombre in notas_eliminados:
                 nota = NotasPresupuesto.objects.get(id=nombre)
                 nota.delete()
+            
+            existen_notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
+            if existen_notas:
+                todas_las_notas = [n.notas for n in existen_notas]
+            else:
+                todas_las_notas = None
+        
+        
+        doc_tipo = req.POST.get("tipo_doc", "")
+
+        if tipo_doc == "PAS":
+            tipo_doc = "Pasaporte.: "
+        documento = tipo_doc + ".: " + str(num_doc)
+        nombre_apellido = nombre_cliente.title() + " " + apellido.title()
+        marca = marca_moto.upper()
+        modelo = modelo_moto.upper() 
+        matricula = matr_letras.upper() + str(matr_num)
+
+        items = []
+        total_pesos = 0
+        total_dolares = 0
+        piezas_actuales = PiezasPresupuesto.objects.filter(presupuesto=presupuesto)
+        for i in piezas_actuales:
+            try:
+                cant = int(i.cantidad)
+                precio_unitario = int(i.precio)
+                moneda = i.moneda
+                descripcion = i.piezas
+
+                # Si querés mostrar el símbolo según la moneda
+                subtotal = cant * precio_unitario
+                
+                if moneda == 'Pesos':
+                    simbolo = '$'
+                    total_pesos = total_pesos + subtotal
+                    total_dolares = total_pesos / precio_dolar
+                else:
+                    simbolo = 'U$s'  # default
+                    total_dolares = total_dolares + subtotal
+                    total_pesos = total_dolares * precio_dolar
+                    
+
+                items.append({
+                    "cantidad": cant,
+                    "descripcion": descripcion,
+                    "precio_unitario": f"{simbolo} {precio_unitario:.2f}",
+                    "subtotal": f"{simbolo} {subtotal:.2f}",
+                })
+            except (ValueError, IndexError):
+                continue  # Saltar si hay algún error en el input
+
+        
+        if moneda_total == "Pesos":
+            costo_total = float(costo_mano_obra) + total_pesos
+            precio_total = "$ " + str(math.ceil(costo_total)) + ".00 expresado en pesos uruguayos."
+            precio_piezas = math.ceil(total_pesos)
+        else:
+            costo_total = float(costo_mano_obra) + total_dolares
+            precio_total = "U$s " + str(math.ceil(costo_total)) + ".00 expresado en dólares estadounidenses."
+            precio_piezas = math.ceil(total_dolares)
+        # servicios_completos = list(zip(servicios, precios, monedas))
+        
+        # crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,todas_las_notas,fuente_precios)
+        messages.success(req, "Presupuesto modificado con éxito.")
+        return redirect('HojasPresupuestales')
+    
     else:
         # precio_dolar = "{:.2f}".format(presupuesto.precio_dolar) if presupuesto.precio_dolar else "0.00"
         # mano_obra = float(presupuesto.mano_de_obra) if presupuesto.mano_de_obra else 0.0
         piezas = PiezasPresupuesto.objects.filter(presupuesto=presupuesto)
+        pieza = []
+        for p in piezas:
+            pieza.append({
+                "id":p.id,
+                "nombre":p.piezas,
+                "cantidad":p.cantidad,
+                "moneda":p.moneda,
+                "precio":str(p.precio)
+            })
         notas = NotasPresupuesto.objects.filter(presupuesto=presupuesto)
         contexto = {
             "marca_moto":presupuesto.marca,
@@ -10120,12 +10283,12 @@ def mod_presupuesto(req,id_p):
             "doc_num":presupuesto.documento,
             "anio_moto":presupuesto.anio,
             "titulo":presupuesto.titulo,
-            # "mano_obra":mano_obra,
-            # "precio_dolar":precio_dolar,
+            "mano_obra":str(presupuesto.mano_de_obra),
+            "precio_dolar":str(presupuesto.precio_dolar),
             "fuente_precios":presupuesto.fuente_precios,
             "moneda":presupuesto.moneda,
             "texto":presupuesto.texto if presupuesto.texto else "Sin descripción del presupuesto.",
-            "piezas":piezas,
+            "piezas":pieza,
             "notas":notas
         }
         return render(req,"perfil_taller/hojas_presupuestales/mod_presupuesto.html",contexto)

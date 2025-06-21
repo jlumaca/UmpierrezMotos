@@ -9590,7 +9590,21 @@ def hojas_presupuestales(req):
         })
     
     page_obj = funcion_paginas_varias(req,data)
-    return render(req,"perfil_taller/hojas_presupuestales/hojas_presupuestales.html",{"page_obj":page_obj})
+
+
+    hojas_memb = HojasMembretadas.objects.all().order_by('-id')
+    data_hojas = []
+    for p in hojas_memb:
+        usuario = Personal.objects.get(id=p.usuario_id)
+        data_hojas.append({
+            "hoja":p,
+            "usuario":usuario.nombre + " " + usuario.apellido,
+            "pdf":p.archivo.url if p.archivo else None,
+            "es_jefe":True if mecanico.jefe else False
+        })
+    
+    page_obj_hojas = funcion_paginas_varias(req,data_hojas)
+    return render(req,"perfil_taller/hojas_presupuestales/hojas_presupuestales.html",{"page_obj":page_obj,"page_obj_hojas":page_obj_hojas})
 
 def buscar_moto_cliente(req):
     tipo_doc = req.POST.get("tipo_doc", "")
@@ -10251,7 +10265,7 @@ def mod_presupuesto(req,id_p):
             precio_piezas = math.ceil(total_dolares)
         # servicios_completos = list(zip(servicios, precios, monedas))
         
-        # crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,todas_las_notas,fuente_precios)
+        crear_presupuesto(documento,nombre_apellido,marca,modelo,matricula,num_padron,num_motor_moto,num_chasis_moto,presupuesto.id,items,anotaciones,precio_piezas,anio,precio_total,costo_mano_obra,moneda_total,todas_las_notas,fuente_precios)
         messages.success(req, "Presupuesto modificado con éxito.")
         return redirect('HojasPresupuestales')
     
@@ -10292,3 +10306,47 @@ def mod_presupuesto(req,id_p):
             "notas":notas
         }
         return render(req,"perfil_taller/hojas_presupuestales/mod_presupuesto.html",contexto)
+
+def nueva_hoja_membretada(req):
+    if req.method == "POST":
+        titulo = req.POST.get("titulo_hm", "")
+        texto = req.POST.get("anotaciones", "")
+        fecha = date.today()
+        # titulo = req.POST['titulo_hm']
+        # texto = req.POST['anotaciones']
+        usuario = req.user
+        usuario_actual = Personal.objects.filter(usuario=usuario.username).first()
+        nueva_hoja = HojasMembretadas(
+            titulo = titulo if titulo else "Sin titulo",
+            texto = texto,
+            usuario = usuario_actual,
+            fecha = fecha
+        )
+        nueva_hoja.save()
+        crear_hoja_membretada(nueva_hoja.id,titulo.capitalize(),texto.capitalize())
+        messages.success(req, "Hoja membretada ingresada con éxito.")
+        return redirect('HojasPresupuestales')
+    else:
+        return render(req,"perfil_taller/hojas_presupuestales/nueva_hoja_membretada.html",{})
+
+def mod_hoja_membretada(req,id_hm):
+    hm = HojasMembretadas.objects.get(id=id_hm)
+    if req.method == "POST":
+        titulo = req.POST.get("titulo_hm", "")
+        texto = req.POST.get("anotaciones", "")
+        hm.titulo = titulo
+        hm.texto = texto
+        hm.save()
+        crear_hoja_membretada(id_hm,titulo.capitalize(),texto.capitalize())
+        messages.success(req, "Hoja membretada modificada con éxito.")
+        return redirect('HojasPresupuestales')
+    else:
+        return render(req,"perfil_taller/hojas_presupuestales/mod_hoja_membretada.html",{"titulo":hm.titulo,"texto":hm.texto})
+
+def baja_hoja_membretada(req,id_hm):
+    if req.method == "POST":
+        hm = HojasMembretadas.objects.get(id=id_hm)
+        hm.delete()
+        return render(req,"perfil_taller/hojas_presupuestales/baja_hoja_membretada.html",{"message":"Hoja membretada borrada con éxito."})
+    else:
+        return render(req,"perfil_taller/hojas_presupuestales/baja_hoja_membretada.html",{})

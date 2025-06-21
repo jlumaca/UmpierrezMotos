@@ -328,6 +328,7 @@ class HojasMembretadas(models.Model):
     texto = models.TextField(null=True, blank=True,default=True)
     usuario = models.ForeignKey(Personal, related_name='personal_hoja_membretada', on_delete=models.CASCADE)
     archivo = models.FileField(upload_to='hojas_membretadas/', null=True, blank=True)
+    fecha = models.DateField()
 
     
 

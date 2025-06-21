@@ -296,6 +296,10 @@ urlpatterns = [
      path('baja_presupuesto/<int:id_p>', views.baja_presupuesto,name="BajaPresupuesto"),
      path('mod_presupuesto/<int:id_p>', views.mod_presupuesto,name="ModPresupuesto"),
 
+     path('nueva_hoja_membretada/', views.nueva_hoja_membretada,name="NuevoHM"),
+     path('baja_hoja_membretada/<int:id_hm>', views.baja_hoja_membretada,name="BajaHM"),
+     path('mod_hoja_membretada/<int:id_hm>', views.mod_hoja_membretada,name="ModHM"),
+
 
 
 

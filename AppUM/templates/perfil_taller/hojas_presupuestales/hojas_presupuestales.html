@@ -68,4 +68,57 @@
             {% endif %}
         </tbody>
     </table>
+
+
+    <h3>Hojas membretadas</h3>
+    <a href="{% url 'NuevoHM' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-file-alt"></i> Ingreso
+</a>
+
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                
+                <th>Título</th>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj_hojas %}
+                {% for hoja in page_obj_hojas %}
+                <tr>
+                    
+                    <td>{{ hoja.hoja.titulo }}</td>
+                    <td>{{ hoja.hoja.fecha }}</td>
+                    <td>{{ hoja.usuario }}</td>
+                    <td>
+                        {% if hoja.es_jefe %}
+                            <a href="{% url 'BajaHM' hoja.hoja.id %}"><button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></a>
+                            <a href="{% url 'ModHM' hoja.hoja.id %}"><button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button></a>
+                        {% endif %}
+                        <a href="{{ hoja.pdf }}" target="_blank">
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        No hay registros de hojas membretadas disponibles.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+</div>
 {% endblock %}

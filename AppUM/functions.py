@@ -2127,3 +2127,88 @@ def convertir_docx_a_pdf_presupuesto(docx_file_path,nombre_archivo,id_p):
     finally:
         # Finalizar COM (si es necesario)
         pythoncom.CoUninitialize()
+
+
+
+
+def crear_hoja_membretada(id_hm,titulo,texto):
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'hojas_membretadas')
+
+    # doc.save(docx_file_path)
+    # doc = Document('D:\Escritorio\SISTEMA UMPIERREZ MOTOS\cert_bikeup.docx')  # Este es el archivo de Word que quieres editar
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Ruta del archivo de plantilla (ajustado para que sea desde media)
+    plantilla_path = os.path.join(settings.BASE_DIR, 'media', 'HOJA_MEMBRETADA.docx')
+    
+    # Crear el documento Word a partir del archivo de plantilla
+    doc = Document(plantilla_path)
+
+    locale.setlocale(locale.LC_TIME, 'spanish')
+    if not titulo:
+        titulo = ""
+    for p in doc.paragraphs:
+        for run in p.runs:
+            if 'titulo_prueba' in run.text:
+                run.text = run.text.replace('titulo_prueba', titulo)
+            if 'texto' in run.text:
+                run.text = run.text.replace('texto', texto)
+        
+    nombre_archivo = f"Hoja_M_{titulo}"
+    docx_file_path = os.path.join(output_dir, f"{nombre_archivo}.docx")
+    doc.save(docx_file_path)
+
+    ruta_archivo = convertir_docx_a_pdf_hoja_membretada(docx_file_path,nombre_archivo,id_hm)
+    if os.path.exists(docx_file_path):
+        os.remove(docx_file_path)
+
+
+def convertir_docx_a_pdf_hoja_membretada(docx_file_path,nombre_archivo,id_hm):
+    # Inicializar COM
+    pythoncom.CoInitialize()
+
+    try:
+        # Iniciar una instancia de Word
+        word = win32com.client.Dispatch("Word.Application")
+        
+        # Abrir el archivo .docx
+        doc = word.Documents.Open(docx_file_path)
+
+        # Asegurarse de que el directorio para guardar el PDF exista
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'hojas_membretadas')
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Definir la ruta del archivo PDF de salida
+        pdf_file_path = os.path.join(output_dir, f'{nombre_archivo}.pdf')
+
+        # Guardar el documento como .pdf
+        doc.SaveAs(pdf_file_path, FileFormat=17)  # El formato 17 corresponde a PDF
+        
+        # Cerrar el documento y la aplicación de Word
+        doc.Close()
+        word.Quit()
+
+        # Eliminar el archivo .docx original después de generar el PDF
+        if os.path.exists(docx_file_path):
+            os.remove(docx_file_path)
+            print(f"El archivo .docx '{docx_file_path}' ha sido eliminado.")
+
+        # Devolver la ruta del archivo PDF generado
+        hojas_membretadas = HojasMembretadas.objects.get(id=id_hm)
+    
+    # Abrir el archivo PDF y asignarlo al campo certificado_venta
+        with open(pdf_file_path, 'rb') as pdf_file:
+            hojas_membretadas.archivo.save(f'{nombre_archivo}.pdf', File(pdf_file))
+    
+    # Guardar los cambios en la base de datos
+        hojas_membretadas.save()
+
+        return pdf_file_path
+
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # Finalizar COM (si es necesario)
+        pythoncom.CoUninitialize()
